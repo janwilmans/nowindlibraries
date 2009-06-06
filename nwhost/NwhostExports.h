@@ -29,7 +29,7 @@
         #define NWHOST_API __declspec(dllimport)
     #endif
 #else
-    #define GEN_API 
+    #define NWHOST_API 
 #endif // _MSC_VER
 
 #endif //NWHOST_EXPORTS_H
