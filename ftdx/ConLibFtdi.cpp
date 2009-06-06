@@ -82,7 +82,7 @@ int ConLibFtdi::readExact(unsigned char * aBuffer, unsigned long aBytesToRead)
 		//
 		result = ftdi_read_data(&mFtdiContext, mInternalBuffer, 4192);
 		if (result == 0) {
-			Sleep(1);
+			Util:sleep(1);
 			continue;
 		}
 
@@ -132,7 +132,7 @@ int ConLibFtdi::readBlocking(unsigned char * aBuffer, unsigned long aMaxBytesToR
 		//
 		result = ftdi_read_data(&mFtdiContext, aBuffer, aMaxBytesToRead);
 		if (result == 0) {
-			Sleep(1);
+			Util:sleep(1);
 			continue;
 		}
 
