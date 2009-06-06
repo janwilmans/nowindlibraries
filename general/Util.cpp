@@ -156,7 +156,8 @@ unsigned long Util::getTicks(void)
 
 void Util::sleep(unsigned long aMilliseconds)
 {
-	::sleep(aMilliseconds);
+	// 4.3BSD, POSIX.1-2001, check HAVE_USLEEP ?
+	usleep(1000*aMilliseconds);
 }
 
 #endif // WIN32
