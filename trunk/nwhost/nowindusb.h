@@ -38,7 +38,7 @@ NWHOST_API bool nowindusb_is_data_available(void);
 // expandable command interface
 // commands get be added using this interface without breaking compatibility
 
-NWHOST_API int CCALL nowindusb_attribute(nowind::nw_attribute aAttribute, bool aValue);
+NWHOST_API int CCALL nowindusb_attribute(nwhost::nw_attribute aAttribute, bool aValue);
 NWHOST_API int CCALL nowindusb_cmd(unsigned int aCommandId, char * aCharArgument, unsigned int aIntArgument1, unsigned int aIntArgument2, unsigned int aIntArgument3, unsigned int aIntArgument4);
 
 #endif /* _NOWINDUSB_H_ */

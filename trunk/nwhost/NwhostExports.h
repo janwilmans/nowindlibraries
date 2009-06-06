@@ -1,7 +1,7 @@
 /**
  * @file NwhostExports.h
  *
- * @brief This headerfile declares the imports/exports for the hwhost library
+ * @brief This headerfile declares the imports/exports for the nwhost library
  * @author Jan Wilmans <jw@dds.nl>  Copyright (C) 2009 Nowind
  *
  */

@@ -8,7 +8,7 @@
 #include <memory>
 #include <iosfwd>
 
-namespace nowind {
+namespace nwhost {
 
 class DiskHandler;
 class SectorMedium;

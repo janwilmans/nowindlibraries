@@ -13,6 +13,8 @@
 
 #include "FtdxExports.h"
 
+namespace ftdx {
+
 class FTDX_API UsbStream {
 	
 public:
@@ -41,4 +43,5 @@ protected:
 
 };
 
+} // namespace ftdx
 #endif

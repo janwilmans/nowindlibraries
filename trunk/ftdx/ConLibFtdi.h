@@ -9,6 +9,8 @@
 #include "ftdi.h"
 #include "UsbStream.h"
 
+namespace ftdx {
+
 class ConLibFtdi : public UsbStream {
 	
 public:
@@ -30,5 +32,7 @@ private:
 	unsigned char mInternalBuffer[8192];
 	std::deque<unsigned char> mDeQue;
 };
+
+} // namespace ftdx
 
 #endif

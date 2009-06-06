@@ -10,9 +10,9 @@
 #include "DiskHandler.hh"
 #include "SectorMedium.hh"
 
-using namespace nowind;
+using namespace nwhost;
 
-class ImageHandler : public nowind::DiskHandler {
+class ImageHandler : public DiskHandler {
 
 private:
 	Image image;

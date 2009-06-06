@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace nowind {
+namespace nwhost {
 
 class SectorMedium;
 

@@ -8,6 +8,7 @@
 #ifndef LIBFTDX_H
 #define LIBFTDX_H
 
-//#include "UsbStream.h"
+#include "ftdx.h"
+#include "UsbStream.h"
 
 #endif

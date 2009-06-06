@@ -4,7 +4,7 @@
 
 typedef unsigned char nw_byte;
 
-namespace nowind {
+namespace nwhost {
 
 class SectorMedium {
 

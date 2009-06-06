@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="General"
-	ProjectGUID="{121530D0-D7D4-487C-846F-2BBFB0CAF032}"
-	RootNamespace="General"
+	Name="nowind"
+	ProjectGUID="{96193BDE-798C-406C-84DD-82D4CBDDB0BD}"
+	RootNamespace="nowind"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
@@ -40,6 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="$(ProjectDir)..\general;$(ProjectDir)..\ftdx;$(ProjectDir)..\nwhost"
 				PreprocessorDefinitions="WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -58,6 +59,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="general.lib ftdx.lib nwhost.lib"
+				AdditionalLibraryDirectories="$(TargetDir)"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
 			/>
@@ -110,6 +113,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="$(ProjectDir)..\general;$(ProjectDir)..\ftdx;$(ProjectDir)..\nwhost"
 				PreprocessorDefinitions="WIN32"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -127,6 +131,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="general.lib ftdx.lib nwhost.lib"
+				AdditionalLibraryDirectories="$(TargetDir)"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -164,11 +170,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\general.cpp"
+				RelativePath=".\nowind.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Util.cpp"
+				RelativePath=".\NwhostService.cpp"
 				>
 			</File>
 		</Filter>
@@ -178,27 +184,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\general.h"
+				RelativePath=".\nowind.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GeneralExports.h"
+				RelativePath=".\NowindExports.h"
 				>
 			</File>
 			<File
-				RelativePath=".\guidelines.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libgeneral.h"
-				>
-			</File>
-			<File
-				RelativePath=".\platform.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Util.h"
+				RelativePath=".\NwhostService.h"
 				>
 			</File>
 		</Filter>

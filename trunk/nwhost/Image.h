@@ -9,7 +9,7 @@
 #include "DiskHandler.hh"
 #include "SectorMedium.hh"
 
-class Image : public nowind::SectorMedium {
+class Image : public nwhost::SectorMedium {
 
 private:
     std::fstream *stream;

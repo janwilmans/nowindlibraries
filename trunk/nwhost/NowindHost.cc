@@ -25,7 +25,7 @@ using std::vector;
 using std::fstream;
 using std::ios;
 
-namespace nowind {
+namespace nwhost {
 
 NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	: drives(drives_)

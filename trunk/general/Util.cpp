@@ -10,6 +10,8 @@
 #include "Util.h"
 #include <stdio.h>
 
+using namespace general;
+
 #ifdef WIN32
 	#include <windows.h>
 #else
@@ -30,15 +32,7 @@ C99 Return value:
        ten to the final string if enough space had been available. Thus, a return value of size or more means
        that  the  output  was  truncated. (See also below under NOTES.)  If an output error is encountered, a
        negative value is returned.
-
 */
-
-// this method should be called at startup, before
-// any other method in Util is used.
-void Util::initialize()
-{
-	startTicks();
-}
 
 #ifdef _MSC_VER
 
@@ -92,7 +86,7 @@ static LARGE_INTEGER hires_start_ticks;
 /* The number of ticks per second of the high-resolution performance counter */
 static LARGE_INTEGER hires_ticks_per_second;
 
-void Util::startTicks(void)
+void Util::_startTicks(void)
 {
 	QueryPerformanceFrequency(&hires_ticks_per_second);
 	QueryPerformanceCounter(&hires_start_ticks);
@@ -130,7 +124,7 @@ static struct timespec start;
 static struct timeval start;
 #endif /* HAVE_CLOCK_GETTIME */
 
-void Util::startTicks(void)
+void Util::_startTicks(void)
 {
 	/* Set first ticks value */
 #if HAVE_CLOCK_GETTIME

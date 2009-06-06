@@ -13,7 +13,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-using namespace nowind;
+using namespace general;
+using namespace nwhost;
 
 FP_void_const_char_p mDebug_callback;
 FP_void_void_p mDataAvailable_callback;
@@ -23,7 +24,7 @@ FP_void_void_p mDataAvailable_callback;
 
 /* some global instances */
 
-nowind::NowindHost * nowindHost;
+nwhost::NowindHost * nowindHost;
 typedef std::vector<DiskHandler*> Drives;
 Drives drives;
 
@@ -75,11 +76,9 @@ void nowindusb_debug_wrap_sprintf(const char *cFormat, ...)
 
 void nowindusb_startup(void)
 {
-    Util::initialize();
-
 	mDebug_callback = 0;
 	drives.push_back(new ImageHandler());
-	nowindHost = new nowind::NowindHostDebug(drives);
+	nowindHost = new nwhost::NowindHostDebug(drives);
 	nowindusb_debug("nowindusb_startup\n");
 
 	//nowindusb_set_image(0, "c:\\disk_dos2.dsk");
