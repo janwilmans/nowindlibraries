@@ -75,7 +75,7 @@ void nowindusb_debug_wrap_sprintf(const char *cFormat, ...)
 
 void nowindusb_startup(void)
 {
-    Util::startTicks();
+    Util::initialize();
 
 	mDebug_callback = 0;
 	drives.push_back(new ImageHandler());

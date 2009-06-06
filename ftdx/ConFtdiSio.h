@@ -18,8 +18,6 @@ class ConFtdiSio : public UsbStream {
 public:
 	ConFtdiSio();
 	virtual ~ConFtdiSio();
-
-	virtual void initialize();
 	virtual bool open();
 	virtual void close();
 	virtual int readExact(unsigned char * buffer, unsigned long bytesToRead);

@@ -18,8 +18,6 @@ class FTDX_API UsbStream {
 public:
 	UsbStream();
 	virtual ~UsbStream();
-
-	virtual void initialize() = 0;
 	virtual bool open() = 0;
 	virtual void close() = 0;
 	virtual int readExact(unsigned char * buffer, unsigned long bytesToRead) = 0;
@@ -33,11 +31,14 @@ public:
 
 	void openBlocking();
 
+    static void initialize();
+
 protected:
 	unsigned int mRxTimeout;
 	unsigned int mTxTimeout;
 	bool mTimeoutSet;
 	bool mUsbStreamOpen;
+
 };
 
 #endif

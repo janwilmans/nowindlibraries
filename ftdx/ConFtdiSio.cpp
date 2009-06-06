@@ -25,11 +25,6 @@ ConFtdiSio::~ConFtdiSio()
 
 }
 
-void ConFtdiSio::initialize()
-{
-
-}
-
 bool ConFtdiSio::open()
 {
    struct termios lTermios;

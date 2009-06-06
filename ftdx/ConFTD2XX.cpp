@@ -49,11 +49,6 @@ ConFTD2XX::~ConFTD2XX()
 
 }
 
-void ConFTD2XX::initialize()
-{
-
-}
-
 bool ConFTD2XX::open()
 {
 	mUsbStreamOpen = false;
@@ -129,7 +124,7 @@ int ConFTD2XX::readExact(unsigned char * aBuffer, unsigned long aBytesToRead)
 		}
 
 		if (lbytesReturned == 0) {
-			Util:sleep(1);
+            Util::sleep(1);
 			continue;
 		}
 
