@@ -1,6 +1,6 @@
 #include <libgeneral.h>
 
-#include "nwhost_internal.h"
+#include "NwhostInternal.h"
 #define NWHOST_API_EXPORT
 #include "nowindusb.h"
 

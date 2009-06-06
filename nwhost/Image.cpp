@@ -4,7 +4,7 @@
 #include <assert.h>
 
 #include "Image.h"
-#include "Nwhost_internal.h"
+#include "NwhostInternal.h"
 
 #include <libgeneral.h>
 
