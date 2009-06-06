@@ -13,7 +13,8 @@
 #ifdef WIN32
 	#include <windows.h>
 #else
-	#include <sys/time.h>
+	#include <sys/unistd.h>		// for usleep
+	#include <sys/time.h>		// for timeval
 #endif
 
 /*
