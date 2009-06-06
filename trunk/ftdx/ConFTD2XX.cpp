@@ -129,7 +129,7 @@ int ConFTD2XX::readExact(unsigned char * aBuffer, unsigned long aBytesToRead)
 		}
 
 		if (lbytesReturned == 0) {
-			Sleep(1);
+			Util:sleep(1);
 			continue;
 		}
 

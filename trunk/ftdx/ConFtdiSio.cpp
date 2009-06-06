@@ -10,7 +10,7 @@
  */
 
 #include "ConFtdiSio.h"
-// #include <fcntl.h> ///?
+#include <fcntl.h> 	// for open() and O_RDRW
 
 // POSIX portable methods to control tty devices
 #include <termios.h>
