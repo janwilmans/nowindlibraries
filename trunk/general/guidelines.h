@@ -9,6 +9,9 @@
  * names: try to be descriptive and specific where possible, ie. if and integer is a length or a height,
  *        dont call it a lSize
  *        
+ * Exceptions: 
+ * - short local variable names like: for(int i=0;...) are preferred if it improves readability, 
+ *   rationale: shortens code, making it easier to read
  *
  * avoid the use of: 
  *  char *lFoo, char * lFoo, char*lFoo, or char&lFoo
@@ -24,17 +27,12 @@
  * Try to use a verb-noun pair, unless the method operates on its containing class, in which case, use just a verb.
  * ex: RenderScreen(), CalculateOdds(), Initialize()
  *
- * placement of {} is free, but it recommened to use {} for any if-statement that
+ * placement of {} is free, but it is recommened to use {} for any if-statement that
  * might otherwise be mis-interpreted.
- *
- * Exceptions: 
- * - short local variable names like: for(int i=0;...) are preferred if it improves readability, 
- *   rationale: shortens code, making it easier to read
  * 
  * Class names: 
  * choose a singular noun and avoid verbs unless there is a good justification to do otherwise
  * bad: Products, Render. good: Product, RenderEngine
- *
  *
  * considerations: 
  * when to start left curly brace { on a new line  ?
@@ -58,7 +56,6 @@
  * AF();
  * //SuperFastAcronymFunction
  * SFAF()
- * 
  * 
  */
 

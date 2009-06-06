@@ -129,8 +129,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="general"
-				AdditionalLibraryDirectories="$(ProjectDir)..\general"
+				AdditionalDependencies="general.lib"
+				AdditionalLibraryDirectories="$(TargetDir)"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
