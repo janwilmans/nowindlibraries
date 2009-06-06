@@ -1,0 +1,5 @@
+
+- a fully portable 'Replacement for Stdio Formatting Library' can be found in AutoGen project.
+  - this is a completely portable version of sprintf etc, it also adds custom formatting function addons
+  
+  
