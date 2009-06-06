@@ -1,7 +1,7 @@
 /**
  * @file libgeneralExports.h
  *
- * @brief This headerfile declares the imports/exports for the libgeneral library
+ * @brief This headerfile declares the imports/exports for the general library
  * @author Jan Wilmans <jw@dds.nl>  Copyright (C) 2009 Nowind
  *
  */
@@ -30,7 +30,7 @@
     #endif
 #else
     #define GEN_API 
-#endif /// defined _MSC_VER
+#endif // _MSC_VER
 
 #endif //LIBGENERAL_EXPORTS_H
 
