@@ -49,11 +49,11 @@ int Util::vsnprintf(char *str, size_t size, const char *format, va_list ap)
     return count;
 }
 
-#else
+#else // not MSV_VER	
 
 int Util::vsnprintf(char *str, size_t size, const char *format, va_list ap)
 {
-    return vsnprintf(str, size, formaat, ap);
+    return ::vsnprintf(str, size, format, ap);
 }
 #endif // _MSC_VER
 
