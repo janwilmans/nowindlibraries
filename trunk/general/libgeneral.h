@@ -8,6 +8,7 @@
 #ifndef LIBGENERAL_H
 #define LIBGENERAL_H
 
+#include "platform.h"
 #include "Util.h"
 
 #endif
