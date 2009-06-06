@@ -2,7 +2,7 @@
 #ifndef NOWIND_TYPES_H
 #define NOWIND_TYPES_H
 
-namespace nowind {
+namespace nwhost {
 
 typedef unsigned char byte;
 typedef unsigned int word;

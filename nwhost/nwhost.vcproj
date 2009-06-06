@@ -186,6 +186,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\nwhost.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PartitionInfo.cpp"
 				>
 			</File>
@@ -213,6 +217,10 @@
 			</File>
 			<File
 				RelativePath=".\nowindusb.h"
+				>
+			</File>
+			<File
+				RelativePath=".\nwhost.h"
 				>
 			</File>
 			<File

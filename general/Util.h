@@ -12,6 +12,8 @@
 #include <stdio.h>		// for size_t
 #include "GeneralExports.h"
 
+namespace general {
+
 class GEN_API Util
 {
 public:
@@ -23,9 +25,12 @@ public:
     static void debug(const char *cFormat, ...);
 	static unsigned long getTicks(void);
 	static void sleep(unsigned long);
-private:
-   	static void startTicks(void);
+
+    // not part of the external library interface
+   	static void _startTicks(void);
 
 };
+
+} // namespace general
 
 #endif  //_UTIL_H

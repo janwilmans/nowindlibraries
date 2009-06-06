@@ -17,6 +17,9 @@
 // this solution is portable to any platform that supports libusb 
 #include "ftdi.h"			// libftdi v0.14 in /libftdi
 
+using namespace general;
+using namespace ftdx;
+
 ConLibFtdi::ConLibFtdi()
 {
 }

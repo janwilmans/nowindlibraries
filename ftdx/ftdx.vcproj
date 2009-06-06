@@ -178,6 +178,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ftdx.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\UsbStream.cpp"
 				>
 			</File>
@@ -205,6 +209,10 @@
 			</File>
 			<File
 				RelativePath=".\ftdi.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ftdx.h"
 				>
 			</File>
 			<File

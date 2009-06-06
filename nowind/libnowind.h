@@ -5,11 +5,10 @@
  * @author Jan Wilmans <jw@dds.nl>  Copyright (C) 2009 Nowind
  *
  */
-#ifndef LIBGENERAL_H
-#define LIBGENERAL_H
+#ifndef LIBNOWIND_H
+#define LIBNOWIND_H
 
-#include "general.h"
-#include "platform.h"
-#include "Util.h"
+#include "nowind.h"
+#include "NwhostService.h"
 
-#endif
+#endif // LIBNOWIND_H

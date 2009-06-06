@@ -12,6 +12,9 @@
 #include "ConFTD2XX.h"
 #include <libgeneral.h>
 
+using namespace general;
+using namespace ftdx;
+
 #ifndef WIN32
 	#include <errno.h>  
 	#include <pthread.h>

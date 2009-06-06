@@ -10,6 +10,7 @@
 
 #define DBERR nowindusb_debug_wrap_sprintf
 
+using namespace general;
 using namespace std;
 
 Image::Image() {

@@ -11,7 +11,8 @@
 #include "NwhostInternal.h"
 #include <stdarg.h>		// for va_list
 
-using namespace nowind;
+using namespace general;
+using namespace nwhost;
 
 void NowindHostDebug::debugMessage(const char *cFormat, ...)
 {

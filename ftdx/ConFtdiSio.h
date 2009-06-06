@@ -13,6 +13,8 @@
 
 #include "UsbStream.h"
 
+namespace ftdx {
+
 class ConFtdiSio : public UsbStream {
 	
 public:
@@ -30,5 +32,7 @@ public:
 
 	int mHandle;
 };
+
+} // namespace ftdx
 
 #endif

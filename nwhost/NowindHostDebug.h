@@ -4,7 +4,7 @@
 #include "NowindHost.hh"
 #include <stdarg.h>		// for va_list
 
-namespace nowind {
+namespace nwhost {
 
 class NowindHostDebug : public NowindHost
 {

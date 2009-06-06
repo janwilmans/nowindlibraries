@@ -15,6 +15,8 @@
 
 #include "UsbStream.h"
 
+namespace ftdx {
+
 class ConFTD2XX : UsbStream {
 	
 public:
@@ -39,4 +41,5 @@ private:
 	std::deque<unsigned char> mDeQue;
 };
 
+} // namespace ftdx
 #endif
