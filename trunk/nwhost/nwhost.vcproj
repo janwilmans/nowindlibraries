@@ -216,11 +216,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\nwhost_internal.h"
+				RelativePath=".\NwhostExports.h"
 				>
 			</File>
 			<File
-				RelativePath=".\NwhostExports.h"
+				RelativePath=".\NwhostInternal.h"
 				>
 			</File>
 			<File
