@@ -14,8 +14,6 @@ class ConLibFtdi : public UsbStream {
 public:
 	ConLibFtdi();
 	virtual ~ConLibFtdi();
-
-	virtual void initialize();
 	virtual bool open();
 	virtual void close();
 	virtual void write(unsigned char * aBuffer, unsigned long aBytesToWrite, unsigned long * aBytesWritten);		// may block until all data is send

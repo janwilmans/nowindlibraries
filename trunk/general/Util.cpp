@@ -33,6 +33,8 @@ C99 Return value:
 
 */
 
+// this method should be called at startup, before
+// any other method in Util is used.
 void Util::initialize()
 {
 	startTicks();

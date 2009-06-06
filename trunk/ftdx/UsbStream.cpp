@@ -10,6 +10,12 @@
 #include "UsbStream.h"
 #include "libgeneral.h"     // for Util::debug / Util::sleep
 
+// should be called once before creating any UsbStream object
+void UsbStream::initialize()
+{
+    Util::initialize();
+}
+
 UsbStream::UsbStream()
 {
 	mTimeoutSet = false;

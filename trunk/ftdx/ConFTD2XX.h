@@ -20,8 +20,6 @@ class ConFTD2XX : UsbStream {
 public:
 	ConFTD2XX();
 	virtual ~ConFTD2XX();
-
-	virtual void initialize();
 	virtual bool open();
 	virtual void close();
 	virtual int readExact(unsigned char * buffer, unsigned long bytesToRead);

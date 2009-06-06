@@ -21,9 +21,11 @@ public:
 
 	static void initialize();
     static void debug(const char *cFormat, ...);
-	static void startTicks(void);
 	static unsigned long getTicks(void);
 	static void sleep(unsigned long);
+private:
+   	static void startTicks(void);
+
 };
 
 #endif  //_UTIL_H
