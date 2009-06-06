@@ -1,0 +1,25 @@
+uses
+	general;
+
+options
+	-I../general;
+
+file
+	common.h,
+	Image.cpp,
+	Image.h,
+	ImageHandler.cpp,
+	ImageHandler.h,
+	NowindHost.cc,
+	NowindHostDebug.cpp,
+	NowindHostDebug.h,
+	nowindusb.cpp,
+	nowindusb.h,
+	NwhostInternal.h,
+	NwhostExports.h,
+	PartitionInfo.cpp,
+	PartitionInfo.h;
+
+mainconfig
+	"" = "DLL";
+
