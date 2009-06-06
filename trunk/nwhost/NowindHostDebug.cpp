@@ -8,7 +8,7 @@
 #include "NowindHostDebug.h"
 #include <libgeneral.h>
 
-#include "nwhost_internal.h"
+#include "NwhostInternal.h"
 #include <stdarg.h>		// for va_list
 
 using namespace nowind;
