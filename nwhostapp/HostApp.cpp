@@ -26,6 +26,8 @@
 
 using namespace std;
 using namespace general;
+using namespace ftdx;
+using namespace nwhost;
 
 unsigned long HostApp::mStartTime = 0;
 unsigned long HostApp::mTotalTime = 0;
@@ -70,16 +72,15 @@ void HostApp::updateFirmware(string sImageName)
 
 void HostApp::hostImage() 
 {
-	mHostService->start(eLibUsb);
+    mHostService->start(eLibUsb);
 	mHostService->hostImage();
 }
-
 
 int HostApp::execute()
 {
     Util::debug("Nowind Interface USB host application v4.0\n");
 
-	mHostService->setAttribute(enable_phantom_drives, false);
+    mHostService->setAttribute(enable_phantom_drives, false);
 	mHostService->setAttribute(allow_other_diskroms, true);
 	mHostService->setAttribute(enable_dos2, false);
 

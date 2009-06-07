@@ -40,7 +40,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(ProjectDir)..\general;$(ProjectDir)..\ftdx;$(ProjectDir)..\nowind;."
+				AdditionalIncludeDirectories="$(ProjectDir)..\general;$(ProjectDir)..\ftdx;$(ProjectDir)..\nowind;$(ProjectDir)..\nwhost;."
+				PreprocessorDefinitions="WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -58,7 +59,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="nowind.lib"
+				AdditionalDependencies="general.lib nowind.lib"
 				AdditionalLibraryDirectories="$(TargetDir)"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
@@ -112,7 +113,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="$(ProjectDir)..\general;$(ProjectDir)..\ftdx;$(ProjectDir)..\nowind;."
+				AdditionalIncludeDirectories="$(ProjectDir)..\general;$(ProjectDir)..\ftdx;$(ProjectDir)..\nowind;$(ProjectDir)..\nwhost;."
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
@@ -129,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="general.lib hwhost.lib ftdx.lib"
+				AdditionalDependencies="general.lib nowind.lib"
 				AdditionalLibraryDirectories="$(TargetDir)"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"

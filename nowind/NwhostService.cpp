@@ -18,24 +18,24 @@
 #define NOWIND_API_EXPORT
 #include "NwhostService.h"
 
-using namespace nowind;
-
-#include <libgeneral.h>
 #include <libftdx.h>
 #include <libnwhost.h>
 
+#include <libgeneral.h>
 #include <algorithm>
+
+
+using namespace nowind;
+using namespace ftdx;
+using namespace nwhost;
+using namespace general;
+using namespace std;
 
 #ifndef WIN32
 # include <fcntl.h>  // for open() and O_RDRW
 #endif
 
 #define LCase(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) tolower)
-
-using namespace std;
-using namespace general;
-using namespace nwhost;
-using namespace ftdx;
 
 /* initialize static member variables */
 
