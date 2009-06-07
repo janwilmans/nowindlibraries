@@ -13,9 +13,9 @@
 namespace ftdx {
 	class UsbStream;
 
-	enum DriverType { eFTD2XX, eLibUsb, eFtdiSio };
-    void FTDX_API initialize();
-    UsbStream* newUsbStream(DriverType aDriverType);
+	FTDX_API enum FtdiDriverType { eFTD2XX, eLibUsb, eFtdiSio };
+    FTDX_API void initialize();
+    FTDX_API UsbStream* newUsbStream(FtdiDriverType aDriverType);
 }
 
 #endif // FTDX_H

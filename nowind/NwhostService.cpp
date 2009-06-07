@@ -116,7 +116,7 @@ chkAA:
     //Util::debug(" ACK received... %u\n", yBuffer[0]);
 }
 
-void NwhostService::start(DriverType aDriverType)
+void NwhostService::start(FtdiDriverType aDriverType)
 {
 	delete mUsbStream;   //does nothing if mUsbStream == 0
 	mUsbStream = ftdx::newUsbStream(aDriverType);
@@ -326,7 +326,7 @@ void NwhostService::hostImage() {
 		statStartMeasument();
 
         // copy the buffer into the nowindhost
-        for (unsigned int i=0;i<lBytesReceived;i++) {
+        for (int i=0;i<lBytesReceived;i++) {
 			nowindusb_write(xBuffer[i]);
         }
 

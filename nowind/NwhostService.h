@@ -11,6 +11,10 @@ using namespace std;
 
 #include <libftdx.h>
 
+#ifdef WIN32
+# pragma warning( disable: 4251 )
+#endif 
+
 using namespace ftdx;
 
 namespace nowind {
@@ -24,7 +28,7 @@ public:
 		int execute();
 		
         static void initialize();
-		void start(DriverType aDriverType);
+		void start(FtdiDriverType aDriverType);
 		void waitForAck();
 		void updateFirmware(string sImageName);
 		void hostImage();
@@ -52,7 +56,6 @@ private:
 		int argc;
 		char **argv;
 		static UsbStream * mUsbStream;
-
 		vector<unsigned char> buffer;
 
 		// statistics
