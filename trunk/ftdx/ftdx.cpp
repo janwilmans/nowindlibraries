@@ -21,7 +21,7 @@ void ftdx::initialize()
     general::initialize();
 }
 
-ftdx::UsbStream* ftdx::newUsbStream(DriverType aDriverType)
+ftdx::UsbStream* ftdx::newUsbStream(FtdiDriverType aDriverType)
 {
 	UsbStream* lUsbStream = 0;
 	switch (aDriverType)

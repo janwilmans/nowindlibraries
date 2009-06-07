@@ -58,7 +58,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="general.lib hwhost.lib ftdx.lib"
+				AdditionalDependencies="nowind.lib"
 				AdditionalLibraryDirectories="$(TargetDir)"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
