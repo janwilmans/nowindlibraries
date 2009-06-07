@@ -10,5 +10,6 @@
 
 #include "nowind.h"
 #include "NwhostService.h"
+#include "Attribute.h"
 
 #endif // LIBNOWIND_H

@@ -11,6 +11,7 @@
 #include <string>
 #include <fstream>
 
+#include "ftdx.h"
 #include "FtdxExports.h"
 
 namespace ftdx {
@@ -32,9 +33,8 @@ public:
 	virtual void purgeTx() = 0;
 
 	void openBlocking();
-
     static void initialize();
-
+ 
 protected:
 	unsigned int mRxTimeout;
 	unsigned int mTxTimeout;

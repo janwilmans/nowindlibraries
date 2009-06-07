@@ -6,6 +6,10 @@
 #include <vector>
 using namespace std;
 
+#include <libnowind.h>
+
+using namespace nowind;
+
 class Connection;
 class HostApp {
 
@@ -39,6 +43,8 @@ private:
 		static unsigned long mTotalTime;
 		static unsigned long mTransferredBytes;
 		static bool mDebug;
+		static HostApp* mHostApp;
+		NwhostService* mHostService;
 };
 
 #endif // HOSTAPP_H

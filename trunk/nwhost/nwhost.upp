@@ -10,15 +10,22 @@ file
 	Image.h,
 	ImageHandler.cpp,
 	ImageHandler.h,
-	NowindHost.cc,
 	NowindHostDebug.cpp,
 	NowindHostDebug.h,
+	nwhost.cpp,
+	nwhost.h,
 	nowindusb.cpp,
 	nowindusb.h,
 	NwhostInternal.h,
 	NwhostExports.h,
 	PartitionInfo.cpp,
-	PartitionInfo.h;
+	PartitionInfo.h,
+	"Shared Code" readonly separator,
+	NowindHost.cc,
+	SectorMedium.hh,
+	NowindTypes.hh,
+	NowindHost.hh,
+	DiskHandler.hh;
 
 mainconfig
 	"" = "DLL";

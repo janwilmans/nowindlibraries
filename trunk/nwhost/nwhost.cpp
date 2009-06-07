@@ -17,4 +17,3 @@ void nwhost::initialize()
     general::initialize();
     nowindusb_startup();
 }
-    

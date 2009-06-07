@@ -1,0 +1,18 @@
+uses
+	nowind;
+
+options
+	"-I../general -I../nowind -I../ftdx";
+
+file
+	getopt.c,
+	getopt.h,
+	getopt1.c,
+	getopt_int.h,
+	HostApp.cpp,
+	HostApp.h,
+	mainUsbHost.cpp;
+
+mainconfig
+	"" = "CONSOLE";
+

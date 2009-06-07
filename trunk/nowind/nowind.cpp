@@ -10,6 +10,7 @@
 #include "nowind.h"
 #include "NwhostService.h"
 #include <libnwhost.h>
+#include <libftdx.h>
 
 void nowind::initialize()
 {

@@ -15,6 +15,8 @@
 // POSIX portable methods to control tty devices
 #include <termios.h>
 
+using namespace ftdx;
+
 ConFtdiSio::ConFtdiSio()
 {
 

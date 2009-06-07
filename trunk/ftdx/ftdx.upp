@@ -15,11 +15,13 @@ file
 	ConLibFtdi.cpp,
 	ConLibFtdi.h,
 	ftdi.c,
+	ftdx.cpp,
+	ftdx.h,
 	ftdi.h,
 	FtdxExports.h,
 	libftdx.h,
-	UsbStream.cpp,
-	UsbStream.h;
+	UsbStream.h,
+	UsbStream.cpp;
 
 mainconfig
 	"" = "DLL";

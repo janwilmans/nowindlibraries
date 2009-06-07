@@ -17,7 +17,7 @@
 
 namespace ftdx {
 
-class ConFTD2XX : UsbStream {
+class ConFTD2XX : public UsbStream {
 	
 public:
 	ConFTD2XX();

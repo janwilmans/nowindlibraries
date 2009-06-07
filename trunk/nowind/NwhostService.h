@@ -6,14 +6,16 @@
 #include <vector>
 using namespace std;
 
+#include "nowind.h"
 #include "NowindExports.h"
 
 #include <libftdx.h>
+
 using namespace ftdx;
 
 namespace nowind {
 
-class NwhostService {
+class NOWIND_API NwhostService {
 
 public:
 		NwhostService();
@@ -22,13 +24,21 @@ public:
 		int execute();
 		
         static void initialize();
-		void start();
+		void start(DriverType aDriverType);
 		void waitForAck();
 		void updateFirmware(string sImageName);
 		void hostImage();
 		void testMode(string);
 		void testModeDev();
 		void diskToRom(string imageName);
+		
+		// todo: maybe create a AttributeType and VarType class
+		void setAttribute(int aAttribute, bool aValue);
+		
+		void setImage(int aDriveNr, string aFilename);
+		unsigned int setHarddiskImage(unsigned int aDriveNr, int aPartitionNr, bool aIgnoreBootflag, const char* aFilename);
+		void setRomdisk(int aDriveNr);
+				
 		//static void read_data_available();
 		static void purge_buffers();
 		static void debugout(const char *msg);
@@ -36,6 +46,7 @@ public:
 		static void statStartMeasument();
 		static void statStopMeasument(unsigned int);
 		static void processExit();
+		
 	
 private:
 		int argc;
