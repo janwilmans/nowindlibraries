@@ -16,9 +16,6 @@ using namespace std;
 # pragma warning( disable: 4251 )
 #endif 
 
-using namespace ftdx;
-using namespace nwhost;
-
 namespace nowind {
 
 class NOWIND_API NwhostService {
@@ -30,16 +27,16 @@ public:
 		int execute();
 		
         static void initialize();
-		void start(FtdiDriverType aDriverType);
+        void start(ftdx::FtdiDriverType aDriverType);
 		void waitForAck();
-		void updateFirmware(string sImageName);
+        void updateFirmware(std::string sImageName);
 		void hostImage();
 		void testMode(string);
 		void testModeDev();
 		void diskToRom(string imageName);
 		
 		// todo: maybe create a AttributeType and VarType class
-		void setAttribute(nw_attribute aAttribute, bool aValue);
+        void setAttribute(nwhost::nw_attribute aAttribute, bool aValue);
 		
 		void setImage(int aDriveNr, string aFilename);
 		unsigned int setHarddiskImage(unsigned int aDriveNr, int aPartitionNr, bool aIgnoreBootflag, const char* aFilename);
@@ -57,7 +54,7 @@ public:
 private:
 		int argc;
 		char **argv;
-		static UsbStream * mUsbStream;
+        static ftdx::UsbStream * mUsbStream;
 		vector<unsigned char> buffer;
 
 		// statistics
