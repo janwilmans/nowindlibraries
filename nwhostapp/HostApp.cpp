@@ -79,9 +79,9 @@ int HostApp::execute()
 {
     Util::debug("Nowind Interface USB host application v4.0\n");
 
-	mHostService->setAttribute(Attribute::DOS2, false);
-	mHostService->setAttribute(Attribute::PHANTOM_DRIVES, true);
-	mHostService->setAttribute(Attribute::OTHER_DISKROMS, false);
+	mHostService->setAttribute(enable_phantom_drives, false);
+	mHostService->setAttribute(allow_other_diskroms, true);
+	mHostService->setAttribute(enable_dos2, false);
 
     Util::debug("Parse commandline parameters...\n");
 
@@ -256,14 +256,14 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
             //nowindHost->loadRom = true;
             break;
         case '2':
-        	mHostService->setAttribute(Attribute::DOS2, true);
+        	mHostService->setAttribute(enable_dos2, true);
 			break;
         case 'a': 
 			Util::debug("Allowing other diskroms to initialize after the internal nowind diskrom!\n");
-			mHostService->setAttribute(Attribute::OTHER_DISKROMS, true);
+			mHostService->setAttribute(allow_other_diskroms, true);
 			break;
         case 'c':
-			mHostService->setAttribute(Attribute::PHANTOM_DRIVES, true);
+			mHostService->setAttribute(enable_phantom_drives, true);
 			break;
         case 'f':
         {

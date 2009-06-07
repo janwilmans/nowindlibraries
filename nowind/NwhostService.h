@@ -10,12 +10,14 @@ using namespace std;
 #include "NowindExports.h"
 
 #include <libftdx.h>
+#include <libnwhost.h>
 
 #ifdef WIN32
 # pragma warning( disable: 4251 )
 #endif 
 
 using namespace ftdx;
+using namespace nwhost;
 
 namespace nowind {
 
@@ -37,7 +39,7 @@ public:
 		void diskToRom(string imageName);
 		
 		// todo: maybe create a AttributeType and VarType class
-		void setAttribute(int aAttribute, bool aValue);
+		void setAttribute(nw_attribute aAttribute, bool aValue);
 		
 		void setImage(int aDriveNr, string aFilename);
 		unsigned int setHarddiskImage(unsigned int aDriveNr, int aPartitionNr, bool aIgnoreBootflag, const char* aFilename);
