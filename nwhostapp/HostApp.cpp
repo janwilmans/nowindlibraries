@@ -27,6 +27,12 @@
 using namespace std;
 using namespace general;
 
+unsigned long HostApp::mStartTime = 0;
+unsigned long HostApp::mTotalTime = 0;
+unsigned long HostApp::mTransferredBytes = 0;
+bool HostApp::mDebug = false;
+HostApp* HostApp::mHostApp = 0;
+
 void HostApp::initialize()
 {
     nowind::initialize();
@@ -34,10 +40,12 @@ void HostApp::initialize()
 
 HostApp::HostApp() {
 
+	mHostService = new NwhostService();
+	mHostApp = this;
 }
 
 HostApp::~HostApp() {
-	//dont delete mConnection here atexit() will do it.
+	//dont delete mHostService here atexit() will do it.
 }
 
 void HostApp::setParameters(int argc, char *argv[])
@@ -51,17 +59,19 @@ void HostApp::debugout(const char *msg)
 	Util::debug(msg);
 }
 
-void HostApp::updateFirmware(string sImageName) {
-
+void HostApp::updateFirmware(string sImageName) 
+{
+/*
 	int lHandle = nwa_open(1);	// open first interface found
 	nwa_updatefirmware(lHandle, sImageName.c_str());
+*/
 }
 
 
 void HostApp::hostImage() 
 {
-	int lHandle = nwa_open(1);	// open first interface found
-	nwa_hostimage(lHandle);
+	mHostService->start(eLibUsb);
+	mHostService->hostImage();
 }
 
 
@@ -69,20 +79,9 @@ int HostApp::execute()
 {
     Util::debug("Nowind Interface USB host application v4.0\n");
 
-    string sImageName = "";
-
-	// initialize the library
-	nowindusb_startup();
-	
-	// set some defaults
-	//nowindusb_attribute(attr_dos2, false);
-	//nowindusb_attribute(attr_ctrl, false);
-	//nowindusb_attribute(attr_shift, true);
-
-	nowindusb_attribute(enable_dos2, false);
-	nowindusb_attribute(enable_phantom_drives, true);
-	nowindusb_attribute(allow_other_diskroms, false);
-	
+	mHostService->setAttribute(Attribute::DOS2, false);
+	mHostService->setAttribute(Attribute::PHANTOM_DRIVES, true);
+	mHostService->setAttribute(Attribute::OTHER_DISKROMS, false);
 
     Util::debug("Parse commandline parameters...\n");
 
@@ -105,7 +104,7 @@ int HostApp::execute()
     /* in getopt.h some of the argv globals are explained (ie optind) */
     bool hasErrors = false;
     opterr = 1; 
-
+	
     for (;;)
     {
         int option_index = 0;
@@ -157,20 +156,21 @@ int HostApp::execute()
             // handle other options (short with and without arguments)
         case 'd':
 			Util::debug("Install libnowind debug loginfo callback\n");
-			nowindusb_set_debug_callback(&debugout);
+			//nowindusb_set_debug_callback(&debugout);
+			//todo: implement LogCallback class on Util and NwHost level?
 			mDebug = true;
 			break;            
         case 'i':
 			// todo: check the file is valid/exists?
 			Util::debug("Inserting image %s into drive %u\n", optarg, driveNr);
-			nowindusb_set_image(driveNr, optarg);
+			mHostService->setImage(driveNr, string(optarg));
 			driveNr++;
 			break;
 
 /*
 In Windows NT/2K/XP the CreateFile function can be used to open a disk drive or a partition on it. 
 After getting a handle to the disk drive using CreateFile function the ReadFile function can be used 
-to read sectors and the WriteFile function can be used to write to the drive.If you want to open 
+to read sectors and the WriteFile function can be used to write to the drive. If you want to open 
 a logical drive give the filename param of the CreateFile function as "\\\\.\\a:" or "\\\\.\\c:" ... etc. 
 and if you want to open a physical drive for raw reading/writing give the filename 
 param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
@@ -178,7 +178,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
         case 'y':
 			//todo: build a read/write through cache for drive data (physical drives can be slow!)
 			Util::debug("piping physical disk into drive %u\n", driveNr);
-			nowindusb_set_image(driveNr, "\\\\.\\a:");
+			mHostService->setImage(driveNr, string("\\\\.\\a:"));
 			driveNr++;
 			break;
          case 'm':
@@ -194,7 +194,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
 					// - mount the boot-partition first
 					// - ignore disabled partitions
 
-					unsigned int drivesInserted = nowindusb_set_harddisk_image(driveNr, 0xff, false, optarg);
+					unsigned int drivesInserted = mHostService->setHarddiskImage(driveNr, 0xff, false, optarg);
 					if (drivesInserted > 0) {
 						Util::debug("Inserted %u partitions using auto detection (bootable partition first)\n", drivesInserted);
 						driveNr += drivesInserted;
@@ -214,7 +214,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
 						int part = atoi(partString.c_str());			// If the conversion cannot be performed, then atoi() will return zero
 	
 						// insert 
-						unsigned int result = nowindusb_set_harddisk_image(driveNr, part, true, filename.c_str());
+						unsigned int result = mHostService->setHarddiskImage(driveNr, part, true, filename.c_str());
 						if (result > 0) {
 							Util::debug("Inserting partition %u of %s\n", part, filename.c_str());
 							driveNr += result;
@@ -232,7 +232,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
 							for (int p=firstPart;p<=lastPart;p++)
 							{
 								// try to insert partition and respect the disabled bootflag
-								unsigned int result = nowindusb_set_harddisk_image(driveNr, p, false, filename.c_str());
+								unsigned int result = mHostService->setHarddiskImage(driveNr, p, false, filename.c_str());
 								if (result > 0) {
 									Util::debug("Inserting partition %u of %s\n", p, filename.c_str());
 									driveNr += result;
@@ -256,37 +256,43 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
             //nowindHost->loadRom = true;
             break;
         case '2':
-			nowindusb_attribute(enable_dos2, true);
+        	mHostService->setAttribute(Attribute::DOS2, true);
 			break;
         case 'a': 
 			Util::debug("Allowing other diskroms to initialize after the internal nowind diskrom!\n");
-			nowindusb_attribute(allow_other_diskroms, true);
+			mHostService->setAttribute(Attribute::OTHER_DISKROMS, true);
 			break;
         case 'c':
-			nowindusb_attribute(enable_phantom_drives, false);
+			mHostService->setAttribute(Attribute::PHANTOM_DRIVES, true);
 			break;
         case 'f':
-            sImageName = string(optarg);
-            printf("Firmware update for Nowind interface: %s\n", sImageName.c_str());
-            updateFirmware(sImageName);
+        {
+            string lFilename = string(optarg);
+            printf("Firmware update for Nowind interface: %s\n", lFilename.c_str());
+            mHostService->updateFirmware(lFilename);
             return 0;
+        }
         case 'z':
-            diskToRom(string(optarg));
+            mHostService->diskToRom(string(optarg));
             return 0;
         case 't':
 			{
 			string lArgument = "read";
 			if (optarg != 0) lArgument = string(optarg);
-            testMode(lArgument);
+            mHostService->testMode(lArgument);
             return 0;
 			}
         case 'j':
-            nowindusb_set_romdisk(driveNr++);        
+            mHostService->setRomdisk(driveNr++);        
             break;        
         case 'p':       
+        	/*
+        	//todo: implement 
+        	
 			nowindusb_cmd(cmd_putmem_clear, 0, 0, 0 ,0, 0);
 			// filename, start-adres, mainslot, subslot, exec-adres
 			nowindusb_cmd(cmd_putmem, optarg, 0x0000, 3, 2, 0x100);
+			*/
             break;        
         case '?':
           hasErrors = true;
@@ -306,7 +312,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
         string arg = string(argv[optind]);
 		LCase(arg);
         if (arg.find(".dsk", 0) != string::npos) {
-			nowindusb_set_image(driveNr, argv[optind]);
+            mHostService->setImage(driveNr, string(argv[optind]));
 			driveNr++;
         } else {
             printf ("unknown option: %s\n", argv[optind]);
@@ -351,10 +357,8 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
 void HostApp::processExit()
 {
 	if (mDebug) Util::debug("process closing down...");
-	nwa_cleanup();
-
-	//delete the object here, because the HostApp destructor will not run if ctrl-c is pressed
-	delete mConnection;		
-	nowindusb_cleanup();
+	
+	//delete the object here, otherwise the HostApp destructor will not run if ctrl-c is pressed
+	delete HostApp::mHostApp;		
 	if (mDebug) Util::debug("done.\n");
 }

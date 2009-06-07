@@ -4,6 +4,9 @@
 #define NWHOST_API_EXPORT
 #include "nowindusb.h"
 
+#define DBERR nowindusb_debug_wrap_sprintf
+
+
 #include "NowindHostDebug.h"
 #include "ImageHandler.h"
 #include "Image.h"

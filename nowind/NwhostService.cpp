@@ -26,6 +26,10 @@ using namespace nowind;
 
 #include <algorithm>
 
+#ifndef WIN32
+# include <fcntl.h>  // for open() and O_RDRW
+#endif
+
 #define LCase(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) tolower)
 
 using namespace std;
@@ -84,7 +88,7 @@ void NwhostService::waitForAck()
 {
     bool firstByte = true;
     bool ackReceived = false;
-    DWORD lBytesReceived;
+    int lBytesReceived;
     
     while (!ackReceived) {
         lBytesReceived = mUsbStream->readExact(yBuffer, 1);
@@ -112,21 +116,10 @@ chkAA:
     //Util::debug(" ACK received... %u\n", yBuffer[0]);
 }
 
-void NwhostService::start()
+void NwhostService::start(DriverType aDriverType)
 {
 	delete mUsbStream;   //does nothing if mUsbStream == 0
-
-#ifdef USE_FTD2XX
-	mUsbStream = new ConFTD2XX();
-#endif
-
-#ifdef USE_LIBFTDI
-	mUsbStream = new ConLibFtdi();
-#endif
-
-#ifdef USE_FTDI_SIO
-	mUsbStream = new ConFtdiSio();
-#endif
+	mUsbStream = ftdx::newUsbStream(aDriverType);
 }
 
 void NwhostService::updateFirmware(string sImageName) {
@@ -137,12 +130,12 @@ void NwhostService::updateFirmware(string sImageName) {
     unsigned int uiAddress = 0;
     unsigned int uiWriteAdress = 0;
     unsigned int uiBank = 0;
-    DWORD uiBytesWritten = 0;
+    unsigned long uiBytesWritten = 0;
     unsigned int uiSector;
     
     char cString[250];
 
-    start();
+    start(eLibUsb);
 
 	// this should not be needed, but without it, FTD2xx::read returns to fast!
 	mUsbStream->setTimeouts(500000, 500000);
@@ -166,7 +159,7 @@ void NwhostService::updateFirmware(string sImageName) {
     }
     
     Util::debug("Flashing %s to USB interface...\n", sImageName.c_str());
-    Sleep(500);  // wait for buffer-flush to occur 
+    Util::sleep(500);  // wait for buffer-flush to occur 
 	
     fs->seekg(0, ios::end);
 	unsigned int uiFileSize = fs->tellg();
@@ -302,10 +295,10 @@ void NwhostService::purge_buffers()
 
 void NwhostService::hostImage() {
 
-    DWORD lBytesReceived;
+    int lBytesReceived;
 
 	// create the mUsbStream instance 
-    start();	
+    start(eLibUsb);	
 
     //nowindusb_set_dataavailable_callback(&read_data_available);
    // nowindusb_set_purge_callback(&purge_buffers);
@@ -456,7 +449,7 @@ void NwhostService::testMode(string aArgument)
 	testString[15] = 0x55;
 	*/
 
-    start();
+    start(eLibUsb);
 	mUsbStream->openBlocking();
 	mUsbStream->reset();
 
@@ -503,3 +496,20 @@ void NwhostService::processExit()
 	nowindusb_cleanup();
 	if (mDebug) Util::debug("done.\n");
 }
+
+// these method will need to be reworking to cope with multiple connections
+void NwhostService::setImage(int aDriveNr, string aFilename)
+{
+	nowindusb_set_image(aDriveNr, aFilename.c_str());
+}
+
+unsigned int NwhostService::setHarddiskImage(unsigned int aDriveNr, int aPartitionNr, bool aIgnoreBootflag, const char* aFilename)
+{
+	return nowindusb_set_harddisk_image(aDriveNr, aPartitionNr, aIgnoreBootflag, aFilename);
+}
+
+void NwhostService::setRomdisk(int aDriveNr)
+{
+	nowindusb_set_romdisk(aDriveNr);
+}
+

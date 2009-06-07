@@ -11,8 +11,11 @@
 #include "FtdxExports.h"
 
 namespace ftdx {
+	class UsbStream;
 
+	enum DriverType { eFTD2XX, eLibUsb, eFtdiSio };
     void FTDX_API initialize();
+    UsbStream* newUsbStream(DriverType aDriverType);
 }
 
 #endif // FTDX_H
