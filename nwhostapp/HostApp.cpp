@@ -42,12 +42,16 @@ void HostApp::initialize()
 
 HostApp::HostApp() {
 
+    Util::debug("HostApp destruction...\n");
 	mHostService = new NwhostService();
 	mHostApp = this;
 }
 
 HostApp::~HostApp() {
 	//dont delete mHostService here atexit() will do it.
+
+    // set the static reference to us to zero
+    mHostApp = 0;
 }
 
 void HostApp::setParameters(int argc, char *argv[])
@@ -357,9 +361,9 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
 
 void HostApp::processExit()
 {
-	if (mDebug) Util::debug("process closing down...");
+	if (mDebug) Util::debug("process closing down...\n");
 	
 	//delete the object here, otherwise the HostApp destructor will not run if ctrl-c is pressed
-	delete HostApp::mHostApp;		
+	//delete HostApp::mHostApp;	   mHostApp is baadfood??	
 	if (mDebug) Util::debug("done.\n");
 }

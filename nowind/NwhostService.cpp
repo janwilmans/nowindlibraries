@@ -24,7 +24,6 @@
 #include <libgeneral.h>
 #include <algorithm>
 
-
 using namespace nowind;
 using namespace ftdx;
 using namespace nwhost;
@@ -50,9 +49,6 @@ void NwhostService::initialize()
 {
 	// set callbacks (before nowindusb_startup)
     nowindusb_set_debug_callback(&debugout);
-
-	// initialize the nowind library
-	nowindusb_startup();        // will be replaced by nwhost::initialize() later
 }
 
 NwhostService::NwhostService() {
@@ -60,7 +56,9 @@ NwhostService::NwhostService() {
 }
 
 NwhostService::~NwhostService() {
-	//dont delete mUsbStream here atexit() will do it.
+    Util::debug("~NwhostService\n");
+	delete mUsbStream;
+    mUsbStream = 0;
 }
 
 void NwhostService::setParameters(int argc, char *argv[])

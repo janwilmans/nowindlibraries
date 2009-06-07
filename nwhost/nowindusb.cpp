@@ -19,8 +19,8 @@
 using namespace general;
 using namespace nwhost;
 
-FP_void_const_char_p mDebug_callback;
-FP_void_void_p mDataAvailable_callback;
+static FP_void_const_char_p mDebug_callback = 0;
+static FP_void_void_p mDataAvailable_callback = 0;
 
 // static linking requires: (and maybe the directx sdk)
 // Sdl.lib ftd2xx.lib WINMM.LIB
@@ -79,7 +79,6 @@ void nowindusb_debug_wrap_sprintf(const char *cFormat, ...)
 
 void nowindusb_startup(void)
 {
-	mDebug_callback = 0;
 	drives.push_back(new ImageHandler());
 	nowindHost = new nwhost::NowindHostDebug(drives);
 	nowindusb_debug("nowindusb_startup\n");
