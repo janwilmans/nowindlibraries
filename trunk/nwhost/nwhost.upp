@@ -6,6 +6,7 @@ options
 
 file
 	common.h,
+	libnwhost.h,
 	Image.cpp,
 	Image.h,
 	ImageHandler.cpp,

@@ -12,7 +12,7 @@
 
 namespace general
 {
-    void GEN_API initialize();
+    GEN_API void initialize();
 }
 
 #endif // GENERAL_H

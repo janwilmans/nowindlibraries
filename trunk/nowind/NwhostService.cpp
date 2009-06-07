@@ -513,3 +513,7 @@ void NwhostService::setRomdisk(int aDriveNr)
 	nowindusb_set_romdisk(aDriveNr);
 }
 
+void NwhostService::setAttribute(nw_attribute aAttribute, bool aValue)
+{
+	nowindusb_attribute(aAttribute, aValue);
+}

@@ -9,6 +9,7 @@
 #define LIBNWHOST_H
 
 #include "nwhost.h"
+#include "NowindTypes.hh"
 #include "nowindusb.h"
 
 #endif // LIBNWHOST_H	
