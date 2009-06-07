@@ -20,7 +20,7 @@ OutDir_nwhost = $(UPPOUT)nwhost/GCC-Console-Debug-Debug_full-Gcc-Linux-Shared/
 Macro_nwhost = $(Macro)
 
 OutDir = $(OutDir_nwhostapp)
-OutFile = /home/jan/src/nowindlibraries/usbhost
+OutFile = nwhostapp
 
 .PHONY: all
 all: install $(OutFile)
