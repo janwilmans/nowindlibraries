@@ -75,6 +75,10 @@ void Util::debug(const char *cFormat, ...)
 	va_end (arg_list);
 
 	fprintf(stderr, scratch);
+#ifdef WIN32
+    OutputDebugStringA(scratch);
+#endif
+
 }
 
 // code borrowed from SDL
