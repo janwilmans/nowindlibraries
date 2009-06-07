@@ -28,6 +28,7 @@ ftdx::UsbStream* ftdx::newUsbStream(FtdiDriverType aDriverType)
 	{
 	case eLibUsb:
 		lUsbStream = new ConLibFtdi();
+		break;
 	case eFTD2XX:
 		lUsbStream = new ConFTD2XX();
 		break;
