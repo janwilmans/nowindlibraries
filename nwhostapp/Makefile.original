@@ -2,21 +2,21 @@ UPPDIR1 = ../
 
 UPPOUT = _out/
 CINC =  -I$(UPPDIR1) -I/usr/include/freetype2 -I/usr/include/gtk-2.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/gtk-2.0/include -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0
-Macro =  -DflagCONSOLE -DflagGCC -DflagDEBUG -DflagSHARED -DflagDEBUG_FULL -DflagLINUX
+Macro =  -DflagCONSOLE -DflagGCC -DflagDEBUG -DflagSHARED -DflagDEBUG_FULL -DflagBLITZ -DflagLINUX -DflagPOSIX
 CC = c++ -c -D_DEBUG -O0 -ggdb -g2 -I../general -I../nowind -I../ftdx -I../nwhost
 CFLAGS = $(CC) -x c
 CPPFLAGS = $(CC) -x c++ 
 LIBPATH =  -L"/usr/X11R6/lib"
 AR = ar -sr
-OutDir_nwhostapp = $(UPPOUT)nwhostapp/GCC-Console-Debug-Debug_full-Gcc-Linux-Main-Shared/
+OutDir_nwhostapp = $(UPPOUT)nwhostapp/GCC-Blitz-Console-Debug-Debug_full-Gcc-Linux-Main-Posix-Shared/
 Macro_nwhostapp = $(Macro) -DflagMAIN
-OutDir_nowind = $(UPPOUT)nowind/GCC-Console-Debug-Debug_full-Gcc-Linux-Shared/
+OutDir_nowind = $(UPPOUT)nowind/GCC-Blitz-Console-Debug-Debug_full-Gcc-Linux-Posix-Shared/
 Macro_nowind = $(Macro)
-OutDir_general = $(UPPOUT)general/GCC-Console-Debug-Debug_full-Gcc-Linux-Shared/
+OutDir_general = $(UPPOUT)general/GCC-Blitz-Console-Debug-Debug_full-Gcc-Linux-Posix-Shared/
 Macro_general = $(Macro)
-OutDir_ftdx = $(UPPOUT)ftdx/GCC-Console-Debug-Debug_full-Gcc-Linux-Shared/
+OutDir_ftdx = $(UPPOUT)ftdx/GCC-Blitz-Console-Debug-Debug_full-Gcc-Linux-Posix-Shared/
 Macro_ftdx = $(Macro)
-OutDir_nwhost = $(UPPOUT)nwhost/GCC-Console-Debug-Debug_full-Gcc-Linux-Shared/
+OutDir_nwhost = $(UPPOUT)nwhost/GCC-Blitz-Console-Debug-Debug_full-Gcc-Linux-Posix-Shared/
 Macro_nwhost = $(Macro)
 
 OutDir = $(OutDir_nwhostapp)
@@ -41,14 +41,16 @@ $(OutFile):  \
 	$(OutDir_general)general.a \
 	$(OutDir_ftdx)ftdx.a \
 	$(OutDir_nwhost)nwhost.a
-	c++ -o $(OutFile) -ggdb $(LIBPATH) -Wl $(LINKOPTIONS) \
+	c++ -o $(OutFile) -ggdb $(LIBPATH) -Wl,-O,2 $(LINKOPTIONS) \
 		$(OutDir_nwhostapp)HostApp.o \
 		$(OutDir_nwhostapp)mainUsbHost.o \
+		-Wl,--start-group  \
 			$(OutDir_nowind)nowind.a \
 			$(OutDir_general)general.a \
 			$(OutDir_ftdx)ftdx.a \
 			$(OutDir_nwhost)nwhost.a \
 			-lftd2xx \
+		-Wl,--end-group
 
 
 $(OutDir_nwhostapp)HostApp.o: $(UPPDIR1)nwhostapp/HostApp.cpp \
