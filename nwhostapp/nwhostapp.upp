@@ -5,10 +5,7 @@ options
 	"-I../general -I../nowind -I../ftdx -I../nwhost";
 
 file
-	getopt.c,
-	getopt.h,
-	getopt1.c,
-	getopt_int.h,
+	/home/jan/src/nowindlibraries/nwhostapp/Makefile,
 	HostApp.cpp,
 	HostApp.h,
 	mainUsbHost.cpp;

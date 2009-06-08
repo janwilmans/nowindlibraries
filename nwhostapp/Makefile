@@ -35,8 +35,6 @@ install:
 	-mkdir -p $(OutDir_nwhost)
 
 $(OutFile):  \
-	$(OutDir_nwhostapp)getopt.o \
-	$(OutDir_nwhostapp)getopt1.o \
 	$(OutDir_nwhostapp)HostApp.o \
 	$(OutDir_nwhostapp)mainUsbHost.o \
 	$(OutDir_nowind)nowind.a \
@@ -44,8 +42,6 @@ $(OutFile):  \
 	$(OutDir_ftdx)ftdx.a \
 	$(OutDir_nwhost)nwhost.a
 	c++ -o $(OutFile) -ggdb $(LIBPATH) -Wl,-O,2 $(LINKOPTIONS) \
-		$(OutDir_nwhostapp)getopt.o \
-		$(OutDir_nwhostapp)getopt1.o \
 		$(OutDir_nwhostapp)HostApp.o \
 		$(OutDir_nwhostapp)mainUsbHost.o \
 		-Wl,--start-group  \
@@ -56,16 +52,6 @@ $(OutFile):  \
 			-lftd2xx \
 		-Wl,--end-group
 
-
-$(OutDir_nwhostapp)getopt.o: $(UPPDIR1)nwhostapp/getopt.c \
-	$(UPPDIR1)nwhostapp/getopt.h \
-	$(UPPDIR1)nwhostapp/getopt_int.h
-	$(CFLAGS) $(CINC) $(Macro_nwhostapp)  $(UPPDIR1)nwhostapp/getopt.c -o $(OutDir_nwhostapp)getopt.o
-
-$(OutDir_nwhostapp)getopt1.o: $(UPPDIR1)nwhostapp/getopt1.c \
-	$(UPPDIR1)nwhostapp/getopt.h \
-	$(UPPDIR1)nwhostapp/getopt_int.h
-	$(CFLAGS) $(CINC) $(Macro_nwhostapp)  $(UPPDIR1)nwhostapp/getopt1.c -o $(OutDir_nwhostapp)getopt1.o
 
 $(OutDir_nwhostapp)HostApp.o: $(UPPDIR1)nwhostapp/HostApp.cpp \
 	$(UPPDIR1)nwhostapp/HostApp.h
