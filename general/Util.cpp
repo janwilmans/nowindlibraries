@@ -15,7 +15,7 @@ using namespace general;
 #ifdef WIN32
 	#include <windows.h>
 #else
-	#include <sys/unistd.h>		// for usleep
+	#include <unistd.h>			// for usleep
 	#include <sys/time.h>		// for timeval
 #endif
 
@@ -80,8 +80,6 @@ void Util::debug(const char *cFormat, ...)
 #endif
 
 }
-
-// code borrowed from SDL
 
 #ifdef WIN32
 
