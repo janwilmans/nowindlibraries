@@ -5,6 +5,7 @@ options
 	"-I../general -I../nowind -I../ftdx -I../nwhost";
 
 file
+	/home/jan/src/nowindlibraries/nwhostapp/Makefile.original,
 	/home/jan/src/nowindlibraries/nwhostapp/Makefile,
 	HostApp.cpp,
 	HostApp.h,
