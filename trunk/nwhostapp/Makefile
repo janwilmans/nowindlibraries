@@ -41,16 +41,14 @@ $(OutFile):  \
 	$(OutDir_general)general.a \
 	$(OutDir_ftdx)ftdx.a \
 	$(OutDir_nwhost)nwhost.a
-	c++ -o $(OutFile) -ggdb $(LIBPATH) -Wl,-O,2 $(LINKOPTIONS) \
+	c++ -o $(OutFile) -ggdb $(LIBPATH) -Wl, $(LINKOPTIONS) \
 		$(OutDir_nwhostapp)HostApp.o \
 		$(OutDir_nwhostapp)mainUsbHost.o \
-		-Wl,--start-group  \
 			$(OutDir_nowind)nowind.a \
 			$(OutDir_general)general.a \
 			$(OutDir_ftdx)ftdx.a \
 			$(OutDir_nwhost)nwhost.a \
 			-lftd2xx \
-		-Wl,--end-group
 
 
 $(OutDir_nwhostapp)HostApp.o: $(UPPDIR1)nwhostapp/HostApp.cpp \
