@@ -174,15 +174,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\flat_python_interface.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\nowind.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\NwhostService.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\python_interface.cpp"
 				>
 			</File>
 		</Filter>
