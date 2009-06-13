@@ -1,0 +1,24 @@
+uses
+	general,
+	ftdx,
+	nwhost;
+
+options
+	-I../general,
+	-I../nowind,
+	-I../nwhost,
+	-I../ftdx;
+
+file
+	Attribute.cpp,
+	Attribute.h,
+	libnowind.h,
+	nowind.cpp,
+	nowind.h,
+	NowindExports.h,
+	NwhostService.cpp,
+	NwhostService.h;
+
+mainconfig
+	"" = "DLL";
+
