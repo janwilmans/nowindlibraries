@@ -30,6 +30,7 @@ public:
         void start(ftdx::FtdiDriverType aDriverType);
 		void waitForAck();
         void updateFirmware(std::string sImageName);
+		void invokeHostImage();
 		void hostImage();
 		void testMode(string);
 		void testModeDev();

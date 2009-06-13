@@ -16,7 +16,7 @@ nowind_init(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-insertDisk(PyObject *self, PyObject *args)
+setImage(PyObject *self, PyObject *args)
 {
     int lReturn = 0;
     const char *lFileName;
@@ -29,13 +29,13 @@ static PyObject *
 hostImage(PyObject *self, PyObject *args)
 {
     int lReturn = 0;
-    gNwhostService->hostImage();
+    gNwhostService->invokeHostImage();
     return Py_BuildValue("i", lReturn);
 }
 
-static PyMethodDef nowind_methods[] = {
+static PyMethodDef nowind_methods[] = { 
 	{"init", nowind_init, METH_VARARGS, "init() doc string"},
-	{"insertDisk", insertDisk, METH_VARARGS, "insertDisk() doc string"},
+	{"setImage", setImage, METH_VARARGS, "setImage() doc string"},
 	{"hostImage", hostImage, METH_VARARGS, "hostImage() doc string"},
 	{NULL, NULL}
 };
