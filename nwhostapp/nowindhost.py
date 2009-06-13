@@ -5,6 +5,7 @@
 import sys
 import wx
 import os.path
+import nowind
 
 class FileDrop(wx.FileDropTarget):
     def __init__(self, window):
@@ -49,6 +50,8 @@ class TopPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnExit, id=button2.GetId())
 
     def OnExit(self, event):
+        nowind.insertDisk(self.textbox.GetValue())
+        nowind.hostImage()
         os._exit(1)
 
     def ShowFileDialog(self, event):
@@ -83,5 +86,7 @@ class MainWindow(wx.Frame):
 app = wx.App(redirect=0)
 frame = MainWindow()
 frame.Show()
+
+nowind.init()
 app.MainLoop()
    
