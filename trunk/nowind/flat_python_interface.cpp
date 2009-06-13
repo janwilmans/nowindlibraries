@@ -33,10 +33,19 @@ hostImage(PyObject *self, PyObject *args)
     return Py_BuildValue("i", lReturn);
 }
 
+static PyObject *
+stopHosting(PyObject *self, PyObject *args)
+{
+    int lReturn = 0;
+    gNwhostService->stopHosting();
+    return Py_BuildValue("i", lReturn);
+}
+
 static PyMethodDef nowind_methods[] = { 
 	{"init", nowind_init, METH_VARARGS, "init() doc string"},
 	{"setImage", setImage, METH_VARARGS, "setImage() doc string"},
 	{"hostImage", hostImage, METH_VARARGS, "hostImage() doc string"},
+	{"stopHosting", stopHosting, METH_VARARGS, "stopHosting() doc string"},
 	{NULL, NULL}
 };
 

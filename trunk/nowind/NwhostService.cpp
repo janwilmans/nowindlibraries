@@ -329,7 +329,8 @@ void NwhostService::hostImage() {
 
 	mUsbStream->setTimeouts(100, 100);
 	bool lConnected = false;
-    for (;;) {
+    mRunning = true;
+    while (mRunning) {
 		
 		if (!lConnected)
 		{
@@ -371,6 +372,11 @@ void NwhostService::hostImage() {
 		}
 
     }
+}
+
+void NwhostService::stopHosting()
+{
+    mRunning = false;
 }
 
 void NwhostService::statStartMeasument()
