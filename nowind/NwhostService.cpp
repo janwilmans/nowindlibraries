@@ -53,6 +53,7 @@ void NwhostService::initialize()
 
 NwhostService::NwhostService() {
 	mUsbStream = 0;
+    mHostingPid = 0;
 }
 
 NwhostService::~NwhostService() {
@@ -307,7 +308,9 @@ void NwhostService::invokeHostImage()
     if (lPid == -1)
     {
         Util::debug("Could not create child process\n");
+        return;
     }
+    mHostingPid = lPid;
 }
 
 #else
@@ -377,6 +380,13 @@ void NwhostService::hostImage() {
 void NwhostService::stopHosting()
 {
     mRunning = false;
+    if (mHostingPid != 0)
+    {
+        Util::debug("Waiting for hosting to stop...\n");
+        long lStatus = 0;
+        waitpid(mHostingPid, &lStatus, WUNTRACED);
+        Util::debug("Hosting stopped.\n");
+    }
 }
 
 void NwhostService::statStartMeasument()
