@@ -32,6 +32,7 @@ public:
         void updateFirmware(std::string sImageName);
 		void invokeHostImage();
 		void hostImage();
+        void stopHosting();
 		void testMode(string);
 		void testModeDev();
 		void diskToRom(string imageName);
@@ -63,6 +64,7 @@ private:
 		static unsigned long mTotalTime;
 		static unsigned long mTransferredBytes;
 		static bool mDebug;
+        bool mRunning;
 };
 
 } // namespace nowind

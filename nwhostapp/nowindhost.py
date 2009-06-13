@@ -54,6 +54,7 @@ class TopPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnExit, id=button2.GetId())
 
     def OnExit(self, event):
+        nowind.stopHosting()
         os._exit(1)
 
     def ShowFileDialog(self, event):
