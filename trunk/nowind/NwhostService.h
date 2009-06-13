@@ -65,6 +65,7 @@ private:
 		static unsigned long mTransferredBytes;
 		static bool mDebug;
         bool mRunning;
+        pid_t mHostingPid; 
 };
 
 } // namespace nowind
