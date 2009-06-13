@@ -291,6 +291,32 @@ void NwhostService::purge_buffers()
 	mUsbStream->purgeRx();
 }
 
+#ifndef WIN32
+
+#include <unistd.h>
+
+void NwhostService::invokeHostImage()
+{
+    pid_t lPid = fork();
+    if (lPid == 0)
+    {
+        //i'm a child 
+        hostImage();
+        return;
+    }
+    if (lPid == -1)
+    {
+        Util::debug("Could not create child process\n");
+    }
+}
+
+#else
+void NwhostService::invokeHostImage() {
+
+    Util::debug("fork() is not supported on windows!\n");
+}
+#endif
+
 void NwhostService::hostImage() {
 
     int lBytesReceived;

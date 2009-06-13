@@ -7,6 +7,9 @@ import wx
 import os.path
 import nowind
 
+import threading
+from functools import partial
+
 class FileDrop(wx.FileDropTarget):
     def __init__(self, window):
         wx.FileDropTarget.__init__(self)
@@ -20,6 +23,9 @@ class FileDrop(wx.FileDropTarget):
                 #file = open(name, 'r')
                 #text = file.read()
                 self.window.SetValue(name)
+                
+                # insert image
+                nowind.setImage(name)
 
                 #file.close()
             except IOError, error:
@@ -28,8 +34,6 @@ class FileDrop(wx.FileDropTarget):
             except UnicodeDecodeError, error:
                 dlg = wx.MessageDialog(None, 'Cannot open non ascii files\n' + str(error))
                 dlg.ShowModal()
-
-
 
 class TopPanel(wx.Panel):
 
@@ -50,8 +54,6 @@ class TopPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnExit, id=button2.GetId())
 
     def OnExit(self, event):
-        nowind.insertDisk(self.textbox.GetValue())
-        nowind.hostImage()
         os._exit(1)
 
     def ShowFileDialog(self, event):
@@ -66,6 +68,7 @@ class MainWindow(wx.Frame):
         self.dirname = '.'
         self.CreateInteriorWindowComponents()
         self.CreateExteriorWindowComponents()
+
 
     def CreateInteriorWindowComponents(self):
 
@@ -84,9 +87,16 @@ class MainWindow(wx.Frame):
 
 # redirect=0 causes exceptions to be printed on the commandline (as usual)
 app = wx.App(redirect=0)
+
+nowind.init()
+   
+print "Start hosting..."
+# start the hosting thread
+nowind.hostImage()
+print "Ready..."
+
 frame = MainWindow()
 frame.Show()
 
-nowind.init()
 app.MainLoop()
    
