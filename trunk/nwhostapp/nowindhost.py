@@ -55,6 +55,7 @@ class TopPanel(wx.Panel):
 
     def OnExit(self, event):
         nowind.stopHosting()
+	print "STOPPPP!!!"
         os._exit(1)
 
     def ShowFileDialog(self, event):

@@ -295,6 +295,7 @@ void NwhostService::purge_buffers()
 #ifndef WIN32
 
 #include <unistd.h>
+#include <sys/wait.h>
 
 void NwhostService::invokeHostImage()
 {
@@ -383,7 +384,7 @@ void NwhostService::stopHosting()
     if (mHostingPid != 0)
     {
         Util::debug("Waiting for hosting to stop...\n");
-        long lStatus = 0;
+        int lStatus = 0;
         waitpid(mHostingPid, &lStatus, WUNTRACED);
         Util::debug("Hosting stopped.\n");
     }
