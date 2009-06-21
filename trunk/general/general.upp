@@ -5,7 +5,9 @@ file
 	general.h,
 	libgeneral.h,
 	Util.cpp,
-	Util.h;
+	Util.h,
+	BasicType.h,
+	BaseType.cpp;
 
 mainconfig
 	"" = "DLL";

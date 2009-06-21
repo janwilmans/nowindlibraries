@@ -10,3 +10,4 @@ int main(int argc, char *argv[])
 	atexit(&HostApp::processExit); 
 	return app.execute();
 }
+

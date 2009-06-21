@@ -30,9 +30,8 @@ public:
         void start(ftdx::FtdiDriverType aDriverType);
 		void waitForAck();
         void updateFirmware(std::string sImageName);
-		void invokeHostImage();
 		void hostImage();
-        void stopHosting();
+        void setRunningFalse();
 		void testMode(string);
 		void testModeDev();
 		void diskToRom(string imageName);
@@ -65,7 +64,6 @@ private:
 		static unsigned long mTransferredBytes;
 		static bool mDebug;
         bool mRunning;
-        pid_t mHostingPid; 
 };
 
 } // namespace nowind

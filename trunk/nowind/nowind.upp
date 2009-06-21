@@ -7,8 +7,7 @@ options
 	-I../general,
 	-I../nowind,
 	-I../nwhost,
-	-I../ftdx,
-	-I/usr/include/python2.5;
+	-I../ftdx;
 
 file
 	Attribute.cpp,
@@ -18,7 +17,6 @@ file
 	nowind.h,
 	NowindExports.h,
 	NwhostService.cpp,
-	flat_python_interface.cpp,
 	NwhostService.h;
 
 mainconfig

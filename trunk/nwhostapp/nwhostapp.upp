@@ -2,7 +2,7 @@ uses
 	nowind;
 
 options
-	"-I../general -I../nowind -I../ftdx -I../nwhost";
+	"-I../general -I../nowind -I../ftdx -I../nwhost -I../boost_1_39_0";
 
 file
 	/home/jan/src/nowindlibraries/nwhostapp/Makefile.original,

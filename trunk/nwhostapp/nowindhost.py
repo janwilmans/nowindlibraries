@@ -5,10 +5,9 @@
 import sys
 import wx
 import os.path
-import nowind
+import pynowind
 
-import threading
-from functools import partial
+nwhost = pynowind.PyNwhostService()
 
 class FileDrop(wx.FileDropTarget):
     def __init__(self, window):
@@ -25,7 +24,7 @@ class FileDrop(wx.FileDropTarget):
                 self.window.SetValue(name)
                 
                 # insert image
-                nowind.setImage(name)
+                nwhost.setImage(0, name.encode("utf-8"))
 
                 #file.close()
             except IOError, error:
@@ -54,14 +53,19 @@ class TopPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnExit, id=button2.GetId())
 
     def OnExit(self, event):
-        nowind.stopHosting()
-	print "STOPPPP!!!"
+        nwhost.stop()
+        print "STOPPPP!!!"
         os._exit(1)
 
     def ShowFileDialog(self, event):
         self.dialog.Show()
         if self.dialog.ShowModal() == wx.ID_OK:
-            self.textbox.SetValue(self.dialog.GetFilename())
+            name = self.dialog.GetFilename()
+            self.textbox.SetValue(name)
+            fullname = self.dialog.GetPath()    # gets the filename with full path
+            # insert image
+            nwhost.setImage(0, fullname.encode("utf-8"))
+
     
 class MainWindow(wx.Frame):
     def __init__(self, filename='noname.txt'):
@@ -90,11 +94,11 @@ class MainWindow(wx.Frame):
 # redirect=0 causes exceptions to be printed on the commandline (as usual)
 app = wx.App(redirect=0)
 
-nowind.init()
+#nwhost.initialize()
    
 print "Start hosting..."
 # start the hosting thread
-nowind.hostImage()
+nwhost.start()
 print "Ready..."
 
 frame = MainWindow()
