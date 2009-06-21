@@ -34,8 +34,6 @@ using namespace std;
 # include <fcntl.h>  // for open() and O_RDRW
 #endif
 
-#define LCase(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) tolower)
-
 /* initialize static member variables */
 
 UsbStream * NwhostService::mUsbStream = 0;
@@ -53,7 +51,6 @@ void NwhostService::initialize()
 
 NwhostService::NwhostService() {
 	mUsbStream = 0;
-    mHostingPid = 0;
 }
 
 NwhostService::~NwhostService() {
@@ -292,35 +289,6 @@ void NwhostService::purge_buffers()
 	mUsbStream->purgeRx();
 }
 
-#ifndef WIN32
-
-#include <unistd.h>
-#include <sys/wait.h>
-
-void NwhostService::invokeHostImage()
-{
-    pid_t lPid = fork();
-    if (lPid == 0)
-    {
-        //i'm a child 
-        hostImage();
-        return;
-    }
-    if (lPid == -1)
-    {
-        Util::debug("Could not create child process\n");
-        return;
-    }
-    mHostingPid = lPid;
-}
-
-#else
-void NwhostService::invokeHostImage() {
-
-    Util::debug("fork() is not supported on windows!\n");
-}
-#endif
-
 void NwhostService::hostImage() {
 
     int lBytesReceived;
@@ -378,16 +346,9 @@ void NwhostService::hostImage() {
     }
 }
 
-void NwhostService::stopHosting()
+void NwhostService::setRunningFalse()
 {
     mRunning = false;
-    if (mHostingPid != 0)
-    {
-        Util::debug("Waiting for hosting to stop...\n");
-        int lStatus = 0;
-        waitpid(mHostingPid, &lStatus, WUNTRACED);
-        Util::debug("Hosting stopped.\n");
-    }
 }
 
 void NwhostService::statStartMeasument()
@@ -541,6 +502,7 @@ void NwhostService::processExit()
 // these method will need to be reworking to cope with multiple connections
 void NwhostService::setImage(int aDriveNr, string aFilename)
 {
+	Util::debug("NwhostService::setImage: %s\n", aFilename.c_str());
 	nowindusb_set_image(aDriveNr, aFilename.c_str());
 }
 

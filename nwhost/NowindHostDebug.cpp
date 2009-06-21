@@ -5,6 +5,8 @@
  * @author Jan Wilmans <jw@dds.nl>  Copyright (C) 2009 Nowind
  *
  */
+ 
+#define NWHOST_API_EXPORT
 #include "NowindHostDebug.h"
 #include <libgeneral.h>
 

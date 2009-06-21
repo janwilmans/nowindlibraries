@@ -4,9 +4,11 @@
 #include "NowindHost.hh"
 #include <stdarg.h>		// for va_list
 
+#include "NwhostExports.h"
+
 namespace nwhost {
 
-class NowindHostDebug : public NowindHost
+class NWHOST_API NowindHostDebug : public NowindHost
 {
 public:
 	NowindHostDebug(const std::vector<DiskHandler*>& drives) : NowindHost(drives) {}

@@ -20,3 +20,14 @@ void general::initialize()
     Util::_startTicks();
 	lInitialized = true;
 }
+
+/*
+
+Todo:
+- add dumpfile (unexhandler) win32 only
+- add stackwalker for multiple platforms
+- add exitprocess callback for multiple platforms
+
+- use boost/thread.h in pynwhost app, it needs boost::python anyway
+
+*/
