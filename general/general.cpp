@@ -17,8 +17,8 @@ void general::initialize()
 {
 	static bool lInitialized = false;
 	if (lInitialized) return;
-    Util::_startTicks();
 	lInitialized = true;
+    Util::_startTicks();
 }
 
 /*

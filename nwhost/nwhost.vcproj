@@ -180,6 +180,22 @@
 			<File
 				RelativePath=".\NowindHostDebug.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						DisableSpecificWarnings="4251"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						DisableSpecificWarnings="4251"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\nowindusb.cpp"
@@ -250,6 +266,22 @@
 			<File
 				RelativePath=".\NowindHost.cc"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						DisableSpecificWarnings="4251"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						DisableSpecificWarnings="4251"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\NowindHost.hh"

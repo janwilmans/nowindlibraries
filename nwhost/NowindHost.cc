@@ -1,4 +1,4 @@
-#include "NowindHost.hh"
+
 #include "DiskHandler.hh"
 #include "SectorMedium.hh"
 #include <fstream>
@@ -7,6 +7,9 @@
 #include <ctype.h>
 #include <time.h>
 #include <iostream>
+
+#define NWHOST_API_EXPORT
+#include "NowindHost.hh"
 
 /*
 For debugging:

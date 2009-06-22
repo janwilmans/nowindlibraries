@@ -1,12 +1,18 @@
 #ifndef NOWINDHOST_HH
 #define NOWINDHOST_HH
 
+#ifdef _MSC_VER
+# pragma warning( disable: 4150 )
+#endif 
+
 #include "NowindTypes.hh"
 #include <deque>
 #include <vector>
 #include <string>
 #include <memory>
 #include <iosfwd>
+
+#include "NwhostExports.h"
 
 namespace nwhost {
 
@@ -37,7 +43,7 @@ struct dpbType {
 	byte FATADR_H;
 };
 
-class NowindHost
+class NWHOST_API NowindHost
 {
 public:
 	NowindHost(const std::vector<DiskHandler*>& drives);

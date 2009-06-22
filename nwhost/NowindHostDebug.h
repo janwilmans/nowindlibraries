@@ -1,6 +1,10 @@
 #ifndef NOWINDHOST_DEBUG_HH
 #define NOWINDHOST_DEBUG_HH
 
+#ifdef _MSC_VER
+# pragma warning( disable: 4251 )
+#endif 
+
 #include "NowindHost.hh"
 #include <stdarg.h>		// for va_list
 
