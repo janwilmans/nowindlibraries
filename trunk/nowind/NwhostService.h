@@ -2,6 +2,10 @@
 #ifndef NWHOSTSERVICE_H
 #define NWHOSTSERVICE_H
 
+#ifdef _MSC_VER
+# pragma warning( disable: 4251 )
+#endif 
+
 #include <string>
 #include <vector>
 using namespace std;
@@ -11,10 +15,6 @@ using namespace std;
 
 #include <libftdx.h>
 #include <libnwhost.h>
-
-#ifdef WIN32
-# pragma warning( disable: 4251 )
-#endif 
 
 namespace nowind {
 

@@ -174,10 +174,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\flat_python_interface.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\nowind.cpp"
 				>
 			</File>
