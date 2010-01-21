@@ -3,8 +3,13 @@
  * if you have good reason to use a different style, go ahead, but if in doubt, follow these guidelines.
  *
  * Variables: 
+ * suggested are aFoo for arguments and lFoo for local variables, but most important is readability
+ * so names like currentValue or numberOfTimes are also acceptable
+ *
  * int aCounter;  //method argument, rationale: improves readability, this variable has just a local scope, but has been initialized outside the method
  * int lCounter;  //local variable, rationale: improves readability, this variable has just a local scope
+ * 
+ * member variables should follow mFoo, it distiquish them from variables with local scope
  * int mCounter;  //member variable, rationale: improves readability, this variable will be available in the next method call
  * names: try to be descriptive and specific where possible, ie. if and integer is a length or a height,
  *        dont call it a lSize
@@ -25,7 +30,7 @@
  *
  * method names: "camelBackStyle", rationale: none, conforming to http://geosoft.no/development/cppstyle.html
  * Try to use a verb-noun pair, unless the method operates on its containing class, in which case, use just a verb.
- * ex: RenderScreen(), CalculateOdds(), Initialize()
+ * ex: renderScreen(), calculateOdds(), initialize()
  *
  * placement of {} is free, but it is recommened to use {} for any if-statement that
  * might otherwise be mis-interpreted.

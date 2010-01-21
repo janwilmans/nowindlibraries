@@ -292,6 +292,7 @@ void NwhostService::purge_buffers()
 void NwhostService::hostImage() {
 
     int lBytesReceived;
+    vector<unsigned char> buffer;
 
 	// create the mUsbStream instance 
     start(eLibUsb);	
@@ -429,8 +430,8 @@ void NwhostService::testModeDev()
 
 void NwhostService::testMode(string aArgument)
 {
-	unsigned char testString[200];
-    Util::snprintf((char *) testString, sizeof(testString), "HELLO MSX 123456");
+	unsigned char testString[2000];
+    Util::snprintf((char *) testString, sizeof(testString), "HELLO MSX 1234567890 1234567890 123456789012345678901234567890123456789012345678");
 
 	if (aArgument.compare("dev") == 0)
 	{
@@ -438,18 +439,10 @@ void NwhostService::testMode(string aArgument)
 		return;
 	}
 
-	testString[12] = 0xff;
-	testString[13] = 0x00;
+	testString[12] = 0x01;
+	testString[13] = 0xFF;
 	testString[14] = 0xAA;
 	testString[15] = 0x55;
-
-	/*
-	char * testString = "HELLO MSX 123456";
-	testString[12] = 0xff;
-	testString[13] = 0x00;
-	testString[14] = 0xAA;
-	testString[15] = 0x55;
-	*/
 
     start(eLibUsb);
 	mUsbStream->openBlocking();
@@ -478,11 +471,18 @@ void NwhostService::testMode(string aArgument)
 	}
 	else
 	{
-		Util::debug("Running in TESTMODE, sending 'HELLO MSX 12' FF 00 AA 55 repeatedly\n", testString);
-		unsigned long uiBytesWritten;
+		Util::debug("Running in TESTMODE, sending 'HELLO MSX 12' 01 FF AA 55 repeatedly\n", testString);
+        unsigned long uiBytesToWrite = strlen((char*)testString);
+		unsigned long uiBytesWritten = 0;
 		for (;;) {
-			mUsbStream->write((unsigned char *) testString, 16, &uiBytesWritten);
-			Util::debug("SEND: %s\n", testString);
+			mUsbStream->write((unsigned char *) testString, uiBytesToWrite, &uiBytesWritten);
+            if (uiBytesWritten == uiBytesToWrite) {
+    			Util::debug("SEND: %d/%d, %s\n", uiBytesWritten, uiBytesToWrite, testString);
+            }
+            else 
+            {
+    			Util::debug("SEND: %d/%d, %s (failing to write is normal in testmode)\n", uiBytesWritten, uiBytesToWrite, testString);
+            }
 		}
 	}
 

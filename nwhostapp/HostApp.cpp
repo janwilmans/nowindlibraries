@@ -82,7 +82,7 @@ void HostApp::hostImage()
 
 int HostApp::execute()
 {
-    Util::debug("Nowind Interface USB host application v4.0\n");
+    Util::debug("Nowind Interface USB host application v4.1\n");
 
     mHostService->setAttribute(enable_phantom_drives, false);
 	mHostService->setAttribute(allow_other_diskroms, true);
@@ -130,7 +130,7 @@ int HostApp::execute()
           {"image", 1, 0, 'i'},
           {"hdimage", 1, 0, 'm'},
           {"physical", 1, 0, 'y'},
-          {"romdisk", 1, 0, 'j'},
+          {"romdisk", 0, 0, 'j'},
           {"debug", 0, 0, 'd'},
           {"help", 0, 0, 'h'},
           {"rom", 1, 0, 'r'},          
@@ -288,7 +288,9 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
             return 0;
 			}
         case 'j':
-            mHostService->setRomdisk(driveNr++);        
+            printf("Enabling ROMDISK at %d\n", driveNr);
+            mHostService->setRomdisk(driveNr);       
+            driveNr++;
             break;        
         case 'p':       
         	/*
@@ -341,12 +343,13 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
         printf("         --allow, -a    allow more diskroms to initialize\n");        
         printf("         --dsk2rom, -z  convert 360 kB image to romdisk.bin\n");
         printf("         --debug, -d    enable debug loginfo from libnowind\n");
-        printf("         --test, -t[mode]  -tread (not implemented)\n");
+        printf("         --test, -t[mode]  -traw\n");
+        printf("         --test, -t[mode]  -tread\n");
         printf("         --test, -t[mode]  -twrite (send a fixed 'HELLO MSX' infinitely to MSX)\n");
-        printf("         --test, -t[mode]  -tdev (device test, not implemented)\n");
+        printf("         --test, -t[mode]  -tdev (device test, not implemented on win32)\n");
         printf("\n");
         printf("Examples: usbhost image.dsk\n");
-        printf("          usbhost kungfu.rom\n");        
+        //printf("          usbhost kungfu.rom\n");        
         printf("          usbhost -2 harddiskimage.dsk\n");
         printf("          usbhost --flash firmware.bin\n");
 		printf("          usbhost -m hdimage.dsk inserts the first partition\n");
