@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;            //File
 using System.Diagnostics;
+using System.Windows.Forms; //MessageBox
 
 namespace NowindInterfaceHostGUI
 {
@@ -30,7 +32,14 @@ namespace NowindInterfaceHostGUI
     public void startHosting(string disk)
     {
       killProcessIfRunning();
-      nwhost.StartInfo.FileName = "D:\\project\\nowindlibraries\\Release\\nwhostapp.exe";
+      
+      nwhost.StartInfo.FileName = Settings.ApplicationPath + "\\nwhostapp.exe";
+      if (!File.Exists(nwhost.StartInfo.FileName))
+      {
+        MessageBox.Show("Cannot open: " + nwhost.StartInfo.FileName);
+        return;
+      }
+
       nwhost.StartInfo.Arguments = String.Format("-i {0} -a", disk);
       nwhost.StartInfo.UseShellExecute = false;
       if (Settings.Debug)
