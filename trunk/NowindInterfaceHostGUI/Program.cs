@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using System.IO;
 
 namespace NowindInterfaceHostGUI
 {
@@ -15,7 +16,7 @@ namespace NowindInterfaceHostGUI
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
 
-      Settings.ApplicationPath = Application.ExecutablePath;
+      Settings.ApplicationPath = Path.GetDirectoryName(Application.ExecutablePath);
       Application.Run(new MainForm());
     }
   }

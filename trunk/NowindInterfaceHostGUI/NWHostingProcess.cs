@@ -9,6 +9,8 @@ namespace NowindInterfaceHostGUI
 {
   public class NWHostingProcess
   {
+    private bool HostRunning = false;
+
     public NWHostingProcess()
     {
       nwhost = new System.Diagnostics.Process();
@@ -18,18 +20,22 @@ namespace NowindInterfaceHostGUI
 
     public void killProcessIfRunning()
     {
-      try
+      if (HostRunning)
       {
-        // Ignore any errors that might occur while closing the process
-        if (!nwhost.HasExited)
+        try
         {
-          nwhost.Kill();
+          // Ignore any errors that might occur while closing the process
+          if (!nwhost.HasExited)
+          {
+            nwhost.Kill();
+          }
         }
+        catch { }
+        HostRunning = false;
       }
-      catch { }
     }
 
-    public void startHosting(string disk)
+    public void startHosting()
     {
       killProcessIfRunning();
       
@@ -39,12 +45,25 @@ namespace NowindInterfaceHostGUI
         MessageBox.Show("Cannot open: " + nwhost.StartInfo.FileName);
         return;
       }
+      if (Settings.Disk != "" && !File.Exists(Settings.Disk))
+      {
+        MessageBox.Show("Cannot open: " + Settings.Disk);
+        return;
+      }
+      nwhost.StartInfo.Arguments = "-a";
 
-      nwhost.StartInfo.Arguments = String.Format("-i {0} -a", disk);
+      if (Settings.Disk != "")
+      {
+        nwhost.StartInfo.Arguments += String.Format(" -i {0}", Settings.Disk);
+      }
+
+      Debug.WriteLine("[exec] " + nwhost.StartInfo.FileName + " " + nwhost.StartInfo.Arguments);
       nwhost.StartInfo.UseShellExecute = false;
       if (Settings.Debug)
       {
         // debugging
+        nwhost.StartInfo.RedirectStandardOutput = false;
+        nwhost.StartInfo.CreateNoWindow = false;
       }
       else
       {
@@ -52,6 +71,8 @@ namespace NowindInterfaceHostGUI
         nwhost.StartInfo.CreateNoWindow = true;
       }
       nwhost.Start();
+      HostRunning = true;
     }
+
   }
 }

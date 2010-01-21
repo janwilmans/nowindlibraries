@@ -28,34 +28,13 @@
     /// </summary>
     private void InitializeComponent()
     {
-      this.btnInsert = new System.Windows.Forms.Button();
-      this.btnRestart = new System.Windows.Forms.Button();
+      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
       this.labelDisk1 = new System.Windows.Forms.Label();
       this.panelTop = new System.Windows.Forms.Panel();
       this.chkboxDebug = new System.Windows.Forms.CheckBox();
+      this.listBox1 = new System.Windows.Forms.ListBox();
       this.panelTop.SuspendLayout();
       this.SuspendLayout();
-      // 
-      // btnInsert
-      // 
-      this.btnInsert.Location = new System.Drawing.Point(12, 54);
-      this.btnInsert.Margin = new System.Windows.Forms.Padding(0);
-      this.btnInsert.Name = "btnInsert";
-      this.btnInsert.Size = new System.Drawing.Size(89, 35);
-      this.btnInsert.TabIndex = 0;
-      this.btnInsert.Text = "&Insert";
-      this.btnInsert.UseVisualStyleBackColor = true;
-      this.btnInsert.Click += new System.EventHandler(this.btnInsert_Click);
-      // 
-      // btnRestart
-      // 
-      this.btnRestart.Location = new System.Drawing.Point(117, 54);
-      this.btnRestart.Name = "btnRestart";
-      this.btnRestart.Size = new System.Drawing.Size(89, 35);
-      this.btnRestart.TabIndex = 1;
-      this.btnRestart.Text = "(re)start hosting";
-      this.btnRestart.UseVisualStyleBackColor = true;
-      this.btnRestart.Click += new System.EventHandler(this.btnRestart_Click);
       // 
       // labelDisk1
       // 
@@ -67,15 +46,16 @@
       // 
       // panelTop
       // 
+      this.panelTop.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+      this.panelTop.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("panelTop.BackgroundImage")));
+      this.panelTop.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
       this.panelTop.Controls.Add(this.chkboxDebug);
       this.panelTop.Controls.Add(this.labelDisk1);
-      this.panelTop.Controls.Add(this.btnRestart);
-      this.panelTop.Controls.Add(this.btnInsert);
-      this.panelTop.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
       this.panelTop.Location = new System.Drawing.Point(0, 0);
       this.panelTop.Margin = new System.Windows.Forms.Padding(0);
       this.panelTop.Name = "panelTop";
-      this.panelTop.Size = new System.Drawing.Size(494, 168);
+      this.panelTop.Size = new System.Drawing.Size(922, 171);
       this.panelTop.TabIndex = 3;
       // 
       // chkboxDebug
@@ -89,14 +69,27 @@
       this.chkboxDebug.UseVisualStyleBackColor = true;
       this.chkboxDebug.CheckedChanged += new System.EventHandler(this.chkboxDebug_CheckedChanged);
       // 
+      // listBox1
+      // 
+      this.listBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.listBox1.FormattingEnabled = true;
+      this.listBox1.Location = new System.Drawing.Point(0, 171);
+      this.listBox1.Name = "listBox1";
+      this.listBox1.Size = new System.Drawing.Size(922, 238);
+      this.listBox1.TabIndex = 4;
+      // 
       // MainForm
       // 
-      this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-      this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+      this.AllowDrop = true;
+      this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+      this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
       this.BackColor = System.Drawing.SystemColors.ControlLight;
-      this.ClientSize = new System.Drawing.Size(494, 168);
+      this.ClientSize = new System.Drawing.Size(922, 410);
+      this.Controls.Add(this.listBox1);
       this.Controls.Add(this.panelTop);
+      this.MaximumSize = new System.Drawing.Size(930, 1000);
       this.Name = "MainForm";
+      this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
       this.Text = "NowindInterfaceHostGUI";
       this.panelTop.ResumeLayout(false);
       this.panelTop.PerformLayout();
@@ -106,11 +99,10 @@
 
     #endregion
 
-    private System.Windows.Forms.Button btnInsert;
-    private System.Windows.Forms.Button btnRestart;
     private System.Windows.Forms.Label labelDisk1;
     private System.Windows.Forms.Panel panelTop;
     private System.Windows.Forms.CheckBox chkboxDebug;
+    private System.Windows.Forms.ListBox listBox1;
   }
 }
 
