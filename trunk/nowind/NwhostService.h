@@ -3,7 +3,7 @@
 #define NWHOSTSERVICE_H
 
 #ifdef _MSC_VER
-# pragma warning( disable: 4251 )
+//# pragma warning( disable: 4251 )
 #endif 
 
 #include <string>
@@ -55,8 +55,7 @@ public:
 private:
 		int argc;
 		char **argv;
-        static ftdx::UsbStream * mUsbStream;
-		vector<unsigned char> buffer;
+        static ftdx::UsbStream* mUsbStream;
 
 		// statistics
 		static unsigned long mStartTime;

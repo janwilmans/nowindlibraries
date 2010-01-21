@@ -1,16 +1,13 @@
 #ifndef NOWINDHOST_HH
 #define NOWINDHOST_HH
 
-#ifdef _MSC_VER
-# pragma warning( disable: 4150 )
-#endif 
-
 #include "NowindTypes.hh"
 #include <deque>
 #include <vector>
 #include <string>
 #include <memory>
 #include <iosfwd>
+#include <fstream>
 
 #include "NwhostExports.h"
 
@@ -135,7 +132,7 @@ private:
 	const std::vector<DiskHandler*>& drives;
 
 	// queue
-	std::deque<byte> hostToMsxFifo;
+	std::deque<byte> hostToMsxFifo;     // todo: maybe use a pointer type
 
 	// state-machine
 	unsigned lastTime;       // last time a byte was received from MSX
