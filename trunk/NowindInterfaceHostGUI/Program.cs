@@ -14,6 +14,8 @@ namespace NowindInterfaceHostGUI
     {
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
+
+      Settings.ApplicationPath = Application.ExecutablePath;
       Application.Run(new MainForm());
     }
   }

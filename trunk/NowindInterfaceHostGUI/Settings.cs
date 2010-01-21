@@ -6,7 +6,9 @@ namespace NowindInterfaceHostGUI
 {
   public class Settings
   {
+    public static string ApplicationPath = "";
     public static string Disk = "";
     public static bool Debug = false;
+    
   }
 }
