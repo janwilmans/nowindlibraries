@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace NowindInterfaceHostGUI
 {
@@ -14,8 +15,12 @@ namespace NowindInterfaceHostGUI
     public MainForm()
     {
       InitializeComponent();
+      this.Size = new Size(310, 150);
+
       NWHostingProcess = new NWHostingProcess();
       Application.ApplicationExit += new EventHandler(this.OnApplicationExit);
+      this.DragEnter += new DragEventHandler(this.form_DragEnter);      // user starts hovering files above form
+      this.DragDrop += new DragEventHandler(this.form_DragDrop);       // user drops files on form
     }
 
     private void OnApplicationExit(object sender, EventArgs e)
@@ -28,6 +33,7 @@ namespace NowindInterfaceHostGUI
       catch { }
     }
 
+    /*
     private void btnInsert_Click(object sender, EventArgs e)
     {
       OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -42,7 +48,8 @@ namespace NowindInterfaceHostGUI
         Settings.Disk = openFileDialog.FileName;
       }      
     }
-
+    */
+  
     /*
      * todo: 
      * - support drag/drop of disk to window
@@ -51,12 +58,37 @@ namespace NowindInterfaceHostGUI
 
     private void btnRestart_Click(object sender, EventArgs e)
     {
-      NWHostingProcess.startHosting(Settings.Disk);
+      NWHostingProcess.startHosting();
     }
 
     private void chkboxDebug_CheckedChanged(object sender, EventArgs e)
     {
       Settings.Debug = chkboxDebug.Checked;
+      NWHostingProcess.startHosting();
     }
+
+    private void form_DragEnter(object sender, DragEventArgs e)
+    {
+      if (e.Data.GetDataPresent(DataFormats.FileDrop, false) == true)
+      {
+        e.Effect = DragDropEffects.All;
+      }
+    }
+
+    private void form_DragDrop(object sender, DragEventArgs e)
+    {
+      string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+      if (files.Length > 0)
+      {
+        Settings.Disk = files[0];
+      }
+      NWHostingProcess.startHosting();
+
+      foreach (string file in files)
+      {
+        Debug.WriteLine(file);
+      }
+    }  
   }
 }
