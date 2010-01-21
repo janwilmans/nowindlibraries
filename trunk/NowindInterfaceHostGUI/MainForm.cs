@@ -14,6 +14,7 @@ namespace NowindInterfaceHostGUI
     public NWHostingProcess NWHostingProcess;
     public MainForm()
     {
+      Settings.MainForm = this;
       InitializeComponent();
       this.Size = new Size(310, 150);
 
@@ -52,8 +53,9 @@ namespace NowindInterfaceHostGUI
   
     /*
      * todo: 
-     * - support drag/drop of disk to window
+     * x support drag/drop of disk to window
      * x kill nwhostapp (my own) if already running and when window is closed
+     * - support log window (and save to logfile)
      */
 
     private void btnRestart_Click(object sender, EventArgs e)

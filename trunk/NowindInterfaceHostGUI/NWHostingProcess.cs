@@ -72,6 +72,12 @@ namespace NowindInterfaceHostGUI
       }
       nwhost.Start();
       HostRunning = true;
+
+      Settings.MainForm.Invoke((MethodInvoker) delegate()
+      {
+        Settings.MainForm.Text = "Hosting process started...";
+      });
+
     }
 
   }
