@@ -80,6 +80,9 @@ public:
 
 	virtual void debugMessage(const char *cFormat, ...);
 
+    void clearRequests();
+    void addRequest(std::vector<byte> command);
+
 private:
 	void msxReset();
 	SectorMedium* getDisk();
@@ -126,15 +129,16 @@ private:
 	void auxOut();
 	void dumpRegisters();
 
+    void commandRequested();
+	std::deque< std::vector<byte> > requestQueue;   // queue for commandRequest()
+
 	void callImage(const std::string& filename);
-
-
 	const std::vector<DiskHandler*>& drives;
 
 	// queue
-	std::deque<byte> hostToMsxFifo;     // todo: maybe use a pointer type
+	std::deque<byte> hostToMsxFifo;
 
-	// state-machine
+    // state-machine
 	unsigned lastTime;       // last time a byte was received from MSX
 	State state;
 	unsigned recvCount;      // how many bytes recv in this state

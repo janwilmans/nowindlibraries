@@ -268,3 +268,16 @@ bool nowindusb_is_data_available()
 	return nowindHost->isDataAvailable();
 }
 
+void nowindusb_clear_requests()
+{
+    nowindHost->clearRequests();
+}
+
+/*
+void nowindusb_add_request(std::vector<byte> command)
+{
+   nowindHost->addRequest();
+}
+
+*/
+

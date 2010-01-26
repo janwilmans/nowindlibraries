@@ -118,6 +118,8 @@ void NwhostService::start(FtdiDriverType aDriverType)
 	mUsbStream = ftdx::newUsbStream(aDriverType);
 }
 
+// the update firmware used hardcoded commands
+// 
 void NwhostService::updateFirmware(string sImageName) {
 
     unsigned int uiSectorSize = 128;
