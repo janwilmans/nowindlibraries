@@ -237,6 +237,7 @@ void NowindHost::executeCommand()
 	case 0x85: DRIVES();      state = STATE_SYNC1; break;
 	case 0x86: INIENV();      state = STATE_SYNC1; break;
 	case 0x87: setDateMSX();  state = STATE_SYNC1; break;
+
 	case 0x88: state = STATE_DEVOPEN; recvCount = 0; break;
 	case 0x89: deviceClose(); state = STATE_SYNC1; break;
 	//case 0x8A: deviceRandomIO(fcb);
@@ -246,7 +247,9 @@ void NowindHost::executeCommand()
 	case 0x8E: auxIn();       state = STATE_SYNC1; break;
 	case 0x8F: auxOut();      state = STATE_SYNC1; break;
 	case 0x90: state = STATE_MESSAGE; recvCount = 0; break;
-	case 0xA0: state = STATE_IMAGE;   recvCount = 0; break;
+	case 0x91: state = STATE_IMAGE;   recvCount = 0; break;
+
+    case 0x92: commandRequested(); break;
 	//case 0xFF: vramDump();
 	default:
 		// Unknown USB command!
@@ -276,6 +279,37 @@ void NowindHost::auxOut()
 	printf("%c", cmdData[7]);
 }
 
+// the MSX asks whether the host has a command  
+// waiting for it to execute
+void NowindHost::commandRequested()
+{
+    sendHeader();
+    if (requestQueue.empty())
+    {
+        send(0);
+    }
+    else
+    {
+        std::vector<byte> command = requestQueue.front();
+        requestQueue.pop_front();
+
+        for (unsigned int i=0;i<requestQueue.size();i++)
+	    {
+            send(command[i]);
+	    }
+    }
+}
+
+void NowindHost::clearRequests()
+{
+    requestQueue.clear();
+}
+
+void NowindHost::addRequest(std::vector<byte> command)
+{
+    requestQueue.push_back(command);
+}
+
 void NowindHost::dumpRegisters()
 {
 	//reg_[cbedlhfa] + cmd
@@ -300,7 +334,7 @@ void NowindHost::purge()
 
 void NowindHost::sendHeader()
 {
-	send(0xFF); // needed because first read might fail!
+	send(0xFF); // needed because first read might fail (hardware design choise)!
 	send(0xAF);
 	send(0x05);
 }

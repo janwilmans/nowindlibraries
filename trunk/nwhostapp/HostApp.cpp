@@ -272,6 +272,26 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
 			break;
         case 'f':
         {
+            string lFlashArg = string(optarg);
+			string first = "";
+			string second = "";
+    		size_t pos = lFlashArg.find(",");
+            if (pos != string::npos) 
+            {
+			    first = lFlashArg.substr(0,pos);
+			    second = lFlashArg.substr(pos+1);
+            }
+            if (pos == string::npos || first == "" || second == "")
+            {
+                printf(" flash syntax error\n");
+            }
+            printf("Firmware update for Nowind interface romimage: %s, romdisk: %s\n", first.c_str(), second.c_str());
+           
+            return 0;
+        }
+
+        case 'g':   // old 'f'
+        {
             string lFilename = string(optarg);
             printf("Firmware update for Nowind interface: %s\n", lFilename.c_str());
             mHostService->updateFirmware(lFilename);
@@ -343,6 +363,10 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
         printf("         --allow, -a    allow more diskroms to initialize\n");        
         printf("         --dsk2rom, -z  convert 360 kB image to romdisk.bin\n");
         printf("         --debug, -d    enable debug loginfo from libnowind\n");
+
+        printf("         --write,slot,subslot,address,code.bin,r\n");
+        printf("         --read,slot,subslot,address,dest.bin,size_to_read\n");
+
         printf("         --test, -t[mode]  -traw\n");
         printf("         --test, -t[mode]  -tread\n");
         printf("         --test, -t[mode]  -twrite (send a fixed 'HELLO MSX' infinitely to MSX)\n");
@@ -351,7 +375,9 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
         printf("Examples: usbhost image.dsk\n");
         //printf("          usbhost kungfu.rom\n");        
         printf("          usbhost -2 harddiskimage.dsk\n");
-        printf("          usbhost --flash firmware.bin\n");
+        printf("          usbhost --flash firmware.bin,none (flash new firmware and disable romdisk, but write bank-headers)\n");
+        printf("          usbhost --flash firmware.bin,myromdisk.dsk (flash new firmware and use myromdisk.dsk as romdisk)\n");
+        printf("          usbhost --flash firmware.bin,raw (only flash new firmware and do no update romdisk or bank-headers, use with caution!)\n");
 		printf("          usbhost -m hdimage.dsk inserts the first partition\n");
 		printf("          usbhost -m hdimage.dsk:0 inserts the first partition\n");
 		printf("          usbhost -m hdimage.dsk:1-3 inserts the second, third and forth\n");
