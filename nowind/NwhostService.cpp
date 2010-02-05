@@ -133,7 +133,8 @@ void NwhostService::updateFirmware(string sImageName) {
     
     char cString[250];
 
-    start(eLibUsb);
+    //start(eLibUsb);
+	start(eFTD2XX);
 
 	// this should not be needed, but without it, FTD2xx::read returns to fast!
 	mUsbStream->setTimeouts(500000, 500000);
@@ -152,7 +153,7 @@ void NwhostService::updateFirmware(string sImageName) {
 
         if ((xBuffer[0] != 'A') || (xBuffer[1] != 'B')) {
             Util::debug("No rom header found in bank %u!\n", i);
-            exit(1);
+            //exit(1);
         }
     }
     
@@ -295,9 +296,6 @@ void NwhostService::hostImage() {
 
     int lBytesReceived;
     vector<unsigned char> buffer;
-
-	// create the mUsbStream instance 
-    start(eLibUsb);	
 
     //nowindusb_set_dataavailable_callback(&read_data_available);
    // nowindusb_set_purge_callback(&purge_buffers);

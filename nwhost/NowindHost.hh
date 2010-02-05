@@ -65,6 +65,7 @@ public:
 
 	void setEnablePhantomDrives(bool enable);
 	bool getEnablePhantomDrives() const;
+	void setEnableMSXDOS2(bool enable);
 
 	// public for serialization
 	enum State {
@@ -82,6 +83,7 @@ public:
 
     void clearRequests();
     void addRequest(std::vector<byte> command);
+	void getDosVersion();
 
 private:
 	void msxReset();
@@ -158,6 +160,7 @@ private:
 	byte romdisk;            // index of romdisk (255 = no romdisk)
 	bool allowOtherDiskroms;
 	bool enablePhantomDrives;
+	bool enableMSXDOS2;
 };
 
 } // namespace nowind
