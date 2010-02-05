@@ -1,0 +1,11 @@
+ Sjasm 0.4 BETA 6
+-================-
+
+This package contains the following files:
+
+sjasm - The Debian Linux executable.
+sjasm.exe - The Win32 executable.
+sjasm.txt - This text.
+manual - A directory with some HTML files: the beginning of a description of what Sjasm might be in the future :)
+
+Have fun.

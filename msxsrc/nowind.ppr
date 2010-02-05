@@ -1,0 +1,77 @@
+[Config]
+Relative path=1
+Compilator.FileName=C:\MSX\nowind\msxsrc\sjasm4beta\sjasm.exe
+Compilator.PSPar=nowind.asm
+Compilator.SaveAll=1
+Compilator.Capture=1
+Compilator.HideOutput=1
+Compilator.LogType=0
+Prog1=Sjasm4,"C:\MSX\nowind\msxsrc\sjasm4.exe" "%File%"§
+DefaultCPIndex=0
+LogtoEnd=1
+DontOpen=0
+FileFormat=0
+[Project tree]
+nowind
+	+msxsrc
+		-sjasm
+			sjasm\sjasm
+			sjasm\sjasm.exe
+			sjasm\sjasm.txt
+		openDiskrom\bdos.asm
+		common.asm
+		debug.asm
+		device.asm
+		extendedBios.asm
+		flashWriter.asm
+		labels.asm
+		nowind.asm
+		nowindbdos.asm
+		nowindDos1.asm
+		nowindDos2.asm
+		nowindnew.asm
+		openDiskrom\openDiskrom.asm
+		romdisk.asm
+		rs232.asm
+		slotRoutines.asm
+		nowindDriver.asm
+[Open project files]
+0=nowindDos1.asm
+1=nowind.asm
+2=..\emuv1\stderr.txt
+3=common.asm
+4=labels.asm
+5=nowindDriver.asm
+6=flashWriter.asm
+7=romdisk.asm
+8=slotRoutines.asm
+[Selected Project Files]
+Main=
+Selected=flashWriter.asm
+[nowindDos1.asm]
+TopLine=55
+Caret=13,92
+[nowind.asm]
+TopLine=48
+Caret=14,82
+[..\emuv1\stderr.txt]
+TopLine=1
+Caret=29,41
+[common.asm]
+TopLine=57
+Caret=1,57
+[labels.asm]
+TopLine=35
+Caret=17,60
+[nowindDriver.asm]
+TopLine=1
+Caret=24,48
+[flashWriter.asm]
+TopLine=1
+Caret=22,19
+[romdisk.asm]
+TopLine=1
+Caret=2,23
+[slotRoutines.asm]
+TopLine=1
+Caret=16,10

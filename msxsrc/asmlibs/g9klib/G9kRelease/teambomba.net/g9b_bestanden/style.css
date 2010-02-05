@@ -1,0 +1,111 @@
+body { 
+    background-color: #000000; 
+    font-family: Trebuchet MS, Arial, Verdana; 
+    font-size: 10pt; 
+    color: #FFFFFF;
+    background-attachment: fixed;
+    background-repeat: repeat-y;
+    background-position: left;
+    background-image: url(pics/sidebar.png);
+}
+
+h1 {
+    font-size: 13pt; 
+    font-weight: bold; 
+    color: #6f93e4;
+}
+
+h2 {
+    font-size: 11pt; 
+    font-weight: bold; 
+    color: #c0d3ff;
+}
+
+a {
+    color: #6f93e4; 
+    text-decoration: underline; 
+    font-weight: bold;
+}
+
+a:hover { 
+    color: #c0d3ff; 
+    text-decoration: underline; 
+    font-weight: bold;
+}
+
+div#title { 
+    text-align: center
+}
+
+div#contents { 
+    margin-top: 20px; 
+    margin-left: 20%; 
+    margin-right: 20%; 
+    font-family: Trebuchet MS, Arial, Verdana; 
+    font-size: 10pt; 
+    color: #ffffff; 
+}
+
+div#contentscentered { 
+    margin-top: 20px; 
+    margin-left: 20%; 
+    margin-right: 20%; 
+    font-family: Trebuchet MS, Arial, Verdana; 
+    font-size: 10pt; 
+    color: #ffffff; 
+    text-align: center;
+}
+
+div#team { 
+    margin-top: 30px; 
+    margin-left: 2%; 
+    margin-right: 2%; 
+    font-family: Trebuchet MS, Arial, Verdana; 
+    font-size: 7pt; 
+    color: #ffffff; 
+    text-align: center; 
+    line-height: 12pt;
+}
+
+td { 
+    font-family: Trebuchet MS, Arial, Verdana; 
+    font-size: 10pt; 
+    color: #FFFFFF; 
+}
+
+.bordered {
+    border: solid 1px #333333;
+}
+
+td.browseheader { 
+    background-color: #6f93e4;
+}
+
+td.browsedir { 
+    background-color: #333333;
+}
+
+td.browsefile { 
+    background-color: #444444;
+}
+
+pre {
+    font-family: courier;
+    font-size: 9pt;
+    color: #999999;
+}
+
+li {
+    color: #999999; 
+}
+
+.error { 
+    color: #ff0000; 
+}
+
+.warning { 
+    color: #0077ff; 
+}
+.message { 
+    color: #22aa00; 
+}
