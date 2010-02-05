@@ -25,7 +25,7 @@
 	module	MSXDOS2_PART
 		
 	define 	MSXDOSVER 2
-	define	ROMINIT $47d6
+;	define	ROMINIT $47d6
 	define	PRINTTEXT $728e
 		
         incbin "..\roms\MSXDOS22.ROM", 0, $72f0-$4000
@@ -77,12 +77,13 @@ getBootArgs:
         call getHeader
 
         call restorePage0
-        jp c,INIHRD                     ; no reply (host not connected?)
+        jp c,bootMSXDOS1                ; no reply (host not connected?)
         
         and a
-        jp z,INIHRD                     ; boot MSXDOS1
+        jp nz,INIHRD                    ; boot MSXDOS2
 
-        ld hl,$576f                     ; boot MSXDOS2
+bootMSXDOS1:
+        ld hl,$576f                     ; boot MSXDOS1
         push hl
         ld a,4
         jp switchBank
@@ -126,7 +127,7 @@ endCopyFromBank:
 	module	MSXDOS1_PART
 
 	define 	MSXDOSVER 1
-	define	ROMINIT $576f
+;	define	ROMINIT $576f
 	define	PRINTTEXT $5f86
 
         incbin "..\roms\DISK.ROM", 0, $7405-$4000

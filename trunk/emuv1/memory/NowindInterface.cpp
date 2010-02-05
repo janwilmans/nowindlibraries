@@ -56,7 +56,7 @@ nw_byte NowindInterface::read(nw_word address) {
 
     nw_byte val = nowindusb_read();
     //DBERR(" USBInterface read addr: 0x%02x value: 0x%02x\n", address, val);
-    return val;
+	return val;
 /*    
 // TODO: is nowindusb_read() blocking?
 // een waarde van 1000 voor numberOfLatencyReads lijkt goed te werken.
@@ -92,7 +92,7 @@ void NowindInterface::write(nw_word address, nw_byte value) {
             break;
         }
         switchedBlock = value & switchedBlockMask;
-        DBERR(" USBInterface switchedBlock: %u (at addr: 0x%04x)\n", switchedBlock, address);
+        //DBERR(" NowindInterface switchedBlock: %u (at addr: 0x%04x)\n", switchedBlock, address);
 		
 		// both or neither might be switched, depending on current slotselection
 		slotSelector->updateSelection(2);
