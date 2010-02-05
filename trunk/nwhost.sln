@@ -27,6 +27,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pynowind", "pynowind\pynowi
 		{96193BDE-798C-406C-84DD-82D4CBDDB0BD} = {96193BDE-798C-406C-84DD-82D4CBDDB0BD}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "emuv1", "emuv1\emuv1.vcproj", "{7A33AB1A-80EF-441B-B444-9A01765DB48E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{84CB9A93-5255-49DC-90B5-094A40902C45} = {84CB9A93-5255-49DC-90B5-094A40902C45}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -54,9 +59,11 @@ Global
 		{B130EB13-1A0D-4482-8A36-F5087F6A0230}.Release|Win32.ActiveCfg = Release|Win32
 		{B130EB13-1A0D-4482-8A36-F5087F6A0230}.Release|Win32.Build.0 = Release|Win32
 		{C62A3963-211E-42C2-8F66-C0CC504B555A}.Debug|Win32.ActiveCfg = Debug|Win32
-		{C62A3963-211E-42C2-8F66-C0CC504B555A}.Debug|Win32.Build.0 = Debug|Win32
 		{C62A3963-211E-42C2-8F66-C0CC504B555A}.Release|Win32.ActiveCfg = Release|Win32
-		{C62A3963-211E-42C2-8F66-C0CC504B555A}.Release|Win32.Build.0 = Release|Win32
+		{7A33AB1A-80EF-441B-B444-9A01765DB48E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7A33AB1A-80EF-441B-B444-9A01765DB48E}.Debug|Win32.Build.0 = Debug|Win32
+		{7A33AB1A-80EF-441B-B444-9A01765DB48E}.Release|Win32.ActiveCfg = Release|Win32
+		{7A33AB1A-80EF-441B-B444-9A01765DB48E}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

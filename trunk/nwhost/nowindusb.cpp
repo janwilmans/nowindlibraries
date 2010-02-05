@@ -239,6 +239,9 @@ int nowindusb_attribute(nw_attribute aAttribute, bool aValue)
 	case allow_other_diskroms:
 		nowindHost->setAllowOtherDiskroms(aValue);
 		break;
+	case enable_dos2:
+		nowindHost->setEnableMSXDOS2(aValue);
+		break;
 	default:
 		break;
 	}

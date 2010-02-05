@@ -37,6 +37,7 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	, romdisk(255)
 	, allowOtherDiskroms(true)
 	, enablePhantomDrives(false)
+	, enableMSXDOS2(false)
 {
 }
 
@@ -66,6 +67,10 @@ bool NowindHost::getEnablePhantomDrives() const
 	return enablePhantomDrives;
 }
 
+void NowindHost::setEnableMSXDOS2(bool enable)
+{
+	enableMSXDOS2 = enable;
+}
 
 byte NowindHost::peek() const
 {
@@ -249,7 +254,8 @@ void NowindHost::executeCommand()
 	case 0x90: state = STATE_MESSAGE; recvCount = 0; break;
 	case 0x91: state = STATE_IMAGE;   recvCount = 0; break;
 
-    case 0x92: commandRequested(); break;
+    case 0x92: getDosVersion(); state = STATE_SYNC1; break;
+	case 0x93: commandRequested(); state = STATE_SYNC1; break;
 	//case 0xFF: vramDump();
 	default:
 		// Unknown USB command!
@@ -292,6 +298,14 @@ void NowindHost::commandRequested()
     {
         std::vector<byte> command = requestQueue.front();
         requestQueue.pop_front();
+		if (requestQueue.empty())
+		{
+			send(0);
+		}
+		else
+		{
+			send(1);
+		}
 
         for (unsigned int i=0;i<requestQueue.size();i++)
 	    {
@@ -974,6 +988,13 @@ void NowindHost::callImage(const string& filename)
 	if (drives[num]->insertDisk(stripquotes(filename))) {
 		// TODO error handling
 	}
+}
+
+void NowindHost::getDosVersion()
+{
+	printf("ik kom hier!\n");
+	sendHeader();
+	send(enableMSXDOS2 ? 1:0);
 }
 
 } // namespace nowind

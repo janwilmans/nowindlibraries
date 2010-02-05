@@ -76,7 +76,8 @@ void HostApp::updateFirmware(string sImageName)
 
 void HostApp::hostImage() 
 {
-    mHostService->start(eLibUsb);
+    mHostService->start(eFTD2XX);
+	//mHostService->start(eLibUsb);
 	mHostService->hostImage();
 }
 
@@ -139,13 +140,14 @@ int HostApp::execute()
           {"ctrl", 0, 0, 'c'},
           {"test", 2, 0, 't'},
           {"flash", 1, 0, 'f'},
+		  {"glash", 1, 0, 'g'},
           {"dsk2rom", 1, 0, 'z'},                    
           {"put", 1, 0, 'p'},                    
           {0, 0, 0, 0}
         };
 
 		// : means needs argument, :: means optional-argument
-		c = getopt_long (argc, argv, "i:m:jdhr:2act::f:z:p:y:", long_options, &option_index);
+		c = getopt_long (argc, argv, "i:m:jdhr:2act::f:g:z:p:y:", long_options, &option_index);
 
         // no more parameters? stop...
         if (c == -1) break;
@@ -261,6 +263,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
             //nowindHost->loadRom = true;
             break;
         case '2':
+			Util::debug("Booting MSXDOS2!\n");
         	mHostService->setAttribute(enable_dos2, true);
 			break;
         case 'a': 
