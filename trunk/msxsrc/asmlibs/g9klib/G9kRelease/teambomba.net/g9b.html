@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>GFX9k lib</title>
+  
+  <link rel="stylesheet" href="g9b_bestanden/style.css" type="text/css">
+  <link rel="shortcut icon" href="http://www.teambomba.net/favicon.ico"></head>
+
+
+<body>
+  <div id="title">
+
+    <img src="g9b_bestanden/gfx9klogo.png" alt="logo">
+  </div>
+
+  <div id="contents">
+  	<h1>G9B - GFX9000 Bitmap</h1>
+
+	<h2>Introduction to the G9B format</h2>
+The G9B format is one of the key features of the G9KLIB. It is a flexible bitmap
+format which can be used in all GFX9000 modes including pattern modes. In theory
+there is no limit to the dimensions of a GFX9000 Bitmap. The limit of dimensions depend
+on the image space of the GFX9000. Unwanted results can occur when it is bigger then the image space.
+All color modes are supported by G9B, except 1bit bitmaps. 
+The GFX9000 doesn't have a 1bit mode but It can use 1bit images for characters and cursor sprites.
+A later version of the G9B format may support this mode too.
+
+<h2>Buildup of the format</h2>
+
+A G9B file consist of the following fields:
+<p>
+</p><pre>
+[HEADER]
+g9bID           DB          "G9B" ; g9b identifier string
+headerSize      DW	    11 ; Length of the G9B_HEADER part. Length can change in updated versions. 
+
+[G9B_HEADER]
+bitDepth	DB  8	    ; 2,4,8 or 16 bit
+colorType	DB  0	    ; 0=64 color palette mode,64=256 color fixed ,128=YJK and 192=YUV mode
+nrColors	DB  64      ; Number of colors in palette mode
+width		DW  512	    ; Width
+height	        DW  424	    ; Height
+compression	DB  1       ; 0 = no compression, 1 = bitbuster compression, other value = future expensions
+dataSize	DS  3       ; 24 bit data size	
+
+[PALETTE_DATA]
+palette         DS nrColors*3  ; If the number of colors is zero then this field is not excisting
+
+[BITMAP_DATA]
+data            DS dataSize ; The bitmap data, this can either be raw data or bitbust data
+
+NOTE: Values used are example values.
+
+</pre>
+
+
+<h2>Using G9B files</h2>
+
+
+In the software G9B files are referred to as objects. The following functions are available
+for G9B files:
+<p>
+
+</p><ul>
+
+<li>G9k.OpenG9B
+</li><li>G9k.ReadG9B
+</li><li>G9k.ReadG9BLinear
+</li><li>G9k.Close          
+</li></ul>
+
+<p>
+These functions use the object G9B_OBJECT. The definition of this object can be found
+in the g9klib.inc file. 
+
+</p><p>
+</p><pre>		STRUCT G9B_OBJECT
+fileHandle	WORD        ; Dos2 file handle from the openend G9B file
+bitDepth	BYTE        ; 2,4,8 or 16 bit
+colorType	BYTE	    ; 0=64 color palette mode,64=256 color fixed ,128=YJK and 192=YUV mode
+nrColors	BYTE        ; Number of colors in palette mode
+width		WORD	    ; Width
+height	        WORD        ; Height
+compression	BYTE        ; 0 = no compression, other value = compression used
+dataSize	D24         ; 24 bit data size	
+		ENDS
+</pre>
+
+When you want to define a G9B_OBJECT object but you don't want to use SJASM then simply define
+an area of 13 bytes.
+<p>
+A G9B file must be opend with G9k.OpenG9B. This function opens the
+file, by default with the DOS2 function _OPEN, and the header is read
+out. An error is returned when it's not a valid G9B file. After opening
+all the fields of the G9B_OBJECT can be checked by the user and then he
+can decide to read the rest of the file by means of G9k.ReadG9B or
+G9k.ReadG9BLinear.
+</p><p>
+G9k.OpenG9B doesn't check if the G9B file is compatible with the current selected GFX9000 screen mode. This is upto the user.
+</p><p>
+For an example check out the source file of G9BView.com or g9ktest.com both included in the G9kLIB package.
+
+</p><p>
+</p><pre>Function     : G9k.OpenG9B
+Description  : Opens a G9B file
+Input        : DE = Pointer to zero terminated file name
+             : HL = Pointer to an unused/empty G9B_OBJECT
+Output       : G9B_OBJECT filled in with G9B header 
+Return value : A = ERROR CODE
+             :     - _NOG9B  = File is not A G9B File
+             :     -  DOS2 error Code. In this case Bdos.ERROR_STRING is filled with
+             :        the DOS2 error explaination string.
+Modifies     : AF,BC,DE,HL     
+</pre>
+
+<pre>Function     : G9k.ReadG9B
+Description  : Reads a G9B file and copies the data to the GFX9000 vram to location X,Y
+Input        : IX = Pointer to G9B_OBJECT
+	     : DE = Pointer to load buffer
+	     : BC = Size of load buffer, size of buffer is not used with bitbust compressed files,however
+             :      always specify a buffer size so compressed and uncompressed can be loaded with the same
+             :      parameters
+	     : HL = Destination X in vram
+	     : IY = Destination Y in vram
+	     :  A = Palette pointer. Only valid with in palette modes. The value of the palette pointer
+             :      can be calculated with: startColorNumber * 4; 	
+Return value : A = ERROR CODE
+             :     - DOS2 error Code. In this case Bdos.ERROR_STRING is filled with
+             :       the DOS2 error explaination string.
+Modifies     : AF,BC,DE,HL  
+</pre>
+
+<pre>Function     : G9k.ReadG9BLinear
+Description  : Reads a G9B file and copies the data linear to the GFX9000 vram
+Input        : IX     = Pointer to G9B_OBJECT
+	     : DE     = Pointer to load buffer
+	     : BC     = Size of load buffer, size of buffer is not used with bitbust compressed files,however
+             :          always specify a buffer size so compressed and uncompressed can be loaded with the same
+             :          parameters
+	     : IYL:HL = Vram destination address
+	     : A      = Palette pointer. Only valid with in palette modes. The value of the palette pointer
+             :          can be calculated with: startColorNumber * 4; 	
+Return value : A      = ERROR CODE
+             :          - DOS2 error Code. In this case Bdos.ERROR_STRING is filled with
+             :            the DOS2 error explaination string.
+Modifies     : AF,BC,DE,HL  
+</pre>  
+  
+
+<pre>  
+Function     : G9k.Close
+Description  : Closes the file handle of an object. This the generic close function for objects used
+	     : within the GFX9000 library
+Input        : IX     = Pointer to G9B_OBJECT
+Output       : G9B_OBJECT = file handle is closed
+Return value : A = ERROR CODE
+             :     -  DOS2 error Code. In this case Bdos.ERROR_STRING is filled with
+             :        the DOS2 error explaination string.
+Modifies     : AF,BC,DE,HL     
+</pre>
+
+<h2>Creating G9B files</h2>
+
+G9B Files can be created on PC or on your (t)rusty MSX. On PC you can use BMP2G9B.exe and on MSX V9BMP.
+Both tools have a built-in help. Only a list of supported file types and output formats is listed here.
+
+<h3>V9BMP.COM V1.1</h3>
+<pre>- suported input formats:
+  TIM - playstation format, currecly only 16bit files are supported.
+  BMP - 1,4,8 and 24 bitmaps. OS/2 and RLE BMP files are not supported.
+
+- Supported output formats:
+  G9B - TIM 15 bit -&gt; 15 bit   
+      - BMP  1 bit -&gt;  2 bit 
+      - BMP  4 bit -&gt;  4 bit 
+      - BMP  8 bit -&gt;  8 bit 64 color
+                   -&gt; 15 bit 
+      - BMP  24bit -&gt;  8 bit YJK 
+                   -&gt;  8 bit YUV 
+                   -&gt; 15 bit  
+  
+  Limitations 
+  - V9BMP can't compress G9B files
+  - All pictures are truncated to fit the display resolution!!
+</pre>
+
+<h3>BMP2G9B.EXE V0.5</h3>
+
+<pre>Output files can be either in raw or in bitbuster compressed mode. Default is bitbuster compressed.
+- suported input formats:
+  G9B - excisting G9B files can be compressed
+  BMP - 1,4,8 and 24 bitmaps. OS/2 and RLE BMP files not supported.
+
+- Supported output formats:  
+  G9B - BMP  1 bit -&gt;  2 bit 
+      - BMP  4 bit -&gt;  4 bit 
+      - BMP  8 bit -&gt;  8 bit 64 color
+      - BMP  24bit -&gt;  8 bit YJK 
+                   -&gt;  8 bit YUV 
+                   -&gt; 15 bit  
+    
+  BMP2G9B can also be used to generate patterns for bitmap modes. This means that the are stored in a linear
+  way in the vram. They must be loaded with G9k.ReadG9BLinear. A linear copy to XY can now be used with
+  these patterns. The linear copy to XY is faster then the XY to XY copy. This is why the pattern mode option is 
+  created for bitmap modes. 
+  Optional dither can be applied. In some cases this will result in a nicer end result. 
+</pre>
+
+<h2>Viewing G9B files</h2>
+
+G9BView.COM is provided in the G9kLIB package to view and test created G9B files on the GFX9000.  ViewMSX
+can be used to view G9B files on the PC.
+  </div>
+
+
+</body></html>

@@ -1,0 +1,161 @@
+V9990 BMP loader
+
+This is the version history overview of V9BMP. The latest version is 1.1
+
+V9BMP is made by N.W.O. 1997,1998,1999,2001,2003,2004,2005
+
+Any commands or questions:
+
+Email:m.delorme@chello.nl
+
+Version 1.1
+   Added: Gbasic copy format support. Palette data is saved in an ascii file if needed.
+
+Version 1.02
+   Added: dos2 check
+
+Version 1.01
+   BugFix: Fixed error in data size calculating while saving g9b files
+
+Version 1.00
+   Added G9B file format
+   Added palette in ascii output when saving raw pictures
+
+Version 0.95
+    Bugfix:In 16bit mode pictures with an odd width resolution where displayed
+	   incorrectly.
+
+Version 0.94
+    Added YUV mode support.
+    Improved read block size routine.
+    Improved YJK mode viewing a bit. 		
+
+Version 0.93
+
+   Added RAW save option. If a BMP named PICTURE.BMP than the RAW file will be called PICTURE.RAW.
+   This file will be saved on the drive and directory where you started V9BMP from.
+
+Version 0.92
+
+    Added 8 bit palette mode support for 8 bit BMP pictures. Only the first 64
+    colors will be used, because the V9990 only support 64 colors in palette 
+    mode.
+
+Version 0.91
+
+    Implanted TIM support. This is a picture format of the PSX.
+    It doesn't support the pallet mode of this format.
+
+Version 0.9
+
+   Implanted YJK mode for viewing 24 Bit pictures. I will implant YUV in a
+   later version.  Add some extra display information while viewing pictures.
+   CAUTION: Sometimes the pictures are corrupt when viewing them in YJK
+   mode, because the resolution of a pictures most be dividable by 4.
+
+Version 0.81
+
+   You can abort viewing by holding down the Esc key now.
+
+Version 0.80
+
+   Improved 24 bit BMP convert routine (again), it's 21% faster now!!!!.
+   Improved 1 bit BMP convert routine, just a little bit faster.
+
+
+Version 0.70
+   
+  Added Manual screen select. You can select X resolution between 192 and 1024 and 
+  Interlace on/off.
+  
+  Improved some code.  
+
+
+Version 0.60
+
+  V9BMP centers the picture, but now it is also possible to shift it to 
+  right/left and/or up/down. 
+
+
+Version 0.51
+
+  Scan option is now available. You will see the file info only
+  
+  Improved command line read routine. It makes no errors anymore (I hope).
+
+  OS/2 bitmaps are skipped now. I will not implant OS/2 bmp, because this format
+  is rarely used.
+ 
+Version 0.50
+
+  Implanted file info. Now you see the file name and resolution of a BMP
+  file on the V9938/V9958.
+
+
+Version 0.42
+
+ 1 BIT bmp is also 100% okay now.
+
+ I tested V9BMP with more than 300MB of BMP files and no errors occurred.
+ If you have a picture that is incorrect converted, than send me that picture
+ and I will correct V9BMP.
+
+
+
+Version 0.40
+
+ 4 BIT bmp is now 100% ok.
+ 1 BIT bmp is now supported too, only is not ok yet.
+
+
+Version 0.35
+
+The header block load routine loaded 1 byte to much this resulted in shifting
+the picture to the right.
+
+Improved 24 bit BMP convert routine, it's a little bit faster now.
+
+V9BMP checks now for 4 bit RLE and skips them (8 bit RLE is now skipped to).
+
+De back ground color is now forced to black.
+
+
+Version 0.33
+
+It supports:
+
+24 BIT bmp
+ 8 BIT bmp
+ 4 BIT bmp (Not 100 %okay yet, mainly because of the 32 bit padding of the BMP
+	   format)
+
+Full DOS2.XX path and wildcard support (It doesn't even work in DOS 1.XX)
+
+At has clipping ,it will select the middle of a picture if the picture is
+bigger than the screen and it will center the picture in the middle of then 
+screen if the picture is smaller than the screen.
+
+An internal help function, now you will only see how to use the timer function.
+
+V9BMP will select the best resolution for the picture to fit in the screen.
+
+
+It will support in the future:
+
+ 8 BIT (RLE) BMP (there is already a bit of 8 bit RLE support in this version
+		  but don't try it, because you will see shit on the screen)
+ 4 BIT (RLE) BMP		 
+ 1 BIT BMP  
+
+Screen mode selection, at this moment V9BMP selects its own resolution, but it will
+be possible to select your own resolution in a latter version.
+
+File information, this I will make so that you can see the resolution of the picture
+and of the screen mode and the file name (and some other things that will pop
+up in my mind) on the v9938/58.
+
+I'm thinking about implanting a menu , but I’m not sure yet.
+
+
+ 
+

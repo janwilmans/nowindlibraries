@@ -1,0 +1,43 @@
+Version history:
+
+Gfx9000 lib 0.51
+-------------------------------------------------------------------------------
+
+- Bugfix: SetScrollXB wrote to the wrong register fixed:
+- Added:  G9kexp.asm to genererate a export file with simple lable names so
+          the g9klib can be used with other assemblers
+
+Gfx9000 lib 0.60
+-------------------------------------------------------------------------------
+- Added: Font support from ram
+- Added: PutChar
+
+
+Bmp2G9b 0.41
+-------------------------------------------------------------------------------
+- BugFix: Compression on 4bits g9b files was not enabled
+
+Bmp2G9b 0.50
+-------------------------------------------------------------------------------
+- Rewritten code so it's portable to linux
+- Added YUV support
+- Added YJK support
+- Added optional dither
+- Added 1bit bmp support
+
+
+
+V9bmp  1.02
+-------------------------------------------------------------------------------
+-   Added: dos2 check
+
+V9bmp  1.1
+-------------------------------------------------------------------------------
+-   Added: Gbasic copy format support. Palette data is saved in an ascii file
+    if needed.
+
+
+G9bView 0.41
+-------------------------------------------------------------------------------
+- Added scroll function if picture is bigger then display screen
+- Added picture centering on screen if smaller then display screen

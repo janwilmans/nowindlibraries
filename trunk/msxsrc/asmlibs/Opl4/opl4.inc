@@ -1,0 +1,27 @@
+			ifndef OPL4_INC
+			define OPL4_INC
+
+; Opl4 ports			
+OPL4_WAVE_REG_SELECT	equ	07Eh
+OPL4_WAVE_REG_DATA	equ     07Fh
+OPL4_FM0_REG_SELECT	equ	0C4h
+OPL4_FM0_REG_DATA	equ     0C5h
+OPL4_FM1_REG_SELECT	equ	0C6h
+OPL4_FM1_REG_DATA	equ     0C7h
+
+
+OPL4_REG_EXPANSION	equ	005h
+OPL4_ENABLE_OPL3_REG    equ	1
+OPL4_ENABLE_OPL4_REG    equ	2
+
+OPL4_CHN_CONTROL	equ	068h  
+KEY_ON			equ 	128
+DAMP			equ	64
+LFO_RESET		equ	32
+OUTPUT_CHN_SEL		equ	16
+
+
+OPL4_LFO_VIB		equ	080h
+OPL4_AM			equ	0
+
+			endif

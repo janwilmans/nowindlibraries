@@ -1,0 +1,56 @@
+[Project ID]
+Signature=UE Proj: v.1
+[Open Files]
+Open File0=C:\project\lib\g9klib\g9kmain.asm
+Open File Pos0=392
+Open File Line0=0
+Open File Window Pos0=2,3,-1,-1,-4,-23,220,220,1046,725
+Open File1=C:\project\lib\g9klib\G9KLIB.ASM
+Open File Pos1=27312
+Open File Line1=22350
+Open File Window Pos1=0,1,-1,-1,-4,-23,242,242,1072,751
+Open File2=C:\project\lib\bitbuster\bitbuster.asm
+Open File Pos2=1654
+Open File Line2=2873
+Open File Window Pos2=0,1,-1,-1,-4,-23,0,0,830,509
+Open File3=C:\project\Tools\msx\g9bview\g9bview.asm
+Open File Pos3=0
+Open File Line3=11468
+Open File Window Pos3=0,1,-1,-1,-4,-23,22,22,852,531
+Open File4=C:\project\lib\g9klib\G9KLIB.INC
+Open File Pos4=15435
+Open File Line4=15151
+Open File Window Pos4=0,1,-1,-1,-4,-23,44,44,874,553
+Open File5=C:\project\dos2tests\dos2tests.asm
+Open File Pos5=111
+Open File Line5=0
+Active File Index=0
+Open File Window Pos5=0,1,-1,-1,-4,-23,132,132,1006,528
+Open File6=C:\project\mbwave\DISKMENU.asm
+Active File Display Mode=3
+Open File Pos6=59645
+Open File Line6=59489
+Open File Window Pos6=0,1,-1,-1,-4,-23,132,132,1006,530
+Open File7=C:\project\mbwave\VOICMENU.asm
+Open File Pos7=85570
+Open File Line7=85470
+Open File Window Pos7=0,1,-1,-1,-4,-23,154,154,1028,552
+Open File8=C:\project\mbwave\MBDEFS.asm
+Open File Pos8=0
+Open File Line8=2902
+Open File Window Pos8=0,1,-1,-1,-4,-23,176,176,1050,574
+Open File9=
+[Project Information]
+Project Start=D5070C0003000E00150025000F00000042
+Project Directory=C:\project\lib\g9klib
+Include Sub Directories=1
+Project Tagfile=
+Project Wordfile=
+Filter=
+Create Tagfile=0
+Working Time=33511
+[Files]
+0=G9KLIB.ASM
+1=G9KLIB.INC
+2=g9klib.txt
+3=g9kmain.asm

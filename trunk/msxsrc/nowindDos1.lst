@@ -1,0 +1,2808 @@
+Sjasm Z80 Assembler v0.4 BETA 6 - www.xl2s.tk             [2010.01.23 - 22:09:45]
+
+C:\MSX\nowind\msxsrc\nowindDos1.asm
+Errors: 3
+
+       1   00:0000                      ; MSXDOS1 address
+       2   00:0000  (00:576F)           romInit         equ $576f
+       3   00:0000  (00:5F86)           printText       equ $5f86
+       4   00:0000                      
+       5   00:0000                              define  MSXDOS1
+       6   00:0000                              define  DEBUG
+       7   00:0000                              define  ROMDSKBANK 1            ; first bank of ROMdisk image
+       8   00:0000                              define  ROMDSKLAST 1+24-1
+       9   00:0000                              define  BDOS_NOWIND_DISABLED
+      10   00:0000                      
+      11   00:0000                              
+      12   00:0000                              output "nowindDos1.rom"
+      13   00:0000                              include "labels.asm"
+       1.  00:0000                      ; BIOS routines
+       2.  00:0000  (00:000C)           RDSLT           equ $000c
+       3.  00:0000  (00:0014)           WRSLT           equ $0014
+       4.  00:0000  (00:001C)           CALSLT          equ $001c
+       5.  00:0000  (00:0024)           ENASLT          equ $0024
+       6.  00:0000  (00:005F)           CHGMOD          equ $005f
+       7.  00:0000  (00:0141)           SNSMAT          equ $0141
+       8.  00:0000  (00:015F)           EXTROM          equ $015f
+       9.  00:0000  (00:0185)           SDFSCR          equ $0185               ; restore screen parameters from clockchip (in SUBROM)
+      10.  00:0000                      
+      11.  00:0000                      ; BIOS variables (really?)
+      12.  00:0000  (00:F33F)           LASTDRV         equ $f33f               ; stores CTRL-key status during boot
+      13.  00:0000  (00:F342)           RAMAD1          equ $f342
+      14.  00:0000  (00:F36E)           XFER            equ $f36e
+      15.  00:0000                      
+      16.  00:0000  (00:F663)           VALTYP          equ $f663
+      17.  00:0000  (00:F7F6)           DAC             equ $f7f6
+      18.  00:0000  (00:F864)           PTRFIL          equ $f864
+      19.  00:0000  (00:F866)           FILNAM          equ $f866
+      20.  00:0000                      
+      21.  00:0000  (00:FCC1)           EXPTBL          equ $fcc1
+      22.  00:0000  (00:FCC5)           SLTTBL          equ $fcc5
+      23.  00:0000  (00:FCC9)           SLTATR          equ $fcc9
+      24.  00:0000  (00:FD09)           SLTWRK          equ $fd09
+      25.  00:0000  (00:FD89)           PROCNM          equ $fd89
+      26.  00:0000  (00:FD99)           DEVICE          equ $fd99
+      27.  00:0000  (00:FFCA)           EXTBIO          equ $ffca
+      28.  00:0000                      
+      29.  00:0000                      ; Diskrom routines
+      30.  00:0000  (00:402D)           GETSLT          equ $402d
+      31.  00:0000                               
+      32.  00:0000                      ; Hooks
+      33.  00:0000  (00:FECB)           H.RUNC          equ $fecb               ; Intercepted by diskrom
+      34.  00:0000                      
+      35.  00:0000                      ; Nowind hardware addresses
+      36.  00:0000  (00:4000)           usbwr           equ $4000               ; 0x4000..0x5fff
+      37.  00:0000  (00:2000)           usbrd           equ $2000               ; 0x2000..0x3fff
+      38.  00:0000  (00:8000)           usb2            equ $8000               ; 0x8000..0x9fff (read and write)
+      39.  00:0000  (00:6001)           mapper          equ $6001               ; 0x6001..0x7fff (odd numbers only)
+      40.  00:0000                      
+      41.  00:0000                      ; Host commands
+      42.  00:0000  (00:0080)           C_DSKIO         equ $80
+      43.  00:0000  (00:0081)           C_DSKCHG        equ $81
+      44.  00:0000  (00:0082)           C_GETDPB        equ $82
+      45.  00:0000  (00:0083)           C_CHOICE        equ $83
+      46.  00:0000  (00:0084)           C_DSKFMT        equ $84
+      47.  00:0000  (00:0085)           C_DRIVES        equ $85
+      48.  00:0000  (00:0086)           C_INIENV        equ $86
+      49.  00:0000  (00:0087)           C_SETDATE       equ $87
+      50.  00:0000  (00:0088)           C_DEVICEOPEN    equ $88
+      51.  00:0000  (00:0089)           C_DEVICECLOSE   equ $89
+      52.  00:0000  (00:008A)           C_DEVICERNDIO   equ $8a
+      53.  00:0000  (00:008B)           C_DEVICEWRITE   equ $8b
+      54.  00:0000  (00:008C)           C_DEVICEREAD    equ $8c
+      55.  00:0000  (00:008D)           C_DEVICEEOF     equ $8d
+      56.  00:0000  (00:008E)           C_AUXIN         equ $8e
+      57.  00:0000  (00:008F)           C_AUXOUT        equ $8f
+      58.  00:0000  (00:0090)           C_MESSAGE       equ $90
+      59.  00:0000  (00:00A0)           C_CHANGEIMAGE   equ $a0
+      60.  00:0000  (00:00A1)           C_BOOTCODE      equ $a1
+      61.  00:0000                      
+      62.  00:0000                      ; BDOS commands 0x0F- 0x37 can just use their original command code in register C
+      63.  00:0000                      
+      64.  00:0000                      ; PATCH       
+      65.  00:0000                              macro PATCH address, word
+      66.  00:0000                    <         code ! address
+      67.  00:0000                    <         dw word
+      68.  00:0000                    <         endmacro
+      69.  00:0000                      
+      70.  00:0000                      ; DEBUGMESSAGE
+      71.  00:0000                              macro DEBUGMESSAGE string
+      72.  00:0000                    <         ifdef DEBUG
+      73.  00:0000                    <         ld d,d
+      74.  00:0000                    <         jr .skip
+      75.  00:0000                    <         db string
+      76.  00:0000                    < .skip:  
+      77.  00:0000                    <         endif
+      78.  00:0000                    <         endmacro
+      79.  00:0000                      
+      80.  00:0000                      ; MESSAGE
+      81.  00:0000                              macro MESSAGE string
+      82.  00:0000                    <         call sendMessage
+      83.  00:0000                    <         db string
+      84.  00:0000                    < .skip2: nop
+      85.  00:0000                    <         endmacro
+      86.  00:0000                      
+      87.  00:0000                      ; DEBUGDUMPREGISTERS
+      88.  00:0000                              macro DEBUGDUMPREGISTERS
+      89.  00:0000                    <         ifdef DEBUG
+      90.  00:0000                    <         db $ed,7
+      91.  00:0000                    <         endif
+      92.  00:0000                    <         
+      93.  00:0000                    <         ifdef USBDEBUG
+      94.  00:0000                    <         assert ($ < $8000)
+      95.  00:0000                    <         call sendCpuInfo
+      96.  00:0000                    <         endif
+      97.  00:0000                    <         endmacro
+      98.  00:0000                      
+      99.  00:0000                      ; MAKEDPB macro
+     100.  00:0000                              macro MAKEDPB media, sectorSize, sectorsPerCluster, maxEnt, maxSector, fatSiz, fatCount
+     101.  00:0000                    < .firfat equ 1
+     102.  00:0000                    < .firdir equ .firfat+(fatCount*fatSiz)
+     103.  00:0000                    < .firrec equ .firdir+(maxEnt/(sectorSize/32))
+     104.  00:0000                    <         if sectorSize = 512
+     105.  00:0000                    < .shft   equ 4
+     106.  00:0000                    <         elseif sectorSize = 256
+     107.  00:0000                    < .shft   equ 3
+     108.  00:0000                    <         endif
+     109.  00:0000                    <         
+     110.  00:0000                    <         db media                                        ; media descriptor
+     111.  00:0000                    <         dw sectorSize                                   ; sector size
+     112.  00:0000                    <         db (sectorSize/32)-1, .shft                     ; dirmsk
+     113.  00:0000                    <         db sectorsPerCluster-1                          ; clusmsk 
+     114.  00:0000                    <         db sectorsPerCluster                            ; clusshft (TODO: only correct for 1 and 2 sec/clus)         
+     115.  00:0000                    <         dw .firfat
+     116.  00:0000                    <         db fatCount, maxEnt
+     117.  00:0000                    <         dw .firrec
+     118.  00:0000                    <         dw (maxSector-.firrec)/sectorsPerCluster+1      ; maxclus
+     119.  00:0000                    <         db fatSiz
+     120.  00:0000                    <         dw .firdir
+     121.  00:0000                    <         endmacro
+     122.  00:0000                      
+     123.  00:0000                      
+     124.  00:0000                      ; ROMHEADER macro
+     125.  00:0000                              macro romheader r   
+     126.  00:0000                    < .addr := $4000        
+     127.  00:0000                    <         repeat r
+     128.  00:0000                    <         code ! .addr
+     129.  00:0000                    < 
+     130.  00:0000                    <         org $4000
+     131.  00:0000                    <         db "AB"
+     132.  00:0000                    <         dw .init
+     133.  00:0000                    <         ds 12,0
+     134.  00:0000                    < 
+     135.  00:0000                    <         call .redir                     ; DSKIO
+     136.  00:0000                    <         call .redir                     ; DSKCHG
+     137.  00:0000                    <         call .redir                     ; GETDPB
+     138.  00:0000                    <         call .redir                     ; CHOICE
+     139.  00:0000                    <         call .redir                     ; DSKFMT
+     140.  00:0000                    <         ds 3,0                          ; DRVOFF
+     141.  00:0000                    < 
+     142.  00:0000                    <         code ! .addr + $3fe7
+     143.  00:0000                    <         org $7fe7
+     144.  00:0000                    <         
+     145.  00:0000                    < .init:  ld hl,romInit
+     146.  00:0000                    <         push hl
+     147.  00:0000                    <         jr .enableBank0        
+     148.  00:0000                    < 
+     149.  00:0000                    < .redir: ex (sp),hl
+     150.  00:0000                    <         dec hl
+     151.  00:0000                    <         dec hl
+     152.  00:0000                    <         dec hl
+     153.  00:0000                    <         ex (sp),hl
+     154.  00:0000                    <         jr .enableBank0
+     155.  00:0000                    < 
+     156.  00:0000                    <         ld (mapper),a                   ; copyFromBank
+     157.  00:0000                    <         ldir
+     158.  00:0000                    < .enableBank0:
+     159.  00:0000                    <         push af                         ; enable bank 0 (no registers changed)
+     160.  00:0000                    <         xor a
+     161.  00:0000                    <         ld (mapper),a
+     162.  00:0000                    <         pop af
+     163.  00:0000                    <         ret
+     164.  00:0000                    <         
+     165.  00:0000                    < .@addr := .addr + $4000
+     166.  00:0000                    <         endrepeat
+     167.  00:0000                    <         endmacro
+     168.  00:0000                      
+     169.  00:0000                      ; MACRO debugdisasm
+     170.  00:0000                              macro DEBUGDISASM
+     171.  00:0000                    <         db $ed, $0b
+     172.  00:0000                    <         endmacro
+     173.  00:0000                              
+     174.  00:0000                      ; MACRO debugdisasmoff
+     175.  00:0000                              macro DEBUGDISASMOFF
+     176.  00:0000                    <         db $ed, $0c
+     177.  00:0000                    <         endmacro        
+     178.  00:0000                      
+     179.  00:0000                      ; MACRO breakpoint
+     180.  00:0000                              macro BREAKPOINT
+     181.  00:0000                    <         ld b,b
+     182.  00:0000                    <         jr $+2
+     183.  00:0000                    <         endmacro
+     184.  00:0000                      
+     185.  00:0000                              
+     186.  00:0000                              macro PRINTVDPTEXT string
+     187.  00:0000                    <         
+     188.  00:0000                    <         push hl
+     189.  00:0000                    <         ld hl,.text 
+     190.  00:0000                    <         call printVdpText2
+     191.  00:0000                    <         pop hl
+     192.  00:0000                    <         jr .skip
+     193.  00:0000                    < .text   db string
+     194.  00:0000                    <         db 0
+     195.  00:0000                    < .skip:
+     196.  00:0000                    <         endmacro
+      14   00:0000                                      
+      15   00:0000                              defpage 0, $4000, $4000
+      16   00:0000                              defpage 1, $4000, 31 * $4000
+      17   00:0000                              
+      18   00:0000  (00)                        page 0
+      19   00:4000                      
+      20   00:4000  (3405)                      incbin "..\roms\DISK.ROM", 0, $7405-$4000
+      21   00:7405                                      
+      22   00:7405                              PATCH $4006, device
+      22   00:7405                    >         code ! address
+      22   00:4006  5E 7E             >         dw word
+      23   00:4008                      
+      24   00:4008                              code ! $4010
+      25   00:4010  C3 B2 77                    jp DSKIO
+      26   00:4013  C3 B5 78                    jp DSKCHG
+      27   00:4016  C3 EC 78                    jp GETDPB
+      28   00:4019  C3 58 79                    jp CHOICE
+      29   00:401C  C3 5D 79                    jp DSKFMT
+      30   00:401F  00 00 00                    db 0,0,0                        ; no DRVOFF
+      31   00:4022                              
+      32   00:4022                              PATCH $5770, INIHRD
+      32   00:4022                    >         code ! address
+      32   00:5770  D4 76             >         dw word
+      33   00:5772                              PATCH $57aa, $f380 + MYSIZE
+      33   00:5772                    >         code ! address
+      33   00:57AA  88 F3             >         dw word
+      34   00:57AC                              PATCH $581e, MYSIZE
+      34   00:57AC                    >         code ! address
+      34   00:581E  08 00             >         dw word
+      35   00:5820                              PATCH $582f, SECLEN
+      35   00:5820                    >         code ! address
+      35   00:582F  00 02             >         dw word
+      36   00:5831                              PATCH $5851, DRIVES
+      36   00:5831                    >         code ! address
+      36   00:5851  F7 76             >         dw word
+      37   00:5853                              PATCH $5884, DEFDPB - 1
+      37   00:5853                    >         code ! address
+      37   00:5884  A2 7C             >         dw word
+      38   00:5886                              PATCH $5890, INIENV
+      38   00:5886                    >         code ! address
+      38   00:5890  60 77             >         dw word
+      39   00:5892                              PATCH $5ae8, DEFDPB             ; different address in some roms
+      39   00:5892                    >         code ! address
+      39   00:5AE8  A3 7C             >         dw word
+      40   00:5AEA                              PATCH $65af, OEMSTA
+      40   00:5AEA                    >         code ! address
+      40   00:65AF  68 7A             >         dw word
+      41   00:65B1                      	PATCH $5809, initDiskBasic      ; HRUNC
+      41   00:65B1                    >         code ! address
+      41   00:5809  38 74             >         dw word
+      42   00:580B                              
+      43   00:580B                              ;PATCH $5b9a, getHostDate        ; get date from host when no clockchip found (different 5b95)
+      44   00:580B                      
+      45   00:580B                      	ifdef BDOS_NOWIND
+      46   00:580B                    ~ 	
+      47   00:580B                    ~ 				; just patching the BDOS hook will not work; not everybody uses the hook
+      48   00:580B                    ~         ;PATCH $5d20, BDOSNW						  ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW
+      49   00:580B                    ~         	
+      50   00:580B                    ~         ; even patching the BDOS jump table will not work; internal calls (even in command.com) bypass it
+      51   00:580B                    ~         ; jump table patches
+      52   00:580B                    ~         ;PATCH $572b, BDOS_0FH_J				  ; overwrite specific function 0Fh in jump table
+      53   00:580B                    ~         ;PATCH $572f, BDOS_11H_J				  ; overwrite specific function 11h in jump table
+      54   00:580B                    ~         ;PATCH $5731, BDOS_12H_J				  ; overwrite specific function 12h in jump table
+      55   00:580B                    ~         	
+      56   00:580B                    ~         ; these patches are at the start of the routine themselves, the addresses are more or less "standardized" 
+      57   00:580B                    ~         ; over several brands of diskroms	
+      58   00:580B                    ~         ; in-routine patches
+      59   00:580B                    ~         PATCH $4463, BDOS_0FH					  ; overwrite function 0Fh itself!
+      60   00:580B                    ~         PATCH $4fb9, BDOS_11H 				  ; overwrite function 11h itself!
+      61   00:580B                    ~         PATCH $5007, BDOS_12H 				  ; overwrite function 12h itself!
+      62   00:580B                    ~         	
+      63   00:580B                    ~        	endif
+      64   00:580B                      				
+      65   00:580B                              code ! $595d
+      66   00:595D  21 D2 74                    ld hl,newAUX                    ; redirect AUX to host  
+      67   00:5960  11 27 F3                    ld de,$f327
+      68   00:5963  01 0A 00                    ld bc,10
+      69   00:5966  ED B0                       ldir
+      70   00:5968  00                          nop
+      71   00:5969  00                          nop
+      72   00:596A  00                          nop
+      73   00:596B  00                          nop                             ; do not remove!
+      74   00:596C                              
+      75   00:596C                              code @ $7405
+      76   00:7405                      
+      77   00:7405                              include "common.asm"
+       1.  00:7405                      ; Nowind specific
+       2.  00:7405                      
+       3.  00:7405                      nowindInit:
+       4.  00:7405  3A F8 FA                    ld a,($faf8)										; moet volgens bifi ld a,($2d) zijn, $faf8 is op msx1 deel van de rs232 area?
+       5.  00:7408  B7                          or a 
+       6.  00:7409  F5                          push af
+       7.  00:740A  CC 5F 00                    call z,CHGMOD                   ; SCREEN 0 for MSX1
+       8.  00:740D  F1                          pop af
+       9.  00:740E  DD 21 85 01                 ld ix,SDFSCR                    ; restore screen mode from clockchip
+      10.  00:7412  C4 5F 01                    call nz,EXTROM
+      11.  00:7415                                      
+common.asm line 12: Label not found: PRINTTEXT
+      12.  00:7415  CD 00 00                    call PRINTTEXT
+      13.  00:7418                              ifndef DEBUG
+      14.  00:7418                    ~         db "Nowind USB Diskrom!",0
+      15.  00:7418                    ~         else
+      16.  00:7418                              db "Nowind USB Diskrom! [debug]",0
+      16.  00:7418  4E 6F 77 69 6E 64 20 55 53 42 20 44 69 73 6B 72 
+      16.  00:7428  6F 6D 21 20 5B 64 65 62 75 67 5D 00 
+      17.  00:7434                              endif
+      18.  00:7434                      
+      19.  00:7434                              ; call insertBootCode
+      20.  00:7434  CD 85 7D                    call flashWriter
+      21.  00:7437  C9                          ret
+      22.  00:7438                      
+      23.  00:7438                      initDiskBasic:
+      24.  00:7438                              DEBUGMESSAGE "initDiskBasic"
+      24.  00:7438                    >         ifdef DEBUG
+      24.  00:7438  52                >         ld d,d
+      24.  00:7439  18 0D             >         jr .skip
+      24.  00:743B                    >         db string
+      24.  00:743B  69 6E 69 74 44 69 73 6B 42 61 73 69 63 
+      24.  00:7448                    > .skip:
+      24.  00:7448                    >         endif
+      25.  00:7448  21 99 FD                    ld hl,DEVICE
+      26.  00:744B  CB BE                       res 7,(hl)
+      27.  00:744D                              
+      28.  00:744D                              ifdef MSXDOS1
+      29.  00:744D  C3 97 58                    jp $5897
+      30.  00:7450                              else
+      31.  00:7450                    ~         jp $495b
+      32.  00:7450                    ~         endif
+      33.  00:7450                      
+      34.  00:7450                      ; search call statement or device name
+      35.  00:7450                      findStatementName:
+      36.  00:7450                              DEBUGMESSAGE "findStatementName"
+      36.  00:7450                    >         ifdef DEBUG
+      36.  00:7450  52                >         ld d,d
+      36.  00:7451  18 11             >         jr .skip
+      36.  00:7453                    >         db string
+      36.  00:7453  66 69 6E 64 53 74 61 74 65 6D 65 6E 74 4E 61 6D 
+      36.  00:7463  65 
+      36.  00:7464                    > .skip:
+      36.  00:7464                    >         endif
+      37.  00:7464  11 89 FD                    ld de,PROCNM
+      38.  00:7467  1A                  .loop:  ld a,(de)
+      39.  00:7468  BE                          cp (hl)
+      40.  00:7469  20 06                       jr nz,.nextStatement
+      41.  00:746B  23                          inc hl
+      42.  00:746C  B7                          or a
+      43.  00:746D  C8                          ret z                           ; name found
+      44.  00:746E  13                          inc de
+      45.  00:746F  18 F6                       jr .loop        
+      46.  00:7471                      .nextStatement:
+      47.  00:7471  AF                          xor a
+      48.  00:7472  4F                          ld c,a
+      49.  00:7473  ED B1                       cpir
+      50.  00:7475  23                          inc hl
+      51.  00:7476  23                          inc hl
+      52.  00:7477  B6                          or (hl)
+      53.  00:7478  20 D6                       jr nz,findStatementName        
+      54.  00:747A  37                          scf                             ; not found
+      55.  00:747B  C9                          ret
+      56.  00:747C                      
+      57.  00:747C                      sendRegisters:
+      58.  00:747C  F5                          push af
+      59.  00:747D  7C                          ld a,h
+      60.  00:747E  26 40                       ld h,HIGH usbwr
+      61.  00:7480  36 AF                       ld (hl),$af                     ; header
+      62.  00:7482  36 05                       ld (hl),$05
+      63.  00:7484  71                          ld (hl),c
+      64.  00:7485  70                          ld (hl),b
+      65.  00:7486  73                          ld (hl),e
+      66.  00:7487  72                          ld (hl),d
+      67.  00:7488  75                          ld (hl),l
+      68.  00:7489  77                          ld (hl),a                       ; register h
+      69.  00:748A  D1                          pop de
+      70.  00:748B  73                          ld (hl),e                       ; register f
+      71.  00:748C  72                          ld (hl),d                       ; register a
+      72.  00:748D  C9                          ret
+      73.  00:748E                              
+      74.  00:748E                      getHeader:
+      75.  00:748E  06 FF                       ld b,HIGH 65535                 ; 42000 * 60 states ~ 0,7 sec (time out)
+      76.  00:7490  7E                  .loop:  ld a,(hl)
+      77.  00:7491  FE AF               .chkaf: cp $af
+      78.  00:7493  28 20                       jr z,.chk05
+      79.  00:7495  0B                          dec bc
+      80.  00:7496  78                          ld a,b
+      81.  00:7497  B1                          or c
+      82.  00:7498  20 F6                       jr nz,.loop
+      83.  00:749A                              DEBUGMESSAGE "getHeader Timed out!"
+      83.  00:749A                    >         ifdef DEBUG
+      83.  00:749A  52                >         ld d,d
+      83.  00:749B  18 14             >         jr .skip
+      83.  00:749D                    >         db string
+      83.  00:749D  67 65 74 48 65 61 64 65 72 20 54 69 6D 65 64 20 
+      83.  00:74AD  6F 75 74 21 
+      83.  00:74B1                    > .skip:
+      83.  00:74B1                    >         endif
+      84.  00:74B1  3E 02                       ld a,2                          ; not ready
+      85.  00:74B3  37                          scf
+      86.  00:74B4  C9                          ret
+      87.  00:74B5                      
+      88.  00:74B5  7E                  .chk05: ld a,(hl)
+      89.  00:74B6  FE 05                       cp $05
+      90.  00:74B8  20 D7                       jr nz,.chkaf
+      91.  00:74BA  7E                          ld a,(hl)
+      92.  00:74BB  C9                          ret
+      93.  00:74BC                      
+      94.  00:74BC                      sendMessage:
+      95.  00:74BC                              ;DEBUGMESSAGE "sendMsg"
+      96.  00:74BC  E3                          ex (sp),hl
+      97.  00:74BD  F5                          push af
+      98.  00:74BE  D5                          push de
+      99.  00:74BF  E5                          push hl        
+     100.  00:74C0  CD 7C 74                    call sendRegisters
+     101.  00:74C3  36 90                       ld (hl),C_MESSAGE
+     102.  00:74C5  E1                          pop hl
+     103.  00:74C6  7E                  .loop:  ld a,(hl)
+     104.  00:74C7  23                          inc hl
+     105.  00:74C8  32 00 40                    ld (usbwr),a
+     106.  00:74CB  B7                          or a
+     107.  00:74CC  20 F8                       jr nz,.loop
+     108.  00:74CE  D1                          pop de
+     109.  00:74CF  F1                          pop af
+     110.  00:74D0  E3                          ex (sp),hl
+     111.  00:74D1  C9                          ret
+     112.  00:74D2                              
+     113.  00:74D2                      ; AUX device
+     114.  00:74D2                              
+     115.  00:74D2  C3 DC 74            newAUX: jp AUXin
+     116.  00:74D5  00                          nop
+     117.  00:74D6  00                          nop
+     118.  00:74D7  C3 21 75                    jp AUXout
+     119.  00:74DA  00                          nop
+     120.  00:74DB  00                          nop
+     121.  00:74DC                      
+     122.  00:74DC                      AUXin:  DEBUGMESSAGE "AUX in"
+     122.  00:74DC                    >         ifdef DEBUG
+     122.  00:74DC  52                >         ld d,d
+     122.  00:74DD  18 06             >         jr .skip
+     122.  00:74DF  41 55 58 20 69 6E >         db string
+     122.  00:74E5                    > .skip:
+     122.  00:74E5                    >         endif
+     123.  00:74E5  E5                          push hl
+     124.  00:74E6  D5                          push de
+     125.  00:74E7  C5                          push bc
+     126.  00:74E8  CD 7C 74                    call sendRegisters
+     127.  00:74EB  36 8E                       ld (hl),C_AUXIN
+     128.  00:74ED  CD 34 76                    call enableNowindPage0
+     129.  00:74F0  26 20                       ld h,HIGH usbrd
+     130.  00:74F2  CD 8E 74                    call getHeader
+     131.  00:74F5  D2 10 75                    jp nc,.getCharacter
+     132.  00:74F8                              
+     133.  00:74F8                              DEBUGMESSAGE "not connected"
+     133.  00:74F8                    >         ifdef DEBUG
+     133.  00:74F8  52                >         ld d,d
+     133.  00:74F9  18 0D             >         jr .skip
+     133.  00:74FB                    >         db string
+     133.  00:74FB  6E 6F 74 20 63 6F 6E 6E 65 63 74 65 64 
+     133.  00:7508                    > .skip:
+     133.  00:7508                    >         endif
+     134.  00:7508  3E 1A                       ld a,$1a                        ; eof
+     135.  00:750A  C1                  .exit:  pop bc
+     136.  00:750B  D1                          pop de
+     137.  00:750C  E1                          pop hl
+     138.  00:750D  C3 3F 76                    jp restorePage0        
+     139.  00:7510                                    
+     140.  00:7510                      .getCharacter:
+     141.  00:7510                              DEBUGMESSAGE "getChar"
+     141.  00:7510                    >         ifdef DEBUG
+     141.  00:7510  52                >         ld d,d
+     141.  00:7511  18 07             >         jr .skip
+     141.  00:7513                    >         db string
+     141.  00:7513  67 65 74 43 68 61 72 
+     141.  00:751A                    > .skip:
+     141.  00:751A                    >         endif
+     142.  00:751A  CD 8E 74                    call getHeader
+     143.  00:751D  38 F1                       jr c,.getCharacter
+     144.  00:751F  18 E9                       jr .exit
+     145.  00:7521                      
+     146.  00:7521                      
+     147.  00:7521                      AUXout: DEBUGMESSAGE "AUX out"
+     147.  00:7521                    >         ifdef DEBUG
+     147.  00:7521  52                >         ld d,d
+     147.  00:7522  18 07             >         jr .skip
+     147.  00:7524                    >         db string
+     147.  00:7524  41 55 58 20 6F 75 74 
+     147.  00:752B                    > .skip:
+     147.  00:752B                    >         endif
+     148.  00:752B                              DEBUGDUMPREGISTERS
+     148.  00:752B                    >         ifdef DEBUG
+     148.  00:752B  ED 07             >         db $ed,7
+     148.  00:752D                    >         endif
+     148.  00:752D                    >         
+     148.  00:752D                    >         ifdef USBDEBUG
+     148.  00:752D                    ~         assert ($ < $8000)
+     148.  00:752D                    ~         call sendCpuInfo
+     148.  00:752D                    ~         endif
+     149.  00:752D  E5                          push hl
+     150.  00:752E  D5                          push de
+     151.  00:752F                      ;        push bc
+     152.  00:752F                      ;        ld a,(RAMAD1) ; TODO: WTF???
+     153.  00:752F                      ;        call RDSLT
+     154.  00:752F  F5                          push af        
+     155.  00:7530  CD 7C 74                    call sendRegisters
+     156.  00:7533  36 8F                       ld (hl),C_AUXOUT
+     157.  00:7535  F1                          pop af
+     158.  00:7536                      ;        pop bc
+     159.  00:7536  D1                          pop de
+     160.  00:7537  E1                          pop hl
+     161.  00:7538  C9                          ret
+     162.  00:7539                      
+     163.  00:7539                      insertBootCode:
+     164.  00:7539                              DEBUGMESSAGE "BOOTCODE"
+     164.  00:7539                    >         ifdef DEBUG
+     164.  00:7539  52                >         ld d,d
+     164.  00:753A  18 08             >         jr .skip
+     164.  00:753C                    >         db string
+     164.  00:753C  42 4F 4F 54 43 4F 44 45 
+     164.  00:7544                    > .skip:
+     164.  00:7544                    >         endif
+     165.  00:7544  CD 7C 74                    call sendRegisters
+     166.  00:7547  36 A1                       ld (hl),C_BOOTCODE
+     167.  00:7549  CD 34 76                    call enableNowindPage0
+     168.  00:754C  CD 8E 74                    call getHeader
+     169.  00:754F  DA 3F 76                    jp c,restorePage0
+     170.  00:7552                              
+     171.  00:7552                              DEBUGMESSAGE "BOOTCODE"
+     171.  00:7552                    >         ifdef DEBUG
+     171.  00:7552  52                >         ld d,d
+     171.  00:7553  18 08             >         jr .skip
+     171.  00:7555                    >         db string
+     171.  00:7555  42 4F 4F 54 43 4F 44 45 
+     171.  00:755D                    > .skip:
+     171.  00:755D                    >         endif
+     172.  00:755D  C3 3F 76                    jp restorePage0
+     173.  00:7560                      
+     174.  00:7560                      ; send 32 bytes starting from address specified by DE to the usb
+     175.  00:7560                      sdendFCB:
+     176.  00:7560  D5                          push de
+     177.  00:7561  C5                          push bc
+     178.  00:7562                              
+     179.  00:7562  06 20                       ld b,32
+     180.  00:7564  1A                  .loop:  ld a,(de)
+     181.  00:7565  32 00 40                    ld (usbwr),a
+     182.  00:7568  13                          inc de
+     183.  00:7569  10 F9                       djnz .loop
+     184.  00:756B  C1                          pop bc
+     185.  00:756C  D1                          pop de
+     186.  00:756D  C9                          ret
+     187.  00:756E                      
+     188.  00:756E                      ; receive 32 bytes and write to the address specified by DE 
+     189.  00:756E                      receiveFCB:
+     190.  00:756E  D5                          push de
+     191.  00:756F  C5                          push bc
+     192.  00:7570                              
+     193.  00:7570  06 20                       ld b,32
+     194.  00:7572  3A 00 20            .loop:  ld a,(usbrd)
+     195.  00:7575  32 00 40            	ld (usbwr),a			; loop back
+     196.  00:7578  12                          ld (de),a
+     197.  00:7579  13                          inc de
+     198.  00:757A  10 F6                       djnz .loop
+     199.  00:757C  C1                          pop bc
+     200.  00:757D  D1                          pop de
+     201.  00:757E  C9                          ret
+     202.  00:757F                              
+      78   00:757F                              include "extendedBios.asm"
+       1.  00:757F                      
+       2.  00:757F                      installExtendedBios:
+       3.  00:757F                      
+       4.  00:757F                              ; Called from INIENV, so EXTBIO hook is already initialized
+       5.  00:757F                      
+       6.  00:757F                              DEBUGMESSAGE "extbio"
+       6.  00:757F                    >         ifdef DEBUG
+       6.  00:757F  52                >         ld d,d
+       6.  00:7580  18 06             >         jr .skip
+       6.  00:7582  65 78 74 62 69 6F >         db string
+       6.  00:7588                    > .skip:
+       6.  00:7588                    >         endif
+       7.  00:7588  CD BF 76                    call getEntrySLTWRK             ; save previous EXTBIO hook
+       8.  00:758B  23                          inc hl
+       9.  00:758C  EB                          ex de,hl        
+      10.  00:758D  21 CA FF                    ld hl,EXTBIO
+      11.  00:7590  01 05 00                    ld bc,5
+      12.  00:7593  ED B0                       ldir
+      13.  00:7595                              
+      14.  00:7595  E5                          push hl                         ; determine device number
+      15.  00:7596  AF                          xor a
+      16.  00:7597  11 01 4E                    ld de,$4e01
+      17.  00:759A  CD CA FF                    call EXTBIO
+      18.  00:759D  E1                          pop hl
+      19.  00:759E  77                          ld (hl),a
+      20.  00:759F                                      
+      21.  00:759F  CD 2D 40                    call GETSLT                     ; install new EXTBIO hook
+      22.  00:75A2  2E F7                       ld l,$f7
+      23.  00:75A4  67                          ld h,a
+      24.  00:75A5  22 CA FF                    ld (EXTBIO),hl
+      25.  00:75A8  21 B4 75                    ld hl,extendedBios
+      26.  00:75AB  22 CC FF                    ld (EXTBIO+2),hl
+      27.  00:75AE  3E C9                       ld a,$c9
+      28.  00:75B0  32 CE FF                    ld (EXTBIO+4),a    
+      29.  00:75B3  C9                          ret
+      30.  00:75B4                      
+      31.  00:75B4                      extendedBios:
+      32.  00:75B4                              ; broadcast (0x00) not implemented
+      33.  00:75B4                              ; system exclusive (0xff) not implemented
+      34.  00:75B4                      
+      35.  00:75B4  FB                          ei
+      36.  00:75B5  F5                          push af
+      37.  00:75B6  7A                          ld a,d
+      38.  00:75B7  FE 4E                       cp $4e
+      39.  00:75B9  28 0E                       jr z,determineFunction
+      40.  00:75BB                      .exit:
+      41.  00:75BB  E5                          push hl
+      42.  00:75BC  C5                          push bc
+      43.  00:75BD  CD BF 76                    call getEntrySLTWRK
+      44.  00:75C0  2C                          inc l                           ; previous EXTBIO hook 
+      45.  00:75C1  E5                          push hl
+      46.  00:75C2  DD E1                       pop ix
+      47.  00:75C4  C1                          pop bc        
+      48.  00:75C5  E1                          pop hl
+      49.  00:75C6  F1                          pop af
+      50.  00:75C7  DD E9                       jp (ix)                         ; process other EXTBIO handles
+      51.  00:75C9                      
+      52.  00:75C9                      determineFunction:
+      53.  00:75C9  E5                          push hl
+      54.  00:75CA  21 D5 D9                    ld hl,functionTable - 2 * $4e00
+      55.  00:75CD  19                          add hl,de
+      56.  00:75CE  19                          add hl,de
+      57.  00:75CF  7E                          ld a,(hl)
+      58.  00:75D0  23                          inc hl
+      59.  00:75D1  66                          ld h,(hl)
+      60.  00:75D2  6F                          ld l,a
+      61.  00:75D3  E3                          ex (sp),hl
+      62.  00:75D4  C9                          ret
+      63.  00:75D5                      
+      64.  00:75D5                      functionTable:
+      65.  00:75D5  DB 75                       dw getNowindSlot
+      66.  00:75D7  F7 75                       dw numberOfDevices
+      67.  00:75D9  0E 76                       dw debugMessage
+      68.  00:75DB                      
+      69.  00:75DB                      getNowindSlot:               
+      70.  00:75DB                              DEBUGMESSAGE "getNowindSlot"
+      70.  00:75DB                    >         ifdef DEBUG
+      70.  00:75DB  52                >         ld d,d
+      70.  00:75DC  18 0D             >         jr .skip
+      70.  00:75DE                    >         db string
+      70.  00:75DE  67 65 74 4E 6F 77 69 6E 64 53 6C 6F 74 
+      70.  00:75EB                    > .skip:
+      70.  00:75EB                    >         endif
+      71.  00:75EB  F1                          pop af
+      72.  00:75EC  3D                          dec a
+      73.  00:75ED  F5                          push af
+      74.  00:75EE  F2 BB 75                    jp p,extendedBios.exit         ; not this device
+      75.  00:75F1                              
+      76.  00:75F1  F1                          pop af
+      77.  00:75F2  CD 8F 76                    call getSlotPage1
+      78.  00:75F5  37                          scf
+      79.  00:75F6  C9                          ret
+      80.  00:75F7                              
+      81.  00:75F7                      numberOfDevices:
+      82.  00:75F7                              DEBUGMESSAGE "numberOfDevices"
+      82.  00:75F7                    >         ifdef DEBUG
+      82.  00:75F7  52                >         ld d,d
+      82.  00:75F8  18 0F             >         jr .skip
+      82.  00:75FA                    >         db string
+      82.  00:75FA  6E 75 6D 62 65 72 4F 66 44 65 76 69 63 65 73 
+      82.  00:7609                    > .skip:
+      82.  00:7609                    >         endif
+      83.  00:7609  F1                          pop af
+      84.  00:760A  3C                          inc a
+      85.  00:760B  F5                          push af
+      86.  00:760C  18 AD                       jr extendedBios.exit
+      87.  00:760E                              
+      88.  00:760E                      debugMessage:
+      89.  00:760E                              DEBUGMESSAGE "debugMessage"
+      89.  00:760E                    >         ifdef DEBUG
+      89.  00:760E  52                >         ld d,d
+      89.  00:760F  18 0C             >         jr .skip
+      89.  00:7611                    >         db string
+      89.  00:7611  64 65 62 75 67 4D 65 73 73 61 67 65 
+      89.  00:761D                    > .skip:
+      89.  00:761D                    >         endif
+      90.  00:761D  F1                          pop af
+      91.  00:761E  3D                          dec a
+      92.  00:761F  F5                          push af
+      93.  00:7620  F2 BB 75                    jp p,extendedBios.exit
+      94.  00:7623                      
+      95.  00:7623  E5                          push hl
+      96.  00:7624  CD 7C 74                    call sendRegisters
+      97.  00:7627  36 90                       ld (hl),C_MESSAGE
+      98.  00:7629  E1                          pop hl
+      99.  00:762A  7E                  .loop:  ld a,(hl)
+     100.  00:762B  23                          inc hl
+     101.  00:762C  32 00 40                    ld (usbwr),a
+     102.  00:762F  B7                          or a
+     103.  00:7630  20 F8                       jr nz,.loop
+     104.  00:7632                              
+     105.  00:7632  F1                          pop af        
+     106.  00:7633  C9                          ret
+      79   00:7634                              include "slotRoutines.asm"
+       1.  00:7634                      ; These routines are used for slot selection
+       2.  00:7634                      
+       3.  00:7634                      enableNowindPage0:
+       4.  00:7634  CD 84 76                    call getSlotPage0
+       5.  00:7637  DD 67                       ld ixh,a
+       6.  00:7639  CD 8F 76                    call getSlotPage1
+       7.  00:763C  C3 48 76                    jp enableSlotPage0       
+       8.  00:763F                      
+       9.  00:763F                      restorePage0:
+      10.  00:763F  F5                          push af
+      11.  00:7640  DD 7C                       ld a,ixh
+      12.  00:7642  CD 48 76                    call enableSlotPage0
+      13.  00:7645  FB                          ei
+      14.  00:7646  F1                          pop af
+      15.  00:7647  C9                          ret
+      16.  00:7648                      
+      17.  00:7648                      enableSlotPage0:
+      18.  00:7648                              ; HL and D remain unchanged
+      19.  00:7648                              ; enableSlotPage0 can be called in page 1 and 2 (no absolute jumps)
+      20.  00:7648                      
+      21.  00:7648                              ;DEBUGMESSAGE "enasltP0"
+      22.  00:7648  5F                          ld e,a                          ; store slotcode for further use
+      23.  00:7649  E6 03                       and 3
+      24.  00:764B  4F                          ld c,a                          ; new primary slot in c  
+      25.  00:764C  CB 7B                       bit 7,e
+      26.  00:764E  F3                          di
+      27.  00:764F  20 08                       jr nz,.expanded
+      28.  00:7651                      
+      29.  00:7651  DB A8                       in a,($a8)
+      30.  00:7653  E6 FC                       and %11111100
+      31.  00:7655  B1                          or c                            ; enable new primary slot in page 0
+      32.  00:7656  D3 A8                       out ($a8),a
+      33.  00:7658  C9                          ret
+      34.  00:7659                              
+      35.  00:7659                      .expanded:
+      36.  00:7659  7B                          ld a,e                          ; store secondary slot in e
+      37.  00:765A  E6 0C                       and %00001100     
+      38.  00:765C  0F                          rrca
+      39.  00:765D  0F                          rrca
+      40.  00:765E  5F                          ld e,a
+      41.  00:765F                      
+      42.  00:765F  DB A8                       in a,($a8)
+      43.  00:7661  E6 FC                       and %11111100
+      44.  00:7663  B1                          or c                            ; new primary slot in page 0
+      45.  00:7664  47                          ld b,a                          ; used to restore
+      46.  00:7665  17                          rla
+      47.  00:7666  A7                          and a                           ; (reset carry)
+      48.  00:7667  17                          rla
+      49.  00:7668  B1                          or c                            ; new primary slot in page 3
+      50.  00:7669  0F                          rrca
+      51.  00:766A  0F                          rrca
+      52.  00:766B  D3 A8                       out ($a8),a
+      53.  00:766D                      
+      54.  00:766D  3A FF FF                    ld a,(-1)                       ; write secondary slot register
+      55.  00:7670  2F                          cpl
+      56.  00:7671  E6 FC                       and %11111100
+      57.  00:7673  B3                          or e                            ; apply new secondary slot for page 0
+      58.  00:7674  32 FF FF                    ld (-1),a
+      59.  00:7677  5F                          ld e,a                          ; store secondary slot register (for SLTTBL)
+      60.  00:7678                      
+      61.  00:7678  78                          ld a,b                          ; restore primary slot page 3
+      62.  00:7679  D3 A8                       out ($a8),a
+      63.  00:767B                      
+      64.  00:767B  3E C5                       ld a,LOW SLTTBL                 ; update SLTTBL
+      65.  00:767D  81                          add c                           ; add primary slot
+      66.  00:767E  4F                          ld c,a
+      67.  00:767F  06 FC                       ld b,HIGH SLTTBL
+      68.  00:7681  7B                          ld a,e                          ; restore secondary slot register
+      69.  00:7682  02                          ld (bc),a
+      70.  00:7683  C9                          ret
+      71.  00:7684                      
+      72.  00:7684                      ; These routines determine the current slot and subslot of a page.
+      73.  00:7684                      
+      74.  00:7684                      getSlotPage0:
+      75.  00:7684                              ;DEBUGMESSAGE "getsltP0"
+      76.  00:7684  DB A8                       in a,($a8)
+      77.  00:7686  CD A9 76                    call expanded
+      78.  00:7689  07                          rlca
+      79.  00:768A  07                          rlca
+      80.  00:768B  E6 0C                       and %00001100           ; keep subSlot
+      81.  00:768D  B1                          or c                    ; add mainSlot and expanded bit
+      82.  00:768E  C9                          ret
+      83.  00:768F                                      
+      84.  00:768F                      getSlotPage1:
+      85.  00:768F                      ;        DEBUGMESSAGE "getsltP1"
+      86.  00:768F  DB A8                       in a,($a8)
+      87.  00:7691  0F                          rrca
+      88.  00:7692  0F                          rrca
+      89.  00:7693  CD A9 76                    call expanded
+      90.  00:7696  E6 0C                       and %00001100           ; keep subSlot
+      91.  00:7698  B1                          or c                    ; add mainSlot and expanded bit
+      92.  00:7699  C9                          ret        
+      93.  00:769A                                      
+      94.  00:769A                      getSlotPage2:
+      95.  00:769A                      ;        DEBUGMESSAGE "getsltP2"
+      96.  00:769A  DB A8                       in a,($a8)
+      97.  00:769C  0F                          rrca
+      98.  00:769D  0F                          rrca
+      99.  00:769E  0F                          rrca
+     100.  00:769F  0F                          rrca
+     101.  00:76A0  CD A9 76                    call expanded
+     102.  00:76A3  0F                          rrca
+     103.  00:76A4  0F                          rrca
+     104.  00:76A5  E6 0C                       and %00001100           ; keep subSlot
+     105.  00:76A7  B1                          or c                    ; add mainSlot and expanded bit
+     106.  00:76A8  C9                          ret
+     107.  00:76A9                      
+     108.  00:76A9                      ;expanded:        
+     109.  00:76A9                      ;        ld hl,EXPTBL - $0300
+     110.  00:76A9                      ;        ld b,3
+     111.  00:76A9                      ;        and b
+     112.  00:76A9                      ;        ld c,a
+     113.  00:76A9                      ;        add hl,bc      
+     114.  00:76A9                      ;        
+     115.  00:76A9                      ;        or (hl)        ; BUGGIE!!!! (a will be used again!)
+     116.  00:76A9                      ;        ret p                           ; return when slot is not expanded
+     117.  00:76A9                      ;        
+     118.  00:76A9                      ;        ld c,a
+     119.  00:76A9                      ;        ld a,4
+     120.  00:76A9                      ;        add a,l
+     121.  00:76A9                      ;        ld l,a
+     122.  00:76A9                      ;        ld a,(hl)
+     123.  00:76A9                      ;        ret
+     124.  00:76A9                      
+     125.  00:76A9                      expanded:        
+     126.  00:76A9  21 C1 F9                    ld hl,EXPTBL - $0300
+     127.  00:76AC  06 03                       ld b,3
+     128.  00:76AE  A0                          and b
+     129.  00:76AF  4F                          ld c,a
+     130.  00:76B0  09                          add hl,bc
+     131.  00:76B1  CB 7E                       bit 7,(hl)
+     132.  00:76B3  28 08                       jr z,notExpanded
+     133.  00:76B5                      
+     134.  00:76B5  CB F9                       set 7,c
+     135.  00:76B7  2C                          inc l
+     136.  00:76B8  2C                          inc l
+     137.  00:76B9  2C                          inc l
+     138.  00:76BA  2C                          inc l
+     139.  00:76BB  7E                          ld a,(hl)
+     140.  00:76BC  C9                          ret        
+     141.  00:76BD                      
+     142.  00:76BD                      notExpanded:
+     143.  00:76BD  C1                          pop bc
+     144.  00:76BE  C9                          ret
+     145.  00:76BF                      
+     146.  00:76BF                      getEntrySLTWRK:
+     147.  00:76BF  CD 8F 76                    call getSlotPage1
+     148.  00:76C2  21 09 FD                    ld hl,SLTWRK
+     149.  00:76C5  4F                          ld c,a
+     150.  00:76C6  0F                          rrca
+     151.  00:76C7  0F                          rrca
+     152.  00:76C8  0F                          rrca
+     153.  00:76C9  E6 60                       and %01100000           ; main slot x 32
+     154.  00:76CB  47                          ld b,a
+     155.  00:76CC  79                          ld a,c
+     156.  00:76CD  07                          rlca
+     157.  00:76CE  E6 18                       and %00011000           ; sub slot x 8
+     158.  00:76D0  80                          add b
+     159.  00:76D1  85                          add l
+     160.  00:76D2  6F                          ld l,a
+     161.  00:76D3  C9                          ret
+     162.  00:76D4                      
+      80   00:76D4                              include "nowindDriver.asm"
+       1.  00:76D4  (00:0008)           MYSIZE          equ 8                   ; size of work area (not used, some programs write here to stop drives spinning)
+       2.  00:76D4  (00:0200)           SECLEN          equ 512                 ; sector size
+       3.  00:76D4                      
+       4.  00:76D4                      ; SLTWRK entry
+       5.  00:76D4                      ; +0    rom drive number
+       6.  00:76D4                      ; +1..5 previous EXTBIO
+       7.  00:76D4                      ; +6    not used
+       8.  00:76D4                      ; +7    not used
+       9.  00:76D4                      
+      10.  00:76D4                             
+      11.  00:76D4                      ; if this is defined we tell DOS2.3 that we _are DOS2.3 also, so
+      12.  00:76D4                      ; it does not try to override our initilazations 
+      13.  00:76D4                      
+      14.  00:76D4                      define  PRETEND_2B_DOS23
+      15.  00:76D4                              
+      16.  00:76D4                      INIHRD: 
+      17.  00:76D4                              DEBUGMESSAGE "INIHRD"        
+      17.  00:76D4                    >         ifdef DEBUG
+      17.  00:76D4  52                >         ld d,d
+      17.  00:76D5  18 06             >         jr .skip
+      17.  00:76D7  49 4E 49 48 52 44 >         db string
+      17.  00:76DD                    > .skip:
+      17.  00:76DD                    >         endif
+      18.  00:76DD                              
+      19.  00:76DD                      ;        call getWorkArea
+      20.  00:76DD                      ;        DEBUGDUMPREGISTERS
+      21.  00:76DD                                                      
+      22.  00:76DD  CD 34 76                    call enableNowindPage0                  ; clear hostToMSXFifo by reading 4Kb of random data
+      23.  00:76E0  01 00 10                    ld bc,4096
+      24.  00:76E3  3A 00 20            .loop:  ld a,(usbrd)
+      25.  00:76E6  0B                          dec bc
+      26.  00:76E7  78                          ld a,b
+      27.  00:76E8  B1                          or c
+      28.  00:76E9  20 F8                       jr nz,.loop
+      29.  00:76EB  CD 3F 76                    call restorePage0
+      30.  00:76EE                              
+      31.  00:76EE  26 40                       ld h,HIGH usbwr
+      32.  00:76F0  36 AF                       ld (hl),$af                     ; INIHRD command
+      33.  00:76F2  36 FF                       ld (hl),$ff
+      34.  00:76F4  C3 05 74                    jp nowindInit
+      35.  00:76F7                      
+      36.  00:76F7                      DRIVES:
+      37.  00:76F7                              DEBUGMESSAGE "DRIVES"
+      37.  00:76F7                    >         ifdef DEBUG
+      37.  00:76F7  52                >         ld d,d
+      37.  00:76F8  18 06             >         jr .skip
+      37.  00:76FA  44 52 49 56 45 53 >         db string
+      37.  00:7700                    > .skip:
+      37.  00:7700                    >         endif
+      38.  00:7700  F5                          push af                         ; A, BC and DE should be preserved!
+      39.  00:7701  C5                          push bc
+      40.  00:7702  D5                          push de
+      41.  00:7703  3A 99 FD                    ld a,(DEVICE)
+      42.  00:7706  CD 7C 74                    call sendRegisters
+      43.  00:7709  36 85                       ld (hl),C_DRIVES
+      44.  00:770B  CD 34 76                    call enableNowindPage0
+      45.  00:770E  26 20                       ld h,HIGH usbrd
+      46.  00:7710  CD 8E 74                    call getHeader
+      47.  00:7713  2E 02                       ld l,2                          ; default 2 drives
+      48.  00:7715  38 2C                       jr c,.notconnected
+      49.  00:7717                      
+      50.  00:7717                              PRINTVDPTEXT " Host connected."
+      50.  00:7717                    >         
+      50.  00:7717  E5                >         push hl
+      50.  00:7718  21 21 77          >         ld hl,.text
+      50.  00:771B  CD 87 7C          >         call printVdpText2
+      50.  00:771E  E1                >         pop hl
+      50.  00:771F  18 11             >         jr .skip
+      50.  00:7721                    > .text   db string
+      50.  00:7721  20 48 6F 73 74 20 63 6F 6E 6E 65 63 74 65 64 2E 
+      50.  00:7731  00                >         db 0
+      50.  00:7732                    > .skip:
+      51.  00:7732                                                      
+      52.  00:7732  32 3F F3                    ld (LASTDRV),a                  ; install phantom drives (CRTL key)?
+      53.  00:7735  7E                          ld a,(hl)                       ; allow other drives (SHIFT key)?
+      54.  00:7736  32 99 FD                    ld (DEVICE),a
+      55.  00:7739  6E                          ld l,(hl)                       ; number of drives
+      56.  00:773A  E5                  .exit:  push hl  
+      57.  00:773B  CD 3F 76                    call restorePage0
+      58.  00:773E  E1                          pop hl
+      59.  00:773F  D1                          pop de
+      60.  00:7740  C1                          pop bc
+      61.  00:7741  F1                          pop af
+      62.  00:7742  C9                          ret
+      63.  00:7743                              
+      64.  00:7743                      .notconnected:
+      65.  00:7743                              PRINTVDPTEXT " Host timed out!"            
+      65.  00:7743                    >         
+      65.  00:7743  E5                >         push hl
+      65.  00:7744  21 4D 77          >         ld hl,.text
+      65.  00:7747  CD 87 7C          >         call printVdpText2
+      65.  00:774A  E1                >         pop hl
+      65.  00:774B  18 11             >         jr .skip
+      65.  00:774D                    > .text   db string
+      65.  00:774D  20 48 6F 73 74 20 74 69 6D 65 64 20 6F 75 74 21 
+      65.  00:775D  00                >         db 0
+      65.  00:775E                    > .skip:
+      66.  00:775E  18 DA                       jr .exit
+      67.  00:7760                      
+      68.  00:7760                      
+      69.  00:7760                      INIENV:
+      70.  00:7760                      ; Interrupt handler can be installed here and
+      71.  00:7760                      ; work area can be initialized when it was requested
+      72.  00:7760                              DEBUGMESSAGE "INIENV"
+      72.  00:7760                    >         ifdef DEBUG
+      72.  00:7760  52                >         ld d,d
+      72.  00:7761  18 06             >         jr .skip
+      72.  00:7763  49 4E 49 45 4E 56 >         db string
+      72.  00:7769                    > .skip:
+      72.  00:7769                    >         endif
+      73.  00:7769                      
+      74.  00:7769                              ifdef PRETEND_2B_DOS23
+      75.  00:7769                              DEBUGMESSAGE "Lie about being DOS v2.31"
+      75.  00:7769                    >         ifdef DEBUG
+      75.  00:7769  52                >         ld d,d
+      75.  00:776A  18 19             >         jr .skip
+      75.  00:776C                    >         db string
+      75.  00:776C  4C 69 65 20 61 62 6F 75 74 20 62 65 69 6E 67 20 
+      75.  00:777C  44 4F 53 20 76 32 2E 33 31 
+      75.  00:7785                    > .skip:
+      75.  00:7785                    >         endif
+      76.  00:7785  3E 23                       ld a,$23
+      77.  00:7787  32 13 F3                    ld ($f313),a
+      78.  00:778A                              endif
+      79.  00:778A                              
+      80.  00:778A  CD 7F 75                    call installExtendedBios
+      81.  00:778D  CD 7C 74                    call sendRegisters
+      82.  00:7790  36 86                       ld (hl),C_INIENV
+      83.  00:7792  CD 34 76                    call enableNowindPage0
+      84.  00:7795  26 20                       ld h,HIGH usbrd
+      85.  00:7797  CD 8E 74                    call getHeader
+      86.  00:779A  F5                          push af
+      87.  00:779B                      ;        push ix
+      88.  00:779B                      ;        call GETWRK
+      89.  00:779B                      ;        pop ix
+      90.  00:779B  CD BF 76                    call getEntrySLTWRK
+      91.  00:779E  F1                          pop af
+      92.  00:779F  36 00                       ld (hl),0                       ; romdisk in drive A: (default)          
+      93.  00:77A1  38 01                       jr c,.exit
+      94.  00:77A3  77                          ld (hl),a                       ; store romdisk drive number (255 = no romdisk)
+      95.  00:77A4  C3 3F 76            .exit:  jp restorePage0
+      96.  00:77A7                      
+      97.  00:77A7                      checkWorkArea:
+      98.  00:77A7  C5                          push bc
+      99.  00:77A8  E5                          push hl
+     100.  00:77A9  F5                          push af
+     101.  00:77AA                      ;        call GETWRK
+     102.  00:77AA  CD BF 76                    call getEntrySLTWRK
+     103.  00:77AD  F1                          pop af
+     104.  00:77AE  BE                          cp (hl)
+     105.  00:77AF  E1                          pop hl
+     106.  00:77B0  C1                          pop bc
+     107.  00:77B1  C9                          ret        
+     108.  00:77B2                      
+     109.  00:77B2                      DSKIO: 
+     110.  00:77B2                      ; Input     F   Carry for set for write, reset for read
+     111.  00:77B2                      ;           A   Drive number
+     112.  00:77B2                      ;           B   Number of sectors to read/write
+     113.  00:77B2                      ;           C   Media descriptor
+     114.  00:77B2                      ;           DE  Logical sector number
+     115.  00:77B2                      ;           HL  Transfer address
+     116.  00:77B2                      ; Output    F   Carry set when not succesfull
+     117.  00:77B2                      ;           A   Error code
+     118.  00:77B2                      ;           B   Number of remaining sectors (TODO: check! even without error?)
+     119.  00:77B2                      
+     120.  00:77B2                              DEBUGMESSAGE "DSKIO"
+     120.  00:77B2                    >         ifdef DEBUG
+     120.  00:77B2  52                >         ld d,d
+     120.  00:77B3  18 05             >         jr .skip
+     120.  00:77B5  44 53 4B 49 4F    >         db string
+     120.  00:77BA                    > .skip:
+     120.  00:77BA                    >         endif
+     121.  00:77BA  F5                          push af
+     122.  00:77BB  CD A7 77                    call checkWorkArea
+     123.  00:77BE  CA 21 7D                    jp z,ROMDISK_DSKIO
+     124.  00:77C1  F1                          pop af
+     125.  00:77C2                      
+     126.  00:77C2  CD 7C 74                    call sendRegisters
+     127.  00:77C5  36 80                       ld (hl),C_DSKIO
+     128.  00:77C7  38 58                       jr c,dskioWrite                 ; read or write?
+     129.  00:77C9                             
+     130.  00:77C9                      dskioRead:
+     131.  00:77C9  07                          rlca                            ; < 0x8000 ?
+     132.  00:77CA  38 3F                       jr c,.page2and3
+     133.  00:77CC                      
+     134.  00:77CC                              DEBUGMESSAGE "read01"
+     134.  00:77CC                    >         ifdef DEBUG
+     134.  00:77CC  52                >         ld d,d
+     134.  00:77CD  18 06             >         jr .skip
+     134.  00:77CF  72 65 61 64 30 31 >         db string
+     134.  00:77D5                    > .skip:
+     134.  00:77D5                    >         endif
+     135.  00:77D5  CD 9A 76                    call getSlotPage2               ; enable nowind in page 2
+     136.  00:77D8  F5                          push af
+     137.  00:77D9  CD 8F 76                    call getSlotPage1
+     138.  00:77DC  DD 67                       ld ixh,a                        ; ixh = current nowind slot
+     139.  00:77DE  26 80                       ld h,$80
+     140.  00:77E0  CD 24 00                    call ENASLT
+     141.  00:77E3  C3 E6 B7                    jp .page2
+     142.  00:77E6                              
+     143.  00:77E6  (B7E6)                      PHASE $ + $4000
+     144.  00:B7E6                      .page2:
+     145.  00:B7E6  3A 42 F3                    ld a,(RAMAD1)                   ; enable RAM in page 1
+     146.  00:B7E9  26 40                       ld h,$40
+     147.  00:B7EB  CD 24 00                    call ENASLT
+     148.  00:B7EE                              
+     149.  00:B7EE  CD 61 B9                    call readSectors01 
+     150.  00:B7F1                              ; TODO: carry checken?----------------------------------------------!!!!!!!!!!!!!!!
+     151.  00:B7F1                              
+     152.  00:B7F1  DD 7C                       ld a,ixh                        ; enable nowind in page 1 
+     153.  00:B7F3  26 40                       ld h,$40
+     154.  00:B7F5  CD 24 00                    call ENASLT
+     155.  00:B7F8  C3 FB 77                    jp .page1        
+     156.  00:B7FB                      
+     157.  00:B7FB  (77FB)                      DEPHASE
+     158.  00:77FB                      .page1:
+     159.  00:77FB  3A 00 80                    ld a,(usb2)
+     160.  00:77FE  DD 67                       ld ixh,a
+     161.  00:7800  F1                          pop af
+     162.  00:7801  26 80                       ld h,$80
+     163.  00:7803  CD 24 00                    call ENASLT                     ; restore page 2
+     164.  00:7806  DD 7C                       ld a,ixh
+     165.  00:7808  B7                          or a
+     166.  00:7809  FB                          ei
+     167.  00:780A  C8                          ret z                           ; nothing more to read
+     168.  00:780B                                      
+     169.  00:780B                      .page2and3:                     
+     170.  00:780B                              DEBUGMESSAGE "read23"
+     170.  00:780B                    >         ifdef DEBUG
+     170.  00:780B  52                >         ld d,d
+     170.  00:780C  18 06             >         jr .skip
+     170.  00:780E  72 65 61 64 32 33 >         db string
+     170.  00:7814                    > .skip:
+     170.  00:7814                    >         endif
+     171.  00:7814  CD 34 76                    call enableNowindPage0
+     172.  00:7817  FD E5                       push iy
+     173.  00:7819  CD B4 79                    call readSectors23
+     174.  00:781C  FD E1                       pop iy
+     175.  00:781E  C3 3F 76                    jp restorePage0
+     176.  00:7821                      
+     177.  00:7821                      dskioWrite:
+     178.  00:7821                              DEBUGMESSAGE "dskwrite"
+     178.  00:7821                    >         ifdef DEBUG
+     178.  00:7821  52                >         ld d,d
+     178.  00:7822  18 08             >         jr .skip
+     178.  00:7824                    >         db string
+     178.  00:7824  64 73 6B 77 72 69 74 65 
+     178.  00:782C                    > .skip:
+     178.  00:782C                    >         endif
+     179.  00:782C  07                          rlca
+     180.  00:782D  38 3E                       jr c,.page2and3        
+     181.  00:782F                              
+     182.  00:782F                              ;call enableNowindPage2 (todo: make common routine?) 
+     183.  00:782F  CD 9A 76                    call getSlotPage2               ; save current slot page 2
+     184.  00:7832  DD 67                       ld ixh,a
+     185.  00:7834  CD 8F 76                    call getSlotPage1
+     186.  00:7837  DD 6F                       ld ixl,a
+     187.  00:7839  26 80                       ld h,$80
+     188.  00:783B  CD 24 00                    call ENASLT                     ; nowind in page 2
+     189.  00:783E  C3 41 B8                    jp .page2
+     190.  00:7841                      
+     191.  00:7841  (B841)                      PHASE $ + $4000
+     192.  00:B841                      .page2:
+     193.  00:B841  3A 42 F3                    ld a,(RAMAD1)
+     194.  00:B844  26 40                       ld h,$40
+     195.  00:B846  CD 24 00                    call ENASLT                     ; ram in page 1
+     196.  00:B849                              
+     197.  00:B849  CD 8F B9                    call writeLoop01
+     198.  00:B84C  F5                          push af
+     199.  00:B84D                              
+     200.  00:B84D  DD 7D                       ld a,ixl
+     201.  00:B84F  26 40                       ld h,$40
+     202.  00:B851  CD 24 00                    call ENASLT                     ; restore nowind in page 1
+     203.  00:B854  C3 57 78                    jp .page1
+     204.  00:B857                              
+     205.  00:B857  (7857)                      DEPHASE
+     206.  00:7857                      .page1:
+     207.  00:7857  DD 7C                       ld a,ixh
+     208.  00:7859  26 80                       ld h,$80
+     209.  00:785B  CD 24 00                    call ENASLT
+     210.  00:785E  F1                          pop af
+     211.  00:785F  D8                          ret c                           ; return error (error code in a)
+     212.  00:7860  E8                          ret pe                          ; host returns 0xfe when data for page 2/3 is available
+     213.  00:7861                              DEBUGMESSAGE "doorgaan!"
+     213.  00:7861                    >         ifdef DEBUG
+     213.  00:7861  52                >         ld d,d
+     213.  00:7862  18 09             >         jr .skip
+     213.  00:7864                    >         db string
+     213.  00:7864  64 6F 6F 72 67 61 61 6E 21 
+     213.  00:786D                    > .skip:
+     213.  00:786D                    >         endif
+     214.  00:786D                              
+     215.  00:786D                      .page2and3:
+     216.  00:786D                              DEBUGMESSAGE "page2and3"
+     216.  00:786D                    >         ifdef DEBUG
+     216.  00:786D  52                >         ld d,d
+     216.  00:786E  18 09             >         jr .skip
+     216.  00:7870                    >         db string
+     216.  00:7870  70 61 67 65 32 61 6E 64 33 
+     216.  00:7879                    > .skip:
+     216.  00:7879                    >         endif
+     217.  00:7879  CD 34 76                    call enableNowindPage0
+     218.  00:787C  CD 82 78                    call .writeLoop23
+     219.  00:787F  C3 3F 76                    jp restorePage0
+     220.  00:7882                              
+     221.  00:7882                      .writeLoop23:
+     222.  00:7882                              DEBUGMESSAGE "writeLoop23"
+     222.  00:7882                    >         ifdef DEBUG
+     222.  00:7882  52                >         ld d,d
+     222.  00:7883  18 0B             >         jr .skip
+     222.  00:7885                    >         db string
+     222.  00:7885  77 72 69 74 65 4C 6F 6F 70 32 33 
+     222.  00:7890                    > .skip:
+     222.  00:7890                    >         endif
+     223.  00:7890                              
+     224.  00:7890  26 20                       ld h,HIGH usbrd
+     225.  00:7892  CD 8E 74                    call getHeader
+     226.  00:7895  D8                          ret c                           ; exit (not ready)
+     227.  00:7896  B7                          or a
+     228.  00:7897  F8                          ret m                           ; exit (no error)
+     229.  00:7898  20 18                       jr nz,.error
+     230.  00:789A                      
+     231.  00:789A                              DEBUGMESSAGE "send23"
+     231.  00:789A                    >         ifdef DEBUG
+     231.  00:789A  52                >         ld d,d
+     231.  00:789B  18 06             >         jr .skip
+     231.  00:789D  73 65 6E 64 32 33 >         db string
+     231.  00:78A3                    > .skip:
+     231.  00:78A3                    >         endif
+     232.  00:78A3  5E                          ld e,(hl)                       ; address
+     233.  00:78A4  56                          ld d,(hl)
+     234.  00:78A5  4E                          ld c,(hl)                       ; number of bytes        
+     235.  00:78A6  46                          ld b,(hl)
+     236.  00:78A7  7E                          ld a,(hl)                       ; block sequence number
+     237.  00:78A8                              
+     238.  00:78A8                              ;DEBUGDUMPREGISTERS
+     239.  00:78A8  EB                          ex de,hl
+     240.  00:78A9  11 00 40                    ld de,usbwr
+     241.  00:78AC  12                          ld (de),a                       ; mark block begin
+     242.  00:78AD  ED B0                       ldir
+     243.  00:78AF  12                          ld (de),a                       ; mark block end
+     244.  00:78B0  18 D0                       jr .writeLoop23
+     245.  00:78B2                      
+     246.  00:78B2  37                  .error: scf
+     247.  00:78B3  7E                          ld a,(hl)                       ; get error code
+     248.  00:78B4  C9                          ret
+     249.  00:78B5                      
+     250.  00:78B5                                     
+     251.  00:78B5                      DSKCHG:
+     252.  00:78B5                      ; Input     A   Drive number
+     253.  00:78B5                      ;           B   0
+     254.  00:78B5                      ;           C   Media descriptor (previous)
+     255.  00:78B5                      ;           HL  Base address of DPB
+     256.  00:78B5                      ; Output    B   1   Disk unchanged
+     257.  00:78B5                      ;               0   Unknown (DPB is updated)
+     258.  00:78B5                      ;               -1  Disk changed (DPB is updated)
+     259.  00:78B5                      ;           F   Carry set when not succesfull
+     260.  00:78B5                      ;           A   Error code
+     261.  00:78B5                      
+     262.  00:78B5                              DEBUGMESSAGE "DSKCHG"
+     262.  00:78B5                    >         ifdef DEBUG
+     262.  00:78B5  52                >         ld d,d
+     262.  00:78B6  18 06             >         jr .skip
+     262.  00:78B8  44 53 4B 43 48 47 >         db string
+     262.  00:78BE                    > .skip:
+     262.  00:78BE                    >         endif
+     263.  00:78BE  F5                          push af
+     264.  00:78BF  CD A7 77                    call checkWorkArea
+     265.  00:78C2  CA 80 7D                    jp z,ROMDISK_DSKCHG
+     266.  00:78C5  F1                          pop af       
+     267.  00:78C6                      
+     268.  00:78C6  E5                          push hl
+     269.  00:78C7  CD 7C 74                    call sendRegisters
+     270.  00:78CA  36 81                       ld (hl),C_DSKCHG
+     271.  00:78CC  CD 34 76                    call enableNowindPage0
+     272.  00:78CF  26 20                       ld h,HIGH usbrd
+     273.  00:78D1  CD 8E 74                    call getHeader
+     274.  00:78D4  4E                          ld c,(hl)               ; media descriptor (when disk was changed)
+     275.  00:78D5  F5                          push af
+     276.  00:78D6  C5                          push bc
+     277.  00:78D7  CD 3F 76                    call restorePage0
+     278.  00:78DA  C1                          pop bc
+     279.  00:78DB  F1                          pop af
+     280.  00:78DC  E1                          pop hl
+     281.  00:78DD  D8                          ret c           ; not ready
+     282.  00:78DE  B7                          or a
+     283.  00:78DF  06 01                       ld b,1
+     284.  00:78E1  C8                          ret z           ; not changed
+     285.  00:78E2  41                          ld b,c
+     286.  00:78E3  CD EC 78                    call GETDPB
+     287.  00:78E6  3E 0A                       ld a,10
+     288.  00:78E8  D8                          ret c
+     289.  00:78E9  06 FF                       ld b,255
+     290.  00:78EB  C9                          ret
+     291.  00:78EC                      
+     292.  00:78EC                      GETDPB:
+     293.  00:78EC                      ; Input     A   Drive number
+     294.  00:78EC                      ;           B   Media descriptor (first byte of FAT)
+     295.  00:78EC                      ;           C   Previous media descriptor (does not seem to be used in other drivers)
+     296.  00:78EC                      ;           HL  Base address of HL
+     297.  00:78EC                      ; Output    DPB for specified drive in [HL+1]..[HL+18]
+     298.  00:78EC                      
+     299.  00:78EC                              DEBUGMESSAGE "GETDPB"
+     299.  00:78EC                    >         ifdef DEBUG
+     299.  00:78EC  52                >         ld d,d
+     299.  00:78ED  18 06             >         jr .skip
+     299.  00:78EF  47 45 54 44 50 42 >         db string
+     299.  00:78F5                    > .skip:
+     299.  00:78F5                    >         endif
+     300.  00:78F5  EB                          ex de,hl
+     301.  00:78F6  13                          inc de
+     302.  00:78F7  67                          ld h,a
+     303.  00:78F8  78                          ld a,b
+     304.  00:78F9  FE F0                       cp $f0
+     305.  00:78FB  7C                          ld a,h
+     306.  00:78FC  28 24                       jr z,.hddImage
+     307.  00:78FE                              
+     308.  00:78FE                              MESSAGE "ROM GETDPB"
+     308.  00:78FE  CD BC 74          >         call sendMessage
+     308.  00:7901                    >         db string
+     308.  00:7901  52 4F 4D 20 47 45 54 44 50 42 
+     308.  00:790B  00                > .skip2: nop
+     309.  00:790C                      
+     310.  00:790C  78                          ld a,b
+     311.  00:790D  D6 F8                       sub $f8
+     312.  00:790F  D8                          ret c                           ; not supported in msxdos1
+     313.  00:7910  07                          rlca                            ; 2x
+     314.  00:7911  4F                          ld c,a
+     315.  00:7912  07                          rlca                            ; 4x
+     316.  00:7913  07                          rlca                            ; 8x
+     317.  00:7914  07                          rlca                            ; 16x
+     318.  00:7915  81                          add a,c                         ; 18x
+     319.  00:7916  4F                          ld c,a
+     320.  00:7917  06 00                       ld b,0        
+     321.  00:7919  21 91 7C                    ld hl,supportedMedia
+     322.  00:791C  09                          add hl,bc
+     323.  00:791D  0E 12                       ld c,18
+     324.  00:791F  ED B0                       ldir
+     325.  00:7921  C9                          ret
+     326.  00:7922                      
+     327.  00:7922                      .hddImage:
+     328.  00:7922                              DEBUGMESSAGE ".hddImage"
+     328.  00:7922                    >         ifdef DEBUG
+     328.  00:7922  52                >         ld d,d
+     328.  00:7923  18 09             >         jr .skip
+     328.  00:7925                    >         db string
+     328.  00:7925  2E 68 64 64 49 6D 61 67 65 
+     328.  00:792E                    > .skip:
+     328.  00:792E                    >         endif
+     329.  00:792E                                      MESSAGE "HOST GETDPB"
+     329.  00:792E  CD BC 74          >         call sendMessage
+     329.  00:7931                    >         db string
+     329.  00:7931  48 4F 53 54 20 47 45 54 44 50 42 
+     329.  00:793C  00                > .skip2: nop
+     330.  00:793D  CD 7C 74                    call sendRegisters
+     331.  00:7940  36 82                       ld (hl),C_GETDPB
+     332.  00:7942  CD 34 76                    call enableNowindPage0
+     333.  00:7945  26 20                       ld h,HIGH usbrd
+     334.  00:7947  CD 8E 74                    call getHeader
+     335.  00:794A  38 09                       jr c,.exit                      ; not ready
+     336.  00:794C  5F                          ld e,a                          ; destination
+     337.  00:794D  56                          ld d,(hl)
+     338.  00:794E  01 12 00                    ld bc,18
+     339.  00:7951                              DEBUGDUMPREGISTERS
+     339.  00:7951                    >         ifdef DEBUG
+     339.  00:7951  ED 07             >         db $ed,7
+     339.  00:7953                    >         endif
+     339.  00:7953                    >         
+     339.  00:7953                    >         ifdef USBDEBUG
+     339.  00:7953                    ~         assert ($ < $8000)
+     339.  00:7953                    ~         call sendCpuInfo
+     339.  00:7953                    ~         endif
+     340.  00:7953  ED B0                       ldir
+     341.  00:7955                              ;DB $ed, $0a       
+     342.  00:7955  C3 3F 76            .exit:  jp restorePage0        
+     343.  00:7958                      
+     344.  00:7958                      CHOICE:
+     345.  00:7958                              ;DEBUGMESSAGE "CHOICE"
+     346.  00:7958                              ifdef MSXDOS2
+     347.  00:7958                    ~         ld hl,.noFormat
+     348.  00:7958                    ~         else
+     349.  00:7958  21 00 00                    ld hl,0                         ; no choice
+     350.  00:795B                              endif
+     351.  00:795B  C9                          ret
+     352.  00:795C                      
+     353.  00:795C                      .noFormat:
+     354.  00:795C  00                          db 0
+     355.  00:795D                      
+     356.  00:795D                      DSKFMT:
+     357.  00:795D  37                          scf
+     358.  00:795E  3E 10                       ld a,16                         ; other error
+     359.  00:7960  C9                          ret
+     360.  00:7961                              
+     361.  00:7961  (B961)                      PHASE $ + $4000
+     362.  00:B961                              
+     363.  00:B961                      readSectors01:
+     364.  00:B961                              DEBUGMESSAGE "readSectors01"
+     364.  00:B961                    >         ifdef DEBUG
+     364.  00:B961  52                >         ld d,d
+     364.  00:B962  18 0D             >         jr .skip
+     364.  00:B964                    >         db string
+     364.  00:B964  72 65 61 64 53 65 63 74 6F 72 73 30 31 
+     364.  00:B971                    > .skip:
+     364.  00:B971                    >         endif
+     365.  00:B971  26 80                       ld h,HIGH usb2
+     366.  00:B973  CD 8E B4                    call getHeader + $4000                                  
+     367.  00:B976  D8                          ret c                           ; carry means timeout, no carry: A == 0 means slow transfer, A == 1 means exit, A == 2 means fast transfer                                      
+     368.  00:B977  3D                          dec a
+     369.  00:B978  C8                          ret z
+     370.  00:B979  FA 83 B9                    jp m,.slowTransfer                              
+     371.  00:B97C  CD F5 B9                    call reverseTransfer + $4000
+     372.  00:B97F  70                          ld (hl),b
+     373.  00:B980  71                          ld (hl),c
+     374.  00:B981  18 DE                       jr readSectors01
+     375.  00:B983                      
+     376.  00:B983                      .slowTransfer:
+     377.  00:B983  5E                          ld e,(hl)                       ; transfer address
+     378.  00:B984  56                          ld d,(hl)
+     379.  00:B985  4E                          ld c,(hl)                       ; transfer amount 
+     380.  00:B986  46                          ld b,(hl)
+     381.  00:B987  ED B0                       ldir        
+     382.  00:B989                              
+     383.  00:B989  56                          ld d,(hl)                       ; BUG in emulator (byte direct terugschrijven, geeft 'rukkert!')
+     384.  00:B98A  7E                          ld a,(hl)
+     385.  00:B98B  72                          ld (hl),d                       ; return end marker ($af, $0f)
+     386.  00:B98C  77                          ld (hl),a
+     387.  00:B98D  18 D2                       jr readSectors01
+     388.  00:B98F                      
+     389.  00:B98F                      writeLoop01:
+     390.  00:B98F  26 80                       ld h,HIGH usb2
+     391.  00:B991  CD 8E B4                    call getHeader + $4000
+     392.  00:B994  D8                          ret c                           ; exit (not ready)
+     393.  00:B995  B7                          or a
+     394.  00:B996  F8                          ret m                           ; exit (no error)
+     395.  00:B997  20 18                       jr nz,.error
+     396.  00:B999                      
+     397.  00:B999                              DEBUGMESSAGE "send01"
+     397.  00:B999                    >         ifdef DEBUG
+     397.  00:B999  52                >         ld d,d
+     397.  00:B99A  18 06             >         jr .skip
+     397.  00:B99C  73 65 6E 64 30 31 >         db string
+     397.  00:B9A2                    > .skip:
+     397.  00:B9A2                    >         endif
+     398.  00:B9A2  5E                          ld e,(hl)                       ; address
+     399.  00:B9A3  56                          ld d,(hl)
+     400.  00:B9A4  4E                          ld c,(hl)                       ; number of bytes        
+     401.  00:B9A5  46                          ld b,(hl)
+     402.  00:B9A6  7E                          ld a,(hl)                       ; block sequence number
+     403.  00:B9A7                      
+     404.  00:B9A7  EB                          ex de,hl
+     405.  00:B9A8  11 00 80                    ld de,usb2
+     406.  00:B9AB  12                          ld (de),a                       ; mark block begin
+     407.  00:B9AC  ED B0                       ldir
+     408.  00:B9AE  12                          ld (de),a                       ; mark block end
+     409.  00:B9AF  18 DE                       jr writeLoop01
+     410.  00:B9B1                      
+     411.  00:B9B1  37                  .error: scf
+     412.  00:B9B2  7E                          ld a,(hl)                       ; get error code
+     413.  00:B9B3  C9                          ret
+     414.  00:B9B4                      
+     415.  00:B9B4  (79B4)                      DEPHASE
+     416.  00:79B4                       
+     417.  00:79B4                      readSectors23:
+     418.  00:79B4                              DEBUGMESSAGE "readSectors23"
+     418.  00:79B4                    >         ifdef DEBUG
+     418.  00:79B4  52                >         ld d,d
+     418.  00:79B5  18 0D             >         jr .skip
+     418.  00:79B7                    >         db string
+     418.  00:79B7  72 65 61 64 53 65 63 74 6F 72 73 32 33 
+     418.  00:79C4                    > .skip:
+     418.  00:79C4                    >         endif
+     419.  00:79C4  26 20                       ld h,HIGH usbrd
+     420.  00:79C6  CD 8E 74                    call getHeader
+     421.  00:79C9  D8                          ret c
+     422.  00:79CA  3D                          dec a
+     423.  00:79CB  C8                          ret z                           ; no more data
+     424.  00:79CC  FA D8 79                    jp m,.slowTransfer        
+     425.  00:79CF  CD F5 79                    call reverseTransfer
+     426.  00:79D2  26 40                       ld h,HIGH usbwr 
+     427.  00:79D4  70                          ld (hl),b
+     428.  00:79D5  71                          ld (hl),c
+     429.  00:79D6  18 DC                       jr readSectors23
+     430.  00:79D8                      
+     431.  00:79D8                      .slowTransfer:
+     432.  00:79D8                              DEBUGMESSAGE "slowtransfer"
+     432.  00:79D8                    >         ifdef DEBUG
+     432.  00:79D8  52                >         ld d,d
+     432.  00:79D9  18 0C             >         jr .skip
+     432.  00:79DB                    >         db string
+     432.  00:79DB  73 6C 6F 77 74 72 61 6E 73 66 65 72 
+     432.  00:79E7                    > .skip:
+     432.  00:79E7                    >         endif
+     433.  00:79E7  5E                          ld e,(hl)                       ; transfer address
+     434.  00:79E8  56                          ld d,(hl)
+     435.  00:79E9  4E                          ld c,(hl)                       ; transfer amount 
+     436.  00:79EA  46                          ld b,(hl)
+     437.  00:79EB  ED B0                       ldir
+     438.  00:79ED  56                          ld d,(hl)
+     439.  00:79EE  7E                          ld a,(hl)
+     440.  00:79EF  26 40                       ld h,HIGH usbwr
+     441.  00:79F1  72                          ld (hl),d                       ; return end marker ($af, $0f)
+     442.  00:79F2  77                          ld (hl),a
+     443.  00:79F3  18 BF                       jr readSectors23
+     444.  00:79F5                                     
+     445.  00:79F5                      reverseTransfer:
+     446.  00:79F5  FD 21 00 00                 ld iy,0                         ; save stack pointer
+     447.  00:79F9  FD 39                       add iy,sp
+     448.  00:79FB  5E                          ld e,(hl)                       ; transfer address
+     449.  00:79FC  56                          ld d,(hl)
+     450.  00:79FD  EB                          ex de,hl
+     451.  00:79FE  F9                          ld sp,hl
+     452.  00:79FF  EB                          ex de,hl
+     453.  00:7A00  46                          ld b,(hl)                       ; number of loops       
+     454.  00:7A01                      .loop:
+     455.  00:7A01                              repeat 32                       ; blocks of 64 bytes hardcoded (NowindHost.cpp)
+     456.  00:7A01                    <         ld d,(hl)
+     457.  00:7A01                    <         ld e,(hl)
+     458.  00:7A01                    <         push de
+     459.  00:7A01                    <         endrepeat
+     459.  00:7A01  56 5E D5 56 5E D5 56 5E D5 56 5E D5 56 5E D5 56 
+     459.  00:7A11  5E D5 56 5E D5 56 5E D5 56 5E D5 56 5E D5 56 5E 
+     459.  00:7A21  D5 56 5E D5 56 5E D5 56 5E D5 56 5E D5 56 5E D5 
+     459.  00:7A31  56 5E D5 56 5E D5 56 5E D5 56 5E D5 56 5E D5 56 
+     459.  00:7A41  5E D5 56 5E D5 56 5E D5 56 5E D5 56 5E D5 56 5E 
+     459.  00:7A51  D5 56 5E D5 56 5E D5 56 5E D5 56 5E D5 56 5E D5 
+     460.  00:7A61  10 9E                       djnz .loop
+     461.  00:7A63                              
+     462.  00:7A63  FD F9                       ld sp,iy                        ; restore stack pointer
+     463.  00:7A65  46                          ld b,(hl)                       ; return end marker
+     464.  00:7A66  4E                          ld c,(hl)
+     465.  00:7A67  C9                          ret
+     466.  00:7A68                            
+     467.  00:7A68                      OEMSTA:
+     468.  00:7A68  E5                          push hl
+     469.  00:7A69  21 76 7A                    ld hl,.statement
+     470.  00:7A6C  CD 50 74                    call findStatementName
+     471.  00:7A6F  5E                          ld e,(hl)
+     472.  00:7A70  23                          inc hl
+     473.  00:7A71  56                          ld d,(hl)
+     474.  00:7A72  E1                          pop hl        
+     475.  00:7A73  D8                          ret c
+     476.  00:7A74  D5                          push de
+     477.  00:7A75  C9                          ret
+     478.  00:7A76                      
+     479.  00:7A76                      .statement:
+     480.  00:7A76  49 4D 41 47 45 00           db "IMAGE",0
+     481.  00:7A7C  89 7A                       dw changeImage
+     482.  00:7A7E                              db "VSTREAM",0
+     482.  00:7A7E  56 53 54 52 45 41 4D 00 
+     483.  00:7A86  B6 7A                       dw videoStream
+     484.  00:7A88  00                          db 0
+     485.  00:7A89                      
+     486.  00:7A89                      ; send arguments, command, filename, end with ":"
+     487.  00:7A89                      changeImage:
+     488.  00:7A89                              DEBUGMESSAGE "changeImage"
+     488.  00:7A89                    >         ifdef DEBUG
+     488.  00:7A89  52                >         ld d,d
+     488.  00:7A8A  18 0B             >         jr .skip
+     488.  00:7A8C                    >         db string
+     488.  00:7A8C  63 68 61 6E 67 65 49 6D 61 67 65 
+     488.  00:7A97                    > .skip:
+     488.  00:7A97                    >         endif
+     489.  00:7A97  E5                          push hl
+     490.  00:7A98  CD 7C 74                    call sendRegisters
+     491.  00:7A9B  36 A0                       ld (hl),C_CHANGEIMAGE
+     492.  00:7A9D  E1                          pop hl
+     493.  00:7A9E                              
+     494.  00:7A9E                      call_exit:
+     495.  00:7A9E                              DEBUGMESSAGE "call_exit"
+     495.  00:7A9E                    >         ifdef DEBUG
+     495.  00:7A9E  52                >         ld d,d
+     495.  00:7A9F  18 09             >         jr .skip
+     495.  00:7AA1                    >         db string
+     495.  00:7AA1  63 61 6C 6C 5F 65 78 69 74 
+     495.  00:7AAA                    > .skip:
+     495.  00:7AAA                    >         endif
+     496.  00:7AAA  7E                  .loop:  ld a,(hl)
+     497.  00:7AAB  32 00 40                    ld (usbwr),a
+     498.  00:7AAE  FE 3A                       cp ":"
+     499.  00:7AB0  C8                          ret z
+     500.  00:7AB1  B7                          or a
+     501.  00:7AB2  C8                          ret z
+     502.  00:7AB3  23                          inc hl
+     503.  00:7AB4  18 F4                       jr .loop
+     504.  00:7AB6                              
+     505.  00:7AB6                      videoStream: 
+     506.  00:7AB6  E5                          push hl
+     507.  00:7AB7                              include "vram.asm"
+       1:  00:7AB7                              
+       2:  00:7AB7                      vramDump:
+       3:  00:7AB7  F3                  	di
+       4:  00:7AB8  CD 34 76                    call enableNowindPage0
+       5:  00:7ABB                      
+       6:  00:7ABB  3E 02                       ld a,2
+       7:  00:7ABD  D3 99                       out ($99),a
+       8:  00:7ABF  3E 8F                       ld a,$80+15             ; status register pointer at S#2
+       9:  00:7AC1  D3 99                       out ($99),a
+      10:  00:7AC3                      
+      11:  00:7AC3                      evenFrame:
+      12:  00:7AC3                              ; vram address 0x0000
+      13:  00:7AC3                              
+      14:  00:7AC3                              ;xor a
+      15:  00:7AC3                              ;out ($99),a
+      16:  00:7AC3                              ;ld a,$80+2
+      17:  00:7AC3                              ;out ($99),a
+      18:  00:7AC3                              
+      19:  00:7AC3  3E 03                       ld a,%00000011                 ; pattern generator table
+      20:  00:7AC5  D3 99                       out ($99),a
+      21:  00:7AC7  3E 84                       ld a,$80+4
+      22:  00:7AC9  D3 99                       out ($99),a
+      23:  00:7ACB                      
+      24:  00:7ACB  AF                          xor a                   ; color table high
+      25:  00:7ACC  D3 99                       out ($99),a
+      26:  00:7ACE  3E 8A                       ld a,$80+10
+      27:  00:7AD0  D3 99                       out ($99),a
+      28:  00:7AD2                              
+      29:  00:7AD2  3E 04                       ld a,%00000100          ; vram access at 0x10000
+      30:  00:7AD4  CD 68 7C                    call setVramAccessPointer
+      31:  00:7AD7  CD 00 7B                    call tranferframe
+      32:  00:7ADA  CD 76 7C                    call waitForRetrace
+      33:  00:7ADD  CD 1A 7C                    call changeColors
+      34:  00:7AE0                      
+      35:  00:7AE0                      oddFrame:
+      36:  00:7AE0                              ; vram address 0x10000
+      37:  00:7AE0                      
+      38:  00:7AE0                              ;ld a,%01000000
+      39:  00:7AE0                              ;out ($99),a
+      40:  00:7AE0                              ;ld a,$80+2
+      41:  00:7AE0                              ;out ($99),a
+      42:  00:7AE0                      
+      43:  00:7AE0  3E 23                       ld a,%00100011          ; pattern generator table
+      44:  00:7AE2  D3 99                       out ($99),a
+      45:  00:7AE4  3E 84                       ld a,$80+4
+      46:  00:7AE6  D3 99                       out ($99),a
+      47:  00:7AE8                      
+      48:  00:7AE8  3E 64                       ld a,00000100           ; color table high
+      49:  00:7AEA  D3 99                       out ($99),a
+      50:  00:7AEC  3E 8A                       ld a,$80+10
+      51:  00:7AEE  D3 99                       out ($99),a
+      52:  00:7AF0                      
+      53:  00:7AF0  AF                          xor a
+      54:  00:7AF1  CD 68 7C                    call setVramAccessPointer
+      55:  00:7AF4  CD 00 7B                    call tranferframe
+      56:  00:7AF7  CD 76 7C                    call waitForRetrace
+      57:  00:7AFA  CD 1A 7C                    call changeColors
+      58:  00:7AFD  C3 C3 7A                    jp evenFrame
+      59:  00:7B00                      
+      60:  00:7B00                      tranferframe:
+      61:  00:7B00  CD 7C 74                    call sendRegisters
+      62:  00:7B03  36 FF                       ld (hl),255
+      63:  00:7B05                                      
+      64:  00:7B05  21 00 20                    ld hl,usbrd
+      65:  00:7B08  CD 8E 74                    call getHeader
+      66:  00:7B0B                              
+      67:  00:7B0B  16 70                       ld d,112			; 224x64 is 1 screen 2 page of data ($3800)
+      68:  00:7B0D                      write_more:        
+      69:  00:7B0D  21 00 20            	ld hl,usbrd
+      70:  00:7B10  01 98 00                    ld bc,$0098
+      71:  00:7B13                              repeat 128
+      72:  00:7B13                    <         outi
+      73:  00:7B13                    <         endrepeat
+      73:  00:7B13  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7B23  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7B33  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7B43  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7B53  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7B63  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7B73  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7B83  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7B93  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7BA3  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7BB3  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7BC3  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7BD3  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7BE3  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7BF3  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      73:  00:7C03  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      74:  00:7C13                      
+      75:  00:7C13  15                          dec d
+      76:  00:7C14  7A                          ld a,d
+      77:  00:7C15  B7                          or a
+      78:  00:7C16  C2 0D 7B                    jp nz,write_more
+      79:  00:7C19  C9                          ret		
+      80:  00:7C1A                      
+      81:  00:7C1A                      changeColors:
+      82:  00:7C1A  AF                          xor a			; set color register pointer to zero
+      83:  00:7C1B  D3 99                       out ($99),a
+      84:  00:7C1D  3E 90                       ld a,$80+16
+      85:  00:7C1F  D3 99                       out ($99),a
+      86:  00:7C21                              
+      87:  00:7C21  21 00 20                    ld hl,usbrd
+      88:  00:7C24  01 9A 00                    ld bc,$009A		; write to color register
+      89:  00:7C27                      
+      90:  00:7C27                              repeat 32
+      91:  00:7C27                    <         outi
+      92:  00:7C27                    <         endrepeat		
+      92:  00:7C27  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      92:  00:7C37  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      92:  00:7C47  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      92:  00:7C57  ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 ED A3 
+      93:  00:7C67  C9                          ret
+      94:  00:7C68                      
+      95:  00:7C68                      	
+      96:  00:7C68                      setVramAccessPointer:
+      97:  00:7C68  D3 99                       out ($99),a
+      98:  00:7C6A  3E 8E                       ld a,$80+14
+      99:  00:7C6C  D3 99                       out ($99),a
+     100:  00:7C6E  AF                          xor a
+     101:  00:7C6F  D3 99                       out ($99),a
+     102:  00:7C71  3E 40                       ld a,%01000000		; vram write
+     103:  00:7C73  D3 99                       out ($99),a
+     104:  00:7C75  C9                          ret
+     105:  00:7C76                      
+     106:  00:7C76                      waitForRetrace:
+     107:  00:7C76  DB 99                       in a,($99)
+     108:  00:7C78  CB 77                       bit 6,a
+     109:  00:7C7A  20 FA                       jr nz,waitForRetrace       
+     110:  00:7C7C                      .lp2:        
+     111:  00:7C7C  DB 99                       in a,($99)
+     112:  00:7C7E  CB 77                       bit 6,a
+     113:  00:7C80  28 FA                       jr z,.lp2       
+     114:  00:7C82  C9                          ret
+     115:  00:7C83                              	
+     116:  00:7C83                      	; just let it go... 
+     508.  00:7C83  E1                          pop hl
+     509.  00:7C84  C3 9E 7A                    jp call_exit
+     510.  00:7C87                              
+     511.  00:7C87                      ; hl points to text
+     512.  00:7C87                      printVdpText2:
+     513.  00:7C87  F5                                                  push af
+     514.  00:7C88  7E                  .loop:  ld a,(hl)
+     515.  00:7C89  D3 98                                               out ($98),a 
+     516.  00:7C8B  23                                                  inc hl
+     517.  00:7C8C  B7                                                  or a
+     518.  00:7C8D  20 F9                                               jr nz,.loop
+     519.  00:7C8F  F1                                                  pop af
+     520.  00:7C90  C9                                                  ret
+     521.  00:7C91                              
+     522.  00:7C91                      supportedMedia:
+     523.  00:7C91                                      
+     524.  00:7C91                      .f8:    MAKEDPB $f8, 512, 2, 112, 1 * 80 * 9, 2, 2      ; 360 kB (1 side * 80 tracks * 9 tracks/sector)
+     524.  00:7C91  (00:0001)         > .firfat equ 1
+     524.  00:7C91  (00:0005)         > .firdir equ .firfat+(fatCount*fatSiz)
+     524.  00:7C91  (00:000C)         > .firrec equ .firdir+(maxEnt/(sectorSize/32))
+     524.  00:7C91                    >         if sectorSize = 512
+     524.  00:7C91  (00:0004)         > .shft   equ 4
+     524.  00:7C91                    >         elseif sectorSize = 256
+     524.  00:7C91                    ~ .shft   equ 3
+     524.  00:7C91                    ~         endif
+     524.  00:7C91                    >         
+     524.  00:7C91  F8                >         db media
+     524.  00:7C92  00 02             >         dw sectorSize
+     524.  00:7C94  0F 04             >         db (sectorSize/32)-1, .shft
+     524.  00:7C96  01                >         db sectorsPerCluster-1
+     524.  00:7C97  02                >         db sectorsPerCluster
+     524.  00:7C98  01 00             >         dw .firfat
+     524.  00:7C9A  02 70             >         db fatCount, maxEnt
+     524.  00:7C9C  0C 00             >         dw .firrec
+     524.  00:7C9E  63 01             >         dw (maxSector-.firrec)/sectorsPerCluster+1
+     524.  00:7CA0  02                >         db fatSiz
+     524.  00:7CA1  05 00             >         dw .firdir
+     525.  00:7CA3                      .def:   MAKEDPB $f9, 512, 2, 112, 2 * 80 * 9, 3, 2      ; 720 kB
+     525.  00:7CA3  (00:0001)         > .firfat equ 1
+     525.  00:7CA3  (00:0007)         > .firdir equ .firfat+(fatCount*fatSiz)
+     525.  00:7CA3  (00:000E)         > .firrec equ .firdir+(maxEnt/(sectorSize/32))
+     525.  00:7CA3                    >         if sectorSize = 512
+     525.  00:7CA3  (00:0004)         > .shft   equ 4
+     525.  00:7CA3                    >         elseif sectorSize = 256
+     525.  00:7CA3                    ~ .shft   equ 3
+     525.  00:7CA3                    ~         endif
+     525.  00:7CA3                    >         
+     525.  00:7CA3  F9                >         db media
+     525.  00:7CA4  00 02             >         dw sectorSize
+     525.  00:7CA6  0F 04             >         db (sectorSize/32)-1, .shft
+     525.  00:7CA8  01                >         db sectorsPerCluster-1
+     525.  00:7CA9  02                >         db sectorsPerCluster
+     525.  00:7CAA  01 00             >         dw .firfat
+     525.  00:7CAC  02 70             >         db fatCount, maxEnt
+     525.  00:7CAE  0E 00             >         dw .firrec
+     525.  00:7CB0  CA 02             >         dw (maxSector-.firrec)/sectorsPerCluster+1
+     525.  00:7CB2  03                >         db fatSiz
+     525.  00:7CB3  07 00             >         dw .firdir
+     526.  00:7CB5                              MAKEDPB $fa, 512, 2, 112, 1 * 80 * 8, 1, 2      ; 320 kB
+     526.  00:7CB5  (00:0001)         > .firfat equ 1
+     526.  00:7CB5  (00:0003)         > .firdir equ .firfat+(fatCount*fatSiz)
+     526.  00:7CB5  (00:000A)         > .firrec equ .firdir+(maxEnt/(sectorSize/32))
+     526.  00:7CB5                    >         if sectorSize = 512
+     526.  00:7CB5  (00:0004)         > .shft   equ 4
+     526.  00:7CB5                    >         elseif sectorSize = 256
+     526.  00:7CB5                    ~ .shft   equ 3
+     526.  00:7CB5                    ~         endif
+     526.  00:7CB5                    >         
+     526.  00:7CB5  FA                >         db media
+     526.  00:7CB6  00 02             >         dw sectorSize
+     526.  00:7CB8  0F 04             >         db (sectorSize/32)-1, .shft
+     526.  00:7CBA  01                >         db sectorsPerCluster-1
+     526.  00:7CBB  02                >         db sectorsPerCluster
+     526.  00:7CBC  01 00             >         dw .firfat
+     526.  00:7CBE  02 70             >         db fatCount, maxEnt
+     526.  00:7CC0  0A 00             >         dw .firrec
+     526.  00:7CC2  3C 01             >         dw (maxSector-.firrec)/sectorsPerCluster+1
+     526.  00:7CC4  01                >         db fatSiz
+     526.  00:7CC5  03 00             >         dw .firdir
+     527.  00:7CC7                              MAKEDPB $fb, 512, 2, 112, 2 * 80 * 8, 2, 2      ; 640 kB
+     527.  00:7CC7  (00:0001)         > .firfat equ 1
+     527.  00:7CC7  (00:0005)         > .firdir equ .firfat+(fatCount*fatSiz)
+     527.  00:7CC7  (00:000C)         > .firrec equ .firdir+(maxEnt/(sectorSize/32))
+     527.  00:7CC7                    >         if sectorSize = 512
+     527.  00:7CC7  (00:0004)         > .shft   equ 4
+     527.  00:7CC7                    >         elseif sectorSize = 256
+     527.  00:7CC7                    ~ .shft   equ 3
+     527.  00:7CC7                    ~         endif
+     527.  00:7CC7                    >         
+     527.  00:7CC7  FB                >         db media
+     527.  00:7CC8  00 02             >         dw sectorSize
+     527.  00:7CCA  0F 04             >         db (sectorSize/32)-1, .shft
+     527.  00:7CCC  01                >         db sectorsPerCluster-1
+     527.  00:7CCD  02                >         db sectorsPerCluster
+     527.  00:7CCE  01 00             >         dw .firfat
+     527.  00:7CD0  02 70             >         db fatCount, maxEnt
+     527.  00:7CD2  0C 00             >         dw .firrec
+     527.  00:7CD4  7B 02             >         dw (maxSector-.firrec)/sectorsPerCluster+1
+     527.  00:7CD6  02                >         db fatSiz
+     527.  00:7CD7  05 00             >         dw .firdir
+     528.  00:7CD9                              MAKEDPB $fc, 512, 1, 64,  1 * 40 * 9, 2, 2      ; 180 kB
+     528.  00:7CD9  (00:0001)         > .firfat equ 1
+     528.  00:7CD9  (00:0005)         > .firdir equ .firfat+(fatCount*fatSiz)
+     528.  00:7CD9  (00:0009)         > .firrec equ .firdir+(maxEnt/(sectorSize/32))
+     528.  00:7CD9                    >         if sectorSize = 512
+     528.  00:7CD9  (00:0004)         > .shft   equ 4
+     528.  00:7CD9                    >         elseif sectorSize = 256
+     528.  00:7CD9                    ~ .shft   equ 3
+     528.  00:7CD9                    ~         endif
+     528.  00:7CD9                    >         
+     528.  00:7CD9  FC                >         db media
+     528.  00:7CDA  00 02             >         dw sectorSize
+     528.  00:7CDC  0F 04             >         db (sectorSize/32)-1, .shft
+     528.  00:7CDE  00                >         db sectorsPerCluster-1
+     528.  00:7CDF  01                >         db sectorsPerCluster
+     528.  00:7CE0  01 00             >         dw .firfat
+     528.  00:7CE2  02 40             >         db fatCount, maxEnt
+     528.  00:7CE4  09 00             >         dw .firrec
+     528.  00:7CE6  60 01             >         dw (maxSector-.firrec)/sectorsPerCluster+1
+     528.  00:7CE8  02                >         db fatSiz
+     528.  00:7CE9  05 00             >         dw .firdir
+     529.  00:7CEB                              MAKEDPB $fd, 512, 2, 112, 2 * 40 * 9, 2, 2      ; 360 kB
+     529.  00:7CEB  (00:0001)         > .firfat equ 1
+     529.  00:7CEB  (00:0005)         > .firdir equ .firfat+(fatCount*fatSiz)
+     529.  00:7CEB  (00:000C)         > .firrec equ .firdir+(maxEnt/(sectorSize/32))
+     529.  00:7CEB                    >         if sectorSize = 512
+     529.  00:7CEB  (00:0004)         > .shft   equ 4
+     529.  00:7CEB                    >         elseif sectorSize = 256
+     529.  00:7CEB                    ~ .shft   equ 3
+     529.  00:7CEB                    ~         endif
+     529.  00:7CEB                    >         
+     529.  00:7CEB  FD                >         db media
+     529.  00:7CEC  00 02             >         dw sectorSize
+     529.  00:7CEE  0F 04             >         db (sectorSize/32)-1, .shft
+     529.  00:7CF0  01                >         db sectorsPerCluster-1
+     529.  00:7CF1  02                >         db sectorsPerCluster
+     529.  00:7CF2  01 00             >         dw .firfat
+     529.  00:7CF4  02 70             >         db fatCount, maxEnt
+     529.  00:7CF6  0C 00             >         dw .firrec
+     529.  00:7CF8  63 01             >         dw (maxSector-.firrec)/sectorsPerCluster+1
+     529.  00:7CFA  02                >         db fatSiz
+     529.  00:7CFB  05 00             >         dw .firdir
+     530.  00:7CFD                              MAKEDPB $fe, 512, 1, 64,  1 * 40 * 8, 1, 2      ; 160 kB
+     530.  00:7CFD  (00:0001)         > .firfat equ 1
+     530.  00:7CFD  (00:0003)         > .firdir equ .firfat+(fatCount*fatSiz)
+     530.  00:7CFD  (00:0007)         > .firrec equ .firdir+(maxEnt/(sectorSize/32))
+     530.  00:7CFD                    >         if sectorSize = 512
+     530.  00:7CFD  (00:0004)         > .shft   equ 4
+     530.  00:7CFD                    >         elseif sectorSize = 256
+     530.  00:7CFD                    ~ .shft   equ 3
+     530.  00:7CFD                    ~         endif
+     530.  00:7CFD                    >         
+     530.  00:7CFD  FE                >         db media
+     530.  00:7CFE  00 02             >         dw sectorSize
+     530.  00:7D00  0F 04             >         db (sectorSize/32)-1, .shft
+     530.  00:7D02  00                >         db sectorsPerCluster-1
+     530.  00:7D03  01                >         db sectorsPerCluster
+     530.  00:7D04  01 00             >         dw .firfat
+     530.  00:7D06  02 40             >         db fatCount, maxEnt
+     530.  00:7D08  07 00             >         dw .firrec
+     530.  00:7D0A  3A 01             >         dw (maxSector-.firrec)/sectorsPerCluster+1
+     530.  00:7D0C  01                >         db fatSiz
+     530.  00:7D0D  03 00             >         dw .firdir
+     531.  00:7D0F                              MAKEDPB $ff, 512, 2, 112, 2 * 40 * 8, 1, 1      ; 320 kB
+     531.  00:7D0F  (00:0001)         > .firfat equ 1
+     531.  00:7D0F  (00:0002)         > .firdir equ .firfat+(fatCount*fatSiz)
+     531.  00:7D0F  (00:0009)         > .firrec equ .firdir+(maxEnt/(sectorSize/32))
+     531.  00:7D0F                    >         if sectorSize = 512
+     531.  00:7D0F  (00:0004)         > .shft   equ 4
+     531.  00:7D0F                    >         elseif sectorSize = 256
+     531.  00:7D0F                    ~ .shft   equ 3
+     531.  00:7D0F                    ~         endif
+     531.  00:7D0F                    >         
+     531.  00:7D0F  FF                >         db media
+     531.  00:7D10  00 02             >         dw sectorSize
+     531.  00:7D12  0F 04             >         db (sectorSize/32)-1, .shft
+     531.  00:7D14  01                >         db sectorsPerCluster-1
+     531.  00:7D15  02                >         db sectorsPerCluster
+     531.  00:7D16  01 00             >         dw .firfat
+     531.  00:7D18  01 70             >         db fatCount, maxEnt
+     531.  00:7D1A  09 00             >         dw .firrec
+     531.  00:7D1C  3C 01             >         dw (maxSector-.firrec)/sectorsPerCluster+1
+     531.  00:7D1E  01                >         db fatSiz
+     531.  00:7D1F  02 00             >         dw .firdir
+     532.  00:7D21                      
+     533.  00:7D21                      ; WARNING: in some cases DEFDPB-1 is expected!
+     534.  00:7D21  (00:7CA3)           DEFDPB  equ supportedMedia.def
+      81   00:7D21                              include "romdisk.asm"
+       1.  00:7D21                      		define	ROMDSKBANK 5			; romdisk starts in bank 5
+       2.  00:7D21                      		define	ROMDSKLAST (FLASHROMSIZE/16)-1
+       3.  00:7D21                      
+       4.  00:7D21                      
+       5.  00:7D21                      ROMDISK_DSKIO:
+       6.  00:7D21                              DEBUGMESSAGE "R_DSKIO"
+       6.  00:7D21                    >         ifdef DEBUG
+       6.  00:7D21  52                >         ld d,d
+       6.  00:7D22  18 07             >         jr .skip
+       6.  00:7D24                    >         db string
+       6.  00:7D24  52 5F 44 53 4B 49 4F 
+       6.  00:7D2B                    > .skip:
+       6.  00:7D2B                    >         endif
+       7.  00:7D2B  F1                          pop af
+       8.  00:7D2C  3E 00                       ld a,0
+       9.  00:7D2E  D8                          ret c                           ; write protected
+      10.  00:7D2F                              
+      11.  00:7D2F  EB                          ex de,hl
+      12.  00:7D30  C5                  .loop:  push bc
+      13.  00:7D31  E5                          push hl        
+      14.  00:7D32                              
+      15.  00:7D32  CB 7A                       bit 7,d
+      16.  00:7D34  20 1C                       jr nz,.directCopy
+      17.  00:7D36  7A                          ld a,d
+      18.  00:7D37  FE 3E                       cp $3e        
+      19.  00:7D39  38 17                       jr c,.directCopy
+      20.  00:7D3B                      
+      21.  00:7D3B  CD 5E 7D                    call .findSector
+      22.  00:7D3E  D5                          push de
+      23.  00:7D3F  ED 5B 4D F3                 ld de,($f34d)        
+      24.  00:7D43  CD F4 7F                    call copyFromBank
+      25.  00:7D46  D1                          pop de
+      26.  00:7D47  01 00 02                    ld bc,512
+      27.  00:7D4A  2A 4D F3                    ld hl,($f34d)
+      28.  00:7D4D  CD 6E F3                    call XFER
+      29.  00:7D50  18 06                       jr .nextSector           
+      30.  00:7D52                                    
+      31.  00:7D52                      .directCopy:                
+      32.  00:7D52  CD 5E 7D                    call .findSector  
+      33.  00:7D55  CD F4 7F                    call copyFromBank
+      34.  00:7D58                      .nextSector:
+      35.  00:7D58  E1                          pop hl
+      36.  00:7D59  23                          inc hl
+      37.  00:7D5A  C1                          pop bc
+      38.  00:7D5B  10 D3                       djnz .loop
+      39.  00:7D5D  C9                          ret
+      40.  00:7D5E                      
+      41.  00:7D5E                      .findSector:        
+      42.  00:7D5E  7D                          ld a,l                          ; determine bank
+      43.  00:7D5F  E6 E0                       and %11100000
+      44.  00:7D61  B4                          or h
+      45.  00:7D62  07                          rlca
+      46.  00:7D63  07                          rlca
+      47.  00:7D64  07                          rlca
+      48.  00:7D65  47                          ld b,a
+      49.  00:7D66                      
+      50.  00:7D66  7D                          ld a,l
+      51.  00:7D67  E6 1F                       and 31
+      52.  00:7D69  4F                          ld c,a
+romdisk.asm line 53: Label not found: FLASHROMSIZE
+      53.  00:7D6A  3E FF                       ld a,ROMDSKLAST                 ; banks with b0..5=0 reside in the last bank
+      54.  00:7D6C  28 05                       jr z,.skip
+      55.  00:7D6E                      
+      56.  00:7D6E  78                          ld a,b
+      57.  00:7D6F  C6 05                       add ROMDSKBANK
+      58.  00:7D71  41                          ld b,c
+      59.  00:7D72  05                          dec b
+      60.  00:7D73  4F                  .skip:  ld c,a
+      61.  00:7D74  78                          ld a,b
+      62.  00:7D75  07                          rlca
+      63.  00:7D76  C6 41                       add $41                         ; disk images starts at $4100
+      64.  00:7D78  67                          ld h,a
+      65.  00:7D79  2E 00                       ld l,0
+      66.  00:7D7B  79                          ld a,c
+      67.  00:7D7C  01 00 02                    ld bc,512
+      68.  00:7D7F  C9                          ret
+      69.  00:7D80                                                               
+      70.  00:7D80                      ROMDISK_DSKCHG:
+      71.  00:7D80                              ;DEBUGMESSAGE "ROM_DSKCHG"
+      72.  00:7D80  F1                          pop af
+      73.  00:7D81  A7                          and a
+      74.  00:7D82  06 01                       ld b,1                          ; not changed
+      75.  00:7D84  C9                          ret
+      76.  00:7D85                      
+      77.  00:7D85                      ROMDISK_GETDPB:
+      78.  00:7D85                              ; not implemented (standard mediadescriptor as used)
+      79.  00:7D85                              
+      80.  00:7D85                      ROMDISK_DSKFMT:
+      81.  00:7D85                              ; not implemented (no disk can be formatted)
+      82.  00:7D85                              
+      82   00:7D85                              include "flashWriter.asm"
+       1.  00:7D85                      ; flashWriter.asm
+       2.  00:7D85                      ; Flashes and erases the AMD29F040/M29F032-D
+       3.  00:7D85                           
+       4.  00:7D85                      flashWriter:
+       5.  00:7D85  3E 03                       ld a,3
+       6.  00:7D87  CD 41 01                    call SNSMAT
+       7.  00:7D8A  E6 08                       and 8
+       8.  00:7D8C  C0                          ret nz
+       9.  00:7D8D                              
+flashWriter.asm line 10: Label not found: PRINTTEXT
+      10.  00:7D8D  CD 00 00                    call PRINTTEXT
+      11.  00:7D90                              db 10,13," FlashROM",10,13," "
+      11.  00:7D90  0A 0D 20 46 6C 61 73 68 52 4F 4D 0A 0D 20 
+      12.  00:7D9E  2E (33)                     ds 33,"."
+      13.  00:7DBF  0D 20 00                    db 13," ",0
+      14.  00:7DC2                              
+      15.  00:7DC2  CD 8F 76                    call getSlotPage1
+      16.  00:7DC5  CD 48 76                    call enableSlotPage0
+      17.  00:7DC8                      
+      18.  00:7DC8  21 D5 7D                    ld hl,.source
+      19.  00:7DCB  11 00 C0                    ld de,$c000
+      20.  00:7DCE  D5                          push de
+      21.  00:7DCF  01 89 00                    ld bc,flasherEnd - $c000
+      22.  00:7DD2  ED B0                       ldir
+      23.  00:7DD4  C9                          ret
+      24.  00:7DD5                              
+      25.  00:7DD5                      .source:     
+      26.  00:7DD5  (C000)                      PHASE $c000  
+      27.  00:C000                              
+      28.  00:C000                      waitForHeader:
+      29.  00:C000  26 20                       ld h,HIGH usbrd
+      30.  00:C002  7E                          ld a,(hl)
+      31.  00:C003  FE BB               .chkbb: cp $bb
+      32.  00:C005  20 F9                       jr nz,waitForHeader
+      33.  00:C007  7E                          ld a,(hl)
+      34.  00:C008  FE 55                       cp $55
+      35.  00:C00A  20 F7                       jr nz,.chkbb       
+      36.  00:C00C                      
+      37.  00:C00C  7E                          ld a,(hl)
+      38.  00:C00D  FE A2                       cp $a2
+      39.  00:C00F  CA 57 C0                    jp z,verifyFlash
+      40.  00:C012  FE A3                       cp $a3
+      41.  00:C014  28 1C                       jr z,writeFlash
+      42.  00:C016  FE A4                       cp $a4
+      43.  00:C018  20 E6                       jr nz,waitForHeader
+      44.  00:C01A                      
+      45.  00:C01A                      chipErase:
+      46.  00:C01A                              ;DEBUGMESSAGE "erase"
+      47.  00:C01A  3E 65               		ld a,"e"
+      48.  00:C01C  D3 98               		out ($98),a
+      49.  00:C01E                      
+      50.  00:C01E  3E 80                       ld a,$80
+      51.  00:C020  CD 7A C0                    call AM29F040Command
+      52.  00:C023  3E 10                       ld a,$10
+      53.  00:C025  CD 7A C0                    call AM29F040Command
+      54.  00:C028                      
+      55.  00:C028  3A 00 40            .wait:  ld a,($4000)                    ; read DQ7 (data# polling) 
+      56.  00:C02B  07                          rlca
+      57.  00:C02C  30 FA                       jr nc,.wait        
+      58.  00:C02E  3E 01                       ld a,1
+      59.  00:C030  18 39                       jr acknowledge
+      60.  00:C032                              
+      61.  00:C032                      writeFlash:
+      62.  00:C032                              ;DEBUGMESSAGE "write"
+      63.  00:C032  5E                          ld e,(hl)                       ; address
+      64.  00:C033  56                          ld d,(hl)
+      65.  00:C034                      
+      66.  00:C034  7A                          ld a,d
+      67.  00:C035  B3                          or e
+      68.  00:C036  CC 75 C0                    call z,updateBar
+      69.  00:C039                      
+      70.  00:C039  7E                          ld a,(hl)                       ; bank
+      71.  00:C03A  32 01 60                    ld (mapper),a
+      72.  00:C03D  26 40                       ld h,$40
+      73.  00:C03F                              
+      74.  00:C03F  06 80                       ld b,128                        ; data is written in blocks of 128 bytes
+      75.  00:C041  3E A0               .loop:  ld a,$a0
+      76.  00:C043  CD 7A C0                    call AM29F040Command
+      77.  00:C046  3A 00 20                    ld a,(usbrd)
+      78.  00:C049  12                          ld (de),a                       ; write data to flash
+      79.  00:C04A  13                          inc de
+      80.  00:C04B                      
+      81.  00:C04B  7E                  .wait:  ld  a,(hl)                      ; write complete?
+      82.  00:C04C  AE                          xor (hl)
+      83.  00:C04D  E6 40                       and %01000000
+      84.  00:C04F  20 FA                       jr  nz,.wait
+      85.  00:C051  10 EE                       djnz .loop
+      86.  00:C053                              
+      87.  00:C053  3E 02                       ld a,2
+      88.  00:C055  18 14                       jr acknowledge        
+      89.  00:C057                              
+      90.  00:C057                      verifyFlash:
+      91.  00:C057                              ;DEBUGMESSAGE "verify"
+      92.  00:C057  21 00 20                    ld hl,usbrd
+      93.  00:C05A  5E                          ld e,(hl)                       ; address
+      94.  00:C05B  56                          ld d,(hl)
+      95.  00:C05C  7E                          ld a,(hl)                       ; bank
+      96.  00:C05D  32 01 60                    ld (mapper),a
+      97.  00:C060                      
+      98.  00:C060  06 80                       ld b,128
+      99.  00:C062  1A                  .loop:  ld a,(de)
+     100.  00:C063  32 00 40                    ld (usbwr),a
+     101.  00:C066  13                          inc de
+     102.  00:C067  10 F9                       djnz .loop
+     103.  00:C069                      
+     104.  00:C069  3E 03                       ld a,3
+     105.  00:C06B                      acknowledge:        
+     106.  00:C06B  26 40                       ld h,HIGH usbwr
+     107.  00:C06D  36 AA                       ld (hl),$aa
+     108.  00:C06F  36 55                       ld (hl),$55
+     109.  00:C071  77                          ld (hl),a
+     110.  00:C072  C3 00 C0                    jp waitForHeader
+     111.  00:C075                      
+     112.  00:C075                      updateBar:
+     113.  00:C075  3E 77                       ld a,"w"  
+     114.  00:C077  D3 98                       out ($98),a
+     115.  00:C079  C9                          ret
+     116.  00:C07A                      
+     117.  00:C07A                      AM29F040Command:
+     118.  00:C07A  F5                          push af
+     119.  00:C07B  3E AA                       ld a,$aa
+     120.  00:C07D  32 55 05                    ld ($0555),a
+     121.  00:C080  2F                          cpl
+     122.  00:C081  32 AA 02                    ld ($02aa),a
+     123.  00:C084  F1                          pop af
+     124.  00:C085  32 55 05                    ld ($0555),a
+     125.  00:C088  C9                          ret
+     126.  00:C089                              
+     127.  00:C089                      flasherEnd:
+     128.  00:C089  (7E5E)                      DEPHASE
+      83   00:7E5E                              include "device.asm"
+       1.  00:7E5E                      ; device.asm
+       2.  00:7E5E                      ; implements a basic now: device
+       3.  00:7E5E                          
+       4.  00:7E5E                      device:
+       5.  00:7E5E  E5                          push hl
+       6.  00:7E5F  21 70 7E                    ld hl,deviceFunctions
+       7.  00:7E62  0F                          rrca
+       8.  00:7E63  3C                          inc a
+       9.  00:7E64  07                          rlca
+      10.  00:7E65  85                          add a,l
+      11.  00:7E66  6F                          ld l,a
+      12.  00:7E67  30 01                       jr nc,.nocy
+      13.  00:7E69  24                          inc h  
+      14.  00:7E6A  7E                  .nocy:  ld a,(hl)
+      15.  00:7E6B  23                          inc hl
+      16.  00:7E6C  66                          ld h,(hl)
+      17.  00:7E6D  6F                          ld l,a
+      18.  00:7E6E  E3                          ex (sp),hl
+      19.  00:7E6F  C9                          ret
+      20.  00:7E70                      
+      21.  00:7E70                      deviceFunctions:
+      22.  00:7E70  86 7E                       dw identifyDevice               ; 0xff
+      23.  00:7E72  A6 7E                       dw open                         ;  0
+      24.  00:7E74  DE 7E                       dw close                        ;  2
+      25.  00:7E76  E4 7E                       dw randomIO                     ;  4
+      26.  00:7E78  E8 7E                       dw write                        ;  6
+      27.  00:7E7A  EE 7E                       dw read                         ;  8
+      28.  00:7E7C  44 7F                       dw loc                          ; 10
+      29.  00:7E7E  56 7F                       dw lof                          ; 12
+      30.  00:7E80  22 7F                       dw eof                          ; 14
+      31.  00:7E82  56 7F                       dw fpos                         ; 16
+      32.  00:7E84  56 7F                       dw putback                      ; 18
+      33.  00:7E86                                
+      34.  00:7E86                      identifyDevice:
+      35.  00:7E86                              DEBUGMESSAGE "identifyDevice"
+      35.  00:7E86                    >         ifdef DEBUG
+      35.  00:7E86  52                >         ld d,d
+      35.  00:7E87  18 0E             >         jr .skip
+      35.  00:7E89                    >         db string
+      35.  00:7E89  69 64 65 6E 74 69 66 79 44 65 76 69 63 65 
+      35.  00:7E97                    > .skip:
+      35.  00:7E97                    >         endif
+      36.  00:7E97  21 9F 7E                    ld hl,deviceNameList
+      37.  00:7E9A  CD 50 74                    call findStatementName
+      38.  00:7E9D  7E                          ld a,(hl)                       ; device number
+      39.  00:7E9E  C9                          ret                             ; carry is set when invalid device name
+      40.  00:7E9F                              
+      41.  00:7E9F                      deviceNameList:
+      42.  00:7E9F  4E 4F 57 00 00 00           db "NOW",0,0,0                  ; name, end marker, device number, dummy
+      43.  00:7EA5                              ;db "STDIN",0,1,0
+      44.  00:7EA5  00                          db 0
+      45.  00:7EA6                      
+      46.  00:7EA6                      ; Input     D   Global device code
+      47.  00:7EA6                      ;           E   File mode    
+      48.  00:7EA6                      ;           HL  address fcb
+      49.  00:7EA6                      open:
+      50.  00:7EA6                      ;        DEBUGMESSAGE "open"
+      51.  00:7EA6                      ;        DEBUGDUMPMEMHL 9
+      52.  00:7EA6  22 64 F8                    ld (PTRFIL),hl
+      53.  00:7EA9  CD 7C 74                    call sendRegisters
+      54.  00:7EAC  36 88                       ld (hl),C_DEVICEOPEN
+      55.  00:7EAE  EB                          ex de,hl
+      56.  00:7EAF  01 0B 00                    ld bc,11
+      57.  00:7EB2  21 66 F8                    ld hl,FILNAM
+      58.  00:7EB5  ED B0                       ldir
+      59.  00:7EB7                      
+      60.  00:7EB7  CD 34 76                    call enableNowindPage0
+      61.  00:7EBA  26 20                       ld h,HIGH usbrd
+      62.  00:7EBC  CD 8E 74                    call getHeader
+      63.  00:7EBF  38 0C                       jr c,deviceIoError              ; time out?
+      64.  00:7EC1  B7                          or a
+      65.  00:7EC2  20 0B                       jr nz,openError
+      66.  00:7EC4                      
+      67.  00:7EC4  5E                          ld e,(hl)                       ; update fcb (including buffer)
+      68.  00:7EC5  56                          ld d,(hl)
+      69.  00:7EC6  4E                          ld c,(hl)
+      70.  00:7EC7  46                          ld b,(hl)
+      71.  00:7EC8  ED B0                       ldir
+      72.  00:7ECA  C3 3F 76                    jp restorePage0        
+      73.  00:7ECD                      
+      74.  00:7ECD                      deviceIoError:
+      75.  00:7ECD  3E 13                       ld a,19
+      76.  00:7ECF                      
+      77.  00:7ECF                      openError:
+      78.  00:7ECF  CD 3F 76                    call restorePage0
+      79.  00:7ED2  5F                          ld e,a
+      80.  00:7ED3                      
+      81.  00:7ED3                      basicError:
+      82.  00:7ED3  DD 21 6F 40                 ld ix,$406f
+      83.  00:7ED7  FD 2A C0 FC                 ld iy,(EXPTBL-1)
+      84.  00:7EDB  C3 1C 00                    jp CALSLT
+      85.  00:7EDE                                      
+      86.  00:7EDE                      close:
+      87.  00:7EDE                      ;        DEBUGMESSAGE "close"
+      88.  00:7EDE  CD 7C 74                    call sendRegisters
+      89.  00:7EE1  36 89                       ld (hl),C_DEVICECLOSE
+      90.  00:7EE3  C9                          ret
+      91.  00:7EE4                              
+      92.  00:7EE4                      randomIO:
+      93.  00:7EE4                      ;        DEBUGMESSAGE "randomIO"
+      94.  00:7EE4  1E 3D                       ld e,61                         ; bad file mode
+      95.  00:7EE6  18 EB                       jr basicError
+      96.  00:7EE8                      
+      97.  00:7EE8                      write:
+      98.  00:7EE8                      ;        DEBUGMESSAGE "write"
+      99.  00:7EE8  CD 7C 74                    call sendRegisters
+     100.  00:7EEB  36 8B                       ld (hl),C_DEVICEWRITE
+     101.  00:7EED  C9                          ret        
+     102.  00:7EEE                      
+     103.  00:7EEE                      read:
+     104.  00:7EEE                      ;        DEBUGMESSAGE "read"
+     105.  00:7EEE  11 06 00                    ld de,6
+     106.  00:7EF1  19                          add hl,de
+     107.  00:7EF2  E5                          push hl
+     108.  00:7EF3  5E                          ld e,(hl)
+     109.  00:7EF4  23                          inc hl
+     110.  00:7EF5  23                          inc hl
+     111.  00:7EF6  23                          inc hl
+     112.  00:7EF7  19                          add hl,de
+     113.  00:7EF8  7E                          ld a,(hl)
+     114.  00:7EF9  E1                          pop hl
+     115.  00:7EFA  FE 1A                       cp $1a
+     116.  00:7EFC  37                          scf
+     117.  00:7EFD  C8                          ret z                           ; end of file
+     118.  00:7EFE  3F                          ccf
+     119.  00:7EFF  34                          inc (hl)                        ; increment position
+     120.  00:7F00  C0                          ret nz                          ; buffer empty?
+     121.  00:7F01                              
+     122.  00:7F01  F5                          push af
+     123.  00:7F02  2B                          dec hl
+     124.  00:7F03  34                          inc (hl)                        ; increment position (high)        
+     125.  00:7F04  11 FB FF                    ld de,-5
+     126.  00:7F07  19                          add hl,de
+     127.  00:7F08  CD 7C 74                    call sendRegisters
+     128.  00:7F0B  36 8C                       ld (hl),C_DEVICEREAD
+     129.  00:7F0D  CD 34 76                    call enableNowindPage0
+     130.  00:7F10  26 20                       ld h,HIGH usbrd
+     131.  00:7F12  CD 8E 74                    call getHeader
+     132.  00:7F15  38 B6                       jr c,deviceIoError
+     133.  00:7F17                      
+     134.  00:7F17  5E                          ld e,(hl)
+     135.  00:7F18  56                          ld d,(hl)
+     136.  00:7F19  4E                          ld c,(hl)
+     137.  00:7F1A  46                          ld b,(hl)
+     138.  00:7F1B  ED B0                       ldir                            ; update fcb buffer
+     139.  00:7F1D  CD 3F 76                    call restorePage0
+     140.  00:7F20  F1                          pop af                          ; return last character
+     141.  00:7F21  C9                          ret
+     142.  00:7F22                      
+     143.  00:7F22                      eof:
+     144.  00:7F22                      ;        DEBUGMESSAGE "eof"
+     145.  00:7F22  7E                          ld a,(hl)
+     146.  00:7F23  FE 01                       cp 1                            ; input mode?        
+     147.  00:7F25  1E 3D                       ld e,61                         ; bad file mode
+     148.  00:7F27  C2 D3 7E                    jp nz,basicError
+     149.  00:7F2A                                      
+     150.  00:7F2A  11 06 00                    ld de,6
+     151.  00:7F2D  19                          add hl,de
+     152.  00:7F2E  5E                          ld e,(hl)
+     153.  00:7F2F  23                          inc hl
+     154.  00:7F30  23                          inc hl
+     155.  00:7F31  23                          inc hl
+     156.  00:7F32  19                          add hl,de
+     157.  00:7F33  7E                          ld a,(hl)
+     158.  00:7F34  ED 62                       sbc hl,hl
+     159.  00:7F36  FE 1A                       cp $1a        
+     160.  00:7F38  20 01                       jr nz,.skip
+     161.  00:7F3A  2B                          dec hl
+     162.  00:7F3B  22 F8 F7            .skip:  ld (DAC+2),hl
+     163.  00:7F3E  3E 02                       ld a,2
+     164.  00:7F40  32 63 F6                    ld (VALTYP),a
+     165.  00:7F43  C9                          ret
+     166.  00:7F44                      
+     167.  00:7F44                      loc:
+     168.  00:7F44  E5                          push hl
+     169.  00:7F45  FD E1                       pop iy
+     170.  00:7F47  FD 6E 06                    ld l,(iy+6)
+     171.  00:7F4A  FD 66 05                    ld h,(iy+5)
+     172.  00:7F4D                      ;        DEBUGASSERT
+     173.  00:7F4D  22 F8 F7                    ld (DAC+2),hl
+     174.  00:7F50  3E 02                       ld a,2
+     175.  00:7F52  32 63 F6                    ld (VALTYP),a
+     176.  00:7F55  C9                          ret
+     177.  00:7F56                              
+     178.  00:7F56                      putback:
+     179.  00:7F56                      ;        DEBUGMESSAGE "putback"
+     180.  00:7F56                      ;        push hl
+     181.  00:7F56                      ;        pop iy
+     182.  00:7F56                      ;        ld (iy+3),c
+     183.  00:7F56                      ;        DEBUGASSERT
+     184.  00:7F56                      ;        ret
+     185.  00:7F56                      
+     186.  00:7F56                      lof:
+     187.  00:7F56                      fpos:
+     188.  00:7F56                              DEBUGMESSAGE "no support!"
+     188.  00:7F56                    >         ifdef DEBUG
+     188.  00:7F56  52                >         ld d,d
+     188.  00:7F57  18 0B             >         jr .skip
+     188.  00:7F59                    >         db string
+     188.  00:7F59  6E 6F 20 73 75 70 70 6F 72 74 21 
+     188.  00:7F64                    > .skip:
+     188.  00:7F64                    >         endif
+     189.  00:7F64                      
+     190.  00:7F64                      illegalFunctionCall:
+     191.  00:7F64  1E 05                       ld e,5
+     192.  00:7F66  C3 D3 7E                    jp basicError
+     193.  00:7F69                      
+     194.  00:7F69                      ;FCB for DISK BASIC
+     195.  00:7F69                      ; +0 FL.MOD     file mode
+     196.  00:7F69                      ; +1 FL.FCA     Pointer to FCB for BDOS (low)
+     197.  00:7F69                      ; +2 FL.LCA     Pointer to FCB for BDOS (high)
+     198.  00:7F69                      ; +3 FL.LSA     Back up character
+     199.  00:7F69                      ; +4 FL.DSK     device number
+     200.  00:7F69                      ; +5 FL.SLB
+     201.  00:7F69                      ; +6 FL.BPS     Position in FL.BUF
+     202.  00:7F69                      ; +7 FL.FLG     Holds various information
+     203.  00:7F69                      ; +8 FL.OPS     Pseudo head position
+     204.  00:7F69                      ; +9 FL.BUF     256-byte file buffer
+     205.  00:7F69                      
+     206.  00:7F69                      ; device codes
+     207.  00:7F69                      ;          SS0           SS1           SS2           SS3
+     208.  00:7F69                      ;    ---------------------------------------------------------
+     209.  00:7F69                      ;    | 00 04 08 0C | 10 14 18 1C | 20 24 28 2C | 30 34 38 3C | PS0
+     210.  00:7F69                      ;    ---------------------------------------------------------
+     211.  00:7F69                      ;    | 40 44 48 4C | 50 54 58 5C | 60 64 68 6C | 70 74 78 7C | PS1
+     212.  00:7F69                      ;    ---------------------------------------------------------
+     213.  00:7F69                      ;    | 80 84 88 8C | 90 94 98 9C | A0 A4 A8 AC | B0 B4 B8 BC | PS2
+     214.  00:7F69                      ;    ---------------------------------------------------------
+     215.  00:7F69                      ;    | C0 C4 C8 CC | D0 D4 D8 DC | E0 E4 E8 EC | F0 F4 F8 FC | PS3
+     216.  00:7F69                      ;    ---------------------------------------------------------
+     217.  00:7F69                      
+     218.  00:7F69                      ; fileModes
+     219.  00:7F69                      ; FOR INPUT (01H)
+     220.  00:7F69                      ; FOR OUTPUT (02H)
+     221.  00:7F69                      ; FOR APPEND (08H)
+     222.  00:7F69                      ; random mode (04H)
+     223.  00:7F69                      
+     224.  00:7F69                      ; maximum number of files open: MAXFILES=15
+     225.  00:7F69                              
+     226.  00:7F69                      ; File Control Block
+     227.  00:7F69                      ;       0     1     2     3     4     5     6     7     8
+     228.  00:7F69                      ;    -------------------------------------------------------
+     229.  00:7F69                      ;    | Mod | 00H | 00H | 00H | DEV | 00H | POS | 00H | PPS |
+     230.  00:7F69                      ;    -------------------------------------------------------
+     231.  00:7F69                      ;                  err? bckup       posHi 
+     232.  00:7F69                      ; followed by a 256 byte buffer
+      84   00:7F69                              
+      85   00:7F69                              ifdef BDOS_NOWIND
+      86   00:7F69                    ~         include "nowindbdos.asm"
+      87   00:7F69                    ~         endif
+      88   00:7F69                              
+      89   00:7F69  FF (139)                    ds $8000-$-12, $ff
+      90   00:7FF4                      
+      91   00:7FF4                      ; bank switching and data transfer
+      92   00:7FF4                      copyFromBank:
+      93   00:7FF4  32 01 60                    ld (mapper),a                   ; no not remove!
+      94   00:7FF7  ED B0                       ldir                            ; no not remove!
+      95   00:7FF9                      enableBank0:
+      96   00:7FF9  AF                          xor a                           ; no not remove!
+      97   00:7FFA  F5                          push af                         ; no not remove!
+      98   00:7FFB  32 01 60                    ld (mapper),a                   ; no not remove!
+      99   00:7FFE  F1                          pop af                          ; no not remove!
+     100   00:7FFF  C9                          ret                             ; no not remove!
+     101   00:8000                      
+     102   00:8000                      
+     103   00:8000  (01)                        page 1
+     104   01:4000                              
+     105   01:4000  (60000)                     incbin "..\roms\romdisk.bin"        
+     106   01!4000                              romheader 31
+     106   01!4000  (01:4000)         > .addr := $4000
+     106   01!4000                    >         repeat r
+     106   01!4000                    <         code ! .addr
+     106   01!4000                    < 
+     106   01!4000                    <         org $4000
+     106   01!4000                    <         db "AB"
+     106   01!4000                    <         dw .init
+     106   01!4000                    <         ds 12,0
+     106   01!4000                    < 
+     106   01!4000                    <         call .redir
+     106   01!4000                    <         call .redir
+     106   01!4000                    <         call .redir
+     106   01!4000                    <         call .redir
+     106   01!4000                    <         call .redir
+     106   01!4000                    <         ds 3,0
+     106   01!4000                    < 
+     106   01!4000                    <         code ! .addr + $3fe7
+     106   01!4000                    <         org $7fe7
+     106   01!4000                    <         
+     106   01!4000                    < .init:  ld hl,romInit
+     106   01!4000                    <         push hl
+     106   01!4000                    <         jr .enableBank0
+     106   01!4000                    < 
+     106   01!4000                    < .redir: ex (sp),hl
+     106   01!4000                    <         dec hl
+     106   01!4000                    <         dec hl
+     106   01!4000                    <         dec hl
+     106   01!4000                    <         ex (sp),hl
+     106   01!4000                    <         jr .enableBank0
+     106   01!4000                    < 
+     106   01!4000                    <         ld (mapper),a
+     106   01!4000                    <         ldir
+     106   01!4000                    < .enableBank0:
+     106   01!4000                    <         push af
+     106   01!4000                    <         xor a
+     106   01!4000                    <         ld (mapper),a
+     106   01!4000                    <         pop af
+     106   01!4000                    <         ret
+     106   01!4000                    <         
+     106   01!4000                    < .@addr := .addr + $4000
+     106   01!4000                    <         endrepeat
+     106   01!4000  41 42 E7 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 
+     106   01!64010 CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 2B E3 18 05 
+     106   01!64020032 01 60 ED B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F 
+     106   01!640300CD ED 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 21 
+     106   01!6404006F 57 E5 18 0C E3 2B 2B 2B E3 18 05 32 01 60 ED 
+     106   01!640500B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F CD ED 7F CD 
+     106   01!640600ED 7F CD ED 7F CD ED 7F CD ED 7F 21 6F 57 E5 18 
+     106   01!6407000C E3 2B 2B 2B E3 18 05 32 01 60 ED B0 F5 AF 32 
+     106   01!64080001 60 F1 C9 41 42 E7 7F CD ED 7F CD ED 7F CD ED 
+     106   01!6409007F CD ED 7F CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 
+     106   01!640A002B E3 18 05 32 01 60 ED B0 F5 AF 32 01 60 F1 C9 
+     106   01!640B0041 42 E7 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 
+     106   01!640C00CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 2B E3 18 05 
+     106   01!640D0032 01 60 ED B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F 
+     106   01!640E00CD ED 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 21 
+     106   01!640F006F 57 E5 18 0C E3 2B 2B 2B E3 18 05 32 01 60 ED 
+     106   01!641000B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F CD ED 7F CD 
+     106   01!641100ED 7F CD ED 7F CD ED 7F CD ED 7F 21 6F 57 E5 18 
+     106   01!6412000C E3 2B 2B 2B E3 18 05 32 01 60 ED B0 F5 AF 32 
+     106   01!64130001 60 F1 C9 41 42 E7 7F CD ED 7F CD ED 7F CD ED 
+     106   01!6414007F CD ED 7F CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 
+     106   01!6415002B E3 18 05 32 01 60 ED B0 F5 AF 32 01 60 F1 C9 
+     106   01!64160041 42 E7 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 
+     106   01!641700CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 2B E3 18 05 
+     106   01!64180032 01 60 ED B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F 
+     106   01!641900CD ED 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 21 
+     106   01!641A006F 57 E5 18 0C E3 2B 2B 2B E3 18 05 32 01 60 ED 
+     106   01!641B00B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F CD ED 7F CD 
+     106   01!641C00ED 7F CD ED 7F CD ED 7F CD ED 7F 21 6F 57 E5 18 
+     106   01!641D000C E3 2B 2B 2B E3 18 05 32 01 60 ED B0 F5 AF 32 
+     106   01!641E0001 60 F1 C9 41 42 E7 7F CD ED 7F CD ED 7F CD ED 
+     106   01!641F007F CD ED 7F CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 
+     106   01!6420002B E3 18 05 32 01 60 ED B0 F5 AF 32 01 60 F1 C9 
+     106   01!64210041 42 E7 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 
+     106   01!642200CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 2B E3 18 05 
+     106   01!64230032 01 60 ED B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F 
+     106   01!642400CD ED 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 21 
+     106   01!6425006F 57 E5 18 0C E3 2B 2B 2B E3 18 05 32 01 60 ED 
+     106   01!642600B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F CD ED 7F CD 
+     106   01!642700ED 7F CD ED 7F CD ED 7F CD ED 7F 21 6F 57 E5 18 
+     106   01!6428000C E3 2B 2B 2B E3 18 05 32 01 60 ED B0 F5 AF 32 
+     106   01!64290001 60 F1 C9 41 42 E7 7F CD ED 7F CD ED 7F CD ED 
+     106   01!642A007F CD ED 7F CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 
+     106   01!642B002B E3 18 05 32 01 60 ED B0 F5 AF 32 01 60 F1 C9 
+     106   01!642C0041 42 E7 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 
+     106   01!642D00CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 2B E3 18 05 
+     106   01!642E0032 01 60 ED B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F 
+     106   01!642F00CD ED 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 21 
+     106   01!6430006F 57 E5 18 0C E3 2B 2B 2B E3 18 05 32 01 60 ED 
+     106   01!643100B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F CD ED 7F CD 
+     106   01!643200ED 7F CD ED 7F CD ED 7F CD ED 7F 21 6F 57 E5 18 
+     106   01!6433000C E3 2B 2B 2B E3 18 05 32 01 60 ED B0 F5 AF 32 
+     106   01!64340001 60 F1 C9 41 42 E7 7F CD ED 7F CD ED 7F CD ED 
+     106   01!6435007F CD ED 7F CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 
+     106   01!6436002B E3 18 05 32 01 60 ED B0 F5 AF 32 01 60 F1 C9 
+     106   01!64370041 42 E7 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 
+     106   01!643800CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 2B E3 18 05 
+     106   01!64390032 01 60 ED B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F 
+     106   01!643A00CD ED 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 21 
+     106   01!643B006F 57 E5 18 0C E3 2B 2B 2B E3 18 05 32 01 60 ED 
+     106   01!643C00B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F CD ED 7F CD 
+     106   01!643D00ED 7F CD ED 7F CD ED 7F CD ED 7F 21 6F 57 E5 18 
+     106   01!643E000C E3 2B 2B 2B E3 18 05 32 01 60 ED B0 F5 AF 32 
+     106   01!643F0001 60 F1 C9 41 42 E7 7F CD ED 7F CD ED 7F CD ED 
+     106   01!6440007F CD ED 7F CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 
+     106   01!6441002B E3 18 05 32 01 60 ED B0 F5 AF 32 01 60 F1 C9 
+     106   01!64420041 42 E7 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 
+     106   01!644300CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 2B E3 18 05 
+     106   01!64440032 01 60 ED B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F 
+     106   01!644500CD ED 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 21 
+     106   01!6446006F 57 E5 18 0C E3 2B 2B 2B E3 18 05 32 01 60 ED 
+     106   01!644700B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F CD ED 7F CD 
+     106   01!644800ED 7F CD ED 7F CD ED 7F CD ED 7F 21 6F 57 E5 18 
+     106   01!6449000C E3 2B 2B 2B E3 18 05 32 01 60 ED B0 F5 AF 32 
+     106   01!644A0001 60 F1 C9 41 42 E7 7F CD ED 7F CD ED 7F CD ED 
+     106   01!644B007F CD ED 7F CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 
+     106   01!644C002B E3 18 05 32 01 60 ED B0 F5 AF 32 01 60 F1 C9 
+     106   01!644D0041 42 E7 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 
+     106   01!644E00CD ED 7F 21 6F 57 E5 18 0C E3 2B 2B 2B E3 18 05 
+     106   01!644F0032 01 60 ED B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F 
+     106   01!645000CD ED 7F CD ED 7F CD ED 7F CD ED 7F CD ED 7F 21 
+     106   01!6451006F 57 E5 18 0C E3 2B 2B 2B E3 18 05 32 01 60 ED 
+     106   01!645200B0 F5 AF 32 01 60 F1 C9 41 42 E7 7F CD ED 7F CD 
+     106   01!645300ED 7F CD ED 7F CD ED 7F CD ED 7F 21 6F 57 E5 18 
+     106   01!6454000C E3 2B 2B 2B E3 18 05 32 01 60 ED B0 F5 AF 32 
+     106   01!64550001 60 F1 C9 
+
+    LABELS
+---------------------------------------
+00:0000576F   romInit
+00:00005F86 X printText
+00:0000000C X RDSLT
+00:00000014 X WRSLT
+00:0000001C   CALSLT
+00:00000024   ENASLT
+00:0000005F   CHGMOD
+00:00000141   SNSMAT
+00:0000015F   EXTROM
+00:00000185   SDFSCR
+00:0000F33F   LASTDRV
+00:0000F342   RAMAD1
+00:0000F36E   XFER
+00:0000F663   VALTYP
+00:0000F7F6   DAC
+00:0000F864   PTRFIL
+00:0000F866   FILNAM
+00:0000FCC1   EXPTBL
+00:0000FCC5   SLTTBL
+00:0000FCC9 X SLTATR
+00:0000FD09   SLTWRK
+00:0000FD89   PROCNM
+00:0000FD99   DEVICE
+00:0000FFCA   EXTBIO
+00:0000402D   GETSLT
+00:0000FECB X H.RUNC
+00:00004000   usbwr
+00:00002000   usbrd
+00:00008000   usb2
+00:00006001   mapper
+00:00000080   C_DSKIO
+00:00000081   C_DSKCHG
+00:00000082   C_GETDPB
+00:00000083 X C_CHOICE
+00:00000084 X C_DSKFMT
+00:00000085   C_DRIVES
+00:00000086   C_INIENV
+00:00000087 X C_SETDATE
+00:00000088   C_DEVICEOPEN
+00:00000089   C_DEVICECLOSE
+00:0000008A X C_DEVICERNDIO
+00:0000008B   C_DEVICEWRITE
+00:0000008C   C_DEVICEREAD
+00:0000008D X C_DEVICEEOF
+00:0000008E   C_AUXIN
+00:0000008F   C_AUXOUT
+00:00000090   C_MESSAGE
+00:000000A0   C_CHANGEIMAGE
+00:000000A1   C_BOOTCODE
+00:00007405   nowindInit
+00:00007438   initDiskBasic
+00:00007450   findStatementName
+00:00007467   findStatementName.loop
+00:00007471   findStatementName.nextStatement
+00:0000747C   sendRegisters
+00:0000748E   getHeader
+00:00007490   getHeader.loop
+00:00007491   getHeader.chkaf
+00:000074B5   getHeader.chk05
+00:000074BC   sendMessage
+00:000074C6   sendMessage.loop
+00:000074D2   newAUX
+00:000074DC   AUXin
+00:0000750A   AUXin.exit
+00:00007510   AUXin.getCharacter
+00:00007521   AUXout
+00:00007539 X insertBootCode
+00:00007560 X sdendFCB
+00:00007564   sdendFCB.loop
+00:0000756E X receiveFCB
+00:00007572   receiveFCB.loop
+00:0000757F   installExtendedBios
+00:000075B4   extendedBios
+00:000075BB   extendedBios.exit
+00:000075C9   determineFunction
+00:000075D5   functionTable
+00:000075DB   getNowindSlot
+00:000075F7   numberOfDevices
+00:0000760E   debugMessage
+00:0000762A   debugMessage.loop
+00:00007634   enableNowindPage0
+00:0000763F   restorePage0
+00:00007648   enableSlotPage0
+00:00007659   enableSlotPage0.expanded
+00:00007684   getSlotPage0
+00:0000768F   getSlotPage1
+00:0000769A   getSlotPage2
+00:000076A9   expanded
+00:000076BD   notExpanded
+00:000076BF   getEntrySLTWRK
+00:00000008   MYSIZE
+00:00000200   SECLEN
+00:000076D4   INIHRD
+00:000076E3   INIHRD.loop
+00:000076F7   DRIVES
+00:0000773A   DRIVES.exit
+00:00007743   DRIVES.notconnected
+00:00007760   INIENV
+00:000077A4   INIENV.exit
+00:000077A7   checkWorkArea
+00:000077B2   DSKIO
+00:000077C9 X dskioRead
+00:0000B7E6   dskioRead.page2
+00:000077FB   dskioRead.page1
+00:0000780B   dskioRead.page2and3
+00:00007821   dskioWrite
+00:0000B841   dskioWrite.page2
+00:00007857   dskioWrite.page1
+00:0000786D   dskioWrite.page2and3
+00:00007882   dskioWrite.writeLoop23
+00:000078B2   dskioWrite.error
+00:000078B5   DSKCHG
+00:000078EC   GETDPB
+00:00007922   GETDPB.hddImage
+00:00007955   GETDPB.exit
+00:00007958   CHOICE
+00:0000795C X CHOICE.noFormat
+00:0000795D   DSKFMT
+00:0000B961   readSectors01
+00:0000B983   readSectors01.slowTransfer
+00:0000B98F   writeLoop01
+00:0000B9B1   writeLoop01.error
+00:000079B4   readSectors23
+00:000079D8   readSectors23.slowTransfer
+00:000079F5   reverseTransfer
+00:00007A01   reverseTransfer.loop
+00:00007A68   OEMSTA
+00:00007A76   OEMSTA.statement
+00:00007A89   changeImage
+00:00007A9E   call_exit
+00:00007AAA   call_exit.loop
+00:00007AB6   videoStream
+00:00007AB7 X vramDump
+00:00007AC3   evenFrame
+00:00007AE0 X oddFrame
+00:00007B00   tranferframe
+00:00007B0D   write_more
+00:00007C1A   changeColors
+00:00007C68   setVramAccessPointer
+00:00007C76   waitForRetrace
+00:00007C7C   waitForRetrace.lp2
+00:00007C87   printVdpText2
+00:00007C88   printVdpText2.loop
+00:00007C91   supportedMedia
+00:00007C91 X supportedMedia.f8
+00:00007CA3   supportedMedia.def
+00:00007CA3   DEFDPB
+00:00007D21   ROMDISK_DSKIO
+00:00007D30   ROMDISK_DSKIO.loop
+00:00007D52   ROMDISK_DSKIO.directCopy
+00:00007D58   ROMDISK_DSKIO.nextSector
+00:00007D5E   ROMDISK_DSKIO.findSector
+00:00007D73   ROMDISK_DSKIO.skip
+00:00007D80   ROMDISK_DSKCHG
+00:00007D85 X ROMDISK_GETDPB
+00:00007D85 X ROMDISK_DSKFMT
+00:00007D85   flashWriter
+00:00007DD5   flashWriter.source
+00:0000C000   waitForHeader
+00:0000C003   waitForHeader.chkbb
+00:0000C01A X chipErase
+00:0000C028   chipErase.wait
+00:0000C032   writeFlash
+00:0000C041   writeFlash.loop
+00:0000C04B   writeFlash.wait
+00:0000C057   verifyFlash
+00:0000C062   verifyFlash.loop
+00:0000C06B   acknowledge
+00:0000C075   updateBar
+00:0000C07A   AM29F040Command
+00:0000C089   flasherEnd
+00:00007E5E   device
+00:00007E6A   device.nocy
+00:00007E70   deviceFunctions
+00:00007E86   identifyDevice
+00:00007E9F   deviceNameList
+00:00007EA6   open
+00:00007ECD   deviceIoError
+00:00007ECF   openError
+00:00007ED3   basicError
+00:00007EDE   close
+00:00007EE4   randomIO
+00:00007EE8   write
+00:00007EEE   read
+00:00007F22   eof
+00:00007F3B   eof.skip
+00:00007F44   loc
+00:00007F56   putback
+00:00007F56   lof
+00:00007F56   fpos
+00:00007F64 X illegalFunctionCall
+00:00007FF4   copyFromBank
+00:00007FF9 X enableBank0
+
+
+Output: C:\MSX\nowind\msxsrc\nowindDos1.out
+--------------------------------------
+
+ Page: 00
+  Org: 00004000  Size: *  Used: 00000000
+
+    No output
+
+Output: nowindDos1.rom
+--------------------------------------
+
+ Page: 00
+  Org: 00004000  Size: 00004000  Used: 00004000
+
+   Address   Length Align  Label
+   00004000   13317        
+   00007405    3067     @  nowindInit
+
+  Overlay parts:
+   Address   Length Align  Label
+   00004006       2     @  
+   00004010      18     @  
+   00005770       2     @  
+   000057AA       2     @  
+   00005809       2     @  
+   0000581E       2     @  
+   0000582F       2     @  
+   00005851       2     @  
+   00005884       2     @  
+   00005890       2     @  
+   0000595D      15     @  
+   00005AE8       2     @  
+   000065AF       2     @  
+
+ Page: 01
+  Org: 00004000  Size: 0007C000  Used: 0007C000
+
+   Address   Length Align  Label
+   00004000  393216        
+   00064000  114688       <empty>
+
+  Overlay parts:
+   Address   Length Align  Label
+   00004000      34     @  
+   00007FE7      25     @  254.255>init
+   00008000      34     @  
+   0000BFE7      25     @  254.256>init
+   0000C000      34     @  
+   0000FFE7      25     @  254.257>init
+   00010000      34     @  
+   00013FE7      25     @  254.258>init
+   00014000      34     @  
+   00017FE7      25     @  254.259>init
+   00018000      34     @  
+   0001BFE7      25     @  254.260>init
+   0001C000      34     @  
+   0001FFE7      25     @  254.261>init
+   00020000      34     @  
+   00023FE7      25     @  254.262>init
+   00024000      34     @  
+   00027FE7      25     @  254.263>init
+   00028000      34     @  
+   0002BFE7      25     @  254.264>init
+   0002C000      34     @  
+   0002FFE7      25     @  254.265>init
+   00030000      34     @  
+   00033FE7      25     @  254.266>init
+   00034000      34     @  
+   00037FE7      25     @  254.267>init
+   00038000      34     @  
+   0003BFE7      25     @  254.268>init
+   0003C000      34     @  
+   0003FFE7      25     @  254.269>init
+   00040000      34     @  
+   00043FE7      25     @  254.270>init
+   00044000      34     @  
+   00047FE7      25     @  254.271>init
+   00048000      34     @  
+   0004BFE7      25     @  254.272>init
+   0004C000      34     @  
+   0004FFE7      25     @  254.273>init
+   00050000      34     @  
+   00053FE7      25     @  254.274>init
+   00054000      34     @  
+   00057FE7      25     @  254.275>init
+   00058000      34     @  
+   0005BFE7      25     @  254.276>init
+   0005C000      34     @  
+   0005FFE7      25     @  254.277>init
+   00060000      34     @  
+   00063FE7      25     @  254.278>init
+   00064000      34     @  
+   00067FE7      25     @  254.279>init
+   00068000      34     @  
+   0006BFE7      25     @  254.280>init
+   0006C000      34     @  
+   0006FFE7      25     @  254.281>init
+   00070000      34     @  
+   00073FE7      25     @  254.282>init
+   00074000      34     @  
+   00077FE7      25     @  254.283>init
+   00078000      34     @  
+   0007BFE7      25     @  254.284>init
+   0007C000      34     @  
+   0007FFE7      25     @  254.285>init
