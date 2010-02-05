@@ -95,6 +95,10 @@ INIENV:
 .exit:  jp restorePage0
 
 checkWorkArea:
+        ld a,1
+        and a
+        ret
+        
         push bc
         push hl
         push af

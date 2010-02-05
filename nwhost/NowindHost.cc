@@ -992,7 +992,6 @@ void NowindHost::callImage(const string& filename)
 
 void NowindHost::getDosVersion()
 {
-	printf("ik kom hier!\n");
 	sendHeader();
 	send(enableMSXDOS2 ? 1:0);
 }
