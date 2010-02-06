@@ -37,6 +37,9 @@ ftdx::UsbStream* ftdx::newUsbStream(FtdiDriverType aDriverType)
 		lUsbStream = new ConFtdiSio();
 		break;
 #endif
+
+    // todo: support for FTDI's FTSER2K.SYS (or any other virtual serial port driver) on windows (COMx:) and linux /dev/TTYSx?
+
 	default:
 		Util::debug("unknown driver type %u specified, null returned\n", aDriverType);
 		break;	
