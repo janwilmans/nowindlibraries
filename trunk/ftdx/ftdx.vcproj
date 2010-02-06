@@ -204,6 +204,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FTD2XX-msc\ftd2xx.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ftdi.c"
 				>
 			</File>
@@ -221,6 +225,10 @@
 			</File>
 			<File
 				RelativePath=".\libftdx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\libusb-win32\usb.h"
 				>
 			</File>
 			<File
