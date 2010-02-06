@@ -4,7 +4,7 @@
  * @brief FTD2xx based FTDI communication (binary drivers from www.ftdichip.com) 
  * @author Jan Wilmans <jw@dds.nl>  Copyright (C) 2009 Nowind
  *
- * this code is portable but requires binary drivers not be installed.
+ * this code is portable but requires binary drivers to be installed.
  * they can be downloaded from www.ftdichip.com
  */
 
@@ -44,7 +44,17 @@ static const char * ftdiErrorString[] = {
 
 ConFTD2XX::ConFTD2XX()
 {
-
+    FT_STATUS ftStatus; 
+    DWORD dwLibraryVer; // Get DLL version 
+    ftStatus = FT_GetLibraryVersion(&dwLibraryVer);
+    if (ftStatus == FT_OK)
+    {
+        printf("Library version = 0x%x\n",dwLibraryVer);
+    }
+    else 
+    {
+        printf("error: ftd2xx driver not found, download at www.ftdichip.com\n");
+    }
 }
 
 ConFTD2XX::~ConFTD2XX()
@@ -55,7 +65,7 @@ ConFTD2XX::~ConFTD2XX()
 bool ConFTD2XX::open()
 {
 	mUsbStreamOpen = false;
-	//todo: make device selectable ! there could be more FTDT devices!!!
+	//todo: make device selectable ! there could be more FTDI devices!!!
 /*
     DWORD numDevs;
     FT_STATUS ftStatus = FT_ListDevices(&numDevs,NULL,FT_LIST_NUMBER_ONLY);
@@ -100,7 +110,7 @@ void ConFTD2XX::close()
 	}
 }
 
-// waits until excactly bytesToRead are available
+// waits until exactly bytesToRead are available
 // but uses an internal buffer when more data then requested is available
 // return:
 //  0: connection problem
@@ -146,7 +156,6 @@ int ConFTD2XX::readExact(unsigned char * aBuffer, unsigned long aBytesToRead)
 }
 
 // waits until any data is available
-// it can use libftdi's internal buffers
 //  0: connection problem 
 //  otherwise: the amount of bytes in written in the buffer
 int ConFTD2XX::readBlocking(unsigned char * aBuffer, unsigned long aMaxBytesToRead)
