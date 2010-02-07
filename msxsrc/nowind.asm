@@ -39,7 +39,7 @@
         jp DSKFMT
         db 0,0,0                        ; no DRVOFF
         
-        PATCH $47d7, getBootArgs
+        PATCH $47d7, getBootArgs        ; INIHDR
 ;        PATCH $47dd, 0                  ; do not check for MSX1
         PATCH $488d, MYSIZE
         PATCH $489f, SECLEN
@@ -68,9 +68,18 @@
         
         code @ $72f0
                 
-getBootArgs:
+getBootArgs:              
+        ;ld b,0                      ; b=0 means request startup command
+        ;ld c,0                      ; c=0 means reset startup queue index 
+        ;call sendRegisters
+        ;ld (hl),C_CMDREQUEST
+        ;call enableNowindPage0
+        ;ld h,HIGH usbrd
+        ;call getHeader
+        ;DEBUGMESSAGE "getBootArgs ############!"        
+
         call sendRegisters
-        ld (hl),C_BOOTARGS
+        ld (hl),C_GETDOSVERSION
         call enableNowindPage0
         ld h,HIGH usbrd
         call getHeader

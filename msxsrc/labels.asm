@@ -12,7 +12,7 @@ SDFSCR          equ $0185               ; restore screen parameters from clockch
 LASTDRV         equ $f33f               ; stores CTRL-key status during boot
 RAMAD1          equ $f342
 XFER            equ $f36e
-
+ 
 VALTYP          equ $f663
 DAC             equ $f7f6
 PTRFIL          equ $f864
@@ -57,7 +57,7 @@ C_AUXIN         equ $8e
 C_AUXOUT        equ $8f
 C_MESSAGE       equ $90
 C_CHANGEIMAGE   equ $91
-C_BOOTARGS      equ $92
+C_GETDOSVERSION equ $92
 C_CMDREQUEST    equ $93
 
 ; BDOS commands 0x0F- 0x37 can just use their original command code in register C
