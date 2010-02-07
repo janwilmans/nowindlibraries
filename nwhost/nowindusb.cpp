@@ -248,24 +248,6 @@ int nowindusb_attribute(nw_attribute aAttribute, bool aValue)
 	return 0;
 }
 
-int nowindusb_cmd(unsigned int aCommandId, char * aCharArgument, unsigned int aIntArgument1, unsigned int aIntArgument2, unsigned int aIntArgument3, unsigned int aIntArgument4)
-{
-	//at_commands { cmd_none = 0, cmd_putmem_clear, cmd_putmem };
-	switch(aCommandId)
-	{
-	case cmd_putmem_clear:
-		// clear putmem list
-		//nowindHost->putmemClear();
-		break;
-	case cmd_putmem:
-		//nowindHost->putMem(aCharArgument, aIntArgument1, aIntArgument2, aIntArgument3, aIntArgument4);
-		break;
-	default:
-		break;
-	}
-	return 0;
-}
-
 bool nowindusb_is_data_available()
 {
 	return nowindHost->isDataAvailable();
@@ -276,11 +258,38 @@ void nowindusb_clear_requests()
     nowindHost->clearRequests();
 }
 
-/*
-void nowindusb_add_request(std::vector<byte> command)
+void nowindusb_add_request(const nwhost::byte* cRequest)     // formatted LL (length) CB (command byte) LL CB CB CB ... ie. 03 0A 0B 0C
 {
-   nowindHost->addRequest();
+    std::vector<nwhost::byte> request;
+    int len = cRequest[0];
+    if (len > 16)
+    {
+        DBERR("add_request to large!\n");
+    }
+    for (int i=0;i<len;i++)
+    {
+        request.push_back(cRequest[i]);
+    }
+    nowindHost->addRequest(request);
 }
 
-*/
+void nowindusb_clear_startup_requests()
+{
+    nowindHost->clearStartupRequests();
+}
+
+void nowindusb_add_startup_request(const nwhost::byte* cRequest)     // formatted LL (length) CB (command byte) LL CB CB CB ... ie. 03 0A 0B 0C
+{
+    std::vector<nwhost::byte> request;
+    int len = cRequest[0];
+    if (len > 16)
+    {
+        DBERR("add_request to large!\n");
+    }
+    for (int i=0;i<len;i++)
+    {
+        request.push_back(cRequest[i]);
+    }
+    nowindHost->addStartupRequest(request);
+}
 

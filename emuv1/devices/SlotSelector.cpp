@@ -82,9 +82,9 @@ void SlotSelector::configure(unsigned int msxVersion) {
         mainRom->patch(0x0180, 0xed);   // TURBO-R CHGCPU
         mainRom->patch(0x0181, 0x0a);   // assert(false)
 		// NO start-up logo, patch should be applied to SUB-ROM 
-		subRom->patch(0x2a0e,0);
-		subRom->patch(0x2a0f,0);
-		subRom->patch(0x2a10,0);
+		//subRom->patch(0x2a0e,0);
+		//subRom->patch(0x2a0f,0);
+		//subRom->patch(0x2a10,0);
 		
 		// NO boot-delay, patch should be applied to SUB-ROM 
 		subRom->patch(0x041d,0x18);

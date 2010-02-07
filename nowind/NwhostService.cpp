@@ -499,7 +499,7 @@ void NwhostService::processExit()
 	if (mDebug) Util::debug("done.\n");
 }
 
-// these method will need to be reworking to cope with multiple connections
+// these method will need to be reworked to cope with multiple connections
 void NwhostService::setImage(int aDriveNr, string aFilename)
 {
 	Util::debug("NwhostService::setImage: %s\n", aFilename.c_str());
@@ -520,3 +520,9 @@ void NwhostService::setAttribute(nw_attribute aAttribute, bool aValue)
 {
 	nowindusb_attribute(aAttribute, aValue);
 }
+
+void NwhostService::addStartupRequest(const nwhost::byte* cRequest)
+{
+    nowindusb_add_startup_request(cRequest);
+}
+

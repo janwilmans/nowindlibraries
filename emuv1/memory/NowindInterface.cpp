@@ -22,7 +22,6 @@ NowindInterface::NowindInterface(string filename) {
     idString = "NowindInterface";
     
 	nwhost::initialize();
-	nowindusb_startup();
 
 	loadRom(filename);
 	deviceSize = 8;            /* in 8kb blocks */
