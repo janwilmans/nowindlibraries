@@ -14,6 +14,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nowind", "nowind\nowind.vcp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nwhost", "nwhost\nwhost.vcproj", "{84CB9A93-5255-49DC-90B5-094A40902C45}"
 	ProjectSection(ProjectDependencies) = postProject
+		{38CF369E-8463-4C57-9101-7A6211D45184} = {38CF369E-8463-4C57-9101-7A6211D45184}
 		{121530D0-D7D4-487C-846F-2BBFB0CAF032} = {121530D0-D7D4-487C-846F-2BBFB0CAF032}
 	EndProjectSection
 EndProject
@@ -31,6 +32,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "emuv1", "emuv1\emuv1.vcproj
 	ProjectSection(ProjectDependencies) = postProject
 		{84CB9A93-5255-49DC-90B5-094A40902C45} = {84CB9A93-5255-49DC-90B5-094A40902C45}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "msxsrc", "msxsrc\msxsrc.vcproj", "{38CF369E-8463-4C57-9101-7A6211D45184}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +67,10 @@ Global
 		{7A33AB1A-80EF-441B-B444-9A01765DB48E}.Debug|Win32.Build.0 = Debug|Win32
 		{7A33AB1A-80EF-441B-B444-9A01765DB48E}.Release|Win32.ActiveCfg = Release|Win32
 		{7A33AB1A-80EF-441B-B444-9A01765DB48E}.Release|Win32.Build.0 = Release|Win32
+		{38CF369E-8463-4C57-9101-7A6211D45184}.Debug|Win32.ActiveCfg = Debug|Win32
+		{38CF369E-8463-4C57-9101-7A6211D45184}.Debug|Win32.Build.0 = Debug|Win32
+		{38CF369E-8463-4C57-9101-7A6211D45184}.Release|Win32.ActiveCfg = Release|Win32
+		{38CF369E-8463-4C57-9101-7A6211D45184}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

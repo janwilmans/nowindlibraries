@@ -314,7 +314,7 @@ void NowindHost::commandRequested()
 void NowindHost::commandRequestedAtStartup(byte reset)
 {
     static unsigned int index = 0;
-    if (reset = 0x00)
+    if (reset == 0x00)
     {
         // The MSX is in its diskrom startup sequence at INIHDR and requests the first startup command
         DBERR("INIHRD hook requests command at startup\n");
