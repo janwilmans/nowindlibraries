@@ -95,12 +95,13 @@ bool NowindHost::isDataAvailable() const
 
 
 // send:  msx -> pc
-void NowindHost::write(byte data, unsigned time)
+void NowindHost::write(byte data, unsigned int time)
 {
 	unsigned duration = time - lastTime;
 	lastTime = time;
 	if (duration >= 500) {
 		// timeout (500ms), start looking for AF05
+        DBERR("Protocol timeout occurred, purge buffers and switch back to STATE_SYNC1\n");
 		purge();
 		state = STATE_SYNC1;
 	}
@@ -289,6 +290,82 @@ void NowindHost::auxOut()
 // waiting for it to execute
 void NowindHost::commandRequested()
 {
+    char cmdType = cmdData[1]; // reg_b
+    char cmdArg = cmdData[0]; // reg_c
+
+    switch (cmdType)
+    {
+    case 0x00:
+        // command request at startup, read from startupRequestQueue
+        commandRequestedAtStartup(cmdArg);
+        break;
+    case 0x01:
+       commandRequestedAnytime();
+       break;
+    default:
+        DBERR("MSX sent unknown commandRequested type %d\n", cmdType);
+        break;
+    }
+}
+
+// the startupRequestQueue is not cleared by the msx requesting commands
+// each time the msx boots, the same startup commands are send as long 
+// as the user application does not remove them
+void NowindHost::commandRequestedAtStartup(byte reset)
+{
+    static unsigned int index = 0;
+    if (reset = 0x00)
+    {
+        // The MSX is in its diskrom startup sequence at INIHDR and requests the first startup command
+        DBERR("INIHRD hook requests command at startup\n");
+        // this reset the index for startupRequestQueue
+        index = 0;
+    }
+    else
+    {
+        // The MSX is in its diskrom startup sequence at INIHDR and requests the next startup command
+        DBERR("INIHRD hook requests next command at startup\n");
+    }
+
+    sendHeader();
+    if (startupRequestQueue.empty())
+    {
+        send(0);    // there is no command
+    }
+    else
+    {
+        std::vector<byte> command;
+        if (index >= startupRequestQueue.size())
+        {
+            send(0);   // no more commands 
+        }
+        else
+        {
+            command = startupRequestQueue.at(index);
+        }
+
+        index++;
+
+        if (index >= startupRequestQueue.size())
+        {
+            send(0);   // last commands being send
+        }
+        else
+        {
+            send(1);   // more commands in queue
+        }
+
+        for (unsigned int i=0;i<command.size();i++)
+	    {
+            send(command[i]);
+	    }
+    }
+}
+
+// command from the requestQueue are sent only once, 
+// and are them removed from the queue
+void NowindHost::commandRequestedAnytime()
+{
     sendHeader();
     if (requestQueue.empty())
     {
@@ -297,6 +374,7 @@ void NowindHost::commandRequested()
     else
     {
         std::vector<byte> command = requestQueue.front();
+        // remove command from queue        
         requestQueue.pop_front();
 		if (requestQueue.empty())
 		{
@@ -307,12 +385,23 @@ void NowindHost::commandRequested()
 			send(1);
 		}
 
-        for (unsigned int i=0;i<requestQueue.size();i++)
+        for (unsigned int i=0;i<command.size();i++)
 	    {
             send(command[i]);
 	    }
     }
 }
+
+void NowindHost::clearStartupRequests()
+{
+    startupRequestQueue.clear();
+}
+
+void NowindHost::addStartupRequest(std::vector<byte> command)
+{
+    startupRequestQueue.push_back(command);
+}
+
 
 void NowindHost::clearRequests()
 {
@@ -335,6 +424,7 @@ void NowindHost::send(byte value)
 {
 	hostToMsxFifo.push_back(value);
 }
+
 void NowindHost::send16(word value)
 {
 	hostToMsxFifo.push_back(value & 255);
@@ -450,7 +540,7 @@ void NowindHost::GETDPB()
 	dpb.FIRREC_L = 0x21; //firstDIRsector & 0xFF;    // offset 12 = 0x21, number of first data sector
 	dpb.FIRREC_H = 0; // firstDIRsector >> 8;      // offset 13 = 0x0, idem 
 	
-	// maxClus is the number of clusters of drive not including reserved sector, 
+	// maxClus is the number of clusters on disk not including reserved sector, 
 	// fat sectors or directory sectors, see p260 of Msx Redbook
 
 	// bigSectors is only used for the F0 media type, it is a 32bit entry

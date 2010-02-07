@@ -35,6 +35,11 @@ unsigned long HostApp::mTransferredBytes = 0;
 bool HostApp::mDebug = false;
 HostApp* HostApp::mHostApp = 0;
 
+// format: LL = length CB = commandbyte 
+static const nwhost::byte requestWait[2] = { 1, 0 };    // LL = 1, CB = 0 (command of 1 byte: 0)
+static const nwhost::byte requestSlaveMode[2] = { 1, 1 };    // LL = 1, CB = 1, tell msx to wait forever for commands
+static const nwhost::byte requestWriteRam[8] = { 7, 2, 3, 2, 0x00, 0x00, 0x00, 0x40 }; //   tell msx to expect 0x4000 bytes to write to 0x0000 in slot 3-2
+
 void HostApp::initialize()
 {
     nowind::initialize();
@@ -88,6 +93,8 @@ int HostApp::execute()
     mHostService->setAttribute(enable_phantom_drives, false);
 	mHostService->setAttribute(allow_other_diskroms, true);
 	mHostService->setAttribute(enable_dos2, false);
+
+    mHostService->addStartupRequest(requestWait);
 
     Util::debug("Parse commandline parameters...\n");
 

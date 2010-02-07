@@ -58,7 +58,7 @@ public:
 	// Write one byte of command-data to the host   (msx -> pc)
 	// Time parameter is in milliseconds. Emulators can pass emulation
 	// time, usbhost can pass real time.
-	void write(byte value, unsigned time);
+	void write(byte value, unsigned int time);
 
 	void setAllowOtherDiskroms(bool allow);
 	bool getAllowOtherDiskroms() const;
@@ -81,6 +81,8 @@ public:
 
 	virtual void debugMessage(const char *cFormat, ...);
 
+    void clearStartupRequests();
+    void addStartupRequest(std::vector<byte> command);
     void clearRequests();
     void addRequest(std::vector<byte> command);
 	void getDosVersion();
@@ -132,6 +134,9 @@ private:
 	void dumpRegisters();
 
     void commandRequested();
+    void commandRequestedAtStartup(byte reset);
+    void commandRequestedAnytime();
+	std::deque< std::vector<byte> > startupRequestQueue;   // queue for commandRequest() at startup
 	std::deque< std::vector<byte> > requestQueue;   // queue for commandRequest()
 
 	void callImage(const std::string& filename);

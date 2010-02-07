@@ -35,10 +35,14 @@ NWHOST_API unsigned char CCALL nowindusb_read(void);
 // used in usb-host implementation (for real usb hardware)
 NWHOST_API bool nowindusb_is_data_available(void);
 
-// expandable command interface
-// commands get be added using this interface without breaking compatibility
-
 NWHOST_API int CCALL nowindusb_attribute(nwhost::nw_attribute aAttribute, bool aValue);
-NWHOST_API int CCALL nowindusb_cmd(unsigned int aCommandId, char * aCharArgument, unsigned int aIntArgument1, unsigned int aIntArgument2, unsigned int aIntArgument3, unsigned int aIntArgument4);
+
+NWHOST_API void CCALL nowindusb_clear_requests();
+NWHOST_API void CCALL nowindusb_clear_startup_requests();
+
+NWHOST_API void CCALL nowindusb_add_request(const nwhost::byte* cRequest);
+NWHOST_API void CCALL nowindusb_add_startup_request(const nwhost::byte* cRequest);
+
+
 
 #endif /* _NOWINDUSB_H_ */

@@ -42,7 +42,9 @@ public:
 		void setImage(int aDriveNr, string aFilename);
 		unsigned int setHarddiskImage(unsigned int aDriveNr, int aPartitionNr, bool aIgnoreBootflag, const char* aFilename);
 		void setRomdisk(int aDriveNr);
-				
+
+        void addStartupRequest(const nwhost::byte* cRequest);
+
 		//static void read_data_available();
 		static void purge_buffers();
 		static void debugout(const char *msg);
