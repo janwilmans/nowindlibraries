@@ -39,6 +39,11 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	, enablePhantomDrives(false)
 	, enableMSXDOS2(false)
 {
+    vector<byte> requestWait;
+    requestWait.push_back(1);
+    requestWait.push_back(0);
+
+    addStartupRequest(requestWait);
 }
 
 NowindHost::~NowindHost()
@@ -328,37 +333,21 @@ void NowindHost::commandRequestedAtStartup(byte reset)
     }
 
     sendHeader();
-    if (startupRequestQueue.empty())
+
+    std::vector<byte> command;
+    if (index >= startupRequestQueue.size())
     {
-        send(0);    // there is no command
+        send(0);   // no more commands 
     }
     else
     {
-        std::vector<byte> command;
-        if (index >= startupRequestQueue.size())
-        {
-            send(0);   // no more commands 
-        }
-        else
-        {
-            command = startupRequestQueue.at(index);
-        }
-
+        command = startupRequestQueue.at(index);
         index++;
 
-        if (index >= startupRequestQueue.size())
-        {
-            send(0);   // last commands being send
-        }
-        else
-        {
-            send(1);   // more commands in queue
-        }
-
         for (unsigned int i=0;i<command.size();i++)
-	    {
+        {
             send(command[i]);
-	    }
+        }
     }
 }
 
