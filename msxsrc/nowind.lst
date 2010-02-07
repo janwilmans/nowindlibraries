@@ -1,4 +1,4 @@
-Sjasm Z80 Assembler v0.4 BETA 6 - www.xl2s.tk             [2010.02.05 - 23:49:18]
+Sjasm Z80 Assembler v0.4 BETA 6 - www.xl2s.tk             [2010.02.07 - 15:12:20]
 
 nowind.asm
 Errors: 0
@@ -15,10 +15,9 @@ Errors: 0
       10   00:0000                      	ifdef	NOWINDVERSION_SUNRISE
       11   00:0000                      	define	FLASHROMSIZE 4096
       12   00:0000                      	endif
-      13   00:0000                      
-      14   00:0000                      		
-      15   00:0000                      	output	"nowind.rom"
-      16   00:0000                      	include "labels.asm"
+      13   00:0000                      		
+      14   00:0000                      	output	"nowind.rom"
+      15   00:0000                      	include "labels.asm"
        1.  00:0000                      ; BIOS routines
        2.  00:0000  (00:000C)           RDSLT           equ $000c
        3.  00:0000  (00:0014)           WRSLT           equ $0014
@@ -216,99 +215,99 @@ Errors: 0
      195.  00:0000                    <         db 0
      196.  00:0000                    < .skip:
      197.  00:0000                    <         endmacro
-      17   00:0000                      
-      18   00:0000                              defpage 0, $4000, $4000						; MSXDOS2 bank 0
-      19   00:0000                              defpage 1, $4000, 3 * $4000					; MSXDOS2 bank 1..3
-      20   00:0000                              defpage 2, $4000, $4000						; MSXDOS1
-      21   00:0000                              defpage 3, 0, (512-80)*1024
-      22   00:0000                      		
-      23   00:0000                      ; insert MSXDOS2
-      24   00:0000  (00)                        page 0
-      25   00:4000                      	module	MSXDOS2_PART
-      26   00:4000                      		
-      27   00:4000                      	define 	MSXDOSVER 2
-      28   00:4000                      ;	define	ROMINIT $47d6
-      29   00:4000                      	define	PRINTTEXT $728e
-      30   00:4000                      		
-      31   00:4000  (32F0)                      incbin "..\roms\MSXDOS22.ROM", 0, $72f0-$4000
-      32   00:72F0                                      
-      33   00:72F0                              PATCH $4006, device
-      33   00:72F0                    >         code ! address
-      33   00:4006  98 7D             >         dw word
-      34   00:4008                      
-      35   00:4008                              code ! $4010
-      36   00:4010  C3 9A 76                    jp DSKIO
-      37   00:4013  C3 9D 77                    jp DSKCHG
-      38   00:4016  C3 D4 77                    jp GETDPB
-      39   00:4019  C3 40 78                    jp CHOICE
-      40   00:401C  C3 45 78                    jp DSKFMT
-      41   00:401F  00 00 00                    db 0,0,0                        ; no DRVOFF
-      42   00:4022                              
-      43   00:4022                              PATCH $47d7, getBootArgs
-      43   00:4022                    >         code ! address
-      43   00:47D7  F0 72             >         dw word
-      44   00:47D9                      ;        PATCH $47dd, 0                  ; do not check for MSX1
-      45   00:47D9                              PATCH $488d, MYSIZE
-      45   00:47D9                    >         code ! address
-      45   00:488D  08 00             >         dw word
-      46   00:488F                              PATCH $489f, SECLEN
-      46   00:488F                    >         code ! address
-      46   00:489F  00 02             >         dw word
-      47   00:48A1                              PATCH $48b9, DRIVES
-      47   00:48A1                    >         code ! address
-      47   00:48B9  DB 75             >         dw word
-      48   00:48BB                              PATCH $48eb, DEFDPB - 1
-      48   00:48BB                    >         code ! address
-      48   00:48EB  8A 7B             >         dw word
-      49   00:48ED                              PATCH $48f7, INIENV
-      49   00:48ED                    >         code ! address
-      49   00:48F7  44 76             >         dw word
-      50   00:48F9                              PATCH $5797, OEMSTA
-      50   00:48F9                    >         code ! address
-      50   00:5797  50 79             >         dw word
-      51   00:5799                      
-      52   00:5799                              PATCH $4093, mapper
-      52   00:5799                    >         code ! address
-      52   00:4093  01 60             >         dw word
-      53   00:4095                      
-      54   00:4095                              code ! $4881
-      55   00:4881  43                          db LOW initDiskBasic
-      56   00:4882                              code ! $4884
-      57   00:4884  73                          db HIGH initDiskBasic
-      58   00:4885                       
-      59   00:4885                              code ! $49a3
-      60   00:49A3  21 DD 73                    ld hl,newAUX                    ; redirect AUX to host  
-      61   00:49A6  11 27 F3                    ld de,$f327
-      62   00:49A9  01 0A 00                    ld bc,10
-      63   00:49AC  ED B0                       ldir
-      64   00:49AE  00                          nop
-      65   00:49AF  00                          nop
-      66   00:49B0  00                          nop
-      67   00:49B1  00                          nop
-      68   00:49B2  00                          nop                             ; nops needed to override existing code!
-      69   00:49B3                              
-      70   00:49B3                              code @ $72f0
-      71   00:72F0                                      
-      72   00:72F0                      getBootArgs:
-      73   00:72F0  CD 87 73                    call sendRegisters
-      74   00:72F3  36 92                       ld (hl),C_BOOTARGS
-      75   00:72F5  CD 18 75                    call enableNowindPage0
-      76   00:72F8  26 20                       ld h,HIGH usbrd
-      77   00:72FA  CD 99 73                    call getHeader
-      78   00:72FD                      
-      79   00:72FD  CD 23 75                    call restorePage0
-      80   00:7300  DA 07 73                    jp c,bootMSXDOS1                ; no reply (host not connected?)
-      81   00:7303                              
-      82   00:7303  A7                          and a
-      83   00:7304  C2 B8 75                    jp nz,INIHRD                    ; boot MSXDOS2
-      84   00:7307                      
-      85   00:7307                      bootMSXDOS1:
-      86   00:7307  21 6F 57                    ld hl,$576f                     ; boot MSXDOS1
-      87   00:730A  E5                          push hl
-      88   00:730B  3E 04                       ld a,4
-      89   00:730D  C3 FA 7F                    jp switchBank
-      90   00:7310                                              
-      91   00:7310                              include "common.asm"
+      16   00:0000                      
+      17   00:0000                              defpage 0, $4000, $4000						; MSXDOS2 bank 0
+      18   00:0000                              defpage 1, $4000, 3 * $4000					; MSXDOS2 bank 1..3
+      19   00:0000                              defpage 2, $4000, $4000						; MSXDOS1
+      20   00:0000                              defpage 3, 0, (512-80)*1024
+      21   00:0000                      		
+      22   00:0000                      ; insert MSXDOS2
+      23   00:0000  (00)                        page 0
+      24   00:4000                      	module	MSXDOS2_PART
+      25   00:4000                      		
+      26   00:4000                      	define 	MSXDOSVER 2
+      27   00:4000                      ;	define	ROMINIT $47d6
+      28   00:4000                      	define	PRINTTEXT $728e
+      29   00:4000                      		
+      30   00:4000  (32F0)                      incbin "..\roms\MSXDOS22.ROM", 0, $72f0-$4000
+      31   00:72F0                                      
+      32   00:72F0                              PATCH $4006, device
+      32   00:72F0                    >         code ! address
+      32   00:4006  98 7D             >         dw word
+      33   00:4008                      
+      34   00:4008                              code ! $4010
+      35   00:4010  C3 9A 76                    jp DSKIO
+      36   00:4013  C3 9D 77                    jp DSKCHG
+      37   00:4016  C3 D4 77                    jp GETDPB
+      38   00:4019  C3 40 78                    jp CHOICE
+      39   00:401C  C3 45 78                    jp DSKFMT
+      40   00:401F  00 00 00                    db 0,0,0                        ; no DRVOFF
+      41   00:4022                              
+      42   00:4022                              PATCH $47d7, getBootArgs
+      42   00:4022                    >         code ! address
+      42   00:47D7  F0 72             >         dw word
+      43   00:47D9                      ;        PATCH $47dd, 0                  ; do not check for MSX1
+      44   00:47D9                              PATCH $488d, MYSIZE
+      44   00:47D9                    >         code ! address
+      44   00:488D  08 00             >         dw word
+      45   00:488F                              PATCH $489f, SECLEN
+      45   00:488F                    >         code ! address
+      45   00:489F  00 02             >         dw word
+      46   00:48A1                              PATCH $48b9, DRIVES
+      46   00:48A1                    >         code ! address
+      46   00:48B9  DB 75             >         dw word
+      47   00:48BB                              PATCH $48eb, DEFDPB - 1
+      47   00:48BB                    >         code ! address
+      47   00:48EB  8A 7B             >         dw word
+      48   00:48ED                              PATCH $48f7, INIENV
+      48   00:48ED                    >         code ! address
+      48   00:48F7  44 76             >         dw word
+      49   00:48F9                              PATCH $5797, OEMSTA
+      49   00:48F9                    >         code ! address
+      49   00:5797  50 79             >         dw word
+      50   00:5799                      
+      51   00:5799                              PATCH $4093, mapper
+      51   00:5799                    >         code ! address
+      51   00:4093  01 60             >         dw word
+      52   00:4095                      
+      53   00:4095                              code ! $4881
+      54   00:4881  43                          db LOW initDiskBasic
+      55   00:4882                              code ! $4884
+      56   00:4884  73                          db HIGH initDiskBasic
+      57   00:4885                       
+      58   00:4885                              code ! $49a3
+      59   00:49A3  21 DD 73                    ld hl,newAUX                    ; redirect AUX to host  
+      60   00:49A6  11 27 F3                    ld de,$f327
+      61   00:49A9  01 0A 00                    ld bc,10
+      62   00:49AC  ED B0                       ldir
+      63   00:49AE  00                          nop
+      64   00:49AF  00                          nop
+      65   00:49B0  00                          nop
+      66   00:49B1  00                          nop
+      67   00:49B2  00                          nop                             ; nops needed to override existing code!
+      68   00:49B3                              
+      69   00:49B3                              code @ $72f0
+      70   00:72F0                                      
+      71   00:72F0                      getBootArgs:
+      72   00:72F0  CD 87 73                    call sendRegisters
+      73   00:72F3  36 92                       ld (hl),C_BOOTARGS
+      74   00:72F5  CD 18 75                    call enableNowindPage0
+      75   00:72F8  26 20                       ld h,HIGH usbrd
+      76   00:72FA  CD 99 73                    call getHeader
+      77   00:72FD                      
+      78   00:72FD  CD 23 75                    call restorePage0
+      79   00:7300  DA 07 73                    jp c,bootMSXDOS1                ; no reply (host not connected?)
+      80   00:7303                              
+      81   00:7303  A7                          and a
+      82   00:7304  C2 B8 75                    jp nz,INIHRD                    ; boot MSXDOS2
+      83   00:7307                      
+      84   00:7307                      bootMSXDOS1:
+      85   00:7307  21 6F 57                    ld hl,$576f                     ; boot MSXDOS1
+      86   00:730A  E5                          push hl
+      87   00:730B  3E 04                       ld a,4
+      88   00:730D  C3 FA 7F                    jp switchBank
+      89   00:7310                                              
+      90   00:7310                              include "common.asm"
        1.  00:7310                      ; Nowind specific
        2.  00:7310                      
        3.  00:7310                      nowindInit:
@@ -572,7 +571,7 @@ Errors: 0
      201.  00:7461  D1                          pop de
      202.  00:7462  C9                          ret
      203.  00:7463                              
-      92   00:7463                              include "extendedBios.asm"
+      91   00:7463                              include "extendedBios.asm"
        1.  00:7463                      
        2.  00:7463                      installExtendedBios:
        3.  00:7463                      
@@ -706,7 +705,7 @@ Errors: 0
      104.  00:7516                              
      105.  00:7516  F1                          pop af        
      106.  00:7517  C9                          ret
-      93   00:7518                              include "slotRoutines.asm"
+      92   00:7518                              include "slotRoutines.asm"
        1.  00:7518                      ; These routines are used for slot selection
        2.  00:7518                      
        3.  00:7518                      enableNowindPage0:
@@ -869,7 +868,7 @@ Errors: 0
      160.  00:75B6  6F                          ld l,a
      161.  00:75B7  C9                          ret
      162.  00:75B8                      
-      94   00:75B8                              include "nowindDriver.asm"
+      93   00:75B8                              include "nowindDriver.asm"
        1.  00:75B8  (00:0008)           MYSIZE          equ 8                   ; size of work area (not used, some programs write here to stop drives spinning)
        2.  00:75B8  (00:0200)           SECLEN          equ 512                 ; sector size
        3.  00:75B8                      
@@ -1885,7 +1884,7 @@ Errors: 0
      536.  00:7C09                      
      537.  00:7C09                      ; WARNING: in some cases DEFDPB-1 is expected!
      538.  00:7C09  (00:7B8B)           DEFDPB  equ supportedMedia.def
-      95   00:7C09                              include "romdisk.asm"
+      94   00:7C09                              include "romdisk.asm"
        1.  00:7C09                      		define	ROMDSKBANK 5			; romdisk starts in bank 5
        2.  00:7C09                      		define	ROMDSKLAST (FLASHROMSIZE/16)-1
        3.  00:7C09                      
@@ -1975,7 +1974,7 @@ Errors: 0
       80.  00:7C6D                      ROMDISK_DSKFMT:
       81.  00:7C6D                              ; not implemented (no disk can be formatted)
       82.  00:7C6D                              
-      96   00:7C6D                              include "flashWriter.asm"		; todo: remove load from pc
+      95   00:7C6D                              include "flashWriter.asm"		; todo: remove load from pc
        1.  00:7C6D                      ; flashWriter.asm
        2.  00:7C6D                      ; Flashes and erases the AMD29F040/M29F032-D
        3.  00:7C6D                           
@@ -2166,7 +2165,7 @@ Errors: 0
      187.  00:C0DB                              
      188.  00:C0DB                      flasherEnd:
      189.  00:C0DB  (7D98)                      DEPHASE
-      97   00:7D98                              include "device.asm"
+      96   00:7D98                              include "device.asm"
        1.  00:7D98                      ; device.asm
        2.  00:7D98                      ; implements a basic now: device
        3.  00:7D98                          
@@ -2413,127 +2412,127 @@ Errors: 0
      230.  00:7EA3                      ;    -------------------------------------------------------
      231.  00:7EA3                      ;                  err? bckup       posHi 
      232.  00:7EA3                      ; followed by a 256 byte buffer
-      98   00:7EA3                      
-      99   00:7EA3  FF (337)                    ds $8000-(endCopyFromBank-copyFromBank)-$, $ff
-     100   00:7FF4                      
-     101   00:7FF4                      ; bank switching and data transfer
-     102   00:7FF4                      copyFromBank:
-     103   00:7FF4  32 01 60                    ld (mapper),a
-     104   00:7FF7  ED B0                       ldir
-     105   00:7FF9                      enableBank0:
-     106   00:7FF9  AF                          xor a
-     107   00:7FFA                      switchBank:
-     108   00:7FFA  F5                          push af
-     109   00:7FFB  32 01 60                    ld (mapper),a
-     110   00:7FFE  F1                          pop af
-     111   00:7FFF  C9                          ret
-     112   00:8000                      endCopyFromBank:
-     113   00:8000                      
-     114   00:8000  (01)                        page 1
-     115   01:4000  (C000)                      incbin "..\roms\MSXDOS22.ROM", $4000, 3 * $4000
-     116   01!0000                              PATCH $4093, mapper
-     116   01!0000                    >         code ! address
-     116   01:4093  01 60             >         dw word
-     117   01:4095                              PATCH $8093, mapper
-     117   01:4095                    >         code ! address
-     117   01:8093  01 60             >         dw word
-     118   01:8095                              PATCH $C093, mapper
-     118   01:8095                    >         code ! address
-     118   01:C093  01 60             >         dw word
-     119   01:C095                      
-     120   01:C095                              ; areas not used in MSXDOS22.ROM
-     121   01:C095                              ; bank 1: 0x5CA0 - 0x7FFF (9056 bytes)
-     122   01:C095                              ; bank 2: 0x7F30 - 0x7FFF (208 bytes)
-     123   01:C095                              ; bank 3: 0x7E70 - 0x7FFF (400 bytes)
-     124   01:C095                      
-     125   01:C095                      ; insert MSXDOS1
-     126   01:C095  (02)                	page 2
-     127   02:4000                      	module	MSXDOS1_PART
-     128   02:4000                      
-     129   02:4000                      	define 	MSXDOSVER 1
-     130   02:4000                      ;	define	ROMINIT $576f
-     131   02:4000                      	define	PRINTTEXT $5f86
-     132   02:4000                      
-     133   02:4000  (3405)                      incbin "..\roms\DISK.ROM", 0, $7405-$4000
-     134   02:7405                                      
-     135   02:7405                              PATCH $4006, device
-     135   02:7405                    >         code ! address
-     135   02:4006  8D 7E             >         dw word
-     136   02:4008                      
-     137   02:4008                              code ! $4010
-     138   02:4010  C3 8F 77                    jp DSKIO
-     139   02:4013  C3 92 78                    jp DSKCHG
-     140   02:4016  C3 C9 78                    jp GETDPB
-     141   02:4019  C3 35 79                    jp CHOICE
-     142   02:401C  C3 3A 79                    jp DSKFMT
-     143   02:401F  00 00 00                    db 0,0,0                        ; no DRVOFF
-     144   02:4022                              
-     145   02:4022                              PATCH $5770, INIHRD
-     145   02:4022                    >         code ! address
-     145   02:5770  AD 76             >         dw word
-     146   02:5772                              PATCH $57aa, $f380 + MYSIZE
-     146   02:5772                    >         code ! address
-     146   02:57AA  88 F3             >         dw word
-     147   02:57AC                              PATCH $581e, MYSIZE
-     147   02:57AC                    >         code ! address
-     147   02:581E  08 00             >         dw word
-     148   02:5820                              PATCH $582f, SECLEN
-     148   02:5820                    >         code ! address
-     148   02:582F  00 02             >         dw word
-     149   02:5831                              PATCH $5851, DRIVES
-     149   02:5831                    >         code ! address
-     149   02:5851  D0 76             >         dw word
-     150   02:5853                              PATCH $5884, DEFDPB - 1
-     150   02:5853                    >         code ! address
-     150   02:5884  7F 7C             >         dw word
-     151   02:5886                              PATCH $5890, INIENV
-     151   02:5886                    >         code ! address
-     151   02:5890  39 77             >         dw word
-     152   02:5892                              PATCH $5ae8, DEFDPB             ; different address in some roms
-     152   02:5892                    >         code ! address
-     152   02:5AE8  80 7C             >         dw word
-     153   02:5AEA                              PATCH $65af, OEMSTA
-     153   02:5AEA                    >         code ! address
-     153   02:65AF  45 7A             >         dw word
-     154   02:65B1                      	PATCH $5809, initDiskBasic      ; HRUNC
-     154   02:65B1                    >         code ! address
-     154   02:5809  38 74             >         dw word
-     155   02:580B                              
-     156   02:580B                              ;PATCH $5b9a, getHostDate        ; get date from host when no clockchip found (different 5b95)
-     157   02:580B                      
-     158   02:580B                      		ifdef BDOS_NOWIND
-     159   02:580B                    ~ 	
-     160   02:580B                    ~ 		; just patching the BDOS hook will not work; not everybody uses the hook
-     161   02:580B                    ~         ;PATCH $5d20, BDOSNW						  ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW
-     162   02:580B                    ~         	
-     163   02:580B                    ~         ; even patching the BDOS jump table will not work; internal calls (even in command.com) bypass it
-     164   02:580B                    ~         ; jump table patches
-     165   02:580B                    ~         ;PATCH $572b, BDOS_0FH_J				  ; overwrite specific function 0Fh in jump table
-     166   02:580B                    ~         ;PATCH $572f, BDOS_11H_J				  ; overwrite specific function 11h in jump table
-     167   02:580B                    ~         ;PATCH $5731, BDOS_12H_J				  ; overwrite specific function 12h in jump table
-     168   02:580B                    ~         	
-     169   02:580B                    ~         ; these patches are at the start of the routine themselves, the addresses are more or less "standardized" 
-     170   02:580B                    ~         ; over several brands of diskroms	
-     171   02:580B                    ~         ; in-routine patches
-     172   02:580B                    ~         PATCH $4463, BDOS_0FH					  ; overwrite function 0Fh itself!
-     173   02:580B                    ~         PATCH $4fb9, BDOS_11H 				  ; overwrite function 11h itself!
-     174   02:580B                    ~         PATCH $5007, BDOS_12H 				  ; overwrite function 12h itself!
-     175   02:580B                    ~         	
-     176   02:580B                    ~        	endif
-     177   02:580B                      				
-     178   02:580B                              code ! $595d
-     179   02:595D  21 D2 74                    ld hl,newAUX                    ; redirect AUX to host  
-     180   02:5960  11 27 F3                    ld de,$f327
-     181   02:5963  01 0A 00                    ld bc,10
-     182   02:5966  ED B0                       ldir
-     183   02:5968  00                          nop
-     184   02:5969  00                          nop
-     185   02:596A  00                          nop
-     186   02:596B  00                          nop                             ; do not remove!
-     187   02:596C                              
-     188   02:596C                              code @ $7405
-     189   02:7405                      
-     190   02:7405                              include "common.asm"
+      97   00:7EA3                      
+      98   00:7EA3  FF (337)                    ds $8000-(endCopyFromBank-copyFromBank)-$, $ff
+      99   00:7FF4                      
+     100   00:7FF4                      ; bank switching and data transfer
+     101   00:7FF4                      copyFromBank:
+     102   00:7FF4  32 01 60                    ld (mapper),a
+     103   00:7FF7  ED B0                       ldir
+     104   00:7FF9                      enableBank0:
+     105   00:7FF9  AF                          xor a
+     106   00:7FFA                      switchBank:
+     107   00:7FFA  F5                          push af
+     108   00:7FFB  32 01 60                    ld (mapper),a
+     109   00:7FFE  F1                          pop af
+     110   00:7FFF  C9                          ret
+     111   00:8000                      endCopyFromBank:
+     112   00:8000                      
+     113   00:8000  (01)                        page 1
+     114   01:4000  (C000)                      incbin "..\roms\MSXDOS22.ROM", $4000, 3 * $4000
+     115   01!0000                              PATCH $4093, mapper
+     115   01!0000                    >         code ! address
+     115   01:4093  01 60             >         dw word
+     116   01:4095                              PATCH $8093, mapper
+     116   01:4095                    >         code ! address
+     116   01:8093  01 60             >         dw word
+     117   01:8095                              PATCH $C093, mapper
+     117   01:8095                    >         code ! address
+     117   01:C093  01 60             >         dw word
+     118   01:C095                      
+     119   01:C095                              ; areas not used in MSXDOS22.ROM
+     120   01:C095                              ; bank 1: 0x5CA0 - 0x7FFF (9056 bytes)
+     121   01:C095                              ; bank 2: 0x7F30 - 0x7FFF (208 bytes)
+     122   01:C095                              ; bank 3: 0x7E70 - 0x7FFF (400 bytes)
+     123   01:C095                      
+     124   01:C095                      ; insert MSXDOS1
+     125   01:C095  (02)                	page 2
+     126   02:4000                      	module	MSXDOS1_PART
+     127   02:4000                      
+     128   02:4000                      	define 	MSXDOSVER 1
+     129   02:4000                      ;	define	ROMINIT $576f
+     130   02:4000                      	define	PRINTTEXT $5f86
+     131   02:4000                      
+     132   02:4000  (3405)                      incbin "..\roms\DISK.ROM", 0, $7405-$4000
+     133   02:7405                                      
+     134   02:7405                              PATCH $4006, device
+     134   02:7405                    >         code ! address
+     134   02:4006  8D 7E             >         dw word
+     135   02:4008                      
+     136   02:4008                              code ! $4010
+     137   02:4010  C3 8F 77                    jp DSKIO
+     138   02:4013  C3 92 78                    jp DSKCHG
+     139   02:4016  C3 C9 78                    jp GETDPB
+     140   02:4019  C3 35 79                    jp CHOICE
+     141   02:401C  C3 3A 79                    jp DSKFMT
+     142   02:401F  00 00 00                    db 0,0,0                        ; no DRVOFF
+     143   02:4022                              
+     144   02:4022                              PATCH $5770, INIHRD
+     144   02:4022                    >         code ! address
+     144   02:5770  AD 76             >         dw word
+     145   02:5772                              PATCH $57aa, $f380 + MYSIZE
+     145   02:5772                    >         code ! address
+     145   02:57AA  88 F3             >         dw word
+     146   02:57AC                              PATCH $581e, MYSIZE
+     146   02:57AC                    >         code ! address
+     146   02:581E  08 00             >         dw word
+     147   02:5820                              PATCH $582f, SECLEN
+     147   02:5820                    >         code ! address
+     147   02:582F  00 02             >         dw word
+     148   02:5831                              PATCH $5851, DRIVES
+     148   02:5831                    >         code ! address
+     148   02:5851  D0 76             >         dw word
+     149   02:5853                              PATCH $5884, DEFDPB - 1
+     149   02:5853                    >         code ! address
+     149   02:5884  7F 7C             >         dw word
+     150   02:5886                              PATCH $5890, INIENV
+     150   02:5886                    >         code ! address
+     150   02:5890  39 77             >         dw word
+     151   02:5892                              PATCH $5ae8, DEFDPB             ; different address in some roms
+     151   02:5892                    >         code ! address
+     151   02:5AE8  80 7C             >         dw word
+     152   02:5AEA                              PATCH $65af, OEMSTA
+     152   02:5AEA                    >         code ! address
+     152   02:65AF  45 7A             >         dw word
+     153   02:65B1                      	PATCH $5809, initDiskBasic      ; HRUNC
+     153   02:65B1                    >         code ! address
+     153   02:5809  38 74             >         dw word
+     154   02:580B                              
+     155   02:580B                              ;PATCH $5b9a, getHostDate        ; get date from host when no clockchip found (different 5b95)
+     156   02:580B                      
+     157   02:580B                      		ifdef BDOS_NOWIND
+     158   02:580B                    ~ 	
+     159   02:580B                    ~ 		; just patching the BDOS hook will not work; not everybody uses the hook
+     160   02:580B                    ~         ;PATCH $5d20, BDOSNW						  ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW
+     161   02:580B                    ~         	
+     162   02:580B                    ~         ; even patching the BDOS jump table will not work; internal calls (even in command.com) bypass it
+     163   02:580B                    ~         ; jump table patches
+     164   02:580B                    ~         ;PATCH $572b, BDOS_0FH_J				  ; overwrite specific function 0Fh in jump table
+     165   02:580B                    ~         ;PATCH $572f, BDOS_11H_J				  ; overwrite specific function 11h in jump table
+     166   02:580B                    ~         ;PATCH $5731, BDOS_12H_J				  ; overwrite specific function 12h in jump table
+     167   02:580B                    ~         	
+     168   02:580B                    ~         ; these patches are at the start of the routine themselves, the addresses are more or less "standardized" 
+     169   02:580B                    ~         ; over several brands of diskroms	
+     170   02:580B                    ~         ; in-routine patches
+     171   02:580B                    ~         PATCH $4463, BDOS_0FH					  ; overwrite function 0Fh itself!
+     172   02:580B                    ~         PATCH $4fb9, BDOS_11H 				  ; overwrite function 11h itself!
+     173   02:580B                    ~         PATCH $5007, BDOS_12H 				  ; overwrite function 12h itself!
+     174   02:580B                    ~         	
+     175   02:580B                    ~        	endif
+     176   02:580B                      				
+     177   02:580B                              code ! $595d
+     178   02:595D  21 D2 74                    ld hl,newAUX                    ; redirect AUX to host  
+     179   02:5960  11 27 F3                    ld de,$f327
+     180   02:5963  01 0A 00                    ld bc,10
+     181   02:5966  ED B0                       ldir
+     182   02:5968  00                          nop
+     183   02:5969  00                          nop
+     184   02:596A  00                          nop
+     185   02:596B  00                          nop                             ; do not remove!
+     186   02:596C                              
+     187   02:596C                              code @ $7405
+     188   02:7405                      
+     189   02:7405                              include "common.asm"
        1.  02:7405                      ; Nowind specific
        2.  02:7405                      
        3.  02:7405                      nowindInit:
@@ -2797,7 +2796,7 @@ Errors: 0
      201.  02:7556  D1                          pop de
      202.  02:7557  C9                          ret
      203.  02:7558                              
-     191   02:7558                              include "extendedBios.asm"
+     190   02:7558                              include "extendedBios.asm"
        1.  02:7558                      
        2.  02:7558                      installExtendedBios:
        3.  02:7558                      
@@ -2931,7 +2930,7 @@ Errors: 0
      104.  02:760B                              
      105.  02:760B  F1                          pop af        
      106.  02:760C  C9                          ret
-     192   02:760D                              include "slotRoutines.asm"
+     191   02:760D                              include "slotRoutines.asm"
        1.  02:760D                      ; These routines are used for slot selection
        2.  02:760D                      
        3.  02:760D                      enableNowindPage0:
@@ -3094,7 +3093,7 @@ Errors: 0
      160.  02:76AB  6F                          ld l,a
      161.  02:76AC  C9                          ret
      162.  02:76AD                      
-     193   02:76AD                              include "nowindDriver.asm"
+     192   02:76AD                              include "nowindDriver.asm"
        1.  02:76AD  (02:0008)           MYSIZE          equ 8                   ; size of work area (not used, some programs write here to stop drives spinning)
        2.  02:76AD  (02:0200)           SECLEN          equ 512                 ; sector size
        3.  02:76AD                      
@@ -4110,7 +4109,7 @@ Errors: 0
      536.  02:7CFE                      
      537.  02:7CFE                      ; WARNING: in some cases DEFDPB-1 is expected!
      538.  02:7CFE  (02:7C80)           DEFDPB  equ supportedMedia.def
-     194   02:7CFE                              include "romdisk.asm"
+     193   02:7CFE                              include "romdisk.asm"
        1.  02:7CFE                      		define	ROMDSKBANK 5			; romdisk starts in bank 5
        2.  02:7CFE                      		define	ROMDSKLAST (FLASHROMSIZE/16)-1
        3.  02:7CFE                      
@@ -4200,7 +4199,7 @@ Errors: 0
       80.  02:7D62                      ROMDISK_DSKFMT:
       81.  02:7D62                              ; not implemented (no disk can be formatted)
       82.  02:7D62                              
-     195   02:7D62                              include "flashWriter.asm"
+     194   02:7D62                              include "flashWriter.asm"
        1.  02:7D62                      ; flashWriter.asm
        2.  02:7D62                      ; Flashes and erases the AMD29F040/M29F032-D
        3.  02:7D62                           
@@ -4391,7 +4390,7 @@ Errors: 0
      187.  02:C0DB                              
      188.  02:C0DB                      flasherEnd:
      189.  02:C0DB  (7E8D)                      DEPHASE
-     196   02:7E8D                              include "device.asm"
+     195   02:7E8D                              include "device.asm"
        1.  02:7E8D                      ; device.asm
        2.  02:7E8D                      ; implements a basic now: device
        3.  02:7E8D                          
@@ -4638,27 +4637,27 @@ Errors: 0
      230.  02:7F98                      ;    -------------------------------------------------------
      231.  02:7F98                      ;                  err? bckup       posHi 
      232.  02:7F98                      ; followed by a 256 byte buffer
-     197   02:7F98                              
-     198   02:7F98                              ifdef BDOS_NOWIND
-     199   02:7F98                    ~         include "nowindbdos.asm"
-     200   02:7F98                    ~         endif
-     201   02:7F98                              
-     202   02:7F98  FF (92)                    ds $8000-(endCopyFromBank-copyFromBank)-$, $ff
-     203   02:7FF4                      
-     204   02:7FF4                      ; bank switching and data transfer
-     205   02:7FF4                      copyFromBank:
-     206   02:7FF4  32 01 60                    ld (mapper),a
-     207   02:7FF7  ED B0                       ldir
-     208   02:7FF9                      enableBank0:
-     209   02:7FF9  AF                          xor a
-     210   02:7FFA  F5                          push af
-     211   02:7FFB  32 01 60                    ld (mapper),a
-     212   02:7FFE  F1                          pop af
-     213   02:7FFF  C9                          ret
-     214   02:8000                      endCopyFromBank:
-     215   02:8000                      
-     216   02:8000  (03)                        page 3
-     217   03:0000  BA (442368)                 ds (512-80)*1024, $ba
+     196   02:7F98                              
+     197   02:7F98                              ifdef BDOS_NOWIND
+     198   02:7F98                    ~         include "nowindbdos.asm"
+     199   02:7F98                    ~         endif
+     200   02:7F98                              
+     201   02:7F98  FF (92)                    ds $8000-(endCopyFromBank-copyFromBank)-$, $ff
+     202   02:7FF4                      
+     203   02:7FF4                      ; bank switching and data transfer
+     204   02:7FF4                      copyFromBank:
+     205   02:7FF4  32 01 60                    ld (mapper),a
+     206   02:7FF7  ED B0                       ldir
+     207   02:7FF9                      enableBank0:
+     208   02:7FF9  AF                          xor a
+     209   02:7FFA  F5                          push af
+     210   02:7FFB  32 01 60                    ld (mapper),a
+     211   02:7FFE  F1                          pop af
+     212   02:7FFF  C9                          ret
+     213   02:8000                      endCopyFromBank:
+     214   02:8000                      
+     215   02:8000  (03)                        page 3
+     216   03:0000  BA (442368)                 ds (512-80)*1024, $ba
 
     LABELS
 ---------------------------------------

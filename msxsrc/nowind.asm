@@ -10,7 +10,6 @@
 	ifdef	NOWINDVERSION_SUNRISE
 	define	FLASHROMSIZE 4096
 	endif
-
 		
 	output	"nowind.rom"
 	include "labels.asm"
