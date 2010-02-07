@@ -35,10 +35,10 @@ unsigned long HostApp::mTransferredBytes = 0;
 bool HostApp::mDebug = false;
 HostApp* HostApp::mHostApp = 0;
 
-// format: LL = length CB = commandbyte 
-static const nwhost::byte requestWait[2] = { 1, 0 };    // LL = 1, CB = 0 (command of 1 byte: 0)
-static const nwhost::byte requestSlaveMode[2] = { 1, 1 };    // LL = 1, CB = 1, tell msx to wait forever for commands
-static const nwhost::byte requestWriteRam[8] = { 7, 2, 3, 2, 0x00, 0x00, 0x00, 0x40 }; //   tell msx to expect 0x4000 bytes to write to 0x0000 in slot 3-2
+// format: LL = length CB = commandbyte (command 0 means, no more commands, so dont use it)
+static const nwhost::byte requestWait[2] = { 1, 1 };    // LL = 1, CB = 1 (command of 1 byte: 1)
+static const nwhost::byte requestSlaveMode[2] = { 1, 2 };    // LL = 1, CB = 2, tell msx to wait forever for commands
+static const nwhost::byte requestWriteRam[8] = { 7, 3, 3, 2, 0x00, 0x00, 0x00, 0x40 }; //   tell msx to expect 0x4000 bytes to write to 0x0000 in slot 3-2
 
 void HostApp::initialize()
 {
