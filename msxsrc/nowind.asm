@@ -69,6 +69,7 @@
         code @ $72f0
                 
 getBootArgs:              
+        DEBUGMESSAGE "Any commands?"   
         ld b,0                      ; b=0 means request startup command
         ld c,0                      ; c=0 means reset startup queue index 
 next:   call sendRegisters
@@ -76,6 +77,11 @@ next:   call sendRegisters
         call enableNowindPage0
         ld h,HIGH usbrd
         call getHeader
+
+        ld a,(hl)
+        ld a,(hl)
+        ld a,(hl)
+
         ; todo: read command here
         call restorePage0
         and a
