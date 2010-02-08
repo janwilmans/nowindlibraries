@@ -1,5 +1,10 @@
 ; These routines are used for slot selection
 
+; function: enabled the selected slot of page 1 in page 0
+; in: none
+; out: ixh = previous slot selection for page 0
+; unchanged: d, iy
+; requirements: stack available
 enableNowindPage0:
         call getSlotPage0
         ld ixh,a

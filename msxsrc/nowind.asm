@@ -70,26 +70,24 @@
                 
 getBootArgs:              
         DEBUGMESSAGE "Any commands?"   
-        ld b,0                      ; b=0 means request startup command
-        ld c,0                      ; c=0 means reset startup queue index 
-next:   call sendRegisters
-        ld (hl),C_CMDREQUEST
         call enableNowindPage0
-        ld h,HIGH usbrd
-        call getHeader
+        ld c,0                      ; c=0 means reset startup queue index 
+next:   ld b,0                      ; b=0 means request startup command
+        SEND_COMMAND C_CMDREQUEST
+        GET_RESPONSE
 
-        ld a,(hl)
-        ld a,(hl)
-        ld a,(hl)
+        ld d,(hl)
+        ld d,(hl)
+        ld d,(hl)
 
         ; todo: read command here
-        call restorePage0
         and a
         jr z,noNextCommand
         DEBUGMESSAGE "Got command!"   
         ld c,1
         jr next
 noNextCommand:
+        call restorePage0
         DEBUGMESSAGE "End of startup commands"   
 
         call sendRegisters
@@ -237,3 +235,4 @@ endCopyFromBank:
 
         page 3
         ds (512-80)*1024, $ba
+
