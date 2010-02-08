@@ -74,6 +74,8 @@ static const unsigned int CMD_PRINT = 0xA1;
 static const unsigned int CMD_VERIFY = 0xA2;
 static const unsigned int CMD_WRITE = 0xA3;
 static const unsigned int CMD_ERASE = 0xA4;
+static const unsigned int CMD_ERASESECTOR = 0xA5;
+static const unsigned int CMD_AUTOSELECTMODE = 0xA6;
 
 void NwhostService::debugout(const char *msg)
 {
@@ -134,7 +136,7 @@ void NwhostService::updateFirmware(string sImageName) {
     char cString[250];
 
     //start(eLibUsb);
-	start(eFTD2XX);
+	start(eFTD2XX);	// TODO: maak commandline optie
 
 	// this should not be needed, but without it, FTD2xx::read returns to fast!
 	mUsbStream->setTimeouts(500000, 500000);
@@ -163,7 +165,17 @@ void NwhostService::updateFirmware(string sImageName) {
     fs->seekg(0, ios::end);
 	unsigned int uiFileSize = fs->tellg();
 
-    Util::debug("Send erase command to flash....\n");
+    Util::debug("Send autoselect command to flash....\n");
+
+    xBuffer[0] = 0xEE;
+    xBuffer[1] = 0xBB;
+    xBuffer[2] = 0x55;
+    xBuffer[3] = CMD_AUTOSELECTMODE;
+
+    mUsbStream->write(xBuffer, 4, &uiBytesWritten);
+	mUsbStream->readExact(yBuffer, 4);
+	Util::debug("Manufacturer Code: 0x%02x\n", yBuffer[2]);
+	Util::debug("Device Code: 0x%02x\n", yBuffer[3]);
 
     xBuffer[0] = 0xEE;
     xBuffer[1] = 0xBB;
