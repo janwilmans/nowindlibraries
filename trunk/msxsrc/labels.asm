@@ -60,7 +60,7 @@ C_CHANGEIMAGE   equ $91
 C_GETDOSVERSION equ $92
 C_CMDREQUEST    equ $93
 
-; BDOS commands 0x0F- 0x37 can just use their original command code in register C
+; BDOS commands 0x0F - 0x37 can just use their original command code in register C
 
 ; PATCH       
         macro PATCH address, word
@@ -182,8 +182,7 @@ C_CMDREQUEST    equ $93
         ld b,b
         jr $+2
         endmacro
-
-        
+       
         macro PRINTVDPTEXT string
         
         push hl
@@ -195,3 +194,21 @@ C_CMDREQUEST    equ $93
         db 0
 .skip:
         endmacro
+
+; in: all registers, 
+; out: h = HIGH usbwr
+; unchanged: bc, ix, iy
+; requirements: stack available
+macro SEND_COMMAND cmd
+    call sendRegisters
+    ld (hl),cmd
+endmacro
+
+; in: none
+; out: A = first received byte, H = HIGH usbrd, CF is on timeout
+; unchanged: de, ix, iy
+; requirements: nowind in page 0! (use enableNowindPage0)
+macro GET_RESPONSE
+        ld h,HIGH usbrd
+        call getHeader
+endmacro

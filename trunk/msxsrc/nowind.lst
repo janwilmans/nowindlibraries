@@ -1,4 +1,4 @@
-Sjasm Z80 Assembler v0.4 BETA 6 - www.xl2s.tk             [2010.02.08 - 21:04:25]
+Sjasm Z80 Assembler v0.4 BETA 6 - www.xl2s.tk             [2010.02.08 - 22:41:00]
 
 d:\project\nowindlibraries\msxsrc\nowind.asm
 Errors: 0
@@ -80,7 +80,7 @@ Errors: 0
       60.  00:0000  (00:0092)           C_GETDOSVERSION equ $92
       61.  00:0000  (00:0093)           C_CMDREQUEST    equ $93
       62.  00:0000                      
-      63.  00:0000                      ; BDOS commands 0x0F- 0x37 can just use their original command code in register C
+      63.  00:0000                      ; BDOS commands 0x0F - 0x37 can just use their original command code in register C
       64.  00:0000                      
       65.  00:0000                      ; PATCH       
       66.  00:0000                              macro PATCH address, word
@@ -202,19 +202,36 @@ Errors: 0
      182.  00:0000                    <         ld b,b
      183.  00:0000                    <         jr $+2
      184.  00:0000                    <         endmacro
-     185.  00:0000                      
-     186.  00:0000                              
-     187.  00:0000                              macro PRINTVDPTEXT string
-     188.  00:0000                    <         
-     189.  00:0000                    <         push hl
-     190.  00:0000                    <         ld hl,.text 
-     191.  00:0000                    <         call printVdpText2
-     192.  00:0000                    <         pop hl
-     193.  00:0000                    <         jr .skip
-     194.  00:0000                    < .text   db string
-     195.  00:0000                    <         db 0
-     196.  00:0000                    < .skip:
-     197.  00:0000                    <         endmacro
+     185.  00:0000                             
+     186.  00:0000                              macro PRINTVDPTEXT string
+     187.  00:0000                    <         
+     188.  00:0000                    <         push hl
+     189.  00:0000                    <         ld hl,.text 
+     190.  00:0000                    <         call printVdpText2
+     191.  00:0000                    <         pop hl
+     192.  00:0000                    <         jr .skip
+     193.  00:0000                    < .text   db string
+     194.  00:0000                    <         db 0
+     195.  00:0000                    < .skip:
+     196.  00:0000                    <         endmacro
+     197.  00:0000                      
+     198.  00:0000                      ; in: all registers, 
+     199.  00:0000                      ; out: h = HIGH usbwr
+     200.  00:0000                      ; unchanged: bc, ix, iy
+     201.  00:0000                      ; requirements: stack available
+     202.  00:0000                      macro SEND_COMMAND cmd
+     203.  00:0000                    <     call sendRegisters
+     204.  00:0000                    <     ld (hl),cmd
+     205.  00:0000                    < endmacro
+     206.  00:0000                      
+     207.  00:0000                      ; in: none
+     208.  00:0000                      ; out: A = first received byte, H = HIGH usbrd, CF is on timeout
+     209.  00:0000                      ; unchanged: de, ix, iy
+     210.  00:0000                      ; requirements: nowind in page 0! (use enableNowindPage0)
+     211.  00:0000                      macro GET_RESPONSE
+     212.  00:0000                    <         ld h,HIGH usbrd
+     213.  00:0000                    <         call getHeader
+     214.  00:0000                    < endmacro
       16   00:0000                      
       17   00:0000                              defpage 0, $4000, $4000						; MSXDOS2 bank 0
       18   00:0000                              defpage 1, $4000, 3 * $4000					; MSXDOS2 bank 1..3
@@ -297,62 +314,64 @@ Errors: 0
       72   00:72F3  41 6E 79 20 63 6F 6D 6D 61 6E 64 73 3F 
       72   00:7300                    > .skip:
       72   00:7300                    >         endif
-      73   00:7300  06 00                       ld b,0                      ; b=0 means request startup command
-      74   00:7302  0E 00                       ld c,0                      ; c=0 means reset startup queue index 
-      75   00:7304  CD DE 73            next:   call sendRegisters
-      76   00:7307  36 93                       ld (hl),C_CMDREQUEST
-      77   00:7309  CD 6F 75                    call enableNowindPage0
-      78   00:730C  26 20                       ld h,HIGH usbrd
-      79   00:730E  CD F0 73                    call getHeader
-      80   00:7311                      
-      81   00:7311  7E                          ld a,(hl)
-      82   00:7312  7E                          ld a,(hl)
-      83   00:7313  7E                          ld a,(hl)
-      84   00:7314                      
-      85   00:7314                              ; todo: read command here
-      86   00:7314  CD 7A 75                    call restorePage0
-      87   00:7317  A7                          and a
-      88   00:7318  28 13                       jr z,noNextCommand
-      89   00:731A                              DEBUGMESSAGE "Got command!"   
-      89   00:731A                    >         ifdef DEBUG
-      89   00:731A  52                >         ld d,d
-      89   00:731B  18 0C             >         jr .skip
-      89   00:731D                    >         db string
-      89   00:731D  47 6F 74 20 63 6F 6D 6D 61 6E 64 21 
-      89   00:7329                    > .skip:
-      89   00:7329                    >         endif
-      90   00:7329  0E 01                       ld c,1
-      91   00:732B  18 D7                       jr next
-      92   00:732D                      noNextCommand:
-      93   00:732D                              DEBUGMESSAGE "End of startup commands"   
-      93   00:732D                    >         ifdef DEBUG
-      93   00:732D  52                >         ld d,d
-      93   00:732E  18 17             >         jr .skip
-      93   00:7330                    >         db string
-      93   00:7330  45 6E 64 20 6F 66 20 73 74 61 72 74 75 70 20 63 
-      93   00:7340  6F 6D 6D 61 6E 64 73 
-      93   00:7347                    > .skip:
-      93   00:7347                    >         endif
-      94   00:7347                      
-      95   00:7347  CD DE 73                    call sendRegisters
-      96   00:734A  36 92                       ld (hl),C_GETDOSVERSION
-      97   00:734C  CD 6F 75                    call enableNowindPage0
-      98   00:734F  26 20                       ld h,HIGH usbrd
-      99   00:7351  CD F0 73                    call getHeader
-     100   00:7354                      
-     101   00:7354  CD 7A 75                    call restorePage0
-     102   00:7357  DA 5E 73                    jp c,bootMSXDOS1                ; no reply (host not connected?)
-     103   00:735A                              
-     104   00:735A  A7                          and a
-     105   00:735B  C2 0F 76                    jp nz,INIHRD                    ; boot MSXDOS2
-     106   00:735E                      
-     107   00:735E                      bootMSXDOS1:
-     108   00:735E  21 6F 57                    ld hl,$576f                     ; boot MSXDOS1
-     109   00:7361  E5                          push hl
-     110   00:7362  3E 04                       ld a,4
-     111   00:7364  C3 FA 7F                    jp switchBank
-     112   00:7367                                              
-     113   00:7367                              include "common.asm"
+      73   00:7300  CD 6F 75                    call enableNowindPage0
+      74   00:7303  0E 00                       ld c,0                      ; c=0 means reset startup queue index 
+      75   00:7305  06 00               next:   ld b,0                      ; b=0 means request startup command
+      76   00:7307                              SEND_COMMAND C_CMDREQUEST
+      76   00:7307  CD DE 73          >     call sendRegisters
+      76   00:730A  36 93             >     ld (hl),cmd
+      77   00:730C                              GET_RESPONSE
+      77   00:730C  26 20             >         ld h,HIGH usbrd
+      77   00:730E  CD F0 73          >         call getHeader
+      78   00:7311                      
+      79   00:7311  56                          ld d,(hl)
+      80   00:7312  56                          ld d,(hl)
+      81   00:7313  56                          ld d,(hl)
+      82   00:7314                      
+      83   00:7314                              ; todo: read command here
+      84   00:7314  A7                          and a
+      85   00:7315  28 13                       jr z,noNextCommand
+      86   00:7317                              DEBUGMESSAGE "Got command!"   
+      86   00:7317                    >         ifdef DEBUG
+      86   00:7317  52                >         ld d,d
+      86   00:7318  18 0C             >         jr .skip
+      86   00:731A                    >         db string
+      86   00:731A  47 6F 74 20 63 6F 6D 6D 61 6E 64 21 
+      86   00:7326                    > .skip:
+      86   00:7326                    >         endif
+      87   00:7326  0E 01                       ld c,1
+      88   00:7328  18 DB                       jr next
+      89   00:732A                      noNextCommand:
+      90   00:732A  CD 7A 75                    call restorePage0
+      91   00:732D                              DEBUGMESSAGE "End of startup commands"   
+      91   00:732D                    >         ifdef DEBUG
+      91   00:732D  52                >         ld d,d
+      91   00:732E  18 17             >         jr .skip
+      91   00:7330                    >         db string
+      91   00:7330  45 6E 64 20 6F 66 20 73 74 61 72 74 75 70 20 63 
+      91   00:7340  6F 6D 6D 61 6E 64 73 
+      91   00:7347                    > .skip:
+      91   00:7347                    >         endif
+      92   00:7347                      
+      93   00:7347  CD DE 73                    call sendRegisters
+      94   00:734A  36 92                       ld (hl),C_GETDOSVERSION
+      95   00:734C  CD 6F 75                    call enableNowindPage0
+      96   00:734F  26 20                       ld h,HIGH usbrd
+      97   00:7351  CD F0 73                    call getHeader
+      98   00:7354                      
+      99   00:7354  CD 7A 75                    call restorePage0
+     100   00:7357  DA 5E 73                    jp c,bootMSXDOS1                ; no reply (host not connected?)
+     101   00:735A                              
+     102   00:735A  A7                          and a
+     103   00:735B  C2 0F 76                    jp nz,INIHRD                    ; boot MSXDOS2
+     104   00:735E                      
+     105   00:735E                      bootMSXDOS1:
+     106   00:735E  21 6F 57                    ld hl,$576f                     ; boot MSXDOS1
+     107   00:7361  E5                          push hl
+     108   00:7362  3E 04                       ld a,4
+     109   00:7364  C3 FA 7F                    jp switchBank
+     110   00:7367                                              
+     111   00:7367                              include "common.asm"
        1.  00:7367                      ; Nowind specific
        2.  00:7367                      
        3.  00:7367                      nowindInit:
@@ -431,17 +450,17 @@ Errors: 0
       59.  00:73DE  F5                          push af
       60.  00:73DF  7C                          ld a,h
       61.  00:73E0  26 40                       ld h,HIGH usbwr
-      62.  00:73E2  36 AF                       ld (hl),$af                     ; header
-      63.  00:73E4  36 05                       ld (hl),$05
+      62.  00:73E2  36 AF                       ld (hl),$af      ; send header
+      63.  00:73E4  36 05                       ld (hl),$05      ;
       64.  00:73E6  71                          ld (hl),c
       65.  00:73E7  70                          ld (hl),b
       66.  00:73E8  73                          ld (hl),e
       67.  00:73E9  72                          ld (hl),d
       68.  00:73EA  75                          ld (hl),l
-      69.  00:73EB  77                          ld (hl),a                       ; register h
+      69.  00:73EB  77                          ld (hl),a        ; send register h
       70.  00:73EC  D1                          pop de
-      71.  00:73ED  73                          ld (hl),e                       ; register f
-      72.  00:73EE  72                          ld (hl),d                       ; register a
+      71.  00:73ED  73                          ld (hl),e        ; send register f
+      72.  00:73EE  72                          ld (hl),d        ; send register a
       73.  00:73EF  C9                          ret
       74.  00:73F0                              
       75.  00:73F0                      getHeader:
@@ -616,7 +635,7 @@ Errors: 0
      201.  00:74B8  D1                          pop de
      202.  00:74B9  C9                          ret
      203.  00:74BA                              
-     114   00:74BA                              include "extendedBios.asm"
+     112   00:74BA                              include "extendedBios.asm"
        1.  00:74BA                      
        2.  00:74BA                      installExtendedBios:
        3.  00:74BA                      
@@ -750,170 +769,175 @@ Errors: 0
      104.  00:756D                              
      105.  00:756D  F1                          pop af        
      106.  00:756E  C9                          ret
-     115   00:756F                              include "slotRoutines.asm"
+     113   00:756F                              include "slotRoutines.asm"
        1.  00:756F                      ; These routines are used for slot selection
        2.  00:756F                      
-       3.  00:756F                      enableNowindPage0:
-       4.  00:756F  CD BF 75                    call getSlotPage0
-       5.  00:7572  DD 67                       ld ixh,a
-       6.  00:7574  CD CA 75                    call getSlotPage1
-       7.  00:7577  C3 83 75                    jp enableSlotPage0       
-       8.  00:757A                      
-       9.  00:757A                      restorePage0:
-      10.  00:757A  F5                          push af
-      11.  00:757B  DD 7C                       ld a,ixh
-      12.  00:757D  CD 83 75                    call enableSlotPage0
-      13.  00:7580  FB                          ei
-      14.  00:7581  F1                          pop af
-      15.  00:7582  C9                          ret
-      16.  00:7583                      
-      17.  00:7583                      enableSlotPage0:
-      18.  00:7583                              ; HL and D remain unchanged
-      19.  00:7583                              ; enableSlotPage0 can be called in page 1 and 2 (no absolute jumps)
-      20.  00:7583                      
-      21.  00:7583                              ;DEBUGMESSAGE "enasltP0"
-      22.  00:7583  5F                          ld e,a                          ; store slotcode for further use
-      23.  00:7584  E6 03                       and 3
-      24.  00:7586  4F                          ld c,a                          ; new primary slot in c  
-      25.  00:7587  CB 7B                       bit 7,e
-      26.  00:7589  F3                          di
-      27.  00:758A  20 08                       jr nz,.expanded
-      28.  00:758C                      
-      29.  00:758C  DB A8                       in a,($a8)
-      30.  00:758E  E6 FC                       and %11111100
-      31.  00:7590  B1                          or c                            ; enable new primary slot in page 0
-      32.  00:7591  D3 A8                       out ($a8),a
-      33.  00:7593  C9                          ret
-      34.  00:7594                              
-      35.  00:7594                      .expanded:
-      36.  00:7594  7B                          ld a,e                          ; store secondary slot in e
-      37.  00:7595  E6 0C                       and %00001100     
-      38.  00:7597  0F                          rrca
-      39.  00:7598  0F                          rrca
-      40.  00:7599  5F                          ld e,a
-      41.  00:759A                      
-      42.  00:759A  DB A8                       in a,($a8)
-      43.  00:759C  E6 FC                       and %11111100
-      44.  00:759E  B1                          or c                            ; new primary slot in page 0
-      45.  00:759F  47                          ld b,a                          ; used to restore
-      46.  00:75A0  17                          rla
-      47.  00:75A1  A7                          and a                           ; (reset carry)
-      48.  00:75A2  17                          rla
-      49.  00:75A3  B1                          or c                            ; new primary slot in page 3
-      50.  00:75A4  0F                          rrca
-      51.  00:75A5  0F                          rrca
-      52.  00:75A6  D3 A8                       out ($a8),a
-      53.  00:75A8                      
-      54.  00:75A8  3A FF FF                    ld a,(-1)                       ; write secondary slot register
-      55.  00:75AB  2F                          cpl
-      56.  00:75AC  E6 FC                       and %11111100
-      57.  00:75AE  B3                          or e                            ; apply new secondary slot for page 0
-      58.  00:75AF  32 FF FF                    ld (-1),a
-      59.  00:75B2  5F                          ld e,a                          ; store secondary slot register (for SLTTBL)
-      60.  00:75B3                      
-      61.  00:75B3  78                          ld a,b                          ; restore primary slot page 3
-      62.  00:75B4  D3 A8                       out ($a8),a
-      63.  00:75B6                      
-      64.  00:75B6  3E C5                       ld a,LOW SLTTBL                 ; update SLTTBL
-      65.  00:75B8  81                          add c                           ; add primary slot
-      66.  00:75B9  4F                          ld c,a
-      67.  00:75BA  06 FC                       ld b,HIGH SLTTBL
-      68.  00:75BC  7B                          ld a,e                          ; restore secondary slot register
-      69.  00:75BD  02                          ld (bc),a
-      70.  00:75BE  C9                          ret
-      71.  00:75BF                      
-      72.  00:75BF                      ; These routines determine the current slot and subslot of a page.
-      73.  00:75BF                      
-      74.  00:75BF                      getSlotPage0:
-      75.  00:75BF                              ;DEBUGMESSAGE "getsltP0"
-      76.  00:75BF  DB A8                       in a,($a8)
-      77.  00:75C1  CD E4 75                    call expanded
-      78.  00:75C4  07                          rlca
-      79.  00:75C5  07                          rlca
-      80.  00:75C6  E6 0C                       and %00001100           ; keep subSlot
-      81.  00:75C8  B1                          or c                    ; add mainSlot and expanded bit
-      82.  00:75C9  C9                          ret
-      83.  00:75CA                                      
-      84.  00:75CA                      getSlotPage1:
-      85.  00:75CA                      ;        DEBUGMESSAGE "getsltP1"
-      86.  00:75CA  DB A8                       in a,($a8)
-      87.  00:75CC  0F                          rrca
-      88.  00:75CD  0F                          rrca
-      89.  00:75CE  CD E4 75                    call expanded
-      90.  00:75D1  E6 0C                       and %00001100           ; keep subSlot
-      91.  00:75D3  B1                          or c                    ; add mainSlot and expanded bit
-      92.  00:75D4  C9                          ret        
-      93.  00:75D5                                      
-      94.  00:75D5                      getSlotPage2:
-      95.  00:75D5                      ;        DEBUGMESSAGE "getsltP2"
-      96.  00:75D5  DB A8                       in a,($a8)
-      97.  00:75D7  0F                          rrca
-      98.  00:75D8  0F                          rrca
-      99.  00:75D9  0F                          rrca
-     100.  00:75DA  0F                          rrca
-     101.  00:75DB  CD E4 75                    call expanded
-     102.  00:75DE  0F                          rrca
-     103.  00:75DF  0F                          rrca
-     104.  00:75E0  E6 0C                       and %00001100           ; keep subSlot
-     105.  00:75E2  B1                          or c                    ; add mainSlot and expanded bit
-     106.  00:75E3  C9                          ret
-     107.  00:75E4                      
-     108.  00:75E4                      ;expanded:        
-     109.  00:75E4                      ;        ld hl,EXPTBL - $0300
-     110.  00:75E4                      ;        ld b,3
-     111.  00:75E4                      ;        and b
-     112.  00:75E4                      ;        ld c,a
-     113.  00:75E4                      ;        add hl,bc      
-     114.  00:75E4                      ;        
-     115.  00:75E4                      ;        or (hl)        ; BUGGIE!!!! (a will be used again!)
-     116.  00:75E4                      ;        ret p                           ; return when slot is not expanded
-     117.  00:75E4                      ;        
-     118.  00:75E4                      ;        ld c,a
-     119.  00:75E4                      ;        ld a,4
-     120.  00:75E4                      ;        add a,l
-     121.  00:75E4                      ;        ld l,a
-     122.  00:75E4                      ;        ld a,(hl)
-     123.  00:75E4                      ;        ret
-     124.  00:75E4                      
-     125.  00:75E4                      expanded:        
-     126.  00:75E4  21 C1 F9                    ld hl,EXPTBL - $0300
-     127.  00:75E7  06 03                       ld b,3
-     128.  00:75E9  A0                          and b
-     129.  00:75EA  4F                          ld c,a
-     130.  00:75EB  09                          add hl,bc
-     131.  00:75EC  CB 7E                       bit 7,(hl)
-     132.  00:75EE  28 08                       jr z,notExpanded
-     133.  00:75F0                      
-     134.  00:75F0  CB F9                       set 7,c
-     135.  00:75F2  2C                          inc l
-     136.  00:75F3  2C                          inc l
-     137.  00:75F4  2C                          inc l
-     138.  00:75F5  2C                          inc l
-     139.  00:75F6  7E                          ld a,(hl)
-     140.  00:75F7  C9                          ret        
-     141.  00:75F8                      
-     142.  00:75F8                      notExpanded:
-     143.  00:75F8  C1                          pop bc
-     144.  00:75F9  C9                          ret
-     145.  00:75FA                      
-     146.  00:75FA                      getEntrySLTWRK:
-     147.  00:75FA  CD CA 75                    call getSlotPage1
-     148.  00:75FD  21 09 FD                    ld hl,SLTWRK
-     149.  00:7600  4F                          ld c,a
-     150.  00:7601  0F                          rrca
-     151.  00:7602  0F                          rrca
-     152.  00:7603  0F                          rrca
-     153.  00:7604  E6 60                       and %01100000           ; main slot x 32
-     154.  00:7606  47                          ld b,a
-     155.  00:7607  79                          ld a,c
-     156.  00:7608  07                          rlca
-     157.  00:7609  E6 18                       and %00011000           ; sub slot x 8
-     158.  00:760B  80                          add b
-     159.  00:760C  85                          add l
-     160.  00:760D  6F                          ld l,a
-     161.  00:760E  C9                          ret
-     162.  00:760F                      
-     116   00:760F                              include "nowindDriver.asm"
+       3.  00:756F                      ; function: enabled the selected slot of page 1 in page 0
+       4.  00:756F                      ; in: none
+       5.  00:756F                      ; out: ixh = previous slot selection for page 0
+       6.  00:756F                      ; unchanged: d, iy
+       7.  00:756F                      ; requirements: stack available
+       8.  00:756F                      enableNowindPage0:
+       9.  00:756F  CD BF 75                    call getSlotPage0
+      10.  00:7572  DD 67                       ld ixh,a
+      11.  00:7574  CD CA 75                    call getSlotPage1
+      12.  00:7577  C3 83 75                    jp enableSlotPage0       
+      13.  00:757A                      
+      14.  00:757A                      restorePage0:
+      15.  00:757A  F5                          push af
+      16.  00:757B  DD 7C                       ld a,ixh
+      17.  00:757D  CD 83 75                    call enableSlotPage0
+      18.  00:7580  FB                          ei
+      19.  00:7581  F1                          pop af
+      20.  00:7582  C9                          ret
+      21.  00:7583                      
+      22.  00:7583                      enableSlotPage0:
+      23.  00:7583                              ; HL and D remain unchanged
+      24.  00:7583                              ; enableSlotPage0 can be called in page 1 and 2 (no absolute jumps)
+      25.  00:7583                      
+      26.  00:7583                              ;DEBUGMESSAGE "enasltP0"
+      27.  00:7583  5F                          ld e,a                          ; store slotcode for further use
+      28.  00:7584  E6 03                       and 3
+      29.  00:7586  4F                          ld c,a                          ; new primary slot in c  
+      30.  00:7587  CB 7B                       bit 7,e
+      31.  00:7589  F3                          di
+      32.  00:758A  20 08                       jr nz,.expanded
+      33.  00:758C                      
+      34.  00:758C  DB A8                       in a,($a8)
+      35.  00:758E  E6 FC                       and %11111100
+      36.  00:7590  B1                          or c                            ; enable new primary slot in page 0
+      37.  00:7591  D3 A8                       out ($a8),a
+      38.  00:7593  C9                          ret
+      39.  00:7594                              
+      40.  00:7594                      .expanded:
+      41.  00:7594  7B                          ld a,e                          ; store secondary slot in e
+      42.  00:7595  E6 0C                       and %00001100     
+      43.  00:7597  0F                          rrca
+      44.  00:7598  0F                          rrca
+      45.  00:7599  5F                          ld e,a
+      46.  00:759A                      
+      47.  00:759A  DB A8                       in a,($a8)
+      48.  00:759C  E6 FC                       and %11111100
+      49.  00:759E  B1                          or c                            ; new primary slot in page 0
+      50.  00:759F  47                          ld b,a                          ; used to restore
+      51.  00:75A0  17                          rla
+      52.  00:75A1  A7                          and a                           ; (reset carry)
+      53.  00:75A2  17                          rla
+      54.  00:75A3  B1                          or c                            ; new primary slot in page 3
+      55.  00:75A4  0F                          rrca
+      56.  00:75A5  0F                          rrca
+      57.  00:75A6  D3 A8                       out ($a8),a
+      58.  00:75A8                      
+      59.  00:75A8  3A FF FF                    ld a,(-1)                       ; write secondary slot register
+      60.  00:75AB  2F                          cpl
+      61.  00:75AC  E6 FC                       and %11111100
+      62.  00:75AE  B3                          or e                            ; apply new secondary slot for page 0
+      63.  00:75AF  32 FF FF                    ld (-1),a
+      64.  00:75B2  5F                          ld e,a                          ; store secondary slot register (for SLTTBL)
+      65.  00:75B3                      
+      66.  00:75B3  78                          ld a,b                          ; restore primary slot page 3
+      67.  00:75B4  D3 A8                       out ($a8),a
+      68.  00:75B6                      
+      69.  00:75B6  3E C5                       ld a,LOW SLTTBL                 ; update SLTTBL
+      70.  00:75B8  81                          add c                           ; add primary slot
+      71.  00:75B9  4F                          ld c,a
+      72.  00:75BA  06 FC                       ld b,HIGH SLTTBL
+      73.  00:75BC  7B                          ld a,e                          ; restore secondary slot register
+      74.  00:75BD  02                          ld (bc),a
+      75.  00:75BE  C9                          ret
+      76.  00:75BF                      
+      77.  00:75BF                      ; These routines determine the current slot and subslot of a page.
+      78.  00:75BF                      
+      79.  00:75BF                      getSlotPage0:
+      80.  00:75BF                              ;DEBUGMESSAGE "getsltP0"
+      81.  00:75BF  DB A8                       in a,($a8)
+      82.  00:75C1  CD E4 75                    call expanded
+      83.  00:75C4  07                          rlca
+      84.  00:75C5  07                          rlca
+      85.  00:75C6  E6 0C                       and %00001100           ; keep subSlot
+      86.  00:75C8  B1                          or c                    ; add mainSlot and expanded bit
+      87.  00:75C9  C9                          ret
+      88.  00:75CA                                      
+      89.  00:75CA                      getSlotPage1:
+      90.  00:75CA                      ;        DEBUGMESSAGE "getsltP1"
+      91.  00:75CA  DB A8                       in a,($a8)
+      92.  00:75CC  0F                          rrca
+      93.  00:75CD  0F                          rrca
+      94.  00:75CE  CD E4 75                    call expanded
+      95.  00:75D1  E6 0C                       and %00001100           ; keep subSlot
+      96.  00:75D3  B1                          or c                    ; add mainSlot and expanded bit
+      97.  00:75D4  C9                          ret        
+      98.  00:75D5                                      
+      99.  00:75D5                      getSlotPage2:
+     100.  00:75D5                      ;        DEBUGMESSAGE "getsltP2"
+     101.  00:75D5  DB A8                       in a,($a8)
+     102.  00:75D7  0F                          rrca
+     103.  00:75D8  0F                          rrca
+     104.  00:75D9  0F                          rrca
+     105.  00:75DA  0F                          rrca
+     106.  00:75DB  CD E4 75                    call expanded
+     107.  00:75DE  0F                          rrca
+     108.  00:75DF  0F                          rrca
+     109.  00:75E0  E6 0C                       and %00001100           ; keep subSlot
+     110.  00:75E2  B1                          or c                    ; add mainSlot and expanded bit
+     111.  00:75E3  C9                          ret
+     112.  00:75E4                      
+     113.  00:75E4                      ;expanded:        
+     114.  00:75E4                      ;        ld hl,EXPTBL - $0300
+     115.  00:75E4                      ;        ld b,3
+     116.  00:75E4                      ;        and b
+     117.  00:75E4                      ;        ld c,a
+     118.  00:75E4                      ;        add hl,bc      
+     119.  00:75E4                      ;        
+     120.  00:75E4                      ;        or (hl)        ; BUGGIE!!!! (a will be used again!)
+     121.  00:75E4                      ;        ret p                           ; return when slot is not expanded
+     122.  00:75E4                      ;        
+     123.  00:75E4                      ;        ld c,a
+     124.  00:75E4                      ;        ld a,4
+     125.  00:75E4                      ;        add a,l
+     126.  00:75E4                      ;        ld l,a
+     127.  00:75E4                      ;        ld a,(hl)
+     128.  00:75E4                      ;        ret
+     129.  00:75E4                      
+     130.  00:75E4                      expanded:        
+     131.  00:75E4  21 C1 F9                    ld hl,EXPTBL - $0300
+     132.  00:75E7  06 03                       ld b,3
+     133.  00:75E9  A0                          and b
+     134.  00:75EA  4F                          ld c,a
+     135.  00:75EB  09                          add hl,bc
+     136.  00:75EC  CB 7E                       bit 7,(hl)
+     137.  00:75EE  28 08                       jr z,notExpanded
+     138.  00:75F0                      
+     139.  00:75F0  CB F9                       set 7,c
+     140.  00:75F2  2C                          inc l
+     141.  00:75F3  2C                          inc l
+     142.  00:75F4  2C                          inc l
+     143.  00:75F5  2C                          inc l
+     144.  00:75F6  7E                          ld a,(hl)
+     145.  00:75F7  C9                          ret        
+     146.  00:75F8                      
+     147.  00:75F8                      notExpanded:
+     148.  00:75F8  C1                          pop bc
+     149.  00:75F9  C9                          ret
+     150.  00:75FA                      
+     151.  00:75FA                      getEntrySLTWRK:
+     152.  00:75FA  CD CA 75                    call getSlotPage1
+     153.  00:75FD  21 09 FD                    ld hl,SLTWRK
+     154.  00:7600  4F                          ld c,a
+     155.  00:7601  0F                          rrca
+     156.  00:7602  0F                          rrca
+     157.  00:7603  0F                          rrca
+     158.  00:7604  E6 60                       and %01100000           ; main slot x 32
+     159.  00:7606  47                          ld b,a
+     160.  00:7607  79                          ld a,c
+     161.  00:7608  07                          rlca
+     162.  00:7609  E6 18                       and %00011000           ; sub slot x 8
+     163.  00:760B  80                          add b
+     164.  00:760C  85                          add l
+     165.  00:760D  6F                          ld l,a
+     166.  00:760E  C9                          ret
+     167.  00:760F                      
+     114   00:760F                              include "nowindDriver.asm"
        1.  00:760F  (00:0008)           MYSIZE          equ 8                   ; size of work area (not used, some programs write here to stop drives spinning)
        2.  00:760F  (00:0200)           SECLEN          equ 512                 ; sector size
        3.  00:760F                      
@@ -1929,7 +1953,7 @@ Errors: 0
      536.  00:7C60                      
      537.  00:7C60                      ; WARNING: in some cases DEFDPB-1 is expected!
      538.  00:7C60  (00:7BE2)           DEFDPB  equ supportedMedia.def
-     117   00:7C60                              include "romdisk.asm"
+     115   00:7C60                              include "romdisk.asm"
        1.  00:7C60                      		define	ROMDSKBANK 5			; romdisk starts in bank 5
        2.  00:7C60                      		define	ROMDSKLAST (FLASHROMSIZE/16)-1
        3.  00:7C60                      
@@ -2019,7 +2043,7 @@ Errors: 0
       80.  00:7CC4                      ROMDISK_DSKFMT:
       81.  00:7CC4                              ; not implemented (no disk can be formatted)
       82.  00:7CC4                              
-     118   00:7CC4                              include "flashWriter.asm"		; todo: remove load from pc
+     116   00:7CC4                              include "flashWriter.asm"		; todo: remove load from pc
        1.  00:7CC4                      ; flashWriter.asm
        2.  00:7CC4                      ; Flashes and erases the AMD29F040/M29F032-D
        3.  00:7CC4                           
@@ -2210,7 +2234,7 @@ Errors: 0
      187.  00:C0DB                              
      188.  00:C0DB                      flasherEnd:
      189.  00:C0DB  (7DEF)                      DEPHASE
-     119   00:7DEF                              include "device.asm"
+     117   00:7DEF                              include "device.asm"
        1.  00:7DEF                      ; device.asm
        2.  00:7DEF                      ; implements a basic now: device
        3.  00:7DEF                          
@@ -2457,127 +2481,127 @@ Errors: 0
      230.  00:7EFA                      ;    -------------------------------------------------------
      231.  00:7EFA                      ;                  err? bckup       posHi 
      232.  00:7EFA                      ; followed by a 256 byte buffer
-     120   00:7EFA                      
-     121   00:7EFA  FF (250)                    ds $8000-(endCopyFromBank-copyFromBank)-$, $ff
-     122   00:7FF4                      
-     123   00:7FF4                      ; bank switching and data transfer
-     124   00:7FF4                      copyFromBank:
-     125   00:7FF4  32 01 60                    ld (mapper),a
-     126   00:7FF7  ED B0                       ldir
-     127   00:7FF9                      enableBank0:
-     128   00:7FF9  AF                          xor a
-     129   00:7FFA                      switchBank:
-     130   00:7FFA  F5                          push af
-     131   00:7FFB  32 01 60                    ld (mapper),a
-     132   00:7FFE  F1                          pop af
-     133   00:7FFF  C9                          ret
-     134   00:8000                      endCopyFromBank:
-     135   00:8000                      
-     136   00:8000  (01)                        page 1
-     137   01:4000  (C000)                      incbin "..\roms\MSXDOS22.ROM", $4000, 3 * $4000
-     138   01!0000                              PATCH $4093, mapper
-     138   01!0000                    >         code ! address
-     138   01:4093  01 60             >         dw word
-     139   01:4095                              PATCH $8093, mapper
-     139   01:4095                    >         code ! address
-     139   01:8093  01 60             >         dw word
-     140   01:8095                              PATCH $C093, mapper
-     140   01:8095                    >         code ! address
-     140   01:C093  01 60             >         dw word
-     141   01:C095                      
-     142   01:C095                              ; areas not used in MSXDOS22.ROM
-     143   01:C095                              ; bank 1: 0x5CA0 - 0x7FFF (9056 bytes)
-     144   01:C095                              ; bank 2: 0x7F30 - 0x7FFF (208 bytes)
-     145   01:C095                              ; bank 3: 0x7E70 - 0x7FFF (400 bytes)
-     146   01:C095                      
-     147   01:C095                      ; insert MSXDOS1
-     148   01:C095  (02)                	page 2
-     149   02:4000                      	module	MSXDOS1_PART
-     150   02:4000                      
-     151   02:4000                      	define 	MSXDOSVER 1
-     152   02:4000                      ;	define	ROMINIT $576f
-     153   02:4000                      	define	PRINTTEXT $5f86
-     154   02:4000                      
-     155   02:4000  (3405)                      incbin "..\roms\DISK.ROM", 0, $7405-$4000
-     156   02:7405                                      
-     157   02:7405                              PATCH $4006, device
-     157   02:7405                    >         code ! address
-     157   02:4006  8D 7E             >         dw word
-     158   02:4008                      
-     159   02:4008                              code ! $4010
-     160   02:4010  C3 8F 77                    jp DSKIO
-     161   02:4013  C3 92 78                    jp DSKCHG
-     162   02:4016  C3 C9 78                    jp GETDPB
-     163   02:4019  C3 35 79                    jp CHOICE
-     164   02:401C  C3 3A 79                    jp DSKFMT
-     165   02:401F  00 00 00                    db 0,0,0                        ; no DRVOFF
-     166   02:4022                              
-     167   02:4022                              PATCH $5770, INIHRD
-     167   02:4022                    >         code ! address
-     167   02:5770  AD 76             >         dw word
-     168   02:5772                              PATCH $57aa, $f380 + MYSIZE
-     168   02:5772                    >         code ! address
-     168   02:57AA  88 F3             >         dw word
-     169   02:57AC                              PATCH $581e, MYSIZE
-     169   02:57AC                    >         code ! address
-     169   02:581E  08 00             >         dw word
-     170   02:5820                              PATCH $582f, SECLEN
-     170   02:5820                    >         code ! address
-     170   02:582F  00 02             >         dw word
-     171   02:5831                              PATCH $5851, DRIVES
-     171   02:5831                    >         code ! address
-     171   02:5851  D0 76             >         dw word
-     172   02:5853                              PATCH $5884, DEFDPB - 1
-     172   02:5853                    >         code ! address
-     172   02:5884  7F 7C             >         dw word
-     173   02:5886                              PATCH $5890, INIENV
-     173   02:5886                    >         code ! address
-     173   02:5890  39 77             >         dw word
-     174   02:5892                              PATCH $5ae8, DEFDPB             ; different address in some roms
-     174   02:5892                    >         code ! address
-     174   02:5AE8  80 7C             >         dw word
-     175   02:5AEA                              PATCH $65af, OEMSTA
-     175   02:5AEA                    >         code ! address
-     175   02:65AF  45 7A             >         dw word
-     176   02:65B1                      	PATCH $5809, initDiskBasic      ; HRUNC
-     176   02:65B1                    >         code ! address
-     176   02:5809  38 74             >         dw word
-     177   02:580B                              
-     178   02:580B                              ;PATCH $5b9a, getHostDate        ; get date from host when no clockchip found (different 5b95)
-     179   02:580B                      
-     180   02:580B                      		ifdef BDOS_NOWIND
-     181   02:580B                    ~ 	
-     182   02:580B                    ~ 		; just patching the BDOS hook will not work; not everybody uses the hook
-     183   02:580B                    ~         ;PATCH $5d20, BDOSNW						  ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW
-     184   02:580B                    ~         	
-     185   02:580B                    ~         ; even patching the BDOS jump table will not work; internal calls (even in command.com) bypass it
-     186   02:580B                    ~         ; jump table patches
-     187   02:580B                    ~         ;PATCH $572b, BDOS_0FH_J				  ; overwrite specific function 0Fh in jump table
-     188   02:580B                    ~         ;PATCH $572f, BDOS_11H_J				  ; overwrite specific function 11h in jump table
-     189   02:580B                    ~         ;PATCH $5731, BDOS_12H_J				  ; overwrite specific function 12h in jump table
-     190   02:580B                    ~         	
-     191   02:580B                    ~         ; these patches are at the start of the routine themselves, the addresses are more or less "standardized" 
-     192   02:580B                    ~         ; over several brands of diskroms	
-     193   02:580B                    ~         ; in-routine patches
-     194   02:580B                    ~         PATCH $4463, BDOS_0FH					  ; overwrite function 0Fh itself!
-     195   02:580B                    ~         PATCH $4fb9, BDOS_11H 				  ; overwrite function 11h itself!
-     196   02:580B                    ~         PATCH $5007, BDOS_12H 				  ; overwrite function 12h itself!
-     197   02:580B                    ~         	
-     198   02:580B                    ~        	endif
-     199   02:580B                      				
-     200   02:580B                              code ! $595d
-     201   02:595D  21 D2 74                    ld hl,newAUX                    ; redirect AUX to host  
-     202   02:5960  11 27 F3                    ld de,$f327
-     203   02:5963  01 0A 00                    ld bc,10
-     204   02:5966  ED B0                       ldir
-     205   02:5968  00                          nop
-     206   02:5969  00                          nop
-     207   02:596A  00                          nop
-     208   02:596B  00                          nop                             ; do not remove!
-     209   02:596C                              
-     210   02:596C                              code @ $7405
-     211   02:7405                      
-     212   02:7405                              include "common.asm"
+     118   00:7EFA                      
+     119   00:7EFA  FF (250)                    ds $8000-(endCopyFromBank-copyFromBank)-$, $ff
+     120   00:7FF4                      
+     121   00:7FF4                      ; bank switching and data transfer
+     122   00:7FF4                      copyFromBank:
+     123   00:7FF4  32 01 60                    ld (mapper),a
+     124   00:7FF7  ED B0                       ldir
+     125   00:7FF9                      enableBank0:
+     126   00:7FF9  AF                          xor a
+     127   00:7FFA                      switchBank:
+     128   00:7FFA  F5                          push af
+     129   00:7FFB  32 01 60                    ld (mapper),a
+     130   00:7FFE  F1                          pop af
+     131   00:7FFF  C9                          ret
+     132   00:8000                      endCopyFromBank:
+     133   00:8000                      
+     134   00:8000  (01)                        page 1
+     135   01:4000  (C000)                      incbin "..\roms\MSXDOS22.ROM", $4000, 3 * $4000
+     136   01!0000                              PATCH $4093, mapper
+     136   01!0000                    >         code ! address
+     136   01:4093  01 60             >         dw word
+     137   01:4095                              PATCH $8093, mapper
+     137   01:4095                    >         code ! address
+     137   01:8093  01 60             >         dw word
+     138   01:8095                              PATCH $C093, mapper
+     138   01:8095                    >         code ! address
+     138   01:C093  01 60             >         dw word
+     139   01:C095                      
+     140   01:C095                              ; areas not used in MSXDOS22.ROM
+     141   01:C095                              ; bank 1: 0x5CA0 - 0x7FFF (9056 bytes)
+     142   01:C095                              ; bank 2: 0x7F30 - 0x7FFF (208 bytes)
+     143   01:C095                              ; bank 3: 0x7E70 - 0x7FFF (400 bytes)
+     144   01:C095                      
+     145   01:C095                      ; insert MSXDOS1
+     146   01:C095  (02)                	page 2
+     147   02:4000                      	module	MSXDOS1_PART
+     148   02:4000                      
+     149   02:4000                      	define 	MSXDOSVER 1
+     150   02:4000                      ;	define	ROMINIT $576f
+     151   02:4000                      	define	PRINTTEXT $5f86
+     152   02:4000                      
+     153   02:4000  (3405)                      incbin "..\roms\DISK.ROM", 0, $7405-$4000
+     154   02:7405                                      
+     155   02:7405                              PATCH $4006, device
+     155   02:7405                    >         code ! address
+     155   02:4006  8D 7E             >         dw word
+     156   02:4008                      
+     157   02:4008                              code ! $4010
+     158   02:4010  C3 8F 77                    jp DSKIO
+     159   02:4013  C3 92 78                    jp DSKCHG
+     160   02:4016  C3 C9 78                    jp GETDPB
+     161   02:4019  C3 35 79                    jp CHOICE
+     162   02:401C  C3 3A 79                    jp DSKFMT
+     163   02:401F  00 00 00                    db 0,0,0                        ; no DRVOFF
+     164   02:4022                              
+     165   02:4022                              PATCH $5770, INIHRD
+     165   02:4022                    >         code ! address
+     165   02:5770  AD 76             >         dw word
+     166   02:5772                              PATCH $57aa, $f380 + MYSIZE
+     166   02:5772                    >         code ! address
+     166   02:57AA  88 F3             >         dw word
+     167   02:57AC                              PATCH $581e, MYSIZE
+     167   02:57AC                    >         code ! address
+     167   02:581E  08 00             >         dw word
+     168   02:5820                              PATCH $582f, SECLEN
+     168   02:5820                    >         code ! address
+     168   02:582F  00 02             >         dw word
+     169   02:5831                              PATCH $5851, DRIVES
+     169   02:5831                    >         code ! address
+     169   02:5851  D0 76             >         dw word
+     170   02:5853                              PATCH $5884, DEFDPB - 1
+     170   02:5853                    >         code ! address
+     170   02:5884  7F 7C             >         dw word
+     171   02:5886                              PATCH $5890, INIENV
+     171   02:5886                    >         code ! address
+     171   02:5890  39 77             >         dw word
+     172   02:5892                              PATCH $5ae8, DEFDPB             ; different address in some roms
+     172   02:5892                    >         code ! address
+     172   02:5AE8  80 7C             >         dw word
+     173   02:5AEA                              PATCH $65af, OEMSTA
+     173   02:5AEA                    >         code ! address
+     173   02:65AF  45 7A             >         dw word
+     174   02:65B1                      	PATCH $5809, initDiskBasic      ; HRUNC
+     174   02:65B1                    >         code ! address
+     174   02:5809  38 74             >         dw word
+     175   02:580B                              
+     176   02:580B                              ;PATCH $5b9a, getHostDate        ; get date from host when no clockchip found (different 5b95)
+     177   02:580B                      
+     178   02:580B                      		ifdef BDOS_NOWIND
+     179   02:580B                    ~ 	
+     180   02:580B                    ~ 		; just patching the BDOS hook will not work; not everybody uses the hook
+     181   02:580B                    ~         ;PATCH $5d20, BDOSNW						  ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW
+     182   02:580B                    ~         	
+     183   02:580B                    ~         ; even patching the BDOS jump table will not work; internal calls (even in command.com) bypass it
+     184   02:580B                    ~         ; jump table patches
+     185   02:580B                    ~         ;PATCH $572b, BDOS_0FH_J				  ; overwrite specific function 0Fh in jump table
+     186   02:580B                    ~         ;PATCH $572f, BDOS_11H_J				  ; overwrite specific function 11h in jump table
+     187   02:580B                    ~         ;PATCH $5731, BDOS_12H_J				  ; overwrite specific function 12h in jump table
+     188   02:580B                    ~         	
+     189   02:580B                    ~         ; these patches are at the start of the routine themselves, the addresses are more or less "standardized" 
+     190   02:580B                    ~         ; over several brands of diskroms	
+     191   02:580B                    ~         ; in-routine patches
+     192   02:580B                    ~         PATCH $4463, BDOS_0FH					  ; overwrite function 0Fh itself!
+     193   02:580B                    ~         PATCH $4fb9, BDOS_11H 				  ; overwrite function 11h itself!
+     194   02:580B                    ~         PATCH $5007, BDOS_12H 				  ; overwrite function 12h itself!
+     195   02:580B                    ~         	
+     196   02:580B                    ~        	endif
+     197   02:580B                      				
+     198   02:580B                              code ! $595d
+     199   02:595D  21 D2 74                    ld hl,newAUX                    ; redirect AUX to host  
+     200   02:5960  11 27 F3                    ld de,$f327
+     201   02:5963  01 0A 00                    ld bc,10
+     202   02:5966  ED B0                       ldir
+     203   02:5968  00                          nop
+     204   02:5969  00                          nop
+     205   02:596A  00                          nop
+     206   02:596B  00                          nop                             ; do not remove!
+     207   02:596C                              
+     208   02:596C                              code @ $7405
+     209   02:7405                      
+     210   02:7405                              include "common.asm"
        1.  02:7405                      ; Nowind specific
        2.  02:7405                      
        3.  02:7405                      nowindInit:
@@ -2656,17 +2680,17 @@ Errors: 0
       59.  02:747C  F5                          push af
       60.  02:747D  7C                          ld a,h
       61.  02:747E  26 40                       ld h,HIGH usbwr
-      62.  02:7480  36 AF                       ld (hl),$af                     ; header
-      63.  02:7482  36 05                       ld (hl),$05
+      62.  02:7480  36 AF                       ld (hl),$af      ; send header
+      63.  02:7482  36 05                       ld (hl),$05      ;
       64.  02:7484  71                          ld (hl),c
       65.  02:7485  70                          ld (hl),b
       66.  02:7486  73                          ld (hl),e
       67.  02:7487  72                          ld (hl),d
       68.  02:7488  75                          ld (hl),l
-      69.  02:7489  77                          ld (hl),a                       ; register h
+      69.  02:7489  77                          ld (hl),a        ; send register h
       70.  02:748A  D1                          pop de
-      71.  02:748B  73                          ld (hl),e                       ; register f
-      72.  02:748C  72                          ld (hl),d                       ; register a
+      71.  02:748B  73                          ld (hl),e        ; send register f
+      72.  02:748C  72                          ld (hl),d        ; send register a
       73.  02:748D  C9                          ret
       74.  02:748E                              
       75.  02:748E                      getHeader:
@@ -2841,7 +2865,7 @@ Errors: 0
      201.  02:7556  D1                          pop de
      202.  02:7557  C9                          ret
      203.  02:7558                              
-     213   02:7558                              include "extendedBios.asm"
+     211   02:7558                              include "extendedBios.asm"
        1.  02:7558                      
        2.  02:7558                      installExtendedBios:
        3.  02:7558                      
@@ -2975,170 +2999,175 @@ Errors: 0
      104.  02:760B                              
      105.  02:760B  F1                          pop af        
      106.  02:760C  C9                          ret
-     214   02:760D                              include "slotRoutines.asm"
+     212   02:760D                              include "slotRoutines.asm"
        1.  02:760D                      ; These routines are used for slot selection
        2.  02:760D                      
-       3.  02:760D                      enableNowindPage0:
-       4.  02:760D  CD 5D 76                    call getSlotPage0
-       5.  02:7610  DD 67                       ld ixh,a
-       6.  02:7612  CD 68 76                    call getSlotPage1
-       7.  02:7615  C3 21 76                    jp enableSlotPage0       
-       8.  02:7618                      
-       9.  02:7618                      restorePage0:
-      10.  02:7618  F5                          push af
-      11.  02:7619  DD 7C                       ld a,ixh
-      12.  02:761B  CD 21 76                    call enableSlotPage0
-      13.  02:761E  FB                          ei
-      14.  02:761F  F1                          pop af
-      15.  02:7620  C9                          ret
-      16.  02:7621                      
-      17.  02:7621                      enableSlotPage0:
-      18.  02:7621                              ; HL and D remain unchanged
-      19.  02:7621                              ; enableSlotPage0 can be called in page 1 and 2 (no absolute jumps)
-      20.  02:7621                      
-      21.  02:7621                              ;DEBUGMESSAGE "enasltP0"
-      22.  02:7621  5F                          ld e,a                          ; store slotcode for further use
-      23.  02:7622  E6 03                       and 3
-      24.  02:7624  4F                          ld c,a                          ; new primary slot in c  
-      25.  02:7625  CB 7B                       bit 7,e
-      26.  02:7627  F3                          di
-      27.  02:7628  20 08                       jr nz,.expanded
-      28.  02:762A                      
-      29.  02:762A  DB A8                       in a,($a8)
-      30.  02:762C  E6 FC                       and %11111100
-      31.  02:762E  B1                          or c                            ; enable new primary slot in page 0
-      32.  02:762F  D3 A8                       out ($a8),a
-      33.  02:7631  C9                          ret
-      34.  02:7632                              
-      35.  02:7632                      .expanded:
-      36.  02:7632  7B                          ld a,e                          ; store secondary slot in e
-      37.  02:7633  E6 0C                       and %00001100     
-      38.  02:7635  0F                          rrca
-      39.  02:7636  0F                          rrca
-      40.  02:7637  5F                          ld e,a
-      41.  02:7638                      
-      42.  02:7638  DB A8                       in a,($a8)
-      43.  02:763A  E6 FC                       and %11111100
-      44.  02:763C  B1                          or c                            ; new primary slot in page 0
-      45.  02:763D  47                          ld b,a                          ; used to restore
-      46.  02:763E  17                          rla
-      47.  02:763F  A7                          and a                           ; (reset carry)
-      48.  02:7640  17                          rla
-      49.  02:7641  B1                          or c                            ; new primary slot in page 3
-      50.  02:7642  0F                          rrca
-      51.  02:7643  0F                          rrca
-      52.  02:7644  D3 A8                       out ($a8),a
-      53.  02:7646                      
-      54.  02:7646  3A FF FF                    ld a,(-1)                       ; write secondary slot register
-      55.  02:7649  2F                          cpl
-      56.  02:764A  E6 FC                       and %11111100
-      57.  02:764C  B3                          or e                            ; apply new secondary slot for page 0
-      58.  02:764D  32 FF FF                    ld (-1),a
-      59.  02:7650  5F                          ld e,a                          ; store secondary slot register (for SLTTBL)
-      60.  02:7651                      
-      61.  02:7651  78                          ld a,b                          ; restore primary slot page 3
-      62.  02:7652  D3 A8                       out ($a8),a
-      63.  02:7654                      
-      64.  02:7654  3E C5                       ld a,LOW SLTTBL                 ; update SLTTBL
-      65.  02:7656  81                          add c                           ; add primary slot
-      66.  02:7657  4F                          ld c,a
-      67.  02:7658  06 FC                       ld b,HIGH SLTTBL
-      68.  02:765A  7B                          ld a,e                          ; restore secondary slot register
-      69.  02:765B  02                          ld (bc),a
-      70.  02:765C  C9                          ret
-      71.  02:765D                      
-      72.  02:765D                      ; These routines determine the current slot and subslot of a page.
-      73.  02:765D                      
-      74.  02:765D                      getSlotPage0:
-      75.  02:765D                              ;DEBUGMESSAGE "getsltP0"
-      76.  02:765D  DB A8                       in a,($a8)
-      77.  02:765F  CD 82 76                    call expanded
-      78.  02:7662  07                          rlca
-      79.  02:7663  07                          rlca
-      80.  02:7664  E6 0C                       and %00001100           ; keep subSlot
-      81.  02:7666  B1                          or c                    ; add mainSlot and expanded bit
-      82.  02:7667  C9                          ret
-      83.  02:7668                                      
-      84.  02:7668                      getSlotPage1:
-      85.  02:7668                      ;        DEBUGMESSAGE "getsltP1"
-      86.  02:7668  DB A8                       in a,($a8)
-      87.  02:766A  0F                          rrca
-      88.  02:766B  0F                          rrca
-      89.  02:766C  CD 82 76                    call expanded
-      90.  02:766F  E6 0C                       and %00001100           ; keep subSlot
-      91.  02:7671  B1                          or c                    ; add mainSlot and expanded bit
-      92.  02:7672  C9                          ret        
-      93.  02:7673                                      
-      94.  02:7673                      getSlotPage2:
-      95.  02:7673                      ;        DEBUGMESSAGE "getsltP2"
-      96.  02:7673  DB A8                       in a,($a8)
-      97.  02:7675  0F                          rrca
-      98.  02:7676  0F                          rrca
-      99.  02:7677  0F                          rrca
-     100.  02:7678  0F                          rrca
-     101.  02:7679  CD 82 76                    call expanded
-     102.  02:767C  0F                          rrca
-     103.  02:767D  0F                          rrca
-     104.  02:767E  E6 0C                       and %00001100           ; keep subSlot
-     105.  02:7680  B1                          or c                    ; add mainSlot and expanded bit
-     106.  02:7681  C9                          ret
-     107.  02:7682                      
-     108.  02:7682                      ;expanded:        
-     109.  02:7682                      ;        ld hl,EXPTBL - $0300
-     110.  02:7682                      ;        ld b,3
-     111.  02:7682                      ;        and b
-     112.  02:7682                      ;        ld c,a
-     113.  02:7682                      ;        add hl,bc      
-     114.  02:7682                      ;        
-     115.  02:7682                      ;        or (hl)        ; BUGGIE!!!! (a will be used again!)
-     116.  02:7682                      ;        ret p                           ; return when slot is not expanded
-     117.  02:7682                      ;        
-     118.  02:7682                      ;        ld c,a
-     119.  02:7682                      ;        ld a,4
-     120.  02:7682                      ;        add a,l
-     121.  02:7682                      ;        ld l,a
-     122.  02:7682                      ;        ld a,(hl)
-     123.  02:7682                      ;        ret
-     124.  02:7682                      
-     125.  02:7682                      expanded:        
-     126.  02:7682  21 C1 F9                    ld hl,EXPTBL - $0300
-     127.  02:7685  06 03                       ld b,3
-     128.  02:7687  A0                          and b
-     129.  02:7688  4F                          ld c,a
-     130.  02:7689  09                          add hl,bc
-     131.  02:768A  CB 7E                       bit 7,(hl)
-     132.  02:768C  28 08                       jr z,notExpanded
-     133.  02:768E                      
-     134.  02:768E  CB F9                       set 7,c
-     135.  02:7690  2C                          inc l
-     136.  02:7691  2C                          inc l
-     137.  02:7692  2C                          inc l
-     138.  02:7693  2C                          inc l
-     139.  02:7694  7E                          ld a,(hl)
-     140.  02:7695  C9                          ret        
-     141.  02:7696                      
-     142.  02:7696                      notExpanded:
-     143.  02:7696  C1                          pop bc
-     144.  02:7697  C9                          ret
-     145.  02:7698                      
-     146.  02:7698                      getEntrySLTWRK:
-     147.  02:7698  CD 68 76                    call getSlotPage1
-     148.  02:769B  21 09 FD                    ld hl,SLTWRK
-     149.  02:769E  4F                          ld c,a
-     150.  02:769F  0F                          rrca
-     151.  02:76A0  0F                          rrca
-     152.  02:76A1  0F                          rrca
-     153.  02:76A2  E6 60                       and %01100000           ; main slot x 32
-     154.  02:76A4  47                          ld b,a
-     155.  02:76A5  79                          ld a,c
-     156.  02:76A6  07                          rlca
-     157.  02:76A7  E6 18                       and %00011000           ; sub slot x 8
-     158.  02:76A9  80                          add b
-     159.  02:76AA  85                          add l
-     160.  02:76AB  6F                          ld l,a
-     161.  02:76AC  C9                          ret
-     162.  02:76AD                      
-     215   02:76AD                              include "nowindDriver.asm"
+       3.  02:760D                      ; function: enabled the selected slot of page 1 in page 0
+       4.  02:760D                      ; in: none
+       5.  02:760D                      ; out: ixh = previous slot selection for page 0
+       6.  02:760D                      ; unchanged: d, iy
+       7.  02:760D                      ; requirements: stack available
+       8.  02:760D                      enableNowindPage0:
+       9.  02:760D  CD 5D 76                    call getSlotPage0
+      10.  02:7610  DD 67                       ld ixh,a
+      11.  02:7612  CD 68 76                    call getSlotPage1
+      12.  02:7615  C3 21 76                    jp enableSlotPage0       
+      13.  02:7618                      
+      14.  02:7618                      restorePage0:
+      15.  02:7618  F5                          push af
+      16.  02:7619  DD 7C                       ld a,ixh
+      17.  02:761B  CD 21 76                    call enableSlotPage0
+      18.  02:761E  FB                          ei
+      19.  02:761F  F1                          pop af
+      20.  02:7620  C9                          ret
+      21.  02:7621                      
+      22.  02:7621                      enableSlotPage0:
+      23.  02:7621                              ; HL and D remain unchanged
+      24.  02:7621                              ; enableSlotPage0 can be called in page 1 and 2 (no absolute jumps)
+      25.  02:7621                      
+      26.  02:7621                              ;DEBUGMESSAGE "enasltP0"
+      27.  02:7621  5F                          ld e,a                          ; store slotcode for further use
+      28.  02:7622  E6 03                       and 3
+      29.  02:7624  4F                          ld c,a                          ; new primary slot in c  
+      30.  02:7625  CB 7B                       bit 7,e
+      31.  02:7627  F3                          di
+      32.  02:7628  20 08                       jr nz,.expanded
+      33.  02:762A                      
+      34.  02:762A  DB A8                       in a,($a8)
+      35.  02:762C  E6 FC                       and %11111100
+      36.  02:762E  B1                          or c                            ; enable new primary slot in page 0
+      37.  02:762F  D3 A8                       out ($a8),a
+      38.  02:7631  C9                          ret
+      39.  02:7632                              
+      40.  02:7632                      .expanded:
+      41.  02:7632  7B                          ld a,e                          ; store secondary slot in e
+      42.  02:7633  E6 0C                       and %00001100     
+      43.  02:7635  0F                          rrca
+      44.  02:7636  0F                          rrca
+      45.  02:7637  5F                          ld e,a
+      46.  02:7638                      
+      47.  02:7638  DB A8                       in a,($a8)
+      48.  02:763A  E6 FC                       and %11111100
+      49.  02:763C  B1                          or c                            ; new primary slot in page 0
+      50.  02:763D  47                          ld b,a                          ; used to restore
+      51.  02:763E  17                          rla
+      52.  02:763F  A7                          and a                           ; (reset carry)
+      53.  02:7640  17                          rla
+      54.  02:7641  B1                          or c                            ; new primary slot in page 3
+      55.  02:7642  0F                          rrca
+      56.  02:7643  0F                          rrca
+      57.  02:7644  D3 A8                       out ($a8),a
+      58.  02:7646                      
+      59.  02:7646  3A FF FF                    ld a,(-1)                       ; write secondary slot register
+      60.  02:7649  2F                          cpl
+      61.  02:764A  E6 FC                       and %11111100
+      62.  02:764C  B3                          or e                            ; apply new secondary slot for page 0
+      63.  02:764D  32 FF FF                    ld (-1),a
+      64.  02:7650  5F                          ld e,a                          ; store secondary slot register (for SLTTBL)
+      65.  02:7651                      
+      66.  02:7651  78                          ld a,b                          ; restore primary slot page 3
+      67.  02:7652  D3 A8                       out ($a8),a
+      68.  02:7654                      
+      69.  02:7654  3E C5                       ld a,LOW SLTTBL                 ; update SLTTBL
+      70.  02:7656  81                          add c                           ; add primary slot
+      71.  02:7657  4F                          ld c,a
+      72.  02:7658  06 FC                       ld b,HIGH SLTTBL
+      73.  02:765A  7B                          ld a,e                          ; restore secondary slot register
+      74.  02:765B  02                          ld (bc),a
+      75.  02:765C  C9                          ret
+      76.  02:765D                      
+      77.  02:765D                      ; These routines determine the current slot and subslot of a page.
+      78.  02:765D                      
+      79.  02:765D                      getSlotPage0:
+      80.  02:765D                              ;DEBUGMESSAGE "getsltP0"
+      81.  02:765D  DB A8                       in a,($a8)
+      82.  02:765F  CD 82 76                    call expanded
+      83.  02:7662  07                          rlca
+      84.  02:7663  07                          rlca
+      85.  02:7664  E6 0C                       and %00001100           ; keep subSlot
+      86.  02:7666  B1                          or c                    ; add mainSlot and expanded bit
+      87.  02:7667  C9                          ret
+      88.  02:7668                                      
+      89.  02:7668                      getSlotPage1:
+      90.  02:7668                      ;        DEBUGMESSAGE "getsltP1"
+      91.  02:7668  DB A8                       in a,($a8)
+      92.  02:766A  0F                          rrca
+      93.  02:766B  0F                          rrca
+      94.  02:766C  CD 82 76                    call expanded
+      95.  02:766F  E6 0C                       and %00001100           ; keep subSlot
+      96.  02:7671  B1                          or c                    ; add mainSlot and expanded bit
+      97.  02:7672  C9                          ret        
+      98.  02:7673                                      
+      99.  02:7673                      getSlotPage2:
+     100.  02:7673                      ;        DEBUGMESSAGE "getsltP2"
+     101.  02:7673  DB A8                       in a,($a8)
+     102.  02:7675  0F                          rrca
+     103.  02:7676  0F                          rrca
+     104.  02:7677  0F                          rrca
+     105.  02:7678  0F                          rrca
+     106.  02:7679  CD 82 76                    call expanded
+     107.  02:767C  0F                          rrca
+     108.  02:767D  0F                          rrca
+     109.  02:767E  E6 0C                       and %00001100           ; keep subSlot
+     110.  02:7680  B1                          or c                    ; add mainSlot and expanded bit
+     111.  02:7681  C9                          ret
+     112.  02:7682                      
+     113.  02:7682                      ;expanded:        
+     114.  02:7682                      ;        ld hl,EXPTBL - $0300
+     115.  02:7682                      ;        ld b,3
+     116.  02:7682                      ;        and b
+     117.  02:7682                      ;        ld c,a
+     118.  02:7682                      ;        add hl,bc      
+     119.  02:7682                      ;        
+     120.  02:7682                      ;        or (hl)        ; BUGGIE!!!! (a will be used again!)
+     121.  02:7682                      ;        ret p                           ; return when slot is not expanded
+     122.  02:7682                      ;        
+     123.  02:7682                      ;        ld c,a
+     124.  02:7682                      ;        ld a,4
+     125.  02:7682                      ;        add a,l
+     126.  02:7682                      ;        ld l,a
+     127.  02:7682                      ;        ld a,(hl)
+     128.  02:7682                      ;        ret
+     129.  02:7682                      
+     130.  02:7682                      expanded:        
+     131.  02:7682  21 C1 F9                    ld hl,EXPTBL - $0300
+     132.  02:7685  06 03                       ld b,3
+     133.  02:7687  A0                          and b
+     134.  02:7688  4F                          ld c,a
+     135.  02:7689  09                          add hl,bc
+     136.  02:768A  CB 7E                       bit 7,(hl)
+     137.  02:768C  28 08                       jr z,notExpanded
+     138.  02:768E                      
+     139.  02:768E  CB F9                       set 7,c
+     140.  02:7690  2C                          inc l
+     141.  02:7691  2C                          inc l
+     142.  02:7692  2C                          inc l
+     143.  02:7693  2C                          inc l
+     144.  02:7694  7E                          ld a,(hl)
+     145.  02:7695  C9                          ret        
+     146.  02:7696                      
+     147.  02:7696                      notExpanded:
+     148.  02:7696  C1                          pop bc
+     149.  02:7697  C9                          ret
+     150.  02:7698                      
+     151.  02:7698                      getEntrySLTWRK:
+     152.  02:7698  CD 68 76                    call getSlotPage1
+     153.  02:769B  21 09 FD                    ld hl,SLTWRK
+     154.  02:769E  4F                          ld c,a
+     155.  02:769F  0F                          rrca
+     156.  02:76A0  0F                          rrca
+     157.  02:76A1  0F                          rrca
+     158.  02:76A2  E6 60                       and %01100000           ; main slot x 32
+     159.  02:76A4  47                          ld b,a
+     160.  02:76A5  79                          ld a,c
+     161.  02:76A6  07                          rlca
+     162.  02:76A7  E6 18                       and %00011000           ; sub slot x 8
+     163.  02:76A9  80                          add b
+     164.  02:76AA  85                          add l
+     165.  02:76AB  6F                          ld l,a
+     166.  02:76AC  C9                          ret
+     167.  02:76AD                      
+     213   02:76AD                              include "nowindDriver.asm"
        1.  02:76AD  (02:0008)           MYSIZE          equ 8                   ; size of work area (not used, some programs write here to stop drives spinning)
        2.  02:76AD  (02:0200)           SECLEN          equ 512                 ; sector size
        3.  02:76AD                      
@@ -4154,7 +4183,7 @@ Errors: 0
      536.  02:7CFE                      
      537.  02:7CFE                      ; WARNING: in some cases DEFDPB-1 is expected!
      538.  02:7CFE  (02:7C80)           DEFDPB  equ supportedMedia.def
-     216   02:7CFE                              include "romdisk.asm"
+     214   02:7CFE                              include "romdisk.asm"
        1.  02:7CFE                      		define	ROMDSKBANK 5			; romdisk starts in bank 5
        2.  02:7CFE                      		define	ROMDSKLAST (FLASHROMSIZE/16)-1
        3.  02:7CFE                      
@@ -4244,7 +4273,7 @@ Errors: 0
       80.  02:7D62                      ROMDISK_DSKFMT:
       81.  02:7D62                              ; not implemented (no disk can be formatted)
       82.  02:7D62                              
-     217   02:7D62                              include "flashWriter.asm"
+     215   02:7D62                              include "flashWriter.asm"
        1.  02:7D62                      ; flashWriter.asm
        2.  02:7D62                      ; Flashes and erases the AMD29F040/M29F032-D
        3.  02:7D62                           
@@ -4435,7 +4464,7 @@ Errors: 0
      187.  02:C0DB                              
      188.  02:C0DB                      flasherEnd:
      189.  02:C0DB  (7E8D)                      DEPHASE
-     218   02:7E8D                              include "device.asm"
+     216   02:7E8D                              include "device.asm"
        1.  02:7E8D                      ; device.asm
        2.  02:7E8D                      ; implements a basic now: device
        3.  02:7E8D                          
@@ -4682,27 +4711,28 @@ Errors: 0
      230.  02:7F98                      ;    -------------------------------------------------------
      231.  02:7F98                      ;                  err? bckup       posHi 
      232.  02:7F98                      ; followed by a 256 byte buffer
-     219   02:7F98                              
-     220   02:7F98                              ifdef BDOS_NOWIND
-     221   02:7F98                    ~         include "nowindbdos.asm"
-     222   02:7F98                    ~         endif
-     223   02:7F98                              
-     224   02:7F98  FF (92)                    ds $8000-(endCopyFromBank-copyFromBank)-$, $ff
-     225   02:7FF4                      
-     226   02:7FF4                      ; bank switching and data transfer
-     227   02:7FF4                      copyFromBank:
-     228   02:7FF4  32 01 60                    ld (mapper),a
-     229   02:7FF7  ED B0                       ldir
-     230   02:7FF9                      enableBank0:
-     231   02:7FF9  AF                          xor a
-     232   02:7FFA  F5                          push af
-     233   02:7FFB  32 01 60                    ld (mapper),a
-     234   02:7FFE  F1                          pop af
-     235   02:7FFF  C9                          ret
-     236   02:8000                      endCopyFromBank:
-     237   02:8000                      
-     238   02:8000  (03)                        page 3
-     239   03:0000  BA (442368)                 ds (512-80)*1024, $ba
+     217   02:7F98                              
+     218   02:7F98                              ifdef BDOS_NOWIND
+     219   02:7F98                    ~         include "nowindbdos.asm"
+     220   02:7F98                    ~         endif
+     221   02:7F98                              
+     222   02:7F98  FF (92)                    ds $8000-(endCopyFromBank-copyFromBank)-$, $ff
+     223   02:7FF4                      
+     224   02:7FF4                      ; bank switching and data transfer
+     225   02:7FF4                      copyFromBank:
+     226   02:7FF4  32 01 60                    ld (mapper),a
+     227   02:7FF7  ED B0                       ldir
+     228   02:7FF9                      enableBank0:
+     229   02:7FF9  AF                          xor a
+     230   02:7FFA  F5                          push af
+     231   02:7FFB  32 01 60                    ld (mapper),a
+     232   02:7FFE  F1                          pop af
+     233   02:7FFF  C9                          ret
+     234   02:8000                      endCopyFromBank:
+     235   02:8000                      
+     236   02:8000  (03)                        page 3
+     237   03:0000  BA (442368)                 ds (512-80)*1024, $ba
+     238   03!C000                      
 
     LABELS
 ---------------------------------------
@@ -4755,8 +4785,8 @@ Errors: 0
 00:00000092   C_GETDOSVERSION
 00:00000093   C_CMDREQUEST
 00:000072F0   MSXDOS2_PART.getBootArgs
-00:00007304   MSXDOS2_PART.next
-00:0000732D   MSXDOS2_PART.noNextCommand
+00:00007305   MSXDOS2_PART.next
+00:0000732A   MSXDOS2_PART.noNextCommand
 00:0000735E   MSXDOS2_PART.bootMSXDOS1
 00:00007367   MSXDOS2_PART.nowindInit
 00:0000739A   MSXDOS2_PART.initDiskBasic

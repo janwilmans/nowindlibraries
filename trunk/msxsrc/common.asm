@@ -59,17 +59,17 @@ sendRegisters:
         push af
         ld a,h
         ld h,HIGH usbwr
-        ld (hl),$af                     ; header
-        ld (hl),$05
+        ld (hl),$af      ; send header
+        ld (hl),$05      ;
         ld (hl),c
         ld (hl),b
         ld (hl),e
         ld (hl),d
         ld (hl),l
-        ld (hl),a                       ; register h
+        ld (hl),a        ; send register h
         pop de
-        ld (hl),e                       ; register f
-        ld (hl),d                       ; register a
+        ld (hl),e        ; send register f
+        ld (hl),d        ; send register a
         ret
         
 getHeader:
