@@ -48,12 +48,12 @@ nowind
 9=extendedBios.asm
 [Selected Project Files]
 Main=
-Selected=nowind.asm
+Selected=flashWriter.asm
 [nowindDos1.asm]
 TopLine=55
 Caret=13,92
 [nowind.asm]
-TopLine=59
+TopLine=63
 Caret=25,80
 [common.asm]
 TopLine=28
@@ -62,11 +62,11 @@ Caret=23,29
 TopLine=35
 Caret=17,60
 [nowindDriver.asm]
-TopLine=491
+TopLine=489
 Caret=20,535
 [flashWriter.asm]
 TopLine=1
-Caret=22,19
+Caret=20,175
 [romdisk.asm]
 TopLine=1
 Caret=2,23
@@ -75,7 +75,7 @@ TopLine=1
 Caret=10,10
 [..\Release\stderr.txt]
 TopLine=180
-Caret=15,215
+Caret=14,215
 [extendedBios.asm]
 TopLine=1
 Caret=15,7
