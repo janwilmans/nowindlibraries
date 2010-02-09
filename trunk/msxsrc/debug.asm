@@ -3,15 +3,15 @@
 ; TODO: implement variable amount of debug data send to host
 
         MACRO DEBUGMESSAGE string
-	IFDEF DEBUG
-	; blueMSX debug info
+        IFDEF DEBUG
+        ; blueMSX debug info
         ld d,d
-	jr .skip
+        jr .skip
         db string
 .skip:
         ENDIF
-		
-	IFDEF USBDEBUG
+                
+        IFDEF USBDEBUG
 ;        ASSERT ($ < $8000)
         push af
         exx
@@ -23,8 +23,8 @@
 .data:  db $af, $66, 0, string, 0, 0
 .end:   exx
         pop af
-	ENDIF
-	ENDM
+        ENDIF
+        ENDM
 
         MACRO DEBUGDUMPSLOTSELECTION
         IFDEF DEBUG
@@ -33,21 +33,21 @@
         ENDM
         
         MACRO DEBUGENABLEDISASM
-	IFDEF DEBUG
-	db $ed,$0b
-	ENDIF
+        IFDEF DEBUG
+        db $ed,$0b
+        ENDIF
         ENDM
 
         MACRO DEBUGDISABLEDISASM
-	IFDEF DEBUG
-	db $ed,$0c
-	ENDIF
+        IFDEF DEBUG
+        db $ed,$0c
+        ENDIF
         ENDM
         
         MACRO DEBUGASSERT
- 	IFDEF DEBUG
-	db $ed,$0a
-	ENDIF
+        IFDEF DEBUG
+        db $ed,$0a
+        ENDIF
         ENDM
         
         MACRO DEBUGDUMPMEMHL len
@@ -68,15 +68,15 @@
         
         
         MACRO DEBUGDUMPREGISTERS
-	IFDEF DEBUG
-	db $ed,7
-	ENDIF
+        IFDEF DEBUG
+        db $ed,7
+        ENDIF
         
         IFDEF USBDEBUG
         ASSERT($ < $8000)
         call sendCpuInfo
         ENDIF
-	ENDM
+        ENDM
 
         MACRO DEBUGROUTINESPAGE1
 sendCpuInfo:
@@ -116,7 +116,7 @@ sendCpuInfo:
         
 ; blueMSX
         MACRO BLUEMSX_BREAKPOINT
-	IFDEF DEBUG
+        IFDEF DEBUG
         ld b,b
         jr $+2
         ENDIF

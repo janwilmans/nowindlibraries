@@ -1,5 +1,5 @@
-		define	ROMDSKBANK 5			; romdisk starts in bank 5
-		define	ROMDSKLAST (FLASHROMSIZE/16)-1
+                define  ROMDSKBANK 5                    ; romdisk starts in bank 5
+                define  ROMDSKLAST (FLASHROMSIZE/16)-1
 
 
 ROMDISK_DSKIO:
