@@ -291,117 +291,6 @@ void NowindHost::auxOut()
 	printf("%c", cmdData[7]);
 }
 
-// the MSX asks whether the host has a command  
-// waiting for it to execute
-void NowindHost::commandRequested()
-{
-    char cmdType = cmdData[1]; // reg_b
-    char cmdArg = cmdData[0]; // reg_c
-
-    switch (cmdType)
-    {
-    case 0x00:
-        // command request at startup, read from startupRequestQueue
-        commandRequestedAtStartup(cmdArg);
-        break;
-    case 0x01:
-       commandRequestedAnytime();
-       break;
-    default:
-        DBERR("MSX sent unknown commandRequested type %d\n", cmdType);
-        break;
-    }
-}
-
-// the startupRequestQueue is not cleared by the msx requesting commands
-// each time the msx boots, the same startup commands are send as long 
-// as the user application does not remove them
-void NowindHost::commandRequestedAtStartup(byte reset)
-{
-    static unsigned int index = 0;
-    if (reset == 0x00)
-    {
-        // The MSX is in its diskrom startup sequence at INIHDR and requests the first startup command
-        DBERR("INIHRD hook requests command at startup\n");
-        // this reset the index for startupRequestQueue
-        index = 0;
-    }
-    else
-    {
-        // The MSX is in its diskrom startup sequence at INIHDR and requests the next startup command
-        DBERR("INIHRD hook requests next command at startup\n");
-    }
-
-    sendHeader();
-
-    std::vector<byte> command;
-    if (index >= startupRequestQueue.size())
-    {
-        send(0);   // no more commands 
-    }
-    else
-    {
-        command = startupRequestQueue.at(index);
-        index++;
-
-        for (unsigned int i=0;i<command.size();i++)
-        {
-            send(command[i]);
-        }
-    }
-}
-
-// command from the requestQueue are sent only once, 
-// and are them removed from the queue
-void NowindHost::commandRequestedAnytime()
-{
-    sendHeader();
-    if (requestQueue.empty())
-    {
-        send(0);
-    }
-    else
-    {
-        std::vector<byte> command = requestQueue.front();
-        // remove command from queue        
-        requestQueue.pop_front();
-		if (requestQueue.empty())
-		{
-			send(0);
-		}
-		else
-		{
-			send(1);
-		}
-
-        for (unsigned int i=0;i<command.size();i++)
-	    {
-            send(command[i]);
-	    }
-    }
-}
-
-void NowindHost::clearStartupRequests()
-{
-    startupRequestQueue.clear();
-}
-
-void NowindHost::addStartupRequest(std::vector<byte> command)
-{
-    startupRequestQueue.push_back(command);
-}
-
-
-void NowindHost::clearRequests()
-{
-    requestQueue.clear();
-}
-
-void NowindHost::addRequest(std::vector<byte> command)
-{
-    requestQueue.push_back(command);
-}
-
 void NowindHost::dumpRegisters()
 {
 	//reg_[cbedlhfa] + cmd
@@ -1075,4 +964,116 @@ void NowindHost::getDosVersion()
 	send(enableMSXDOS2 ? 1:0);
 }
 
+// the MSX asks whether the host has a command  
+// waiting for it to execute
+void NowindHost::commandRequested()
+{
+    char cmdType = cmdData[1]; // reg_b
+    char cmdArg = cmdData[0]; // reg_c
+
+    switch (cmdType)
+    {
+    case 0x00:
+        // command request at startup, read from startupRequestQueue
+        commandRequestedAtStartup(cmdArg);
+        break;
+    case 0x01:
+       commandRequestedAnytime();
+       break;
+    default:
+        DBERR("MSX sent unknown commandRequested type %d\n", cmdType);
+        break;
+    }
+}
+
+// the startupRequestQueue is not cleared by the msx requesting commands
+// each time the msx boots, the same startup commands are send as long 
+// as the user application does not remove them
+void NowindHost::commandRequestedAtStartup(byte reset)
+{
+    static unsigned int index = 0;
+    if (reset == 0x00)
+    {
+        // The MSX is in its diskrom startup sequence at INIHDR and requests the first startup command
+        DBERR("INIHRD hook requests command at startup\n");
+        // this reset the index for startupRequestQueue
+        index = 0;
+    }
+    else
+    {
+        // The MSX is in its diskrom startup sequence at INIHDR and requests the next startup command
+        DBERR("INIHRD hook requests next command at startup\n");
+    }
+
+    sendHeader();
+
+    std::vector<byte> command;
+    if (index >= startupRequestQueue.size())
+    {
+        send(0);   // no more commands 
+    }
+    else
+    {
+        command = startupRequestQueue.at(index);
+        index++;
+
+        for (unsigned int i=0;i<command.size();i++)
+        {
+            send(command[i]);
+        }
+    }
+}
+
+// command from the requestQueue are sent only once, 
+// and are them removed from the queue
+void NowindHost::commandRequestedAnytime()
+{
+    sendHeader();
+    if (requestQueue.empty())
+    {
+        send(0);
+    }
+    else
+    {
+        std::vector<byte> command = requestQueue.front();
+        // remove command from queue        
+        requestQueue.pop_front();
+		if (requestQueue.empty())
+		{
+			send(0);
+		}
+		else
+		{
+			send(1);
+		}
+
+        for (unsigned int i=0;i<command.size();i++)
+	    {
+            send(command[i]);
+	    }
+    }
+}
+
+void NowindHost::clearStartupRequests()
+{
+    startupRequestQueue.clear();
+}
+
+void NowindHost::addStartupRequest(std::vector<byte> command)
+{
+    startupRequestQueue.push_back(command);
+}
+
+
+void NowindHost::clearRequests()
+{
+    requestQueue.clear();
+}
+
+void NowindHost::addRequest(std::vector<byte> command)
+{
+    requestQueue.push_back(command);
+}
+
 } // namespace nowind
+
