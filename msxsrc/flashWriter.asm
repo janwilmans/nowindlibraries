@@ -66,8 +66,8 @@ autoselectMode:
 
 eraseSector:
         ;DEBUGMESSAGE "sector erase"
-	ld a,"e"
-	out ($98),a
+        ld a,"e"
+        out ($98),a
 
         ld a,(hl)                       ; get sector number 0..63
         sla a
@@ -104,8 +104,8 @@ writeResetCommand:
 
 chipErase:
         ;DEBUGMESSAGE "chip erase"
-	ld a,"E"
-	out ($98),a
+        ld a,"E"
+        out ($98),a
 
         ld a,$80
         call writeCommandSequence

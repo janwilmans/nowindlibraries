@@ -2,7 +2,7 @@
 
 nowindInit:
         ;DEBUGMESSAGE "nowindInit"
-        ld a,($faf8)										; moet volgens bifi ld a,($2d) zijn, $faf8 is op msx1 deel van de rs232 area?
+        ld a,($faf8)                                                                            ; moet volgens bifi ld a,($2d) zijn, $faf8 is op msx1 deel van de rs232 area?
         or a 
         push af
         call z,CHGMOD                   ; SCREEN 0 for MSX1
@@ -193,7 +193,7 @@ receiveFCB:
         
         ld b,32
 .loop:  ld a,(usbrd)
-	ld (usbwr),a			; loop back
+        ld (usbwr),a                    ; loop back
         ld (de),a
         inc de
         djnz .loop

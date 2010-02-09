@@ -1,6 +1,6 @@
         
 vramDump:
-	di
+        di
         call enableNowindPage0
 
         ld a,2
@@ -64,9 +64,9 @@ tranferframe:
         ld hl,usbrd
         call getHeader
         
-        ld d,112			; 224x64 is 1 screen 2 page of data ($3800)
+        ld d,112                        ; 224x64 is 1 screen 2 page of data ($3800)
 write_more:        
-	ld hl,usbrd
+        ld hl,usbrd
         ld bc,$0098
         repeat 128
         outi
@@ -76,30 +76,30 @@ write_more:
         ld a,d
         or a
         jp nz,write_more
-        ret		
+        ret             
 
 changeColors:
-        xor a			; set color register pointer to zero
+        xor a                   ; set color register pointer to zero
         out ($99),a
         ld a,$80+16
         out ($99),a
         
         ld hl,usbrd
-        ld bc,$009A		; write to color register
+        ld bc,$009A             ; write to color register
 
         repeat 32
         outi
-        endrepeat		
+        endrepeat               
         ret
 
-	
+        
 setVramAccessPointer:
         out ($99),a
         ld a,$80+14
         out ($99),a
         xor a
         out ($99),a
-        ld a,%01000000		; vram write
+        ld a,%01000000          ; vram write
         out ($99),a
         ret
 
@@ -112,5 +112,5 @@ waitForRetrace:
         bit 6,a
         jr z,.lp2       
         ret
-        	
-	; just let it go... 
+                
+        ; just let it go... 
