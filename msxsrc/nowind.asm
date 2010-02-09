@@ -18,7 +18,7 @@
         defpage 1, $4000, 3 * $4000                                     ; MSXDOS2 bank 1..3
         defpage 2, $4000, $4000                                         ; MSXDOS1
         defpage 3, 0, (512-80)*1024
-                
+
 ; insert MSXDOS2
         page 0
         module  MSXDOS2_PART
@@ -72,21 +72,21 @@ getBootArgs:
         DEBUGMESSAGE "Any commands?"   
         call enableNowindPage0
         ld c,0                      ; c=0 means reset startup queue index 
-next:   ld b,0                      ; b=0 means request startup command
+.loop:  ld b,0                      ; b=0 means request startup command
         SEND_COMMAND C_CMDREQUEST
         GET_RESPONSE
-
-        ld d,(hl)
-        ld d,(hl)
-        ld d,(hl)
-
-        ; todo: read command here
         and a
-        jr z,noNextCommand
+        jr z,noCommand
         DEBUGMESSAGE "Got command!"   
+ 
+        ld a,(hl)
+        ;cp 1
+        ;jr z, Com
+                
         ld c,1
-        jr next
-noNextCommand:
+        jr .loop
+
+noCommand:
         call restorePage0
         DEBUGMESSAGE "End of startup commands"   
 
