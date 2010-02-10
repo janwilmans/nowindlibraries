@@ -73,6 +73,14 @@
 				RelativePath=".\common.asm"
 				>
 				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
 					>
@@ -84,6 +92,14 @@
 			<File
 				RelativePath=".\debug.asm"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
@@ -97,6 +113,14 @@
 				RelativePath=".\device.asm"
 				>
 				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
 					>
@@ -108,6 +132,14 @@
 			<File
 				RelativePath=".\labels.asm"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
@@ -121,19 +153,37 @@
 				RelativePath=".\nowind.asm"
 				>
 				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Assembly using sjasm"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						Outputs="$(OutDir)nowind.rom"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Assembly using Sjasm"
-						CommandLine="$(ProjectDir)sjasm4beta\sjasm.exe $(InputPath)"
-						Outputs="nowind.rom"
+						Description="Assembly using sjasm"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						Outputs="$(OutDir)nowind.rom"
 					/>
 				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\nowindDriver.asm"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
@@ -147,6 +197,14 @@
 				RelativePath=".\romdisk.asm"
 				>
 				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
 					>
@@ -159,6 +217,14 @@
 				RelativePath=".\slotRoutines.asm"
 				>
 				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
 					>
@@ -170,6 +236,14 @@
 			<File
 				RelativePath=".\vram.asm"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
