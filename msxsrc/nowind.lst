@@ -1,4 +1,4 @@
-Sjasm Z80 Assembler v0.4 BETA 6 - www.xl2s.tk             [2010.02.09 - 21:36:29]
+Sjasm Z80 Assembler v0.42b8 - www.xl2s.tk             [2010.02.10 - 22:18:05]
 
 d:\project\nowindlibraries\msxsrc\nowind.asm
 Errors: 0
@@ -4735,7 +4735,7 @@ Errors: 0
      238   03!C000                      
 
     LABELS
----------------------------------------
+-------------------------------------------------
 00:0000000C X RDSLT
 00:00000014 X WRSLT
 00:0000001C   CALSLT
@@ -5087,23 +5087,23 @@ Errors: 0
 02:00008000   MSXDOS1_PART.endCopyFromBank
 
 
-Output: d:\project\nowindlibraries\msxsrc\nowind.out
---------------------------------------
+ Output: d:\project\nowindlibraries\msxsrc\nowind.out
+-------------------------------------------------
 
  Page: 00
   Org: 00000000  Size: *  Used: 00000000
 
     No output
 
-Output: nowind.rom
---------------------------------------
+ Output: nowind.rom
+-------------------------------------------------
 
  Page: 00
   Org: 00004000  Size: 00004000  Used: 00004000
 
-   Address   Length Align  Label
-   00004000   13040        
-   000072F0    3344     @  MSXDOS2_PART.getBootArgs
+   Address   Length Align   Label
+   00004000   13040         
+   000072F0    3344     @   MSXDOS2_PART.getBootArgs
 
   Overlay parts:
    Address   Length Align  Label
@@ -5124,8 +5124,8 @@ Output: nowind.rom
  Page: 01
   Org: 00004000  Size: 0000C000  Used: 0000C000
 
-   Address   Length Align  Label
-   00004000   49152        
+   Address   Length Align   Label
+   00004000   49152         
 
   Overlay parts:
    Address   Length Align  Label
@@ -5136,9 +5136,9 @@ Output: nowind.rom
  Page: 02
   Org: 00004000  Size: 00004000  Used: 00004000
 
-   Address   Length Align  Label
-   00004000   13317        
-   00007405    3067     @  MSXDOS1_PART.nowindInit
+   Address   Length Align   Label
+   00004000   13317         
+   00007405    3067     @   MSXDOS1_PART.nowindInit
 
   Overlay parts:
    Address   Length Align  Label
@@ -5159,5 +5159,5 @@ Output: nowind.rom
  Page: 03
   Org: 00000000  Size: 0006C000  Used: 0006C000
 
-   Address   Length Align  Label
-   00000000  442368        
+   Address   Length Align   Label
+   00000000  442368         
