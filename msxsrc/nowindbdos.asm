@@ -1,3 +1,20 @@
+	
+; just patching the BDOS hook will not work; not everybody uses the hook
+        ;PATCH $5d20, BDOSNW						  ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW
+        	
+        ; even patching the BDOS jump table will not work; internal calls (even in command.com) bypass it
+        ; jump table patches
+        ;PATCH $572b, BDOS_0FH_J				  ; overwrite specific function 0Fh in jump table
+        ;PATCH $572f, BDOS_11H_J				  ; overwrite specific function 11h in jump table
+        ;PATCH $5731, BDOS_12H_J				  ; overwrite specific function 12h in jump table
+        	
+        ; these patches are at the start of the routine themselves, the addresses are more or less "standardized" 
+        ; over several brands of diskroms	
+        ; in-routine patches
+        PATCH $4463, BDOS_0FH					  ; overwrite function 0Fh itself!
+        PATCH $4fb9, BDOS_11H 				  ; overwrite function 11h itself!
+        PATCH $5007, BDOS_12H 				  ; overwrite function 12h itself!
+        	
 
 BDOSNW:
 ; is this a virtual drive? if not then call 56D3
