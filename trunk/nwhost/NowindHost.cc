@@ -104,7 +104,7 @@ void NowindHost::write(byte data, unsigned int time)
 {
 	unsigned duration = time - lastTime;
 	lastTime = time;
-	if (duration >= 500) {
+	if ((duration >= 500) && (state != STATE_SYNC1)) {
 		// timeout (500ms), start looking for AF05
         DBERR("Protocol timeout occurred, purge buffers and switch back to STATE_SYNC1\n");
 		purge();
@@ -171,6 +171,15 @@ void NowindHost::write(byte data, unsigned int time)
 			state = STATE_SYNC1;
 		}
 		break;
+	
+	case STATE_SPEEDTEST:
+		extraData[recvCount++] = data;
+		if (recvCount == 2) {
+			DBERR("bc = %d\n", extraData[0] + extraData[1]*256);
+			state = STATE_SYNC1;
+		}
+		break;
+
 	default:
 		assert(false);
 	}
@@ -263,6 +272,7 @@ void NowindHost::executeCommand()
     case 0x92: getDosVersion(); state = STATE_SYNC1; break;
 	case 0x93: commandRequested(); state = STATE_SYNC1; break;
 	//case 0xFF: vramDump();
+	case 0xff: speedTest(); break;
 	default:
 		// Unknown USB command!
 		state = STATE_SYNC1;
@@ -963,6 +973,26 @@ void NowindHost::getDosVersion()
 	sendHeader();
 	send(enableMSXDOS2 ? 1:0);
 }
+
+void NowindHost::speedTest()
+{
+	DBERR("speedTest()");
+	sendHeader();
+	send(0x00);			// dummy
+/*
+	send16(0xc000);		// transfer address
+	send16(128);		// amount
+
+	for (int i=0;i<128;i++) {
+		send(i);
+	}
+	send(0xaf);
+	send(0x07);
+*/
+	state = STATE_SPEEDTEST;
+	recvCount = 0;
+}
+
 
 // the MSX asks whether the host has a command  
 // waiting for it to execute

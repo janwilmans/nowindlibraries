@@ -76,7 +76,8 @@ public:
 		STATE_DISKWRITE, // waiting for AA<data>AA
 		STATE_DEVOPEN,   // waiting for filename (11 bytes)
 		STATE_IMAGE,     // waiting for filename
-		STATE_MESSAGE,   // waiting for null-terminated message 
+		STATE_MESSAGE,   // waiting for null-terminated message
+		STATE_SPEEDTEST,	// TODO: remove!
 	};
 
 	virtual void debugMessage(const char *cFormat, ...);
@@ -166,6 +167,9 @@ private:
 	bool allowOtherDiskroms;
 	bool enablePhantomDrives;
 	bool enableMSXDOS2;
+
+	// TODO: remove when done with testing!
+	void speedTest();
 };
 
 } // namespace nowind

@@ -132,7 +132,7 @@ DSKIO:
         jr c,dskioWrite                 ; read or write?
        
 dskioRead:
-        rlca                            ; < 0x8000 ?
+        rlca                            ; tranfer address < 0x8000 ?
         jr c,.page2and3
 
         DEBUGMESSAGE "read01"
@@ -330,7 +330,7 @@ GETDPB:
 
 .hddImage:
         DEBUGMESSAGE ".hddImage"
-                MESSAGE "HOST GETDPB"
+        MESSAGE "HOST GETDPB"
         call sendRegisters
         ld (hl),C_GETDPB
         call enableNowindPage0
@@ -384,11 +384,11 @@ readSectors01:
         ld b,(hl)
         ldir        
         
-        ld d,(hl)                       ; BUG in emulator (byte direct terugschrijven, geeft 'rukkert!')
-        ld a,(hl)
-        ld (hl),d                       ; return end marker ($af, $0f)
-        ld (hl),a
-        jr readSectors01
+		ld d,(hl)						; return end marker ($af, $0f)
+		ld (hl),d
+		ld d,(hl)
+		ld (hl),d
+		jr readSectors01
 
 writeLoop01:
         ld h,HIGH usb2

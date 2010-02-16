@@ -154,7 +154,7 @@ void NwhostService::updateFirmware(string sImageName) {
         fs->read(cBuffer, 2);
 
         if ((xBuffer[0] != 'A') || (xBuffer[1] != 'B')) {
-            Util::debug("No rom header found in bank %u!\n", i);
+			Util::debug("warning: No rom header found in bank %u!\n", i);
             //exit(1);
         }
     }
@@ -165,9 +165,9 @@ void NwhostService::updateFirmware(string sImageName) {
     fs->seekg(0, ios::end);
 	unsigned int uiFileSize = fs->tellg();
 
-    Util::debug("Send autoselect command to flash....\n");
 
-    xBuffer[0] = 0xEE;
+	Util::debug("Send autoselect command to flash....\n");
+	xBuffer[0] = 0xEE;
     xBuffer[1] = 0xBB;
     xBuffer[2] = 0x55;
     xBuffer[3] = CMD_AUTOSELECTMODE;
@@ -177,6 +177,7 @@ void NwhostService::updateFirmware(string sImageName) {
 	Util::debug("Manufacturer Code: 0x%02x\n", yBuffer[2]);
 	Util::debug("Device Code: 0x%02x\n", yBuffer[3]);
 
+/*
     xBuffer[0] = 0xEE;
     xBuffer[1] = 0xBB;
     xBuffer[2] = 0x55;
@@ -185,14 +186,58 @@ void NwhostService::updateFirmware(string sImageName) {
     mUsbStream->write(xBuffer, 4, &uiBytesWritten);
     Util::debug("Waiting for erase to complete...\n");
     waitForAck();
-    Util::debug("Erase complete!\n");
+*/
 
-    Util::debug("Writing to flash....\n");
-    unsigned int uiSectorCount = uiFileSize/uiSectorSize;
+	xBuffer[0] = 0xEE;
+    xBuffer[1] = 0xBB;
+    xBuffer[2] = 0x55;
+    xBuffer[3] = CMD_ERASESECTOR;
+
+	xBuffer[4] = 2;
+	mUsbStream->write(xBuffer, 5, &uiBytesWritten);
+    Util::debug("Erasing sector %i...\n", xBuffer[4]);
+    waitForAck();
+/*
+	xBuffer[4] = 1;
+	mUsbStream->write(xBuffer, 5, &uiBytesWritten);
+    Util::debug("Erasing sector %i...\n", xBuffer[4]);
+    waitForAck();
+*/	
+	Util::debug("Erase complete!\n");
+
+	unsigned int uiSectorCount = uiFileSize/uiSectorSize;
     unsigned int uiLastProgress = 1;
     unsigned int uiProgress = 0;
-    
-    for (uiSector=0; uiSector<uiSectorCount; uiSector++) {
+exit(1);
+
+    Util::debug("Writing testdata to flash (bank 8)....\n");
+
+    uiWriteAdress = uiAddress & 0x3fff;
+    xBuffer[0] = 0xEE;
+    xBuffer[1] = 0xBB;
+    xBuffer[2] = 0x55;
+    xBuffer[3] = CMD_WRITE;
+    xBuffer[4] = uiWriteAdress & 0xFF;
+    xBuffer[5] = (uiWriteAdress >> 8) & 0xFF;
+    xBuffer[6] = 8;
+          
+	for (int i=0; i<128; i++) xBuffer[i+7] = i;
+ 
+    mUsbStream->write(xBuffer, uiAmount, &uiBytesWritten);
+    waitForAck();            
+
+    Util::debug("Write complete!\n");
+
+
+
+/*
+	unsigned int uiSectorCount = uiFileSize/uiSectorSize;
+    unsigned int uiLastProgress = 1;
+    unsigned int uiProgress = 0;
+
+
+    Util::debug("Writing to flash....\n");
+	for (uiSector=0; uiSector<uiSectorCount; uiSector++) {
 
             uiWriteAdress = uiAddress & 0x3fff;
             uiBank = uiSector/uiSectorSize;                  // there are 128 x 128 bytes in a bank
@@ -225,7 +270,7 @@ void NwhostService::updateFirmware(string sImageName) {
             waitForAck();            
     }
     Util::debug("Write complete!\n");
-
+*/
     uiAddress = 0;
     unsigned int uiErrors = 0;
     uiAmount = uiHeader;
@@ -249,7 +294,7 @@ void NwhostService::updateFirmware(string sImageName) {
 			uiBytesWritten = mUsbStream->readExact(yBuffer, uiSectorSize);
             for (unsigned int i=0; i<uiSectorSize; i++) {
                 if (xBuffer[i+uiHeader] != yBuffer[i]) {
-                    Util::snprintf(cString, sizeof(cString), "\nVerify of address 0x%04X failed! Found: 0x%02X Expected: 0x%02X\n", (uiWriteAdress+i)+(uiBank*0x4000), yBuffer[i], xBuffer[i+uiHeader]);
+                    Util::snprintf(cString, sizeof(cString), "Verify of address 0x%04X failed! Found: 0x%02X Expected: 0x%02X\n", (uiWriteAdress+i)+(uiBank*0x4000), yBuffer[i], xBuffer[i+uiHeader]);
                     uiErrors++;
                     if (uiErrors > 25) {
                         Util::debug("Found more than 25 error...!\n");

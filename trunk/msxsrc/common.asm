@@ -2,7 +2,7 @@
 
 nowindInit:
         ;DEBUGMESSAGE "nowindInit"
-        ld a,($faf8)                                                                            ; moet volgens bifi ld a,($2d) zijn, $faf8 is op msx1 deel van de rs232 area?
+        ld a,($faf8)										; moet volgens bifi ld a,($2d) zijn, $faf8 is op msx1 deel van de rs232 area?
         or a 
         push af
         call z,CHGMOD                   ; SCREEN 0 for MSX1
@@ -17,8 +17,8 @@ nowindInit:
         db "Nowind USB Diskrom! [debug]",0
         endif
 
-        ; call insertBootCode
         call flashWriter
+        ;call blockTransferTest23
         ret
 
 initDiskBasic:
@@ -81,7 +81,7 @@ getHeader:
         ld a,b
         or c
         jr nz,.loop
-        DEBUGMESSAGE "getHeader Timed out!"
+        DEBUGMESSAGE "getHeader timeout!"
         ld a,2                          ; not ready
         scf
         ret
@@ -193,7 +193,7 @@ receiveFCB:
         
         ld b,32
 .loop:  ld a,(usbrd)
-        ld (usbwr),a                    ; loop back
+	ld (usbwr),a			; loop back
         ld (de),a
         inc de
         djnz .loop
@@ -201,3 +201,41 @@ receiveFCB:
         pop de
         ret
         
+blockTransferTest23:
+        ;DEBUGMESSAGE "block23"
+        call enableNowindPage0
+
+.loop:
+        DEBUGMESSAGE "sendRegisters"
+        call sendRegisters
+        ld (hl),$FF                     ; TODO: define later!
+        
+        ld h,HIGH usbrd
+        call getHeader2
+        jp c,restorePage0
+        
+        ;DEBUGMESSAGE "do transfer"
+        ld hl,usbwr
+        ld (hl),c                       ; return counter
+        ld (hl),b
+        jr .loop
+              
+getHeader2:
+        ld bc,0
+.loop:  ld a,(hl)
+.chkaf: cp $af
+        jr z,.chk05
+        inc bc
+        ld a,b
+        or c
+        jr nz,.loop
+        DEBUGMESSAGE "timeout!"
+        ld a,2                          ; not ready
+        scf
+        ret
+
+.chk05: ld a,(hl)
+        cp $05
+        jr nz,.chkaf
+        ld a,(hl)
+        ret        
