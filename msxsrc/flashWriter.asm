@@ -45,8 +45,6 @@ waitForHeader:
         cp $a5
         jr z,eraseSector
         cp $a6
-        jr z,autoselectMode
-
         jr nz,waitForHeader
     
 autoselectMode:
@@ -61,7 +59,7 @@ autoselectMode:
         ld (hl),e                       ; manufacturer ID (0x01 = AMD)
         ld (hl),d                       ; device ID (0xA4 = AM29F040, 0x41 = AM29F032B)
 
-        call writeResetCommand
+        call resetFlashDevice
         jr waitForHeader
 
 eraseSector:
@@ -79,28 +77,9 @@ eraseSector:
         ld a,$30        
         call writeCommandSequence
 
-        call waitForCommandToComplete
+        call checkCommandExecution
         jp acknowledge
         
-waitForCommandToComplete:
-        ld a,(hl)
-        ld b,(hl)
-        xor b
-        and %01000000                   ; check toggle bit I (DQ6)
-        ret z                           ; operation complete
-        
-        ld a,b
-        and %00100000                   ; timing limits exceeded? (DQ5)
-        jr z,waitForCommandToComplete
-
-        call writeResetCommand
-        ld a,b
-        ret
-
-writeResetCommand:
-        ld a,$f0                        ; write RESET command
-        ld (0),a
-        ret
 
 chipErase:
         ;DEBUGMESSAGE "chip erase"
@@ -112,10 +91,7 @@ chipErase:
         ld a,$10
         call writeCommandSequence
 
-.wait:  ld a,($4000)                    ; read DQ7 (data# polling) 
-        rlca
-        jr nc,.wait        
-        ld a,1
+        call checkCommandExecution
         jr acknowledge
 
 
@@ -130,7 +106,6 @@ writeFlash:
 
         ld a,(hl)                       ; bank
         ld (mapper),a
-        ld h,$40
         
         ld b,128                        ; data is written in blocks of 128 bytes
 .loop:  ld a,$a0
@@ -138,11 +113,7 @@ writeFlash:
         ld a,(usbrd)
         ld (de),a                       ; write data to flash
         inc de
-
-.wait:  ld  a,(hl)                      ; write complete?
-        xor (hl)
-        and %01000000
-        jr  nz,.wait
+        call checkCommandExecution
         djnz .loop
         
         ld a,2
@@ -163,6 +134,7 @@ verifyFlash:
         djnz .loop
 
         ld a,3
+
 acknowledge:        
         ld h,HIGH usbwr
         ld (hl),$aa
@@ -184,6 +156,26 @@ writeCommandSequence:
         pop af
         ld ($0555),a
         ret
-        
+
+checkCommandExecution:
+        ld h,HIGH $4000
+.wait:  ld a,(hl)
+        ld c,(hl)
+        xor c
+        bit 6,a                         ; check toggle bit I (DQ6)
+        ret z                           ; command complete
+        bit 5,c
+        jr z,.wait                      ; time limit not exceeded (DQ5)
+
+        ld a,(hl)                       ; recheck (command might have been completed at the same time DQ5 was set)
+        xor (hl)
+        and %01000000
+        ret z                           ; command complete
+
+resetFlashDevice:        
+        ld a,$f0                        ; write RESET command
+        ld (0),a
+        ret
+                      
 flasherEnd:
         DEPHASE

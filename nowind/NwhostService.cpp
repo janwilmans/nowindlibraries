@@ -165,7 +165,6 @@ void NwhostService::updateFirmware(string sImageName) {
     fs->seekg(0, ios::end);
 	unsigned int uiFileSize = fs->tellg();
 
-
 	Util::debug("Send autoselect command to flash....\n");
 	xBuffer[0] = 0xEE;
     xBuffer[1] = 0xBB;
@@ -176,7 +175,7 @@ void NwhostService::updateFirmware(string sImageName) {
 	mUsbStream->readExact(yBuffer, 4);
 	Util::debug("Manufacturer Code: 0x%02x\n", yBuffer[2]);
 	Util::debug("Device Code: 0x%02x\n", yBuffer[3]);
-
+    
 /*
     xBuffer[0] = 0xEE;
     xBuffer[1] = 0xBB;
@@ -188,53 +187,26 @@ void NwhostService::updateFirmware(string sImageName) {
     waitForAck();
 */
 
-	xBuffer[0] = 0xEE;
+    xBuffer[0] = 0xEE;
     xBuffer[1] = 0xBB;
     xBuffer[2] = 0x55;
     xBuffer[3] = CMD_ERASESECTOR;
 
-	xBuffer[4] = 2;
-	mUsbStream->write(xBuffer, 5, &uiBytesWritten);
-    Util::debug("Erasing sector %i...\n", xBuffer[4]);
-    waitForAck();
-/*
-	xBuffer[4] = 1;
-	mUsbStream->write(xBuffer, 5, &uiBytesWritten);
-    Util::debug("Erasing sector %i...\n", xBuffer[4]);
-    waitForAck();
-*/	
-	Util::debug("Erase complete!\n");
+    unsigned int sizeInSectors = ((uiFileSize-1) >> 16) + 1;
+    for (unsigned int i=0; i<sizeInSectors; i++) {
+	    
+        xBuffer[4] = i;
+	    mUsbStream->write(xBuffer, 5, &uiBytesWritten);
+        Util::debug("Erasing sector %i...\r", i);
+        waitForAck();
+    }
 
-	unsigned int uiSectorCount = uiFileSize/uiSectorSize;
-    unsigned int uiLastProgress = 1;
-    unsigned int uiProgress = 0;
-exit(1);
+	Util::debug("\nErase complete!\n");
 
-    Util::debug("Writing testdata to flash (bank 8)....\n");
-
-    uiWriteAdress = uiAddress & 0x3fff;
-    xBuffer[0] = 0xEE;
-    xBuffer[1] = 0xBB;
-    xBuffer[2] = 0x55;
-    xBuffer[3] = CMD_WRITE;
-    xBuffer[4] = uiWriteAdress & 0xFF;
-    xBuffer[5] = (uiWriteAdress >> 8) & 0xFF;
-    xBuffer[6] = 8;
-          
-	for (int i=0; i<128; i++) xBuffer[i+7] = i;
  
-    mUsbStream->write(xBuffer, uiAmount, &uiBytesWritten);
-    waitForAck();            
-
-    Util::debug("Write complete!\n");
-
-
-
-/*
-	unsigned int uiSectorCount = uiFileSize/uiSectorSize;
+    unsigned int uiSectorCount = uiFileSize/uiSectorSize;
     unsigned int uiLastProgress = 1;
     unsigned int uiProgress = 0;
-
 
     Util::debug("Writing to flash....\n");
 	for (uiSector=0; uiSector<uiSectorCount; uiSector++) {
@@ -270,7 +242,7 @@ exit(1);
             waitForAck();            
     }
     Util::debug("Write complete!\n");
-*/
+
     uiAddress = 0;
     unsigned int uiErrors = 0;
     uiAmount = uiHeader;

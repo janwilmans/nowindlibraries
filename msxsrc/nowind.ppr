@@ -36,26 +36,14 @@ nowind
 		slotRoutines.asm
 		nowindDriver.asm
 [Open project files]
-0=nowind.asm
-1=flashWriter.asm
-2=nowindbdos.asm
-3=common.asm
-4=labels.asm
+0=flashWriter.asm
+1=common.asm
 [Selected Project Files]
 Main=
 Selected=flashWriter.asm
-[nowind.asm]
-TopLine=1
-Caret=10,1
 [flashWriter.asm]
-TopLine=51
-Caret=14,74
-[nowindbdos.asm]
-TopLine=1
-Caret=1,1
+TopLine=139
+Caret=1,182
 [common.asm]
-TopLine=5
-Caret=1,1
-[labels.asm]
-TopLine=1
-Caret=1,1
+TopLine=67
+Caret=2,75
