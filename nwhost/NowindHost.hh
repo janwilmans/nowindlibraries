@@ -80,7 +80,7 @@ public:
 		STATE_SPEEDTEST,	// TODO: remove!
 	};
 
-	virtual void debugMessage(const char *cFormat, ...);
+	virtual void debugMessage(const char *cFormat, ...) const;
 
     void clearStartupRequests();
     void addStartupRequest(std::vector<byte> command);
@@ -153,7 +153,7 @@ private:
 	byte cmdData[9];         // reg_[cbedlhfa] + cmd
 	byte extraData[240 + 2]; // extra data for diskread/write
 	std::vector<byte> buffer;// work buffer for diskread/write
-	unsigned transfered;     // progress within diskread/write
+	unsigned transferred;     // progress within diskread/write
 	unsigned retryCount;     // only used for diskread
 	unsigned transferSize;   // size of current chunk
 

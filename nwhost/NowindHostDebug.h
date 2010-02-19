@@ -17,7 +17,7 @@ class NWHOST_API NowindHostDebug : public NowindHost
 public:
 	NowindHostDebug(const std::vector<DiskHandler*>& drives) : NowindHost(drives) {}
 	virtual ~NowindHostDebug() {}
-	virtual void debugMessage(const char *cFormat, ...);
+	virtual void debugMessage(const char *cFormat, ...) const;
 };
 
 } // namespace nowind
