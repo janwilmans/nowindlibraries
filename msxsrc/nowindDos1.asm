@@ -1,6 +1,10 @@
 ; MSXDOS1 address
+
+        define  FLASHROMSIZE 512
+        define  PRINTTEXT $5f86
+        define  MSXDOSVER 1
+
 romInit         equ $576f
-printText       equ $5f86
 
         define  MSXDOS1 ; TODO!!!!!
         define  DEBUG
