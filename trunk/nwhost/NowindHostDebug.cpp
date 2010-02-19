@@ -16,7 +16,7 @@
 using namespace general;
 using namespace nwhost;
 
-void NowindHostDebug::debugMessage(const char *cFormat, ...)
+void NowindHostDebug::debugMessage(const char *cFormat, ...) const
 {
 	va_list arg_list;
 	char scratch[2000];

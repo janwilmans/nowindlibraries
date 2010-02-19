@@ -86,7 +86,7 @@ void DiskInterface::diskIO() {
 		A = drive number (relative)
 		B = number of sectors
 		C = media descriptor (also used for 23 bits sector support)
-		DE = logical sector
+		DE = start sector
 		HL = transfer address
         */
         

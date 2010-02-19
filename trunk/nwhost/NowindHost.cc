@@ -50,7 +50,7 @@ NowindHost::~NowindHost()
 {
 }
 
-void NowindHost::debugMessage(const char *, ...)
+void NowindHost::debugMessage(const char *, ...) const
 {
 }
 
@@ -208,30 +208,32 @@ void NowindHost::executeCommand()
 	assert(recvCount == 9);
 	byte cmd = cmdData[8];
 	switch (cmd) {
-	//case 0x0D: BDOS_0DH_DiskReset();
-	//case 0x0F: BDOS_0FH_OpenFile();
-	//case 0x10: BDOS_10H_CloseFile();
-	//case 0x11: BDOS_11H_FindFirst();
-	//case 0x12: BDOS_12H_FindNext();
-	//case 0x13: BDOS_13H_DeleteFile();
-	//case 0x14: BDOS_14H_ReadSeq();
-	//case 0x15: BDOS_15H_WriteSeq();
-	//case 0x16: BDOS_16H_CreateFile();
-	//case 0x17: BDOS_17H_RenameFile();
-	//case 0x21: BDOS_21H_ReadRandomFile();
-	//case 0x22: BDOS_22H_WriteRandomFile();
-	//case 0x23: BDOS_23H_GetFileSize();
-	//case 0x24: BDOS_24H_SetRandomRecordField();
-	//case 0x26: BDOS_26H_WriteRandomBlock();
-	//case 0x27: BDOS_27H_ReadRandomBlock();
-	//case 0x28: BDOS_28H_WriteRandomFileWithZeros();
-	//case 0x2A: BDOS_2AH_GetDate();
-	//case 0x2B: BDOS_2BH_SetDate();
-	//case 0x2C: BDOS_2CH_GetTime();
-	//case 0x2D: BDOS_2DH_SetTime();
-	//case 0x2E: BDOS_2EH_Verify();
-	//case 0x2F: BDOS_2FH_ReadLogicalSector();
-	//case 0x30: BDOS_30H_WriteLogicalSector();
+    /*
+	case 0x0D: BDOS_0DH_DiskReset();
+	case 0x0F: BDOS_0FH_OpenFile();
+	case 0x10: BDOS_10H_CloseFile();
+	case 0x11: BDOS_11H_FindFirst();
+	case 0x12: BDOS_12H_FindNext();
+	case 0x13: BDOS_13H_DeleteFile();
+	case 0x14: BDOS_14H_ReadSeq();
+	case 0x15: BDOS_15H_WriteSeq();
+	case 0x16: BDOS_16H_CreateFile();
+	case 0x17: BDOS_17H_RenameFile();
+	case 0x21: BDOS_21H_ReadRandomFile();
+	case 0x22: BDOS_22H_WriteRandomFile();
+	case 0x23: BDOS_23H_GetFileSize();
+	case 0x24: BDOS_24H_SetRandomRecordField();
+	case 0x26: BDOS_26H_WriteRandomBlock();
+	case 0x27: BDOS_27H_ReadRandomBlock();
+	case 0x28: BDOS_28H_WriteRandomFileWithZeros();
+	case 0x2A: BDOS_2AH_GetDate();
+	case 0x2B: BDOS_2BH_SetDate();
+	case 0x2C: BDOS_2CH_GetTime();
+	case 0x2D: BDOS_2DH_SetTime();
+	case 0x2E: BDOS_2EH_Verify();
+	case 0x2F: BDOS_2FH_ReadLogicalSector();
+	case 0x30: BDOS_30H_WriteLogicalSector();
+    */
 
 	case 0x80: { // DSKIO
 		SectorMedium* disk = getDisk();
@@ -519,24 +521,28 @@ void NowindHost::setDateMSX()
 	send16(tm->tm_year + 1900); // year
 }
 
-
 unsigned NowindHost::getSectorAmount() const
 {
 	byte reg_b = cmdData[1];
+    DBERR("getSectorAmount: %d\n", reg_b);
 	return reg_b;
 }
+
 unsigned NowindHost::getStartSector() const
 {
 	byte reg_c = cmdData[0];
 	byte reg_e = cmdData[2];
 	byte reg_d = cmdData[3];
 	unsigned startSector = reg_e + (reg_d * 256);
+    DBERR("getStartSector: %d\n", startSector);
+
 	if (reg_c < 0x80) {
 		// FAT16 read/write sector
 		startSector += reg_c << 16;
 	}
 	return startSector;
 }
+
 unsigned NowindHost::getStartAddress() const
 {
 	byte reg_l = cmdData[4];
@@ -546,12 +552,13 @@ unsigned NowindHost::getStartAddress() const
 unsigned NowindHost::getCurrentAddress() const
 {
 	unsigned startAdress = getStartAddress();
-	return startAdress + transfered;
+	return startAdress + transferred;
 }
 
 
 void NowindHost::diskReadInit(SectorMedium& disk)
 {
+    DBERR("diskReadInit");
 	unsigned sectorAmount = getSectorAmount();
 	buffer.resize(sectorAmount * 512);
 	unsigned startSector = getStartSector();
@@ -561,19 +568,20 @@ void NowindHost::diskReadInit(SectorMedium& disk)
 		return;
 	}
 
-	transfered = 0;
+	transferred = 0;
 	retryCount = 0;
 	doDiskRead1();
 }
 
 void NowindHost::doDiskRead1()
 {
-	unsigned bytesLeft = unsigned(buffer.size()) - transfered;
+	unsigned bytesLeft = unsigned(buffer.size()) - transferred;
 	if (bytesLeft == 0) {
 		sendHeader();
 		send(0x01); // end of receive-loop
 		send(0x00); // no more data
 		state = STATE_SYNC1;
+        DBERR("doDiskRead1 end normal");
 		return;
 	}
 
@@ -611,11 +619,11 @@ void NowindHost::doDiskRead2()
 	byte tail1 = extraData[0];
 	byte tail2 = extraData[1];
 	if ((tail1 == 0xAF) && (tail2 == 0x07)) {
-		transfered += transferSize;
+		transferred += transferSize;
 		retryCount = 0;
 
 		unsigned address = getCurrentAddress();
-		size_t bytesLeft = buffer.size() - transfered;
+		size_t bytesLeft = buffer.size() - transferred;
 		if ((address == 0x8000) && (bytesLeft > 0)) {
 			sendHeader();
 			send(0x01); // end of receive-loop
@@ -633,7 +641,7 @@ void NowindHost::doDiskRead2()
 			return;
 		}
 
-		// try again, wait for two bytes
+		// try again, wait for two bytes            (jan: how is this a retry, how is the command send again???)
 		state = STATE_DISKREAD;
 		recvCount = 0;
 	}
@@ -647,7 +655,7 @@ void NowindHost::transferSectors(unsigned transferAddress, unsigned amount)
 	send16(transferAddress);
 	send16(amount);
 
-	const byte* bufferPointer = &buffer[transfered];
+	const byte* bufferPointer = &buffer[transferred];
 	for (unsigned i = 0; i < amount; ++i) {
 		send(bufferPointer[i]);
 	}
@@ -659,11 +667,11 @@ void NowindHost::transferSectors(unsigned transferAddress, unsigned amount)
 void NowindHost::transferSectorsBackwards(unsigned transferAddress, unsigned amount)
 {
 	sendHeader();
-	send(0x02); // don't exit command, (more) data is coming
+	send(0x02); // don't exit command, (more) data is coming            // jan: doesn't '0x02' mean 'backwards' transfer
 	send16(transferAddress + amount);
 	send(amount / 64);
 
-	const byte* bufferPointer = &buffer[transfered];
+	const byte* bufferPointer = &buffer[transferred];
 	for (int i = amount - 1; i >= 0; --i) {
 		send(bufferPointer[i]);
 	}
@@ -684,13 +692,13 @@ void NowindHost::diskWriteInit(SectorMedium& disk)
 
 	unsigned sectorAmount = std::min(128u, getSectorAmount());
 	buffer.resize(sectorAmount * 512);
-	transfered = 0;
+	transferred = 0;
 	doDiskWrite1();
 }
 
 void NowindHost::doDiskWrite1()
 {
-	unsigned bytesLeft = unsigned(buffer.size()) - transfered;
+	unsigned bytesLeft = unsigned(buffer.size()) - transferred;
 	if (bytesLeft == 0) {
 		// All data transferred!
 		unsigned sectorAmount = unsigned(buffer.size()) / 512;
@@ -731,17 +739,17 @@ void NowindHost::doDiskWrite2()
 {
 	assert(recvCount == (transferSize + 2));
 	for (unsigned i = 0; i < transferSize; ++i) {
-		buffer[i + transfered] = extraData[i + 1];
+		buffer[i + transferred] = extraData[i + 1];
 	}
 
 	byte seq1 = extraData[0];
 	byte seq2 = extraData[transferSize + 1];
 	if ((seq1 == 0xaa) && (seq2 == 0xaa)) {
 		// good block received
-		transfered += transferSize;
+		transferred += transferSize;
 
 		unsigned address = getCurrentAddress();
-		size_t bytesLeft = buffer.size() - transfered;
+		size_t bytesLeft = buffer.size() - transferred;
 		if ((address == 0x8000) && (bytesLeft > 0)) {
 			sendHeader();
 			send(254); // more data for page 2/3
