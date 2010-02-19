@@ -1,5 +1,9 @@
+
+        define  FLASHROMSIZE 512
+        define  PRINTTEXT $5f86
+        define  MSXDOSVER 1
+
 romInit:        equ $47d6
-printText:      equ $728e
 
         define  MSXDOS2
         define  DEBUG

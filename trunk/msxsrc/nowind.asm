@@ -1,4 +1,4 @@
-        ;define  DEBUG
+        define  DEBUG
         
         ;define NOWINDVERSION_FIRSTBATCH   ; our handmade first batch
         define NOWINDVERSION_SUNRISE    ; sunrise first batch
@@ -220,3 +220,9 @@ enableBank0:
         pop af
         ret
 endCopyFromBank:
+
+        
+        
+        defpage 3, 0, (512-80)*1024
+        page 3
+        ds (512-80)*1024, $ba
