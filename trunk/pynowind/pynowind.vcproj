@@ -58,6 +58,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\$(ProjectName).pyd"
 				AdditionalLibraryDirectories="C:\Program Files\boost\boost_1_38\lib;C:\Python26\libs"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
@@ -128,7 +129,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\$(ProjectName).dll"
+				OutputFile="$(OutDir)\$(ProjectName).pyd"
 				AdditionalLibraryDirectories="C:\Program Files\boost\boost_1_38\lib;C:\Python26\libs"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
