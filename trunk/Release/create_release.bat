@@ -1,0 +1,2 @@
+"c:\program files\winrar\winrar.exe" -agDD-MM-YYYY a nwhostapp_.zip nowind.rom ftdx.dll General.dll nowind.dll nwhost.dll nwhostapp.exe pynowind.dll pynowind.pyd usbhost.py libusb0.dll_ NowindInterfaceHostGUI.exe
+rem pause
