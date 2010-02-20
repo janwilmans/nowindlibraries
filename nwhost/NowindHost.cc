@@ -106,7 +106,7 @@ void NowindHost::write(byte data, unsigned int time)
 	lastTime = time;
 	if ((duration >= 500) && (state != STATE_SYNC1)) {
 		// timeout (500ms), start looking for AF05
-        DBERR("Protocol timeout occurred, purge buffers and switch back to STATE_SYNC1\n");
+        DBERR("Protocol timeout occurred in state %d, purge buffers and switch back to STATE_SYNC1\n", state);
 		purge();
 		state = STATE_SYNC1;
 	}
@@ -558,7 +558,7 @@ unsigned NowindHost::getCurrentAddress() const
 
 void NowindHost::diskReadInit(SectorMedium& disk)
 {
-    DBERR("diskReadInit");
+    readRetries = 0;
 	unsigned sectorAmount = getSectorAmount();
 	buffer.resize(sectorAmount * 512);
 	unsigned startSector = getStartSector();
@@ -581,11 +581,11 @@ void NowindHost::doDiskRead1()
 		send(0x01); // end of receive-loop
 		send(0x00); // no more data
 		state = STATE_SYNC1;
-        DBERR("doDiskRead1 end normal");
+        DBERR("finished. (%d retries)\n", readRetries);
 		return;
 	}
 
-	static const unsigned NUMBEROFBLOCKS = 32; // 32 * 64 bytes = 2048 bytes
+	static const unsigned NUMBEROFBLOCKS = 8; // 32 * 64 bytes = 2048 bytes
 	transferSize = std::min(bytesLeft, NUMBEROFBLOCKS * 64); // hardcoded in firmware
 
 	unsigned address = getCurrentAddress();
@@ -634,15 +634,16 @@ void NowindHost::doDiskRead2()
 		doDiskRead1();
 	} else {
 		purge();
-		if (++retryCount == 10) {
+		if (++retryCount == 50) {
 			// do nothing, timeout on MSX
 			// too many retries, aborting readDisk()
+            DBERR("Too many retries, returning to STATE_SYNC1\n");
 			state = STATE_SYNC1;
 			return;
 		}
 
-		// try again, wait for two bytes            (jan: how is this a retry, how is the command send again???)
-		state = STATE_DISKREAD;
+        readRetries++;
+		doDiskRead1(); // try again
 		recvCount = 0;
 	}
 }
@@ -659,8 +660,24 @@ void NowindHost::transferSectors(unsigned transferAddress, unsigned amount)
 	for (unsigned i = 0; i < amount; ++i) {
 		send(bufferPointer[i]);
 	}
+    sendTrailer(); // used for validation
+}
+
+void NowindHost::sendTrailer()
+{
 	send(0xAF);
-	send(0x07); // used for validation
+    /*
+    static int failOnPurpose = 0;
+    failOnPurpose++;
+    if (failOnPurpose == 5)
+    {
+        // to test the protocols error-correction, make every 5th transfer fail :)
+        failOnPurpose = 0;
+        DBERR("Fail on purpose!\n");
+    	send(0xFF); // screw up the transmission on purpose
+    }
+    */
+    send(0x07);
 }
 
  // sends "02" + "transfer_addr" + "amount" + "data" + "0F 07"
@@ -675,8 +692,7 @@ void NowindHost::transferSectorsBackwards(unsigned transferAddress, unsigned amo
 	for (int i = amount - 1; i >= 0; --i) {
 		send(bufferPointer[i]);
 	}
-	send(0xAF);
-	send(0x07); // used for validation
+	sendTrailer(); // used for validation
 }
 
 
