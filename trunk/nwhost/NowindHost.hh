@@ -82,6 +82,7 @@ public:
 
 	virtual void debugMessage(const char *cFormat, ...) const;
 
+    void sendTrailer();
     void clearStartupRequests();
     void addStartupRequest(std::vector<byte> command);
     void clearRequests();
@@ -167,6 +168,7 @@ private:
 	bool allowOtherDiskroms;
 	bool enablePhantomDrives;
 	bool enableMSXDOS2;
+    int readRetries;
 
 	// TODO: remove when done with testing!
 	void speedTest();

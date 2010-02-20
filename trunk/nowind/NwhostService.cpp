@@ -165,6 +165,7 @@ void NwhostService::updateFirmware(string sImageName) {
     fs->seekg(0, ios::end);
 	unsigned int uiFileSize = fs->tellg();
 
+    /*
 	Util::debug("Send autoselect command to flash....\n");
 	xBuffer[0] = 0xEE;
     xBuffer[1] = 0xBB;
@@ -175,8 +176,8 @@ void NwhostService::updateFirmware(string sImageName) {
 	mUsbStream->readExact(yBuffer, 4);
 	Util::debug("Manufacturer Code: 0x%02x\n", yBuffer[2]);
 	Util::debug("Device Code: 0x%02x\n", yBuffer[3]);
-    
-/*
+    */
+
     xBuffer[0] = 0xEE;
     xBuffer[1] = 0xBB;
     xBuffer[2] = 0x55;
@@ -185,8 +186,8 @@ void NwhostService::updateFirmware(string sImageName) {
     mUsbStream->write(xBuffer, 4, &uiBytesWritten);
     Util::debug("Waiting for erase to complete...\n");
     waitForAck();
-*/
 
+/*
     xBuffer[0] = 0xEE;
     xBuffer[1] = 0xBB;
     xBuffer[2] = 0x55;
@@ -200,7 +201,7 @@ void NwhostService::updateFirmware(string sImageName) {
         Util::debug("Erasing sector %i...\r", i);
         waitForAck();
     }
-
+*/
 	Util::debug("\nErase complete!\n");
 
  
@@ -460,7 +461,7 @@ void NwhostService::testModeDev()
 void NwhostService::testMode(string aArgument)
 {
 	unsigned char testString[2000];
-    Util::snprintf((char *) testString, sizeof(testString), "HELLO MSX 1234567890 1234567890 123456789012345678901234567890123456789012345678");
+    Util::snprintf((char *) testString, sizeof(testString), "HELLO MSX 123456");
 
 	if (aArgument.compare("dev") == 0)
 	{
