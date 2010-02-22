@@ -190,7 +190,7 @@ void ConFTD2XX::write(unsigned char * aBuffer, unsigned long aBytesToWrite, unsi
 	if (ftStatus != FT_OK) {  
 		Util::debug("FTD2XX [%u of %u bytes written] error: %s\n", *aBytesWritten, aBytesToWrite, ftdiErrorString[ftStatus]);
 	}
-    Util::debug("FTD2XX [%u of %u bytes written]\n", *aBytesWritten, aBytesToWrite);
+    //Util::debug("FTD2XX [%u of %u bytes written]\n", *aBytesWritten, aBytesToWrite);
 }
 
 #ifdef WIN32

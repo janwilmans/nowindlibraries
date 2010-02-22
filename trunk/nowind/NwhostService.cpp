@@ -378,7 +378,7 @@ void NwhostService::hostImage() {
 			buffer.push_back(nowindusb_read());
 		}
 
-        Util::debug("read buffer of: %d bytes\n", buffer.size());
+        //Util::debug("read buffer of: %d bytes\n", buffer.size());
 
 		unsigned long lBytesWritten = 0;
 		if (buffer.size() > 0)
