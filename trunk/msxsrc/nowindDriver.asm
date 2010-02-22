@@ -384,11 +384,11 @@ readSectors01:
         ld b,(hl)
         ldir        
         
-		ld d,(hl)						; return end marker ($af, $0f)
-		ld (hl),d
-		ld d,(hl)
-		ld (hl),d
-		jr readSectors01
+        ld d,(hl)						; return end marker ($af, $0f)
+        ld (hl),d
+        ld d,(hl)
+        ld (hl),d
+        jr readSectors01
 
 writeLoop01:
         ld h,HIGH usb2
@@ -514,17 +514,17 @@ videoStream:
         
 ; hl points to text
 printVdpText2:
-                                push af
+        push af
 .loop:  ld a,(hl)
-                                out ($98),a 
-                                inc hl
-                                or a
-                                jr nz,.loop
-                                pop af
-                                ret
-        
+        out ($98),a 
+        inc hl
+        or a
+        jr nz,.loop
+        pop af
+        ret
+
 supportedMedia:
-                
+
 .f8:    MAKEDPB $f8, 512, 2, 112, 1 * 80 * 9, 2, 2      ; 360 kB (1 side * 80 tracks * 9 tracks/sector)
 .def:   MAKEDPB $f9, 512, 2, 112, 2 * 80 * 9, 3, 2      ; 720 kB
         MAKEDPB $fa, 512, 2, 112, 1 * 80 * 8, 1, 2      ; 320 kB

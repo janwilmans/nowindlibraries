@@ -1,12 +1,11 @@
-
+        define  DEBUG
+        
         define  FLASHROMSIZE 512
-        define  PRINTTEXT $5f86
-        define  MSXDOSVER 1
+        define  PRINTTEXT $728e
+        define  MSXDOSVER 2
 
 romInit:        equ $47d6
 
-        define  MSXDOS2
-        define  DEBUG
         define  ROMDSKBANK 4            ; first bank of ROMdisk image
         define  ROMDSKLAST 4+24-1
         
@@ -39,6 +38,8 @@ romInit:        equ $47d6
         PATCH $48eb, DEFDPB - 1
         PATCH $48f7, INIENV
         PATCH $5797, OEMSTA
+
+        PATCH $4093, mapper
 
         code ! $4881
         db LOW initDiskBasic
@@ -82,6 +83,9 @@ enableBank0:
         page 1
 
         incbin "..\roms\MSXDOS22.ROM", $4000, 3 * $4000
+        PATCH $4093, mapper
+        PATCH $8093, mapper
+        PATCH $C093, mapper
 
         page 2  
         incbin "..\roms\romdisk.bin"        

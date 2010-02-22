@@ -1,5 +1,5 @@
-; MSXDOS1 address
-
+        define  DEBUG
+        
         define  FLASHROMSIZE 512
         define  PRINTTEXT $5f86
         define  MSXDOSVER 1
@@ -7,7 +7,6 @@
 romInit         equ $576f
 
         define  MSXDOS1 ; TODO!!!!!
-        define  DEBUG
         define  ROMDSKBANK 1            ; first bank of ROMdisk image
         define  ROMDSKLAST 1+24-1
         define  BDOS_NOWIND_DISABLED
