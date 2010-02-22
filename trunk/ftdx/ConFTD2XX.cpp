@@ -89,8 +89,8 @@ bool ConFTD2XX::open()
 			Util::debug("FT_SetLatencyTimer failed!\n");
 		}
 	    
-		//ftStatus = FT_SetUSBParameters(ftHandle, 4*1024, 64);
-		//if (ftStatus != FT_OK) {
+		//lStatus = FT_SetUSBParameters(mHandle, 4*1024, 64);
+		//if (lStatus != FT_OK) {
 		//    Util::debug("FT_SetUSBParameters failed!\n");
 		//}
 
@@ -188,8 +188,9 @@ void ConFTD2XX::write(unsigned char * aBuffer, unsigned long aBytesToWrite, unsi
 	*aBytesWritten = 0;
 	FT_STATUS ftStatus = FT_Write(mHandle, aBuffer, aBytesToWrite, aBytesWritten); 
 	if (ftStatus != FT_OK) {  
-		Util::debug("FTD2XX [%u of %u bytes written] error: %s\n", aBytesWritten, aBytesToWrite, ftdiErrorString[ftStatus]);
+		Util::debug("FTD2XX [%u of %u bytes written] error: %s\n", *aBytesWritten, aBytesToWrite, ftdiErrorString[ftStatus]);
 	}
+    Util::debug("FTD2XX [%u of %u bytes written]\n", *aBytesWritten, aBytesToWrite);
 }
 
 #ifdef WIN32
@@ -226,7 +227,7 @@ int ConFTD2XX::waitForData()
 EVENT_HANDLE eh;
 FT_STATUS ConFTD2XX::initFtdi(FT_HANDLE ftHandle)
 {
-/* Todo: create an SDL equevilent for this to be portable: */ 
+/* Todo: create an SDL equivalent for this to be portable: */ 
 	pthread_mutex_init(&eh.eMutex, NULL);
 	pthread_cond_init(&eh.eCondVar, NULL);
 	DWORD EventMask = FT_EVENT_RXCHAR | FT_EVENT_MODEM_STATUS;

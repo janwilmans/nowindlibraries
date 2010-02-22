@@ -524,7 +524,6 @@ void NowindHost::setDateMSX()
 unsigned NowindHost::getSectorAmount() const
 {
 	byte reg_b = cmdData[1];
-    DBERR("getSectorAmount: %d\n", reg_b);
 	return reg_b;
 }
 
@@ -534,7 +533,6 @@ unsigned NowindHost::getStartSector() const
 	byte reg_e = cmdData[2];
 	byte reg_d = cmdData[3];
 	unsigned startSector = reg_e + (reg_d * 256);
-    DBERR("getStartSector: %d\n", startSector);
 
 	if (reg_c < 0x80) {
 		// FAT16 read/write sector

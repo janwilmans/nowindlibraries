@@ -136,7 +136,7 @@ void NwhostService::updateFirmware(string sImageName) {
     char cString[250];
 
     //start(eLibUsb);
-	start(eFTD2XX);	// TODO: maak commandline optie
+	start(eDRIVER_FTD2XX);	// TODO: maak commandline optie
 
 	// this should not be needed, but without it, FTD2xx::read returns to fast!
 	mUsbStream->setTimeouts(500000, 500000);
@@ -377,6 +377,9 @@ void NwhostService::hostImage() {
 		{
 			buffer.push_back(nowindusb_read());
 		}
+
+        Util::debug("read buffer of: %d bytes\n", buffer.size());
+
 		unsigned long lBytesWritten = 0;
 		if (buffer.size() > 0)
 		{
@@ -488,7 +491,7 @@ void NwhostService::testMode(string aArgument)
 	testString[14] = 0xAA;
 	testString[15] = 0x55;
 
-    start(eLibUsb);
+    start(eDRIVER_LibUsb);
 	mUsbStream->openBlocking();
 	mUsbStream->reset();
 
