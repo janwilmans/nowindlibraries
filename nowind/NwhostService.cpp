@@ -165,7 +165,14 @@ void NwhostService::updateFirmware(string sImageName) {
     fs->seekg(0, ios::end);
 	unsigned int uiFileSize = fs->tellg();
 
-    /*
+
+#define DO_AUTOSELECT
+//#define DO_CHIPERASE
+#define DO_SECTORERASE
+#define DO_WRITEFLASH
+#define DO_VERIFY
+
+#ifdef DO_AUTOSELECT
 	Util::debug("Send autoselect command to flash....\n");
 	xBuffer[0] = 0xEE;
     xBuffer[1] = 0xBB;
@@ -176,8 +183,9 @@ void NwhostService::updateFirmware(string sImageName) {
 	mUsbStream->readExact(yBuffer, 4);
 	Util::debug("Manufacturer Code: 0x%02x\n", yBuffer[2]);
 	Util::debug("Device Code: 0x%02x\n", yBuffer[3]);
-    */
+#endif
 
+#ifdef DO_CHIPERASE
     xBuffer[0] = 0xEE;
     xBuffer[1] = 0xBB;
     xBuffer[2] = 0x55;
@@ -186,8 +194,10 @@ void NwhostService::updateFirmware(string sImageName) {
     mUsbStream->write(xBuffer, 4, &uiBytesWritten);
     Util::debug("Waiting for erase to complete...\n");
     waitForAck();
+	Util::debug("\nErase complete!\n");
+#endif
 
-/*
+#ifdef DO_SECTORERASE
     xBuffer[0] = 0xEE;
     xBuffer[1] = 0xBB;
     xBuffer[2] = 0x55;
@@ -201,14 +211,14 @@ void NwhostService::updateFirmware(string sImageName) {
         Util::debug("Erasing sector %i...\r", i);
         waitForAck();
     }
-*/
 	Util::debug("\nErase complete!\n");
+#endif
 
- 
     unsigned int uiSectorCount = uiFileSize/uiSectorSize;
     unsigned int uiLastProgress = 1;
     unsigned int uiProgress = 0;
 
+#ifdef DO_WRITEFLASH
     Util::debug("Writing to flash....\n");
 	for (uiSector=0; uiSector<uiSectorCount; uiSector++) {
 
@@ -243,7 +253,9 @@ void NwhostService::updateFirmware(string sImageName) {
             waitForAck();            
     }
     Util::debug("Write complete!\n");
+#endif
 
+#ifdef DO_VERIFY
     uiAddress = 0;
     unsigned int uiErrors = 0;
     uiAmount = uiHeader;
@@ -290,7 +302,9 @@ void NwhostService::updateFirmware(string sImageName) {
     }
 
     Util::debug("\nDone... %u sectors written and verified.\n", uiSector);
-	mUsbStream->close(); 
+#endif
+
+    mUsbStream->close(); 
 }
 
 /*

@@ -111,8 +111,8 @@ void SlotSelector::configure(unsigned int msxVersion) {
 //		addMemoryDevice(new MapperKonami5("../MSX Games/konami5/Kings Valley2 (msx2).rom"),1,0,0x4000);
 	
 #define NOWINDDOS1_off
-#define NOWINDDOS2_off
-#define NOWIND              // combines MSXDOS 1&2
+#define NOWINDDOS2
+#define NOWIND_off              // combines MSXDOS 1&2
 #define OPENDISKROM_off
 #define NORMALDISKROM_off
 #define MSXDOS2_off

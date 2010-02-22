@@ -585,7 +585,7 @@ void NowindHost::doDiskRead1()
 		return;
 	}
 
-	static const unsigned NUMBEROFBLOCKS = 8; // 32 * 64 bytes = 2048 bytes
+	static const unsigned NUMBEROFBLOCKS = 128; // 32 * 64 bytes = 2048 bytes
 	transferSize = std::min(bytesLeft, NUMBEROFBLOCKS * 64); // hardcoded in firmware
 
 	unsigned address = getCurrentAddress();
