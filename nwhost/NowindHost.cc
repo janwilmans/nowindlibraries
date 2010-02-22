@@ -583,7 +583,11 @@ void NowindHost::doDiskRead1()
 		return;
 	}
 
-	static const unsigned NUMBEROFBLOCKS = 128; // 32 * 64 bytes = 2048 bytes
+    // 64 and 128 work well at 3.57Mhz (180Kbps), but causes AT LOT of retries at 7 Mhz!
+    // 32 works reasonably well at both 3.57 and 7.16 mhz, (both 120 Kbps) 
+    // 8-16 works a bit better at 7 Mhz (180Kps)
+
+	static const unsigned NUMBEROFBLOCKS = 8; // 64 * 64 bytes = 4192 bytes
 	transferSize = std::min(bytesLeft, NUMBEROFBLOCKS * 64); // hardcoded in firmware
 
 	unsigned address = getCurrentAddress();
