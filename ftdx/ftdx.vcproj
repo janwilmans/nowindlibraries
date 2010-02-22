@@ -131,7 +131,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="general.lib libusb.lib FTD2XX.lib"
+				AdditionalDependencies="general.lib FTD2XX.lib"
 				AdditionalLibraryDirectories="$(TargetDir);libusb-win32;FTD2XX-msc"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
@@ -174,8 +174,28 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ConFtdiSio.cpp"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\ConLibFtdi.cpp"
 				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\ftdx.cpp"
@@ -210,6 +230,14 @@
 			<File
 				RelativePath=".\ftdi.c"
 				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\ftdi.h"

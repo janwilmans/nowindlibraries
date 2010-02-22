@@ -81,8 +81,14 @@ void HostApp::updateFirmware(string sImageName)
 
 void HostApp::hostImage() 
 {
-    mHostService->start(eFTD2XX);
-	//mHostService->start(eLibUsb);
+    // FTD2XX driver works in kernel-space and has much less retries at 7 MHz
+    mHostService->start(eDRIVER_FTD2XX);            
+    
+    // LIBUSB driver is a user-space driver, maybe slower in some cases?
+    // this is strange because this shouldnt have any effect on the polling rate
+    // (which is an important factor in retries)
+
+	//mHostService->start(eDRIVER_LibUsb);
 	mHostService->hostImage();
 }
 

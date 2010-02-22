@@ -11,8 +11,16 @@
 #include "libgeneral.h"
 
 #include "ConFTD2XX.h"
-#include "ConFtdiSio.h"
-#include "ConLibFtdi.h"
+
+#ifndef WIN32
+    #include "ConFtdiSio.h"
+
+    // the libftdi works on libusb-win32 aswell, _but_ libusb relies on the
+    // windows usbser.dll driver which performs very poorly 
+    // and because we do not want to rely on libusb0.dll if we are never going to use it
+    // it is excluded from the windows build
+    #include "ConLibFtdi.h"
+#endif
 
 using namespace general;
 
@@ -26,14 +34,14 @@ ftdx::UsbStream* ftdx::newUsbStream(FtdiDriverType aDriverType)
 	UsbStream* lUsbStream = 0;
 	switch (aDriverType)
 	{
-	case eLibUsb:
-		lUsbStream = new ConLibFtdi();
-		break;
-	case eFTD2XX:
+	case eDRIVER_FTD2XX:
 		lUsbStream = new ConFTD2XX();
 		break;
 #ifndef WIN32
-	case eFtdiSio:
+	case eDRIVER_LibUsb:
+		lUsbStream = new ConLibFtdi();
+		break;
+	case eDRIVER_FtdiSio:
 		lUsbStream = new ConFtdiSio();
 		break;
 #endif
