@@ -10,19 +10,9 @@
 #include <fstream>
 
 #include "NwhostExports.h"
+#include "DataBlock.hh"
 
 namespace nwhost {
-
-class DataBlock {
-public:
-    DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData, unsigned int offset, word aTransferAddress, word size);
-
-    word number;
-    byte header;
-    word transferAddress;
-    std::vector < byte > data;
-
-};
 
 class DiskHandler;
 class SectorMedium;
