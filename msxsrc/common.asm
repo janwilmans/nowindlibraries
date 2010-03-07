@@ -17,7 +17,7 @@ nowindInit:
         db "Nowind USB Diskrom! [debug]",0
         endif
 
-        call flashWriter
+        ;call flashWriter
         ;call blockTransferTest23
         ret
 
@@ -201,41 +201,69 @@ receiveFCB:
         pop de
         ret
         
-blockTransferTest23:
-        ;DEBUGMESSAGE "block23"
-        call enableNowindPage0
+blockRead:
+        
+startTranferRoutine:
+        ld h,HIGH usbrd
+        call getHeader
+        ret c                           ; return on timeout 
+        and a
+        ret z                           ; resume
+        
+        ld iy,0                         ; save stack pointer
+        add iy,sp
+        ld e,(hl)                       ; transfer address
+        ld d,(hl)
+        ex de,hl
+        ld sp,hl
+        ex de,hl
+        ld b,(hl)                       ; amount of 128 byte blocks (max 32kB)       
 
 .loop:
-        DEBUGMESSAGE "sendRegisters"
-        call sendRegisters
-        ld (hl),$FF                     ; TODO: define later!
-        
-        ld h,HIGH usbrd
-        call getHeader2
-        jp c,restorePage0
-        
-        ;DEBUGMESSAGE "do transfer"
-        ld hl,usbwr
-        ld (hl),c                       ; return counter
-        ld (hl),b
-        jr .loop
-              
-getHeader2:
-        ld bc,0
-.loop:  ld a,(hl)
-.chkaf: cp $af
-        jr z,.chk05
-        inc bc
-        ld a,b
-        or c
-        jr nz,.loop
-        DEBUGMESSAGE "timeout!"
-        ld a,2                          ; not ready
-        scf
-        ret
+        DEBUGMESSAGE "loop"
+        ld c,(hl)                       ; header
+        ;DEBUGDUMPREGISTERS
+        cp 255
+        jp z,.error255
 
-.chk05: ld a,(hl)
-        cp $05
-        jr nz,.chkaf
+.good:        
+        DEBUGDUMPREGISTERS
+        repeat 64                       ; blocks of 128 bytes hardcoded (NowindHost.cpp)
+        ld d,(hl)
+        ld e,(hl)
+        push de
+        endrepeat
+        DEBUGDUMPREGISTERS
+        
+        ld a,(hl)                       ; tail
+        ld (usbwr),a
+        
+        cp c
+        jr nz,.error
+.nextLoop:
+        dec b
+        jp nz,.loop
+        
+        ld sp,iy                        ; restore stack pointer        
+        jp startTranferRoutine
+         
+.error: 
+        DEBUGMESSAGE ".err"
+        ; TODO timeout
         ld a,(hl)
-        ret        
+        cp c
+        jp z,.nextLoop
+        jr .error
+
+.error255: 
+        ; TODO timeout
+        DEBUGMESSAGE ".err255"
+        ld a,(hl)
+        cp 255
+        jr z,.error255
+        ; b moet nog aangepast... (hoe?)
+        ld c,a 
+        jp .good
+
+
+        

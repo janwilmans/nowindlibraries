@@ -82,9 +82,9 @@ void SlotSelector::configure(unsigned int msxVersion) {
         mainRom->patch(0x0180, 0xed);   // TURBO-R CHGCPU
         mainRom->patch(0x0181, 0x0a);   // assert(false)
 		// NO start-up logo, patch should be applied to SUB-ROM 
-		//subRom->patch(0x2a0e,0);
-		//subRom->patch(0x2a0f,0);
-		//subRom->patch(0x2a10,0);
+		subRom->patch(0x2a0e,0);
+		subRom->patch(0x2a0f,0);
+		subRom->patch(0x2a10,0);
 		
 		// NO boot-delay, patch should be applied to SUB-ROM 
 		subRom->patch(0x041d,0x18);
@@ -111,12 +111,13 @@ void SlotSelector::configure(unsigned int msxVersion) {
 //		addMemoryDevice(new MapperKonami5("../MSX Games/konami5/Kings Valley2 (msx2).rom"),1,0,0x4000);
 	
 #define NOWINDDOS1_off
-#define NOWINDDOS2
-#define NOWIND_off              // combines MSXDOS 1&2
+#define NOWINDDOS2_off
+#define NOWIND           // combines MSXDOS 1&2
 #define OPENDISKROM_off
 #define NORMALDISKROM_off
 #define MSXDOS2_off
 #define WD279X_off
+
 
 #ifdef NOWIND
     usbInterface = new NowindInterface("../msxsrc/nowind.rom");

@@ -59,6 +59,8 @@ C_MESSAGE       equ $90
 C_CHANGEIMAGE   equ $91
 C_GETDOSVERSION equ $92
 C_CMDREQUEST    equ $93
+C_BLOCKREAD     equ $94
+C_BLOCKWRITE    equ $95
 
 ; BDOS commands 0x0F - 0x37 can just use their original command code in register C
 

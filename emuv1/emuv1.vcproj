@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="emuv1"
 	ProjectGUID="{7A33AB1A-80EF-441B-B444-9A01765DB48E}"
 	RootNamespace="emuv1"
@@ -120,6 +120,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="2"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\SDL-1.2.13\include&quot;;&quot;$(ProjectDir)&quot;;&quot;$(InputDir)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;NO_TRACEALLOCATOR"
 				RuntimeLibrary="2"

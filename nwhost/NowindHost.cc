@@ -22,6 +22,8 @@ first the 2 header bytes AF 05 are send, then all registers are send (8 bytes) a
 */
 
 #define DBERR debugMessage
+#define PROTOCOL_V2_off 
+
 
 using std::string;
 using std::vector;
@@ -37,7 +39,7 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	, romdisk(255)
 	, allowOtherDiskroms(true)
 	, enablePhantomDrives(false)
-	, enableMSXDOS2(true)
+	, enableMSXDOS2(false)
 {
     vector<byte> requestWait;
     requestWait.push_back(1);
@@ -107,10 +109,10 @@ void NowindHost::write(byte data, unsigned int time)
 	if ((duration >= 500) && (state != STATE_SYNC1)) {
 		// timeout (500ms), start looking for AF05
         DBERR("Protocol timeout occurred in state %d, purge buffers and switch back to STATE_SYNC1\n", state);
-		purge();
-		state = STATE_SYNC1;
+		//purge();
+		//state = STATE_SYNC1;
 	}
-
+    //DBERR("received: 0x%02x (in state: %d)\n", data, state);
 	switch (state) {
 	case STATE_SYNC1:
 		if (data == 0xAF) state = STATE_SYNC2;
@@ -172,12 +174,8 @@ void NowindHost::write(byte data, unsigned int time)
 		}
 		break;
 	
-	case STATE_SPEEDTEST:
-		extraData[recvCount++] = data;
-		if (recvCount == 2) {
-			DBERR("bc = %d\n", extraData[0] + extraData[1]*256);
-			state = STATE_SYNC1;
-		}
+	case STATE_BLOCKREAD:
+		blockReadAck(data);
 		break;
 
 	default:
@@ -274,7 +272,8 @@ void NowindHost::executeCommand()
     case 0x92: getDosVersion(); state = STATE_SYNC1; break;
 	case 0x93: commandRequested(); state = STATE_SYNC1; break;
 	//case 0xFF: vramDump();
-	case 0xff: speedTest(); break;
+	case 0x94: blockReadCmd(); break;
+    case 0x95: blockWrite(); break;
 	default:
 		// Unknown USB command!
 		state = STATE_SYNC1;
@@ -560,7 +559,8 @@ void NowindHost::diskReadInit(SectorMedium& disk)
 	unsigned sectorAmount = getSectorAmount();
 	buffer.resize(sectorAmount * 512);
 	unsigned startSector = getStartSector();
-	if (disk.readSectors(&buffer[0], startSector, sectorAmount)) {
+    DBERR("startSector: %u\n", startSector);
+    if (disk.readSectors(&buffer[0], startSector, sectorAmount)) {
 		// read error
 		state = STATE_SYNC1;
 		return;
@@ -587,7 +587,9 @@ void NowindHost::doDiskRead1()
     // 32 works reasonably well at both 3.57 and 7.16 mhz, (both 120 Kbps) 
     // 8-16 works a bit better at 7 Mhz (180Kps)
 
-	static const unsigned NUMBEROFBLOCKS = 8; // 64 * 64 bytes = 4192 bytes
+	state = STATE_DISKREAD;
+
+    static const unsigned NUMBEROFBLOCKS = 255; // 64 * 64 bytes = 4192 bytes
 	transferSize = std::min(bytesLeft, NUMBEROFBLOCKS * 64); // hardcoded in firmware
 
 	unsigned address = getCurrentAddress();
@@ -608,9 +610,6 @@ void NowindHost::doDiskRead1()
 			transferSectors(address, transferSize);
 		}
 	}
-
-	// wait for 2 bytes
-	state = STATE_DISKREAD;
 	recvCount = 0;
 }
 
@@ -685,6 +684,15 @@ void NowindHost::sendTrailer()
  // sends "02" + "transfer_addr" + "amount" + "data" + "0F 07"
 void NowindHost::transferSectorsBackwards(unsigned transferAddress, unsigned amount)
 {
+    DBERR("tranferAddr: 0x%04x  amount %d\n", transferAddress, amount);
+#ifdef PROTOCOL_V2
+    vector<byte> temp;
+	const byte* bufferPointer = &buffer[transferred];
+	for (unsigned int i=0;i<amount; i++) {
+		temp.push_back(bufferPointer[i]);
+	}
+    blockRead(transferAddress, amount, temp);
+#else
 	sendHeader();
 	send(0x02); // don't exit command, (more) data is coming            // jan: doesn't '0x02' mean 'backwards' transfer
 	send16(transferAddress + amount);
@@ -695,6 +703,7 @@ void NowindHost::transferSectorsBackwards(unsigned transferAddress, unsigned amo
 		send(bufferPointer[i]);
 	}
 	sendTrailer(); // used for validation
+#endif 
 }
 
 
@@ -963,7 +972,6 @@ void NowindHost::readHelper2(unsigned len, const char* buffer)
 	}
 }
 
-
 // strips a string from outer double-quotes and anything outside them
 // ie: 'pre("foo")bar' will result in 'foo'
 static string stripquotes(const string& str)
@@ -1000,23 +1008,116 @@ void NowindHost::getDosVersion()
 	send(enableMSXDOS2 ? 1:0);
 }
 
-void NowindHost::speedTest()
-{
-	DBERR("speedTest()");
-	sendHeader();
-	send(0x00);			// dummy
-/*
-	send16(0xc000);		// transfer address
-	send16(128);		// amount
+static const word READ_DATABLOCK_SIZE = 128;
 
-	for (int i=0;i<128;i++) {
-		send(i);
+void NowindHost::blockReadCmd()
+{
+    SectorMedium* disk = drives[0]->getSectorMedium();
+    
+    vector<byte> data(16*1024);
+	if (disk->readSectors(&data[0], 0, 32)) {
+		DBERR("readSectors error reading sector 0-31\n");
 	}
-	send(0xaf);
-	send(0x07);
-*/
-	state = STATE_SPEEDTEST;
-	recvCount = 0;
+
+    blockRead(0x8000, 0x4000, data);
+}
+
+void NowindHost::blockRead(word startAddress, word size, const vector <byte >& data)
+{
+    DBERR("blockRead() startAddress: 0x%04x, size: 0x%02x\n", startAddress, size);
+
+    for(unsigned int i=0; i< dataBlockQueue.size(); i++)
+    {        
+        delete dataBlockQueue[i];
+    }
+    dataBlockQueue.clear();
+
+    word address = startAddress;
+    unsigned int offset = 0;
+    byte blocks = size / READ_DATABLOCK_SIZE;
+
+    // queue datablocks in reverse order
+    for(int i=0; i<blocks; i++)
+    {        
+        dataBlockQueue.push_front(new DataBlock(i, data, offset, address, READ_DATABLOCK_SIZE));
+        address += READ_DATABLOCK_SIZE;
+        offset += READ_DATABLOCK_SIZE;
+    }
+
+    sendHeader();
+    send(1);            // not end 
+    send16(startAddress+size);
+    send(blocks);
+    for (unsigned int i=0; i<blocks; i++)
+    {
+        sendDataBlock(i);
+    }
+    state = STATE_BLOCKREAD;
+}
+
+void NowindHost::sendDataBlock(unsigned int blocknr)
+{
+    DataBlock* dataBlock = dataBlockQueue[blocknr];
+    DBERR("sendDatablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
+
+    send(dataBlock->header);    // header
+    for (unsigned int i=0; i<dataBlock->data.size(); i++)
+    {
+        //DBERR("byte[%u]: 0x%02x\n", i, dataBlock->data[i]);
+        send(dataBlock->data[i]);
+    }
+
+    static int wrong = 0;
+    
+    if (wrong == 0)
+    {
+        send(0xff); // insert extra 0xff to simulate buffer underrun
+    }
+    send(dataBlock->header);    // tail
+    wrong++;
+    if (wrong == 7) wrong=0;
+
+}
+
+void NowindHost::blockReadAck(byte tail)
+{
+    assert(dataBlockQueue.size() != 0);
+    DBERR("blockReadAck tail:0x%02x\n", tail);
+    DataBlock* dataBlock = dataBlockQueue[0];
+    DBERR("Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
+
+    if (dataBlock->header == tail)
+    {
+        delete dataBlock;
+        dataBlock = 0;
+        dataBlockQueue.pop_front();
+        DBERR("block correct!\n");
+    }
+    else
+    {
+        DBERR("block failed!\n");
+	    sendHeader();
+	    send(0x01);			// not done, retry block follows
+        send16(dataBlock->transferAddress);
+        send(1);
+        sendDataBlock(0); // resend dataBlock
+        dataBlockQueue.pop_front();
+        dataBlockQueue.push_back(dataBlock);    // put dataBlock at end of queue
+    }
+
+    if (dataBlockQueue.size() == 0)
+    {
+        // all blocks ack'd, we're done
+        sendHeader();   // TODO: remove, MSX should check if errors occured
+        send(0);
+        state = STATE_SYNC1;
+    }
+}
+
+
+void NowindHost::blockWrite()
+{
+
 }
 
 
@@ -1130,6 +1231,38 @@ void NowindHost::addRequest(std::vector<byte> command)
 {
     requestQueue.push_back(command);
 }
+
+
+DataBlock::DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData, unsigned int offset, word aTransferAddress, word size)
+{
+    //assert(size < 255);
+    number = aNumber;
+    transferAddress = aTransferAddress+offset+size;
+
+    bool byteInUse[256];    // byte in use map
+    for (int i=0;i<256;i++)
+    {
+        byteInUse[i] = false;
+    }
+
+    for (unsigned int i=0;i<size;i++)
+    {
+        byte currentByte = sourceData[offset+size-1-i];      // reverse the data order
+        data.push_back(currentByte);
+        byteInUse[currentByte] = true;
+    }
+
+    for (int i=0;i<256;i++)
+    {
+        if (byteInUse[i] == false)
+        {
+            // found our header (first byte not 'used' by the data)
+            header = i;
+            break;
+        }
+    }
+}
+
 
 } // namespace nowind
 
