@@ -174,9 +174,14 @@ dskioRead:
         DEBUGMESSAGE "read23"
         call enableNowindPage0
         push iy
-        call readSectors23
+        call readSectors23  
+;        call blockRead   ;jcw
         pop iy
-        jp restorePage0
+        DEBUGMESSAGE "read23_klaar"
+        DEBUGDUMPREGISTERS
+        CALL restorePage0
+        DEBUGDUMPREGISTERS
+        RET
 
 dskioWrite:
         DEBUGMESSAGE "dskwrite"
@@ -301,6 +306,7 @@ GETDPB:
 ; Output    DPB for specified drive in [HL+1]..[HL+18]
 
         DEBUGMESSAGE "GETDPB"
+        DEBUGDUMPREGISTERS
         ex de,hl
         inc de
         ld h,a
@@ -309,7 +315,7 @@ GETDPB:
         ld a,h
         jr z,.hddImage
         
-        MESSAGE "ROM GETDPB"
+;        MESSAGE "ROM GETDPB"
 
         ld a,b
         sub $f8
@@ -330,7 +336,7 @@ GETDPB:
 
 .hddImage:
         DEBUGMESSAGE ".hddImage"
-        MESSAGE "HOST GETDPB"
+        ;MESSAGE "HOST GETDPB"
         call sendRegisters
         ld (hl),C_GETDPB
         call enableNowindPage0

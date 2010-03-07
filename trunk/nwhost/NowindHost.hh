@@ -13,6 +13,17 @@
 
 namespace nwhost {
 
+class DataBlock {
+public:
+    DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData, unsigned int offset, word aTransferAddress, word size);
+
+    word number;
+    byte header;
+    word transferAddress;
+    std::vector < byte > data;
+
+};
+
 class DiskHandler;
 class SectorMedium;
 
@@ -77,7 +88,7 @@ public:
 		STATE_DEVOPEN,   // waiting for filename (11 bytes)
 		STATE_IMAGE,     // waiting for filename
 		STATE_MESSAGE,   // waiting for null-terminated message
-		STATE_SPEEDTEST,	// TODO: remove!
+		STATE_BLOCKREAD
 	};
 
 	virtual void debugMessage(const char *cFormat, ...) const;
@@ -140,6 +151,7 @@ private:
     void commandRequestedAnytime();
 	std::deque< std::vector<byte> > startupRequestQueue;   // queue for commandRequest() at startup
 	std::deque< std::vector<byte> > requestQueue;   // queue for commandRequest()
+	std::deque< DataBlock* > dataBlockQueue;
 
 	void callImage(const std::string& filename);
 	const std::vector<DiskHandler*>& drives;
@@ -170,8 +182,13 @@ private:
 	bool enableMSXDOS2;
     int readRetries;
 
-	// TODO: remove when done with testing!
-	void speedTest();
+    void blockReadCmd();
+    void blockRead(word startAddress, word size, const std::vector <byte >& data);
+    void doBlockRead();
+    void sendDataBlock(unsigned int blocknr);
+    void blockReadAck(byte tail);
+
+    void blockWrite();
 };
 
 } // namespace nowind
