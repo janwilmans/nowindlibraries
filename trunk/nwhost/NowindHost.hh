@@ -177,7 +177,7 @@ private:
     void doBlockRead();
     void sendDataBlock(unsigned int blocknr);
     void blockReadAck(byte tail);
-
+    void newBlockTransfer(unsigned transferAddress, unsigned amount);   // TODO: tijdelijk!
     void blockWrite();
 };
 

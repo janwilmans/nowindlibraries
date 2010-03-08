@@ -21,7 +21,7 @@ first the 2 header bytes AF 05 are send, then all registers are send (8 bytes) a
 */
 
 #define DBERR debugMessage
-#define PROTOCOL_V2_off 
+#define PROTOCOL_V2
 
 
 using std::string;
@@ -108,8 +108,8 @@ void NowindHost::write(byte data, unsigned int time)
 	if ((duration >= 500) && (state != STATE_SYNC1)) {
 		// timeout (500ms), start looking for AF05
         DBERR("Protocol timeout occurred in state %d, purge buffers and switch back to STATE_SYNC1\n", state);
-		//purge();
-		//state = STATE_SYNC1;
+		purge();
+		state = STATE_SYNC1;
 	}
     //DBERR("received: 0x%02x (in state: %d)\n", data, state);
 	switch (state) {
@@ -581,11 +581,6 @@ void NowindHost::doDiskRead1()
         DBERR("finished. (%d retries)\n", readRetries);
 		return;
 	}
-
-    // 64 and 128 work well at 3.57Mhz (180Kbps), but causes AT LOT of retries at 7 Mhz!
-    // 32 works reasonably well at both 3.57 and 7.16 mhz, (both 120 Kbps) 
-    // 8-16 works a bit better at 7 Mhz (180Kps)
-
 	state = STATE_DISKREAD;
 
     static const unsigned NUMBEROFBLOCKS = 255; // 64 * 64 bytes = 4192 bytes
@@ -593,10 +588,11 @@ void NowindHost::doDiskRead1()
 
 	unsigned address = getCurrentAddress();
 	if (address >= 0x8000) {
-		if (transferSize & 0x003F) {
+		if (transferSize & 0x007F) {
 			transferSectors(address, transferSize);
 		} else {
-			transferSectorsBackwards(address, transferSize);
+			//transferSectorsBackwards(address, transferSize);
+            newBlockTransfer(address, transferSize);
 		}
 	} else {
 		// transfer below 0x8000
@@ -684,14 +680,6 @@ void NowindHost::sendTrailer()
 void NowindHost::transferSectorsBackwards(unsigned transferAddress, unsigned amount)
 {
     DBERR("tranferAddr: 0x%04x  amount %d\n", transferAddress, amount);
-#ifdef PROTOCOL_V2
-    vector<byte> temp;
-	const byte* bufferPointer = &buffer[transferred];
-	for (unsigned int i=0;i<amount; i++) {
-		temp.push_back(bufferPointer[i]);
-	}
-    blockRead(transferAddress, amount, temp);
-#else
 	sendHeader();
 	send(0x02); // don't exit command, (more) data is coming            // jan: doesn't '0x02' mean 'backwards' transfer
 	send16(transferAddress + amount);
@@ -702,7 +690,6 @@ void NowindHost::transferSectorsBackwards(unsigned transferAddress, unsigned amo
 		send(bufferPointer[i]);
 	}
 	sendTrailer(); // used for validation
-#endif 
 }
 
 
@@ -1007,7 +994,18 @@ void NowindHost::getDosVersion()
 	send(enableMSXDOS2 ? 1:0);
 }
 
-static const word READ_DATABLOCK_SIZE = 128;
+static const byte READ_DATABLOCK_SIZE = 128;
+
+void NowindHost::newBlockTransfer(unsigned transferAddress, unsigned amount)
+{
+    DBERR("newBlockTranfer: addr: 0x%04x  amount %d\n", transferAddress, amount);
+    vector<byte> temp;
+	const byte* bufferPointer = &buffer[transferred];
+	for (unsigned int i=0;i<amount; i++) {
+		temp.push_back(bufferPointer[i]);
+	}
+    blockRead(transferAddress, amount, temp);
+}
 
 void NowindHost::blockReadCmd()
 {
@@ -1038,6 +1036,7 @@ void NowindHost::blockRead(word startAddress, word size, const vector <byte >& d
     // queue datablocks in reverse order
     for(int i=0; i<blocks; i++)
     {        
+        //DBERR("newDataBlock[%u] addr: 0x%04x, offset: 0x%04x, size: %u\n", i, address, offset, READ_DATABLOCK_SIZE);
         dataBlockQueue.push_front(new DataBlock(i, data, offset, address, READ_DATABLOCK_SIZE));
         address += READ_DATABLOCK_SIZE;
         offset += READ_DATABLOCK_SIZE;
@@ -1057,44 +1056,48 @@ void NowindHost::blockRead(word startAddress, word size, const vector <byte >& d
 void NowindHost::sendDataBlock(unsigned int blocknr)
 {
     DataBlock* dataBlock = dataBlockQueue[blocknr];
-    DBERR("sendDatablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
+    //DBERR("sendDatablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
 
     send(dataBlock->header);    // header
     for (unsigned int i=0; i<dataBlock->data.size(); i++)
     {
-        //DBERR("byte[%u]: 0x%02x\n", i, dataBlock->data[i]);
         send(dataBlock->data[i]);
     }
-
+/*
     static int wrong = 0;
-    
     if (wrong == 0)
     {
         send(0xff); // insert extra 0xff to simulate buffer underrun
+        send(0xff); // insert extra 0xff to simulate buffer underrun
+        send(0xff); // insert extra 0xff to simulate buffer underrun
+        send(0xff); // insert extra 0xff to simulate buffer underrun
     }
-    send(dataBlock->header);    // tail
     wrong++;
-    if (wrong == 7) wrong=0;
-
+    if (wrong == 50) wrong=0;
+*/
+    send(dataBlock->header);    // tail
 }
 
 void NowindHost::blockReadAck(byte tail)
 {
     assert(dataBlockQueue.size() != 0);
-    DBERR("blockReadAck tail:0x%02x\n", tail);
+    //DBERR("blockReadAck tail:0x%02x\n", tail);
     DataBlock* dataBlock = dataBlockQueue[0];
-    DBERR("Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
+    //DBERR("Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
 
     if (dataBlock->header == tail)
     {
+        // block succesfully received
         delete dataBlock;
         dataBlock = 0;
         dataBlockQueue.pop_front();
-        DBERR("block correct!\n");
     }
     else
     {
-        DBERR("block failed!\n");
+        static int errors = 0;
+        errors++;
+
+        DBERR("block failed! (errors: %u)\n", errors);
 	    sendHeader();
 	    send(0x01);			// not done, retry block follows
         send16(dataBlock->transferAddress);

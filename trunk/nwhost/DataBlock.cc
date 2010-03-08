@@ -6,7 +6,7 @@ DataBlock::DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData
 {
     //assert(size < 255);
     number = aNumber;
-    transferAddress = aTransferAddress+offset+size;
+    transferAddress = aTransferAddress + size;
 
     bool byteInUse[256];    // byte in use map
     for (int i=0;i<256;i++)
