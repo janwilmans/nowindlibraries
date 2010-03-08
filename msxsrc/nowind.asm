@@ -71,6 +71,7 @@
 getBootArgs:
 ; tijdelijke test
         
+        call flashWriter                ; TODO: zoek betere plek (tijdelijk geen ruimte in dos1 rom)
         DEBUGMESSAGE "Any commands?"   
         call enableNowindPage0
         ld c,0                      ; c=0 means reset startup queue index 
@@ -86,7 +87,7 @@ getBootArgs:
         ; todo: read command here
         and a
         jr z,noNextCommand
-        DEBUGMESSAGE "Got command!"   
+        DEBUGMESSAGE "Got cmd!"   
  
         ld a,(hl)
         ;cp 1
@@ -97,7 +98,7 @@ getBootArgs:
 
 noNextCommand:
         call restorePage0
-        DEBUGMESSAGE "End of startup commands"   
+        DEBUGMESSAGE "End of startup cmds"   
         
         call sendRegisters
         ld (hl),C_GETDOSVERSION
@@ -122,7 +123,7 @@ bootMSXDOS1:
         include "slotRoutines.asm"
         include "nowindDriver.asm"
         include "romdisk.asm"
-        ;include "flashWriter.asm"  ; todo: remove load from pc
+        include "flashWriter.asm"  ; todo: remove load from pc
         include "device.asm"
         
         ds $8000-(endCopyFromBank-copyFromBank)-$, $ff

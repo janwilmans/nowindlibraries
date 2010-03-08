@@ -170,18 +170,22 @@ dskioRead:
         ei
         ret z                           ; nothing more to read
                 
-.page2and3:                     
+;.page2and3:                     
         DEBUGMESSAGE "read23"
         call enableNowindPage0
         push iy
         call readSectors23  
-;        call blockRead   ;jcw
         pop iy
-        DEBUGMESSAGE "read23_klaar"
-        DEBUGDUMPREGISTERS
-        CALL restorePage0
-        DEBUGDUMPREGISTERS
-        RET
+        jp restorePage0
+
+.page2and3:
+        DEBUGMESSAGE "blockRead23"
+        call enableNowindPage0
+        push iy
+        call blockRead
+        pop iy
+        jp restorePage0
+        
 
 dskioWrite:
         DEBUGMESSAGE "dskwrite"

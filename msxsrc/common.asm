@@ -17,8 +17,6 @@ nowindInit:
         db "Nowind USB Diskrom! [debug]",0
         endif
 
-        ;call flashWriter
-        ;call blockTransferTest23
         ret
 
 initDiskBasic:
@@ -161,16 +159,6 @@ AUXout: DEBUGMESSAGE "AUX out"
         pop hl
         ret
 
-;insertBootCode:
-;        DEBUGMESSAGE "BOOTCODE"
-;        call sendRegisters
-;        ld (hl),C_BOOTCODE
-;        call enableNowindPage0
-;        call getHeader
-;        jp c,restorePage0
-        
-;        DEBUGMESSAGE "BOOTCODE"
-;        jp restorePage0
 
 ; send 32 bytes starting from address specified by DE to the usb
 sdendFCB:
@@ -220,20 +208,16 @@ startTranferRoutine:
         ld b,(hl)                       ; amount of 128 byte blocks (max 32kB)       
 
 .loop:
-        DEBUGMESSAGE "loop"
         ld c,(hl)                       ; header
-        ;DEBUGDUMPREGISTERS
         cp 255
         jp z,.error255
 
 .good:        
-        DEBUGDUMPREGISTERS
         repeat 64                       ; blocks of 128 bytes hardcoded (NowindHost.cpp)
         ld d,(hl)
         ld e,(hl)
         push de
         endrepeat
-        DEBUGDUMPREGISTERS
         
         ld a,(hl)                       ; tail
         ld (usbwr),a
