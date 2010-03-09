@@ -7,8 +7,9 @@ DataBlock::DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData
     //assert(size < 255);
     number = aNumber;
     transferAddress = aTransferAddress + size;
+    data.clear();
 
-    bool byteInUse[256];    // byte in use map
+    bool byteInUse[256];    // 'byte in use' map
     for (int i=0;i<256;i++)
     {
         byteInUse[i] = false;
@@ -16,8 +17,8 @@ DataBlock::DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData
 
     for (unsigned int i=0;i<size;i++)
     {
-        byte currentByte = sourceData[offset+size-1-i];      // reverse the data order
-        data.push_back(currentByte);
+        byte currentByte = sourceData[offset+size-1-i];         // reverse the data order
+        data.push_back(currentByte);              
         byteInUse[currentByte] = true;
     }
 

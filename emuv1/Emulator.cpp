@@ -282,7 +282,7 @@ void Emulator::reset() {
     vdp->reset();       // zet de lastNormalInterruptTime op emuTime
 }
 
-unsigned long OUR_SDL_GetTicks()
+unsigned long long OUR_SDL_GetTicks()
 {
     unsigned long long offset = starttime;
     offset *= 1000;
@@ -297,7 +297,7 @@ void reportCyclesInit()
 {
 }
 
-void reportCycles(emuTimeType emuTime, unsigned long msRunning)
+void reportCycles(emuTimeType emuTime, unsigned long long msRunning)
 {
     static int point = 0;
     ofs << emuTime << ";" << msRunning << "\n";
