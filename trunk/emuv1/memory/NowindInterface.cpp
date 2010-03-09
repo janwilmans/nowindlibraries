@@ -43,8 +43,6 @@ NowindInterface::~NowindInterface() {
 void NowindInterface::insertDisk(string filename) {
 
     nowindusb_set_image(0, filename.c_str());
-//    nowindusb_set_image(1, "..\\disks\\nowind_flasher.dsk");
-//    nowindusb_set_image(2, "..\\disks\\wb.dsk");
 }
 
 /*

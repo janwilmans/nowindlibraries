@@ -17,12 +17,11 @@ commands send for the msx to the host look like:
 
 AF 05 cc bb ee dd ll hh ff aa CC
 
-first the 2 header bytes AF 05 are send, then all registers are send (8 bytes) and finally the command is send (1 byte)
+first the 2 header bytes AF 05 are sent, then all registers are send (8 bytes) and finally the command is sent (1 byte)
 */
 
 #define DBERR debugMessage
-#define PROTOCOL_V2
-
+#define PROTOCOL_V2_off
 
 using std::string;
 using std::vector;
@@ -586,12 +585,13 @@ void NowindHost::doDiskRead1()
     static const unsigned NUMBEROFBLOCKS = 255; // 64 * 64 bytes = 4192 bytes
 	transferSize = std::min(bytesLeft, NUMBEROFBLOCKS * 64); // hardcoded in firmware
 
+
+#ifdef PROTOCOL_V2
 	unsigned address = getCurrentAddress();
 	if (address >= 0x8000) {
 		if (transferSize & 0x007F) {
 			transferSectors(address, transferSize);
 		} else {
-			//transferSectorsBackwards(address, transferSize);
             newBlockTransfer(address, transferSize);
 		}
 	} else {
@@ -605,6 +605,26 @@ void NowindHost::doDiskRead1()
 			transferSectors(address, transferSize);
 		}
 	}
+#else
+	unsigned address = getCurrentAddress();
+	if (address >= 0x8000) {
+		if (transferSize & 0x003F) {
+			transferSectors(address, transferSize);
+		} else {
+			transferSectorsBackwards(address, transferSize);
+		}
+	} else {
+		// transfer below 0x8000
+		unsigned endAddress = address + transferSize;
+		if (endAddress <= 0x8000) {
+			transferSectorsBackwards(address, transferSize);
+		} else {
+			transferSize = 0x8000 - address;
+			transferSectors(address, transferSize);
+		}
+	}
+#endif
+
 	recvCount = 0;
 }
 

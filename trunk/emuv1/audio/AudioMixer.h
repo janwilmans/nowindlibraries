@@ -18,10 +18,6 @@
  */
 class AudioDevice;
 
-typedef struct bufferStatus {
-    bool newData;   
-} bufferStatus;
-
 class AudioMixer {
 
 private:

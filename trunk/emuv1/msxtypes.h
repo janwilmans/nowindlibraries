@@ -8,7 +8,7 @@ typedef unsigned char nw_byte;          // should be (at least?) an 8 bit type
 typedef unsigned int nw_word;           // should be (at least?) an 16 bit type
     
 typedef unsigned int emuTimeType;
-typedef unsigned int msTimeType;
+typedef unsigned long long msTimeType;
 
 #endif
 

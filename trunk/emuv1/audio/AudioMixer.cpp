@@ -38,7 +38,6 @@ void AudioMixer::initialize() {
     memset(obtained, 0, sizeof(SDL_AudioSpec));
 
 /*
-BUG: only 16Kb audiobuffers (8192 samples @ 16bit) work right (or at least reasonable)
 
 44100 Hz * 16 Bit audio = 82,2 Kbps 
 this means 16kb/82200 = 0,2 seconds of audiobuffer (and so 0,2 latency!)
@@ -46,7 +45,7 @@ this means 16kb/82200 = 0,2 seconds of audiobuffer (and so 0,2 latency!)
 It would be good to have about a 1024 bytes buffer 
 L = B / O) 
 L = 1024 / 82200 = 0,0125 seconds (100th of a second delay)
-
+-
 */    
     
     desired->freq = 44100;
@@ -55,7 +54,7 @@ L = 1024 / 82200 = 0,0125 seconds (100th of a second delay)
 #ifdef __APPLE__
     desired->format = AUDIO_S16;
 #endif
-    desired->samples = 1024; //4*2048; // size in samples
+    desired->samples = 1024; //4*2048; // size in samples (1024 works good)
     desired->userdata = NULL;
 	desired->channels = 1;
 	desired->callback = &AudioMixer::staticAudioCallback;
