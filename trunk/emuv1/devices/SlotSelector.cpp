@@ -125,7 +125,7 @@ void SlotSelector::configure(unsigned int msxVersion) {
 //  usbInterface->insertDisk("../disks/test.dsk");
 //	usbInterface->insertDisk("../disks/wb.dsk");
 	usbInterface->insertDisk("../disks/hd5mbDOS2.dsk");
-	usbInterface->insertDisk("../disks/dos2.dsk");
+//	usbInterface->insertDisk("../disks/dos2.dsk");
 #endif
 
 

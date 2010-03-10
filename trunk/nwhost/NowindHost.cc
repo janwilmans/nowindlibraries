@@ -21,7 +21,7 @@ first the 2 header bytes AF 05 are sent, then all registers are send (8 bytes) a
 */
 
 #define DBERR debugMessage
-#define PROTOCOL_V2_off
+#define PROTOCOL_V2
 
 using std::string;
 using std::vector;
@@ -37,7 +37,7 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	, romdisk(255)
 	, allowOtherDiskroms(true)
 	, enablePhantomDrives(false)
-	, enableMSXDOS2(false)
+	, enableMSXDOS2(true)
 {
     vector<byte> requestWait;
     requestWait.push_back(1);
@@ -107,8 +107,8 @@ void NowindHost::write(byte data, unsigned int time)
 	if ((duration >= 500) && (state != STATE_SYNC1)) {
 		// timeout (500ms), start looking for AF05
         DBERR("Protocol timeout occurred in state %d, purge buffers and switch back to STATE_SYNC1\n", state);
-		//purge();
-		//state = STATE_SYNC1;
+		purge();
+		state = STATE_SYNC1;
 	}
     //DBERR("received: 0x%02x (in state: %d)\n", data, state);
 	switch (state) {
@@ -1005,7 +1005,7 @@ static const byte READ_DATABLOCK_SIZE = 128;
 
 void NowindHost::newBlockTransfer(unsigned transferAddress, unsigned amount)
 {
-    DBERR("create new BlockTranfer: addr: 0x%04x  amount %d\n", transferAddress, amount);
+    //DBERR("create new BlockTranfer: addr: 0x%04x  amount %d\n", transferAddress, amount);
     vector<byte> temp;
 	const byte* bufferPointer = &buffer[transferred];
 	for (unsigned int i=0;i<amount; i++) {
@@ -1022,13 +1022,12 @@ void NowindHost::blockReadCmd()
 	if (disk->readSectors(&data[0], 0, 32)) {
 		DBERR("readSectors error reading sector 0-31\n");
 	}
-
     blockRead(0x8000, 0x4000, data);
 }
 
 void NowindHost::blockRead(word startAddress, word size, const vector <byte >& data)
 {
-    DBERR("blockRead() startAddress: 0x%04x, size: 0x%02x\n", startAddress, size);
+    //DBERR("blockRead() startAddress: 0x%04x, size: 0x%02x\n", startAddress, size);
 
     for(unsigned int i=0; i< dataBlockQueue.size(); i++)
     {        
@@ -1043,7 +1042,7 @@ void NowindHost::blockRead(word startAddress, word size, const vector <byte >& d
     // queue datablocks in reverse order
     for(int i=0; i<blocks; i++)
     {        
-        DBERR("newDataBlock[%u] addr: 0x%04x, offset: 0x%04x, size: %u\n", i, address, offset, READ_DATABLOCK_SIZE);
+        //DBERR("newDataBlock[%u] addr: 0x%04x, offset: 0x%04x, size: %u\n", i, address, offset, READ_DATABLOCK_SIZE);
         dataBlockQueue.push_front(new DataBlock(i, data, offset, address, READ_DATABLOCK_SIZE));
         address += READ_DATABLOCK_SIZE;
         offset += READ_DATABLOCK_SIZE;
@@ -1089,7 +1088,7 @@ void NowindHost::blockReadAck(byte tail)
 {
     assert(dataBlockQueue.size() != 0);
     DataBlock* dataBlock = dataBlockQueue[0];
-    DBERR("ACK -> Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
+    //DBERR("ACK -> Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
 
     if (dataBlock->header == tail)
     {

@@ -42,10 +42,10 @@ nowind
 4=labels.asm
 5=nowindDriver.asm
 6=..\..\..\documents and settings\kwik\desktop\TUR-HD.GEN
-7=New3.GEN
+7=flashWriter.asm
 [Selected Project Files]
 Main=
-Selected=New3.GEN
+Selected=nowind.asm
 [common.asm]
 TopLine=189
 Caret=18,215
@@ -67,6 +67,6 @@ Caret=18,187
 [..\..\..\documents and settings\kwik\desktop\TUR-HD.GEN]
 TopLine=1203
 Caret=6,1219
-[New3.GEN]
-TopLine=1915
-Caret=1,1951
+[flashWriter.asm]
+TopLine=51
+Caret=1,1
