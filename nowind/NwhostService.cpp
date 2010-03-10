@@ -122,7 +122,7 @@ void NwhostService::start(FtdiDriverType aDriverType)
 
 // the update firmware used hardcoded commands
 // 
-void NwhostService::updateFirmware(string sImageName) {
+void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool bVerify) {
 
     unsigned int uiSectorSize = 128;
     unsigned int uiHeader = 7;
@@ -132,11 +132,23 @@ void NwhostService::updateFirmware(string sImageName) {
     unsigned int uiBank = 0;
     unsigned long uiBytesWritten = 0;
     unsigned int uiSector;
-    
     char cString[250];
 
-    //start(eLibUsb);
-	start(eDRIVER_FTD2XX);	// TODO: maak commandline optie
+    bool doAutoSelect = false;
+    bool doChipErase = true;
+    bool doSectorErase = false;
+    bool doWriteFlash = true;
+    bool doVerify = bVerify;
+
+    if (iMethodVersion == 2)
+    {
+        doAutoSelect = true;
+        doChipErase = false;
+        doSectorErase = true;
+        doWriteFlash = true;
+    }
+
+	start(eDRIVER_FTD2XX);
 
 	// this should not be needed, but without it, FTD2xx::read returns to fast!
 	mUsbStream->setTimeouts(500000, 500000);
@@ -165,144 +177,142 @@ void NwhostService::updateFirmware(string sImageName) {
     fs->seekg(0, ios::end);
 	unsigned int uiFileSize = fs->tellg();
 
+    if (doAutoSelect)
+    {
+	    Util::debug("Send autoselect command to flash....\n");
+	    xBuffer[0] = 0xEE;
+        xBuffer[1] = 0xBB;
+        xBuffer[2] = 0x55;
+        xBuffer[3] = CMD_AUTOSELECTMODE;
 
-#define DO_AUTOSELECT
-//#define DO_CHIPERASE
-#define DO_SECTORERASE
-#define DO_WRITEFLASH
-#define DO_VERIFY
-
-#ifdef DO_AUTOSELECT
-	Util::debug("Send autoselect command to flash....\n");
-	xBuffer[0] = 0xEE;
-    xBuffer[1] = 0xBB;
-    xBuffer[2] = 0x55;
-    xBuffer[3] = CMD_AUTOSELECTMODE;
-
-    mUsbStream->write(xBuffer, 4, &uiBytesWritten);
-	mUsbStream->readExact(yBuffer, 4);
-	Util::debug("Manufacturer Code: 0x%02x\n", yBuffer[2]);
-	Util::debug("Device Code: 0x%02x\n", yBuffer[3]);
-#endif
-
-#ifdef DO_CHIPERASE
-    xBuffer[0] = 0xEE;
-    xBuffer[1] = 0xBB;
-    xBuffer[2] = 0x55;
-    xBuffer[3] = CMD_ERASE;
-
-    mUsbStream->write(xBuffer, 4, &uiBytesWritten);
-    Util::debug("Waiting for erase to complete...\n");
-    waitForAck();
-	Util::debug("\nErase complete!\n");
-#endif
-
-#ifdef DO_SECTORERASE
-    xBuffer[0] = 0xEE;
-    xBuffer[1] = 0xBB;
-    xBuffer[2] = 0x55;
-    xBuffer[3] = CMD_ERASESECTOR;
-
-    unsigned int sizeInSectors = ((uiFileSize-1) >> 16) + 1;
-    for (unsigned int i=0; i<sizeInSectors; i++) {
-	    
-        xBuffer[4] = i;
-	    mUsbStream->write(xBuffer, 5, &uiBytesWritten);
-        Util::debug("Erasing sector %i...\r", i);
-        waitForAck();
+        mUsbStream->write(xBuffer, 4, &uiBytesWritten);
+	    mUsbStream->readExact(yBuffer, 4);
+	    Util::debug("Manufacturer Code: 0x%02x\n", yBuffer[2]);
+	    Util::debug("Device Code: 0x%02x\n", yBuffer[3]);
     }
-	Util::debug("\nErase complete!\n");
-#endif
+
+    if (doChipErase)
+    {
+        xBuffer[0] = 0xEE;
+        xBuffer[1] = 0xBB;
+        xBuffer[2] = 0x55;
+        xBuffer[3] = CMD_ERASE;
+
+        mUsbStream->write(xBuffer, 4, &uiBytesWritten);
+        Util::debug("Waiting for erase to complete...\n");
+        waitForAck();
+	    Util::debug("\nErase complete!\n");
+    }
+
+    if (doSectorErase)
+    {
+        xBuffer[0] = 0xEE;
+        xBuffer[1] = 0xBB;
+        xBuffer[2] = 0x55;
+        xBuffer[3] = CMD_ERASESECTOR;
+
+        unsigned int sizeInSectors = ((uiFileSize-1) >> 16) + 1;
+        for (unsigned int i=0; i<sizeInSectors; i++) {
+    	    
+            xBuffer[4] = i;
+	        mUsbStream->write(xBuffer, 5, &uiBytesWritten);
+            Util::debug("Erasing sector %i...\r", i);
+            waitForAck();
+        }
+	    Util::debug("\nErase complete!\n");
+    }
 
     unsigned int uiSectorCount = uiFileSize/uiSectorSize;
     unsigned int uiLastProgress = 1;
     unsigned int uiProgress = 0;
 
-#ifdef DO_WRITEFLASH
-    Util::debug("Writing to flash....\n");
-	for (uiSector=0; uiSector<uiSectorCount; uiSector++) {
+    if (doWriteFlash)
+    {
+        Util::debug("Writing to flash....\n");
+	    for (uiSector=0; uiSector<uiSectorCount; uiSector++) {
 
-            uiWriteAdress = uiAddress & 0x3fff;
-            uiBank = uiSector/uiSectorSize;                  // there are 128 x 128 bytes in a bank
-            xBuffer[0] = 0xEE;
-            xBuffer[1] = 0xBB;
-            xBuffer[2] = 0x55;
-            xBuffer[3] = CMD_WRITE;
-            xBuffer[4] = uiWriteAdress & 0xFF;
-            xBuffer[5] = (uiWriteAdress >> 8) & 0xFF;
-            xBuffer[6] = uiBank & 0xFF;
-            
-            uiProgress = (uiSector*100)/uiSectorCount;
-            if (uiLastProgress != uiProgress)
-            {
-                uiLastProgress = uiProgress;          
-                printf("Writing bank %u (%u%%)\r", uiBank, uiProgress);
-				fflush(stdout);
-            }
-            
-            fs->seekg(uiSector*uiSectorSize);
-            fs->read(cBuffer+uiHeader, uiSectorSize);
- 
-            mUsbStream->write(xBuffer, uiAmount, &uiBytesWritten);
-            uiAddress = uiAddress + uiSectorSize;
-
-            if (uiBytesWritten != uiAmount) {
-                Util::debug("error: sector %u not completely send...\n", uiSector);
-                Util::debug("       BytesWritten: %u amount: %u\n", uiBytesWritten, uiAmount);
-            }
-            waitForAck();            
-    }
-    Util::debug("Write complete!\n");
-#endif
-
-#ifdef DO_VERIFY
-    uiAddress = 0;
-    unsigned int uiErrors = 0;
-    uiAmount = uiHeader;
-    for (uiSector=0; uiSector<uiSectorCount; uiSector++) {
-
-            uiWriteAdress = (uiAddress & 0x3fff) + 0x4000;
-            uiBank = uiSector/uiSectorSize;
-            xBuffer[0] = 0xEE;
-            xBuffer[1] = 0xBB;
-            xBuffer[2] = 0x55;
-            xBuffer[3] = CMD_VERIFY;
-            xBuffer[4] = uiWriteAdress & 0xFF;
-            xBuffer[5] = (uiWriteAdress >> 8) & 0xff;
-            xBuffer[6] = uiBank & 0xFF;
-
-            mUsbStream->write(xBuffer, uiAmount, &uiBytesWritten);
-            
-            fs->seekg(uiSector*uiSectorSize);
-            fs->read(cBuffer+uiHeader, uiSectorSize);
- 
-			uiBytesWritten = mUsbStream->readExact(yBuffer, uiSectorSize);
-            for (unsigned int i=0; i<uiSectorSize; i++) {
-                if (xBuffer[i+uiHeader] != yBuffer[i]) {
-                    Util::snprintf(cString, sizeof(cString), "Verify of address 0x%04X failed! Found: 0x%02X Expected: 0x%02X\n", (uiWriteAdress+i)+(uiBank*0x4000), yBuffer[i], xBuffer[i+uiHeader]);
-                    uiErrors++;
-                    if (uiErrors > 25) {
-                        Util::debug("Found more than 25 error...!\n");
-                        exit(1);
-                    }
-                    Util::debug(cString);
+                uiWriteAdress = uiAddress & 0x3fff;
+                uiBank = uiSector/uiSectorSize;                  // there are 128 x 128 bytes in a bank
+                xBuffer[0] = 0xEE;
+                xBuffer[1] = 0xBB;
+                xBuffer[2] = 0x55;
+                xBuffer[3] = CMD_WRITE;
+                xBuffer[4] = uiWriteAdress & 0xFF;
+                xBuffer[5] = (uiWriteAdress >> 8) & 0xFF;
+                xBuffer[6] = uiBank & 0xFF;
+                
+                uiProgress = (uiSector*100)/uiSectorCount;
+                if (uiLastProgress != uiProgress)
+                {
+                    uiLastProgress = uiProgress;          
+                    printf("Writing bank %u (%u%%)\r", uiBank, uiProgress);
+				    fflush(stdout);
                 }
-            }
-            uiAddress += 128;
+                
+                fs->seekg(uiSector*uiSectorSize);
+                fs->read(cBuffer+uiHeader, uiSectorSize);
+     
+                mUsbStream->write(xBuffer, uiAmount, &uiBytesWritten);
+                uiAddress = uiAddress + uiSectorSize;
 
-            waitForAck();
-            
-            uiProgress = (uiSector*100)/uiSectorCount;
-            if (uiLastProgress != uiProgress)
-            {
-                uiLastProgress = uiProgress;          
-                printf("Verify progress %u%%\r", uiProgress);
-				fflush(stdout);
-            }
+                if (uiBytesWritten != uiAmount) {
+                    Util::debug("error: sector %u not completely send...\n", uiSector);
+                    Util::debug("       BytesWritten: %u amount: %u\n", uiBytesWritten, uiAmount);
+                }
+                waitForAck();            
+        }
+        Util::debug("Write complete!\n");
     }
 
-    Util::debug("\nDone... %u sectors written and verified.\n", uiSector);
-#endif
+    if (doVerify)
+    {
+        uiAddress = 0;
+        unsigned int uiErrors = 0;
+        uiAmount = uiHeader;
+        for (uiSector=0; uiSector<uiSectorCount; uiSector++) {
+
+                uiWriteAdress = (uiAddress & 0x3fff) + 0x4000;
+                uiBank = uiSector/uiSectorSize;
+                xBuffer[0] = 0xEE;
+                xBuffer[1] = 0xBB;
+                xBuffer[2] = 0x55;
+                xBuffer[3] = CMD_VERIFY;
+                xBuffer[4] = uiWriteAdress & 0xFF;
+                xBuffer[5] = (uiWriteAdress >> 8) & 0xff;
+                xBuffer[6] = uiBank & 0xFF;
+
+                mUsbStream->write(xBuffer, uiAmount, &uiBytesWritten);
+                
+                fs->seekg(uiSector*uiSectorSize);
+                fs->read(cBuffer+uiHeader, uiSectorSize);
+     
+			    uiBytesWritten = mUsbStream->readExact(yBuffer, uiSectorSize);
+                for (unsigned int i=0; i<uiSectorSize; i++) {
+                    if (xBuffer[i+uiHeader] != yBuffer[i]) {
+                        Util::snprintf(cString, sizeof(cString), "Verify of address 0x%04X failed! Found: 0x%02X Expected: 0x%02X\n", (uiWriteAdress+i)+(uiBank*0x4000), yBuffer[i], xBuffer[i+uiHeader]);
+                        uiErrors++;
+                        if (uiErrors > 25) {
+                            Util::debug("Found more than 25 error...!\n");
+                            exit(1);
+                        }
+                        Util::debug(cString);
+                    }
+                }
+                uiAddress += 128;
+
+                waitForAck();
+                
+                uiProgress = (uiSector*100)/uiSectorCount;
+                if (uiLastProgress != uiProgress)
+                {
+                    uiLastProgress = uiProgress;          
+                    printf("Verify progress %u%%\r", uiProgress);
+				    fflush(stdout);
+                }
+        }
+
+        Util::debug("\nDone... %u sectors written and verified.\n", uiSector);
+    }
 
     mUsbStream->close(); 
 }

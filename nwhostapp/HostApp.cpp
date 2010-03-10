@@ -286,6 +286,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
         case 'c':
 			mHostService->setAttribute(enable_phantom_drives, true);
 			break;
+            /*
         case 'f':
         {
             string lFlashArg = string(optarg);
@@ -305,12 +306,19 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
            
             return 0;
         }
-
-        case 'g':   // old 'f'
+            */
+        case 'f':
         {
             string lFilename = string(optarg);
-            printf("Firmware update for Nowind interface: %s\n", lFilename.c_str());
-            mHostService->updateFirmware(lFilename);
+            printf("Firmware update (using old 'chiperase' protocol) for Nowind interface: %s\n", lFilename.c_str());
+            mHostService->updateFirmware(lFilename, 1, true);
+            return 0;            
+        }
+        case 'g':
+        {
+            string lFilename = string(optarg);
+            printf("Firmware update (using sector based protocol) for Nowind interface: %s\n", lFilename.c_str());
+            mHostService->updateFirmware(lFilename, 2, false);
             return 0;
         }
         case 'z':
