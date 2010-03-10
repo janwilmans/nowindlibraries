@@ -171,7 +171,7 @@ dskioRead:
         ret z                           ; nothing more to read
              
 ; protocol v1
-.page2and3:                     
+;.page2and3:                     
         DEBUGMESSAGE "read23"
         call enableNowindPage0
         push iy
@@ -180,7 +180,7 @@ dskioRead:
         jp restorePage0
 
 ; protocol v2
-;.page2and3:
+.page2and3:
         DEBUGMESSAGE "blockRead23"
         call enableNowindPage0
         push iy
