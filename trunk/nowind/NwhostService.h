@@ -29,7 +29,7 @@ public:
         static void initialize();
         void start(ftdx::FtdiDriverType aDriverType);
 		void waitForAck();
-        void updateFirmware(std::string sImageName);
+        void updateFirmware(std::string sImageName, int iMethodVersion, bool bVerify); 
 		void hostImage();
         void setRunningFalse();
 		void testMode(string);
