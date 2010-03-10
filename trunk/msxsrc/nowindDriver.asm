@@ -225,16 +225,16 @@ dskioWrite:
         pop af
         ret c                           ; return error (error code in a)
         ret pe                          ; host returns 0xfe when data for page 2/3 is available
-        DEBUGMESSAGE "doorgaan!"
+        ;DEBUGMESSAGE "doorgaan!"
         
 .page2and3:
-        DEBUGMESSAGE "page2and3"
+        DEBUGMESSAGE "p2&3"
         call enableNowindPage0
         call .writeLoop23
         jp restorePage0
         
 .writeLoop23:
-        DEBUGMESSAGE "writeLoop23"
+        ;DEBUGMESSAGE "writeLoop23"
         
         ld h,HIGH usbrd
         call getHeader
@@ -243,7 +243,7 @@ dskioWrite:
         ret m                           ; exit (no error)
         jr nz,.error
 
-        DEBUGMESSAGE "send23"
+        ;DEBUGMESSAGE "send23"
         ld e,(hl)                       ; address
         ld d,(hl)
         ld c,(hl)                       ; number of bytes        
@@ -319,7 +319,8 @@ GETDPB:
         ld a,b
         cp $f0
         ld a,h
-        jr z,.hddImage
+        DEBUGDUMPREGISTERS
+        ;jr z,.hddImage
         
 ;        MESSAGE "ROM GETDPB"
 
