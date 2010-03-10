@@ -37,7 +37,7 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	, romdisk(255)
 	, allowOtherDiskroms(true)
 	, enablePhantomDrives(false)
-	, enableMSXDOS2(true)
+	, enableMSXDOS2(false)
 {
     vector<byte> requestWait;
     requestWait.push_back(1);
@@ -566,7 +566,14 @@ void NowindHost::diskReadInit(SectorMedium& disk)
 
 	transferred = 0;
 	retryCount = 0;
-	doDiskRead1();
+
+#ifdef PROTOCOL_V2
+    unsigned int size = sectorAmount * 512;
+    unsigned address = getCurrentAddress();
+    newBlockTransfer(address, size);
+#else
+    doDiskRead1();
+#endif
 }
 
 void NowindHost::doDiskRead1()
@@ -587,29 +594,6 @@ void NowindHost::doDiskRead1()
     static const unsigned NUMBEROFBLOCKS = 128; // 64 * 64 bytes = 4192 bytes
 	transferSize = std::min(bytesLeft, NUMBEROFBLOCKS * 64); // hardcoded in firmware
 
-
-#ifdef PROTOCOL_V2
-	unsigned address = getCurrentAddress();
-    DBERR("tranfer: addr=0x%04x  amount=%d\n", address, transferSize);
-
-    if (address >= 0x8000) {
-		if (transferSize & 0x007F) {
-			transferSectors(address, transferSize);
-		} else {
-            newBlockTransfer(address, bytesLeft);
-		}
-	} else {
-		// transfer below 0x8000
-		// TODO shouldn't we also test for (transferSize & 0x3F)?
-		unsigned endAddress = address + transferSize;
-		if (endAddress <= 0x8000) {
-			transferSectorsBackwards(address, transferSize);
-		} else {
-			transferSize = 0x8000 - address;
-			transferSectors(address, transferSize);
-		}
-	}
-#else
 	unsigned address = getCurrentAddress();
 	if (address >= 0x8000) {
 		if (transferSize & 0x003F) {
@@ -627,8 +611,6 @@ void NowindHost::doDiskRead1()
 			transferSectors(address, transferSize);
 		}
 	}
-#endif
-
 	recvCount = 0;
 }
 
