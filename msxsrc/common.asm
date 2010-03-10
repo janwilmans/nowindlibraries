@@ -190,8 +190,7 @@ receiveFCB:
         ret
         
 blockRead:
-        
-startTranferRoutine:
+        ;DEBUGMESSAGE "br"
         ld h,HIGH usbrd
         call getHeader
         ret c                           ; return on timeout 
@@ -229,7 +228,7 @@ startTranferRoutine:
         jp nz,.loop
         
         ld sp,iy                        ; restore stack pointer        
-        jp startTranferRoutine
+        jp blockRead
          
 .error: 
         DEBUGMESSAGE ".err"

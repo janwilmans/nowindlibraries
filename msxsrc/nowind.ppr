@@ -41,17 +41,19 @@ nowind
 3=nowindDos2.asm
 4=labels.asm
 5=nowindDriver.asm
+6=..\..\..\documents and settings\kwik\desktop\TUR-HD.GEN
+7=New3.GEN
 [Selected Project Files]
 Main=
-Selected=nowindDriver.asm
+Selected=New3.GEN
 [common.asm]
-TopLine=152
-Caret=1,164
+TopLine=189
+Caret=18,215
 [nowindDos1.asm]
 TopLine=9
 Caret=24,9
 [nowind.asm]
-TopLine=63
+TopLine=73
 Caret=1,98
 [nowindDos2.asm]
 TopLine=1
@@ -60,5 +62,11 @@ Caret=9,1
 TopLine=13
 Caret=24,37
 [nowindDriver.asm]
-TopLine=378
-Caret=9,188
+TopLine=158
+Caret=18,187
+[..\..\..\documents and settings\kwik\desktop\TUR-HD.GEN]
+TopLine=1203
+Caret=6,1219
+[New3.GEN]
+TopLine=1915
+Caret=1,1951

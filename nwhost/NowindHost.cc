@@ -37,7 +37,7 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	, romdisk(255)
 	, allowOtherDiskroms(true)
 	, enablePhantomDrives(false)
-	, enableMSXDOS2(false)
+	, enableMSXDOS2(true)
 {
     vector<byte> requestWait;
     requestWait.push_back(1);
@@ -107,8 +107,8 @@ void NowindHost::write(byte data, unsigned int time)
 	if ((duration >= 500) && (state != STATE_SYNC1)) {
 		// timeout (500ms), start looking for AF05
         DBERR("Protocol timeout occurred in state %d, purge buffers and switch back to STATE_SYNC1\n", state);
-		purge();
-		state = STATE_SYNC1;
+		//purge();
+		//state = STATE_SYNC1;
 	}
     //DBERR("received: 0x%02x (in state: %d)\n", data, state);
 	switch (state) {
@@ -571,7 +571,8 @@ void NowindHost::diskReadInit(SectorMedium& disk)
 
 void NowindHost::doDiskRead1()
 {
-	unsigned bytesLeft = unsigned(buffer.size()) - transferred;
+	//DBERR("doDiskRead1\n");
+    unsigned bytesLeft = unsigned(buffer.size()) - transferred;
 	if (bytesLeft == 0) {
 		sendHeader();
 		send(0x01); // end of receive-loop
@@ -580,19 +581,22 @@ void NowindHost::doDiskRead1()
         DBERR("finished. (%d retries)\n", readRetries);
 		return;
 	}
-	state = STATE_DISKREAD;
 
-    static const unsigned NUMBEROFBLOCKS = 255; // 64 * 64 bytes = 4192 bytes
+    state = STATE_DISKREAD;
+
+    static const unsigned NUMBEROFBLOCKS = 128; // 64 * 64 bytes = 4192 bytes
 	transferSize = std::min(bytesLeft, NUMBEROFBLOCKS * 64); // hardcoded in firmware
 
 
 #ifdef PROTOCOL_V2
 	unsigned address = getCurrentAddress();
-	if (address >= 0x8000) {
+    DBERR("tranfer: addr=0x%04x  amount=%d\n", address, transferSize);
+
+    if (address >= 0x8000) {
 		if (transferSize & 0x007F) {
 			transferSectors(address, transferSize);
 		} else {
-            newBlockTransfer(address, transferSize);
+            newBlockTransfer(address, bytesLeft);
 		}
 	} else {
 		// transfer below 0x8000
@@ -631,7 +635,8 @@ void NowindHost::doDiskRead1()
 void NowindHost::doDiskRead2()
 {
 	// diskrom sends back the last two bytes read
-	assert(recvCount == 2);
+	//DBERR("doDiskRead2\n");
+    assert(recvCount == 2);
 	byte tail1 = extraData[0];
 	byte tail2 = extraData[1];
 	if ((tail1 == 0xAF) && (tail2 == 0x07)) {
@@ -1018,7 +1023,7 @@ static const byte READ_DATABLOCK_SIZE = 128;
 
 void NowindHost::newBlockTransfer(unsigned transferAddress, unsigned amount)
 {
-    DBERR("newBlockTranfer: addr: 0x%04x  amount %d\n", transferAddress, amount);
+    DBERR("create new BlockTranfer: addr: 0x%04x  amount %d\n", transferAddress, amount);
     vector<byte> temp;
 	const byte* bufferPointer = &buffer[transferred];
 	for (unsigned int i=0;i<amount; i++) {
@@ -1056,7 +1061,7 @@ void NowindHost::blockRead(word startAddress, word size, const vector <byte >& d
     // queue datablocks in reverse order
     for(int i=0; i<blocks; i++)
     {        
-        //DBERR("newDataBlock[%u] addr: 0x%04x, offset: 0x%04x, size: %u\n", i, address, offset, READ_DATABLOCK_SIZE);
+        DBERR("newDataBlock[%u] addr: 0x%04x, offset: 0x%04x, size: %u\n", i, address, offset, READ_DATABLOCK_SIZE);
         dataBlockQueue.push_front(new DataBlock(i, data, offset, address, READ_DATABLOCK_SIZE));
         address += READ_DATABLOCK_SIZE;
         offset += READ_DATABLOCK_SIZE;
@@ -1101,9 +1106,8 @@ void NowindHost::sendDataBlock(unsigned int blocknr)
 void NowindHost::blockReadAck(byte tail)
 {
     assert(dataBlockQueue.size() != 0);
-    //DBERR("blockReadAck tail:0x%02x\n", tail);
     DataBlock* dataBlock = dataBlockQueue[0];
-    //DBERR("Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
+    DBERR("ACK -> Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
 
     if (dataBlock->header == tail)
     {
