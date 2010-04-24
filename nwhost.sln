@@ -21,6 +21,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nwhost", "nwhost\nwhost.vcp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nwhostapp", "nwhostapp\nwhostapp.vcproj", "{B130EB13-1A0D-4482-8A36-F5087F6A0230}"
 	ProjectSection(ProjectDependencies) = postProject
+		{84CB9A93-5255-49DC-90B5-094A40902C45} = {84CB9A93-5255-49DC-90B5-094A40902C45}
 		{96193BDE-798C-406C-84DD-82D4CBDDB0BD} = {96193BDE-798C-406C-84DD-82D4CBDDB0BD}
 	EndProjectSection
 EndProject
