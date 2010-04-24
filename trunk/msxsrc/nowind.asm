@@ -123,7 +123,7 @@ bootMSXDOS1:
         include "slotRoutines.asm"
         include "nowindDriver.asm"
         include "romdisk.asm"
-        include "flashWriter.asm"  ; todo: remove load from pc
+        include "flashWriter.asm"  ; todo: remove, and use bootcommand to flash
         include "device.asm"
         
         ds $8000-(endCopyFromBank-copyFromBank)-$, $ff
@@ -201,7 +201,6 @@ endCopyFromBank:
         include "slotRoutines.asm"
         include "nowindDriver.asm"
         include "romdisk.asm"
-        ;include "flashWriter.asm"
         include "device.asm"
         
         ifdef BDOS_NOWIND

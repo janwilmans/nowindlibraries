@@ -1,31 +1,10 @@
 ; flashWriter.asm
 ; Flashes and erases the AMD29F040/M29F032-D
-     
-flashWriter:
-        ;DEBUGMESSAGE "flashWriter"
-        ld a,3
-        call SNSMAT
-        and 8
-        ret nz
-        
-        call PRINTTEXT
-        db 10,13," FlashROM",10,13," "
-        ds 33,"."
-        db 13," ",0
-        
-        call getSlotPage1
-        call enableSlotPage0
 
-        ld hl,.source
-        ld de,$c000
-        push de
-        ld bc,flasherEnd - $c000
-        ldir
-        ret
-        
-.source:     
+waitForFlashCommand:
         PHASE $c000  
         
+        di
 waitForHeader:
         ld h,HIGH usbrd
         ld a,(hl)
@@ -179,3 +158,4 @@ resetFlashDevice:
                       
 flasherEnd:
         DEPHASE
+

@@ -247,6 +247,30 @@ blockRead:
         ; b moet nog aangepast... (hoe?)
         ld c,a 
         jp .good
-
-
         
+        ; include flash routine only once
+		if MSXDOSVER = 2
+        
+flashWriter:
+        ;DEBUGMESSAGE "flashWriter"
+        ld a,3
+        call SNSMAT
+        and 8
+        ret nz
+        
+        call PRINTTEXT
+        db 10,13," FlashROM",10,13," "
+        ds 33,"."
+        db 13," ",0
+        
+        call getSlotPage1
+        call enableSlotPage0
+
+        ld hl,waitForFlashCommand
+        ld de,$c000
+        push de
+        ld bc,flasherEnd - $c000
+        ldir
+        ret        
+        
+        endif
