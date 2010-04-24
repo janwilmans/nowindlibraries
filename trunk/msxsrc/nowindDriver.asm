@@ -74,7 +74,7 @@ INIENV:
         ifdef PRETEND_2B_DOS23
         DEBUGMESSAGE "Lie about being DOS v2.31"
         ld a,$23
-        ld ($f313),a
+        ;ld ($f313),a
         endif
         
         call installExtendedBios
@@ -187,7 +187,6 @@ dskioRead:
         call blockRead
         pop iy
         jp restorePage0
-        
 
 dskioWrite:
         DEBUGMESSAGE "dskwrite"

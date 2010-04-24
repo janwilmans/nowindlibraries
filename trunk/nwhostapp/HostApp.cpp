@@ -176,7 +176,7 @@ int HostApp::execute()
             // handle other options (short with and without arguments)
         case 'd':
 			Util::debug("Install libnowind debug loginfo callback\n");
-			//nowindusb_set_debug_callback(&debugout);
+			nowindusb_set_debug_callback(&debugout);
 			//todo: implement LogCallback class on Util and NwHost level?
 			mDebug = true;
 			break;            

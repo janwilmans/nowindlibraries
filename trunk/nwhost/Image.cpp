@@ -165,7 +165,7 @@ int Image::readSectors(nw_byte * buffer, unsigned int startSector, unsigned int 
     }
 
     // TODO: check of sectornumber isn't too high (has to fit in the current image!!!
-	DBERR("[%s] Offset: 0x%08X Image::readSectors, startSector %u, amount %u\n", filename.c_str(), offset/512, startSector, sectorCount);
+	//DBERR("[%s] Offset: 0x%08X Image::readSectors, startSector %u, amount %u\n", filename.c_str(), offset/512, startSector, sectorCount);
 
     stream->seekg(source);
     stream->read((char *)buffer,count);
