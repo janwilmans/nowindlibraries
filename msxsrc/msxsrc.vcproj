@@ -130,6 +130,20 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\flash01.asm"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Assemble flash01.bin"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(OutDir)flash01.bin"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\flashWriter.asm"
 				>
 				<FileConfiguration
@@ -179,8 +193,8 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Assembly using sjasm"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
+						Description="Assembly nowind.rom"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
 						Outputs="$(OutDir)nowind.rom"
 					/>
 				</FileConfiguration>
