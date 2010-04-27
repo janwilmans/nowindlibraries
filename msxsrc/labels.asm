@@ -214,3 +214,14 @@ macro GET_RESPONSE
         ld h,HIGH usbrd
         call getHeader
 endmacro
+
+
+macro SEND_CMD_AND_WAIT cmd
+		call sendRegisters
+		ld (hl),cmd
+        call enableNowindPage0
+        ;call getHeaderHigh
+		ld h,HIGH usbrd
+		call getHeader
+endmacro
+

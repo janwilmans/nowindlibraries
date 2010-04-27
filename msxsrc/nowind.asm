@@ -100,11 +100,12 @@ noNextCommand:
         call restorePage0
         DEBUGMESSAGE "End of startup cmds"   
         
-        call sendRegisters
-        ld (hl),C_GETDOSVERSION
-        call enableNowindPage0
-        ld h,HIGH usbrd
-        call getHeader
+        ;call sendRegisters
+        ;ld (hl),C_GETDOSVERSION
+        ;call enableNowindPage0
+        ;ld h,HIGH usbrd
+        ;call getHeader
+		SEND_CMD_AND_WAIT C_GETDOSVERSION
         
         call restorePage0
         jp c,bootMSXDOS1                ; no reply (host not connected?)

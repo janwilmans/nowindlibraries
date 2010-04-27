@@ -39,11 +39,15 @@ DRIVES:
         push bc
         push de
         ld a,(DEVICE)
-        call sendRegisters
-        ld (hl),C_DRIVES
-        call enableNowindPage0
-        ld h,HIGH usbrd
-        call getHeader
+        
+		;call sendRegisters
+        ;ld (hl),C_DRIVES
+        ;call enableNowindPage0
+        ;ld h,HIGH usbrd
+        ;call getHeader
+
+		SEND_CMD_AND_WAIT C_DRIVES
+
         ld l,2                          ; default 2 drives
         jr c,.notconnected
 
@@ -78,11 +82,15 @@ INIENV:
         endif
         
         call installExtendedBios
-        call sendRegisters
-        ld (hl),C_INIENV
-        call enableNowindPage0
-        ld h,HIGH usbrd
-        call getHeader
+        
+		;call sendRegisters
+        ;ld (hl),C_INIENV
+        ;call enableNowindPage0
+        ;ld h,HIGH usbrd
+        ;call getHeader
+
+		SEND_CMD_AND_WAIT C_INIENV
+
         push af
 ;        push ix
 ;        call GETWRK
@@ -280,11 +288,14 @@ DSKCHG:
         pop af       
 
         push hl
-        call sendRegisters
-        ld (hl),C_DSKCHG
-        call enableNowindPage0
-        ld h,HIGH usbrd
-        call getHeader
+        ;call sendRegisters
+        ;ld (hl),C_DSKCHG
+        ;call enableNowindPage0
+        ;ld h,HIGH usbrd
+        ;call getHeader
+
+		SEND_CMD_AND_WAIT C_DSKCHG
+
         ld c,(hl)               ; media descriptor (when disk was changed)
         push af
         push bc
@@ -343,11 +354,13 @@ GETDPB:
 .hddImage:
         DEBUGMESSAGE ".hddImage"
         ;MESSAGE "HOST GETDPB"
-        call sendRegisters
-        ld (hl),C_GETDPB
-        call enableNowindPage0
-        ld h,HIGH usbrd
-        call getHeader
+
+        ;call sendRegisters
+        ;ld (hl),C_GETDPB
+        ;call enableNowindPage0
+        ;ld h,HIGH usbrd
+        ;call getHeader
+		SEND_CMD_AND_WAIT C_GETDPB
         jr c,.exit                      ; not ready
         ld e,a                          ; destination
         ld d,(hl)
