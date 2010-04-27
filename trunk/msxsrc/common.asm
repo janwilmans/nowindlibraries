@@ -69,7 +69,9 @@ sendRegisters:
         ld (hl),e        ; send register f
         ld (hl),d        ; send register a
         ret
-        
+
+;getHeaderHigh:
+;		ld h,HIGH usbrd
 getHeader:
         ld b,HIGH 65535                 ; 42000 * 60 states ~ 0,7 sec (time out)
 .loop:  ld a,(hl)
@@ -122,11 +124,14 @@ AUXin:  DEBUGMESSAGE "AUX in"
         push hl
         push de
         push bc
-        call sendRegisters
-        ld (hl),C_AUXIN
-        call enableNowindPage0
-        ld h,HIGH usbrd
-        call getHeader
+
+		;call sendRegisters
+        ;ld (hl),C_AUXIN
+        ;call enableNowindPage0
+        ;ld h,HIGH usbrd
+        ;call getHeader
+		SEND_CMD_AND_WAIT C_AUXIN
+
         jp nc,.getCharacter
         
         DEBUGMESSAGE "not connected"
