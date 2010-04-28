@@ -58,7 +58,7 @@ sendRegisters:
         ld a,h
         ld h,HIGH usbwr
         ld (hl),$af      ; send header
-        ld (hl),$05      ;
+        ld (hl),$05
         ld (hl),c
         ld (hl),b
         ld (hl),e

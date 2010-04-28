@@ -1,5 +1,4 @@
 [Config]
-Relative path=1
 Compilator.FileName=C:\MSX\nowind\msxsrc\sjasm4beta\sjasm.exe
 Compilator.PSPar=nowind.asm
 Compilator.SaveAll=1
@@ -10,7 +9,9 @@ Prog1=Sjasm4,"C:\MSX\nowind\msxsrc\sjasm4.exe" "%File%"§
 DefaultCPIndex=0
 LogtoEnd=1
 DontOpen=0
+AbsolutePath=0
 FileFormat=0
+ProjectFilesOnly=0
 [Project tree]
 nowind
 	+msxsrc
@@ -35,38 +36,30 @@ nowind
 		slotRoutines.asm
 		nowindDriver.asm
 [Open project files]
-0=common.asm
-1=nowindDos1.asm
-2=nowind.asm
-3=nowindDos2.asm
-4=labels.asm
-5=nowindDriver.asm
-6=..\..\..\documents and settings\kwik\desktop\TUR-HD.GEN
-7=flashWriter.asm
+0=New1.txt
+1=nowindDriver.asm
+2=slotRoutines.asm
+3=device.asm
+4=common.asm
+5=extendedBios.asm
 [Selected Project Files]
 Main=
-Selected=nowind.asm
-[common.asm]
-TopLine=189
-Caret=18,215
-[nowindDos1.asm]
-TopLine=9
-Caret=24,9
-[nowind.asm]
-TopLine=73
-Caret=1,98
-[nowindDos2.asm]
+Selected=nowindDriver.asm
+[New1.txt]
 TopLine=1
-Caret=9,1
-[labels.asm]
-TopLine=13
-Caret=24,37
-[nowindDriver.asm]
-TopLine=158
-Caret=18,187
-[..\..\..\documents and settings\kwik\desktop\TUR-HD.GEN]
-TopLine=1203
-Caret=6,1219
-[flashWriter.asm]
-TopLine=51
 Caret=1,1
+[nowindDriver.asm]
+TopLine=30
+Caret=1,49
+[slotRoutines.asm]
+TopLine=1
+Caret=7,12
+[device.asm]
+TopLine=1
+Caret=9,18
+[common.asm]
+TopLine=226
+Caret=18,227
+[extendedBios.asm]
+TopLine=1
+Caret=20,2

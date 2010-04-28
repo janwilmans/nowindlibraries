@@ -39,35 +39,53 @@ DRIVES:
         push bc
         push de
         ld a,(DEVICE)
-        
-		;call sendRegisters
-        ;ld (hl),C_DRIVES
-        ;call enableNowindPage0
-        ;ld h,HIGH usbrd
-        ;call getHeader
 
-		SEND_CMD_AND_WAIT C_DRIVES
+        push hl        
+        call sendRegisters
+        ld (hl),C_DRIVES
+        ld hl,drivesCommand
+        call executeCommand
 
-        ld l,2                          ; default 2 drives
-        jr c,.notconnected
-
-        PRINTVDPTEXT " Host connected."
-                                
-        ld (LASTDRV),a                  ; install phantom drives (CRTL key)?
-        ld a,(hl)                       ; allow other drives (SHIFT key)?
-        ld (DEVICE),a
-        ld l,(hl)                       ; number of drives
-.exit:  push hl  
-        call restorePage0
         pop hl
+        ld l,2
+        jr c,.error
+        ld l,a        
+.error: 
         pop de
         pop bc
         pop af
+        ret         
+
+drivesCommand:
+        ld h,HIGH usbrd
+        ld (LASTDRV),a                  ; install phantom drives (CRTL key)?
+        ld a,(hl)                       ; allow other drives (SHIFT key)?
+        ld (DEVICE),a
+        ld a,(hl)                       ; number of drives
         ret
         
-.notconnected:
-        PRINTVDPTEXT " Host timed out!"            
-        jr .exit
+      
+executeCommand:
+        push hl
+        call enableNowindPage0
+        ld h,HIGH usbrd
+        call getHeader
+        jr c,.exit
+        
+        ld hl,.restorePage
+        ex (sp),hl
+        jp (hl) ; callback
+
+.exit:  pop hl  ; (error)
+        ret
+
+.restorePage:
+        push bc
+        call restorePage0
+        pop bc
+        ret
+
+
 
 
 INIENV:
