@@ -70,6 +70,7 @@ sendRegisters:
         ld (hl),d        ; send register a
         ret
 
+; GetHeader, returns a = 2 if timeout occurs
 ;getHeaderHigh:
 ;		ld h,HIGH usbrd
 getHeader:
