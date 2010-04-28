@@ -49,8 +49,8 @@ Selected=nowindDriver.asm
 TopLine=1
 Caret=1,1
 [nowindDriver.asm]
-TopLine=30
-Caret=1,49
+TopLine=525
+Caret=1,564
 [slotRoutines.asm]
 TopLine=1
 Caret=7,12
