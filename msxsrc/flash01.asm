@@ -1,3 +1,5 @@
+; flash01.bin is the bload'able version of the flashWriter
+; it can be loaded from a real disk in case the firmware is somehow flashed incorrectly
 
 		output "flash01.bin"
         include "labels.asm"

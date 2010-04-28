@@ -1,3 +1,6 @@
+; labels.asm doesn't generate any code 
+; it provides names for several memory addresses and some macros
+
 ; BIOS routines
 RDSLT           equ $000c
 WRSLT           equ $0014
