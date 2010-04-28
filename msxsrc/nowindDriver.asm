@@ -63,30 +63,6 @@ drivesCommand:
         ld (DEVICE),a
         ld a,(hl)                       ; number of drives
         ret
-        
-      
-executeCommand:
-        push hl
-        call enableNowindPage0
-        ld h,HIGH usbrd
-        call getHeader
-        jr c,.exit
-        
-        ld hl,.restorePage
-        ex (sp),hl
-        jp (hl) ; callback
-
-.exit:  pop hl  ; (error)
-        ret
-
-.restorePage:
-        push bc
-        call restorePage0
-        pop bc
-        ret
-
-
-
 
 INIENV:
 ; Interrupt handler can be installed here and
@@ -96,29 +72,27 @@ INIENV:
         ifdef PRETEND_2B_DOS23
         DEBUGMESSAGE "Lie about being DOS v2.31"
         ld a,$23
-        ;ld ($f313),a
+        ld ($f313),a
         endif
         
         call installExtendedBios
         
-		;call sendRegisters
-        ;ld (hl),C_INIENV
-        ;call enableNowindPage0
-        ;ld h,HIGH usbrd
-        ;call getHeader
-
-		SEND_CMD_AND_WAIT C_INIENV
+        call sendRegisters
+        ld (hl),C_DRIVES
+        ld hl,inienvCommand
+        call executeCommand
 
         push af
-;        push ix
-;        call GETWRK
-;        pop ix
         call getEntrySLTWRK
         pop af
-        ld (hl),0                       ; romdisk in drive A: (default)          
-        jr c,.exit
-        ld (hl),a                       ; store romdisk drive number (255 = no romdisk)
-.exit:  jp restorePage0
+        ld (hl),0
+        ret c        
+        ld (hl),a
+        ret
+
+inienvCommand:
+        ret
+
 
 checkWorkArea:
         ld a,1
@@ -564,6 +538,26 @@ printVdpText2:
         or a
         jr nz,.loop
         pop af
+        ret
+
+executeCommand:
+        push hl
+        call enableNowindPage0
+        ld h,HIGH usbrd
+        call getHeader
+        jr c,.exit
+        
+        ld hl,.restorePage
+        ex (sp),hl
+        jp (hl) ; callback
+
+.exit:  pop hl  ; (error)
+        ret
+
+.restorePage:
+        push bc
+        call restorePage0
+        pop bc
         ret
 
 supportedMedia:
