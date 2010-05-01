@@ -7,19 +7,19 @@ SECLEN          equ 512                 ; sector size
 ; +6    not used
 ; +7    not used
 
-       
+
 ; if this is defined we tell DOS2.3 that we _are DOS2.3 also, so
-; it does not try to override our initilazations 
+; it does not try to override our initilazations
 
 define  PRETEND_2B_DOS23
-        
-INIHRD: 
-        DEBUGMESSAGE "INIHRD"        
-        
+
+INIHRD:
+        DEBUGMESSAGE "INIHRD"
+
 ;        call getWorkArea
 ;        DEBUGDUMPREGISTERS
-                                
-        call enableNowindPage0                  ; clear hostToMSXFifo by reading 4Kb of random data
+
+        call enableNowindPage0          ; clear hostToMSXFifo by reading 4Kb of random data
         ld bc,4096
 .loop:  ld a,(usbrd)
         dec bc
@@ -27,7 +27,7 @@ INIHRD:
         or c
         jr nz,.loop
         call restorePage0
-        
+
         ld h,HIGH usbwr
         ld (hl),$af                     ; INIHRD command
         ld (hl),$ff
@@ -40,7 +40,7 @@ DRIVES:
         push de
         ld a,(DEVICE)
 
-        push hl        
+        push hl
         call sendRegisters
         ld (hl),C_DRIVES
         ld hl,drivesCommand
@@ -49,12 +49,12 @@ DRIVES:
         pop hl
         ld l,2
         jr c,.error
-        ld l,a        
-.error: 
+        ld l,a
+.error:
         pop de
         pop bc
         pop af
-        ret         
+        ret
 
 drivesCommand:
         ld h,HIGH usbrd
@@ -74,9 +74,9 @@ INIENV:
         ld a,$23
         ld ($f313),a
         endif
-        
+
         call installExtendedBios
-        
+
         call sendRegisters
         ld (hl),C_DRIVES
         ld hl,inienvCommand
@@ -86,7 +86,7 @@ INIENV:
         call getEntrySLTWRK
         pop af
         ld (hl),0
-        ret c        
+        ret c
         ld (hl),a
         ret
 
@@ -98,7 +98,7 @@ checkWorkArea:
         ld a,1
         and a
         ret
-        
+
         push bc
         push hl
         push af
@@ -108,9 +108,9 @@ checkWorkArea:
         cp (hl)
         pop hl
         pop bc
-        ret        
+        ret
 
-DSKIO: 
+DSKIO:
 ; Input     F   Carry for set for write, reset for read
 ;           A   Drive number
 ;           B   Number of sectors to read/write
@@ -130,7 +130,7 @@ DSKIO:
         call sendRegisters
         ld (hl),C_DSKIO
         jr c,dskioWrite                 ; read or write?
-       
+
 dskioRead:
         rlca                            ; tranfer address < 0x8000 ?
         jr c,.page2and3
@@ -143,20 +143,20 @@ dskioRead:
         ld h,$80
         call ENASLT
         jp .page2
-        
+
         PHASE $ + $4000
 .page2:
         ld a,(RAMAD1)                   ; enable RAM in page 1
         ld h,$40
         call ENASLT
-        
-        call readSectors01 
+
+        call readSectors01
         ; TODO: carry checken?----------------------------------------------!!!!!!!!!!!!!!!
-        
-        ld a,ixh                        ; enable nowind in page 1 
+
+        ld a,ixh                        ; enable nowind in page 1
         ld h,$40
         call ENASLT
-        jp .page1        
+        jp .page1
 
         DEPHASE
 .page1:
@@ -169,13 +169,13 @@ dskioRead:
         or a
         ei
         ret z                           ; nothing more to read
-             
+
 ; protocol v1
-;.page2and3:                     
+;.page2and3:
         DEBUGMESSAGE "read23"
         call enableNowindPage0
         push iy
-        call readSectors23  
+        call readSectors23
         pop iy
         jp restorePage0
 
@@ -191,9 +191,9 @@ dskioRead:
 dskioWrite:
         DEBUGMESSAGE "dskwrite"
         rlca
-        jr c,.page2and3        
-        
-        ;call enableNowindPage2 (todo: make common routine?) 
+        jr c,.page2and3
+
+        ;call enableNowindPage2 (todo: make common routine?)
         call getSlotPage2               ; save current slot page 2
         ld ixh,a
         call getSlotPage1
@@ -207,15 +207,15 @@ dskioWrite:
         ld a,(RAMAD1)
         ld h,$40
         call ENASLT                     ; ram in page 1
-        
+
         call writeLoop01
         push af
-        
+
         ld a,ixl
         ld h,$40
         call ENASLT                     ; restore nowind in page 1
         jp .page1
-        
+
         DEPHASE
 .page1:
         ld a,ixh
@@ -225,16 +225,16 @@ dskioWrite:
         ret c                           ; return error (error code in a)
         ret pe                          ; host returns 0xfe when data for page 2/3 is available
         ;DEBUGMESSAGE "doorgaan!"
-        
+
 .page2and3:
         DEBUGMESSAGE "p2&3"
         call enableNowindPage0
         call .writeLoop23
         jp restorePage0
-        
+
 .writeLoop23:
         ;DEBUGMESSAGE "writeLoop23"
-        
+
         ld h,HIGH usbrd
         call getHeader
         ret c                           ; exit (not ready)
@@ -245,10 +245,10 @@ dskioWrite:
         ;DEBUGMESSAGE "send23"
         ld e,(hl)                       ; address
         ld d,(hl)
-        ld c,(hl)                       ; number of bytes        
+        ld c,(hl)                       ; number of bytes
         ld b,(hl)
         ld a,(hl)                       ; block sequence number
-        
+
         ;DEBUGDUMPREGISTERS
         ex de,hl
         ld de,usbwr
@@ -261,7 +261,7 @@ dskioWrite:
         ld a,(hl)                       ; get error code
         ret
 
-               
+
 DSKCHG:
 ; Input     A   Drive number
 ;           B   0
@@ -277,7 +277,7 @@ DSKCHG:
         push af
         call checkWorkArea
         jp z,ROMDISK_DSKCHG
-        pop af       
+        pop af
 
         push hl
         ;call sendRegisters
@@ -286,7 +286,7 @@ DSKCHG:
         ;ld h,HIGH usbrd
         ;call getHeader
 
-		SEND_CMD_AND_WAIT C_DSKCHG
+    SEND_CMD_AND_WAIT C_DSKCHG
 
         ld c,(hl)               ; media descriptor (when disk was changed)
         push af
@@ -323,7 +323,7 @@ GETDPB:
         ld a,h
         DEBUGDUMPREGISTERS
         ;jr z,.hddImage
-        
+
 ;        MESSAGE "ROM GETDPB"
 
         ld a,b
@@ -336,7 +336,7 @@ GETDPB:
         rlca                            ; 16x
         add a,c                         ; 18x
         ld c,a
-        ld b,0        
+        ld b,0
         ld hl,supportedMedia
         add hl,bc
         ld c,18
@@ -352,15 +352,15 @@ GETDPB:
         ;call enableNowindPage0
         ;ld h,HIGH usbrd
         ;call getHeader
-		SEND_CMD_AND_WAIT C_GETDPB
+    SEND_CMD_AND_WAIT C_GETDPB
         jr c,.exit                      ; not ready
         ld e,a                          ; destination
         ld d,(hl)
         ld bc,18
         DEBUGDUMPREGISTERS
         ldir
-        ;DB $ed, $0a       
-.exit:  jp restorePage0        
+        ;DB $ed, $0a
+.exit:  jp restorePage0
 
 CHOICE:
         ;DEBUGMESSAGE "CHOICE"
@@ -378,17 +378,17 @@ DSKFMT:
         scf
         ld a,16                         ; other error
         ret
-        
+
         PHASE $ + $4000
-        
+
 readSectors01:
         DEBUGMESSAGE "readSectors01"
         ld h,HIGH usb2
-        call getHeader + $4000                                  
-        ret c                           ; carry means timeout, no carry: A == 0 means slow transfer, A == 1 means exit, A == 2 means fast transfer                                      
+        call getHeader + $4000
+        ret c                           ; carry means timeout, no carry: A == 0 means slow transfer, A == 1 means exit, A == 2 means fast transfer
         dec a
         ret z
-        jp m,.slowTransfer                              
+        jp m,.slowTransfer
         call reverseTransfer + $4000
         ld (hl),b
         ld (hl),c
@@ -397,11 +397,11 @@ readSectors01:
 .slowTransfer:
         ld e,(hl)                       ; transfer address
         ld d,(hl)
-        ld c,(hl)                       ; transfer amount 
+        ld c,(hl)                       ; transfer amount
         ld b,(hl)
-        ldir        
-        
-        ld d,(hl)						; return end marker ($af, $0f)
+        ldir
+
+        ld d,(hl)           ; return end marker ($af, $0f)
         ld (hl),d
         ld d,(hl)
         ld (hl),d
@@ -418,7 +418,7 @@ writeLoop01:
         DEBUGMESSAGE "send01"
         ld e,(hl)                       ; address
         ld d,(hl)
-        ld c,(hl)                       ; number of bytes        
+        ld c,(hl)                       ; number of bytes
         ld b,(hl)
         ld a,(hl)                       ; block sequence number
 
@@ -434,7 +434,7 @@ writeLoop01:
         ret
 
         DEPHASE
- 
+
 readSectors23:
         DEBUGMESSAGE "readSectors23"
         ld h,HIGH usbrd
@@ -442,9 +442,9 @@ readSectors23:
         ret c
         dec a
         ret z                           ; no more data
-        jp m,.slowTransfer        
+        jp m,.slowTransfer
         call reverseTransfer
-        ld h,HIGH usbwr 
+        ld h,HIGH usbwr
         ld (hl),b
         ld (hl),c
         jr readSectors23
@@ -453,7 +453,7 @@ readSectors23:
         DEBUGMESSAGE "slowtransfer"
         ld e,(hl)                       ; transfer address
         ld d,(hl)
-        ld c,(hl)                       ; transfer amount 
+        ld c,(hl)                       ; transfer amount
         ld b,(hl)
         ldir
         ld d,(hl)
@@ -462,7 +462,7 @@ readSectors23:
         ld (hl),d                       ; return end marker ($af, $0f)
         ld (hl),a
         jr readSectors23
-               
+
 reverseTransfer:
         ld iy,0                         ; save stack pointer
         add iy,sp
@@ -471,7 +471,7 @@ reverseTransfer:
         ex de,hl
         ld sp,hl
         ex de,hl
-        ld b,(hl)                       ; number of loops       
+        ld b,(hl)                       ; number of loops
 .loop:
         repeat 32                       ; blocks of 64 bytes hardcoded (NowindHost.cpp)
         ld d,(hl)
@@ -479,12 +479,12 @@ reverseTransfer:
         push de
         endrepeat
         djnz .loop
-        
+
         ld sp,iy                        ; restore stack pointer
         ld b,(hl)                       ; return end marker
         ld c,(hl)
         ret
-      
+
 OEMSTA:
         push hl
         ld hl,.statement
@@ -492,7 +492,7 @@ OEMSTA:
         ld e,(hl)
         inc hl
         ld d,(hl)
-        pop hl        
+        pop hl
         ret c
         push de
         ret
@@ -511,7 +511,7 @@ changeImage:
         call sendRegisters
         ld (hl),C_CHANGEIMAGE
         pop hl
-        
+
 call_exit:
         DEBUGMESSAGE "call_exit"
 .loop:  ld a,(hl)
@@ -522,36 +522,40 @@ call_exit:
         ret z
         inc hl
         jr .loop
-        
-videoStream: 
+
+videoStream:
         push hl
         include "vram.asm"
         pop hl
         jp call_exit
-        
+
 ; hl points to text
 printVdpText2:
         push af
 .loop:  ld a,(hl)
-        out ($98),a 
+        out ($98),a
         inc hl
         or a
         jr nz,.loop
         pop af
         ret
 
+; in: hl = callback to execute
+; out: bc = callback return data
+; changed: all
+; requirements: stack available
 executeCommand:
         push hl
         call enableNowindPage0
         ld h,HIGH usbrd
         call getHeader
-        jr c,.exit
-        
+        jr c,.exit      ; timeout occurred?
+
         ld hl,.restorePage
         ex (sp),hl
-        jp (hl) ; callback
+        jp (hl)     ; jump to callback, a = first data read by getHeader, ret will resume at .restorePage
 
-.exit:  pop hl  ; (error)
+.exit:  pop hl
         ret
 
 .restorePage:

@@ -1,6 +1,6 @@
 ; device.asm
 ; implements a basic now: device
-    
+
 device:
         push hl
         ld hl,deviceFunctions
@@ -10,7 +10,7 @@ device:
         add a,l
         ld l,a
         jr nc,.nocy
-        inc h  
+        inc h
 .nocy:  ld a,(hl)
         inc hl
         ld h,(hl)
@@ -30,21 +30,21 @@ deviceFunctions:
         dw eof                          ; 14
         dw fpos                         ; 16
         dw putback                      ; 18
-          
+
 identifyDevice:
         DEBUGMESSAGE "identifyDevice"
         ld hl,deviceNameList
         call findStatementName
         ld a,(hl)                       ; device number
         ret                             ; carry is set when invalid device name
-        
+
 deviceNameList:
         db "NOW",0,0,0                  ; name, end marker, device number, dummy
         ;db "STDIN",0,1,0
         db 0
 
 ; Input     D   Global device code
-;           E   File mode    
+;           E   File mode
 ;           HL  address fcb
 open:
 ;        DEBUGMESSAGE "open"
@@ -69,7 +69,7 @@ open:
         ld c,(hl)
         ld b,(hl)
         ldir
-        jp restorePage0        
+        jp restorePage0
 
 deviceIoError:
         ld a,19
@@ -82,13 +82,13 @@ basicError:
         ld ix,$406f
         ld iy,(EXPTBL-1)
         jp CALSLT
-                
+
 close:
 ;        DEBUGMESSAGE "close"
         call sendRegisters
         ld (hl),C_DEVICECLOSE
         ret
-        
+
 randomIO:
 ;        DEBUGMESSAGE "randomIO"
         ld e,61                         ; bad file mode
@@ -98,7 +98,7 @@ write:
 ;        DEBUGMESSAGE "write"
         call sendRegisters
         ld (hl),C_DEVICEWRITE
-        ret        
+        ret
 
 read:
 ;        DEBUGMESSAGE "read"
@@ -118,10 +118,10 @@ read:
         ccf
         inc (hl)                        ; increment position
         ret nz                          ; buffer empty?
-        
+
         push af
         dec hl
-        inc (hl)                        ; increment position (high)        
+        inc (hl)                        ; increment position (high)
         ld de,-5
         add hl,de
         call sendRegisters
@@ -143,10 +143,10 @@ read:
 eof:
 ;        DEBUGMESSAGE "eof"
         ld a,(hl)
-        cp 1                            ; input mode?        
+        cp 1                            ; input mode?
         ld e,61                         ; bad file mode
         jp nz,basicError
-                
+
         ld de,6
         add hl,de
         ld e,(hl)
@@ -156,7 +156,7 @@ eof:
         add hl,de
         ld a,(hl)
         sbc hl,hl
-        cp $1a        
+        cp $1a
         jr nz,.skip
         dec hl
 .skip:  ld (DAC+2),hl
@@ -174,7 +174,7 @@ loc:
         ld a,2
         ld (VALTYP),a
         ret
-        
+
 putback:
 ;        DEBUGMESSAGE "putback"
 ;        push hl
@@ -222,11 +222,11 @@ illegalFunctionCall:
 ; random mode (04H)
 
 ; maximum number of files open: MAXFILES=15
-        
+
 ; File Control Block
 ;       0     1     2     3     4     5     6     7     8
 ;    -------------------------------------------------------
 ;    | Mod | 00H | 00H | 00H | DEV | 00H | POS | 00H | PPS |
 ;    -------------------------------------------------------
-;                  err? bckup       posHi 
+;                  err? bckup       posHi
 ; followed by a 256 byte buffer

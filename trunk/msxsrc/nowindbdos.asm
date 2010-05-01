@@ -1,20 +1,20 @@
-	
+
 ; just patching the BDOS hook will not work; not everybody uses the hook
-        ;PATCH $5d20, BDOSNW						  ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW
-        	
+        ;PATCH $5d20, BDOSNW              ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW
+
         ; even patching the BDOS jump table will not work; internal calls (even in command.com) bypass it
         ; jump table patches
-        ;PATCH $572b, BDOS_0FH_J				  ; overwrite specific function 0Fh in jump table
-        ;PATCH $572f, BDOS_11H_J				  ; overwrite specific function 11h in jump table
-        ;PATCH $5731, BDOS_12H_J				  ; overwrite specific function 12h in jump table
-        	
-        ; these patches are at the start of the routine themselves, the addresses are more or less "standardized" 
-        ; over several brands of diskroms	
+        ;PATCH $572b, BDOS_0FH_J          ; overwrite specific function 0Fh in jump table
+        ;PATCH $572f, BDOS_11H_J          ; overwrite specific function 11h in jump table
+        ;PATCH $5731, BDOS_12H_J          ; overwrite specific function 12h in jump table
+
+        ; these patches are at the start of the routine themselves, the addresses are more or less "standardized"
+        ; over several brands of diskroms
         ; in-routine patches
-        PATCH $4463, BDOS_0FH					  ; overwrite function 0Fh itself!
-        PATCH $4fb9, BDOS_11H 				  ; overwrite function 11h itself!
-        PATCH $5007, BDOS_12H 				  ; overwrite function 12h itself!
-        	
+        PATCH $4463, BDOS_0FH           ; overwrite function 0Fh itself!
+        PATCH $4fb9, BDOS_11H           ; overwrite function 11h itself!
+        PATCH $5007, BDOS_12H           ; overwrite function 12h itself!
+
 
 BDOSNW:
 ; is this a virtual drive? if not then call 56D3
@@ -25,7 +25,7 @@ BDOSNW:
                                 push bc
                                 push de
                                 push hl
-                                
+
                                 ld a,c
                                 cp 0x0F
                                 jr z,hooked_bdoscall
@@ -33,7 +33,7 @@ BDOSNW:
                                 jr z,hooked_bdoscall
                                 cp 0x12
                                 jr z,hooked_bdoscall
-                                jr exit 
+                                jr exit
 
 hooked_bdoscall:
 
@@ -43,16 +43,16 @@ hooked_bdoscall:
                                 ld (hl),c                                       ; send the original BDOS command code
                                 pop de
                                 pop hl
-                                
-                                call sendFCB 
-                                
+
+                                call sendFCB
+
                                 jr exit
-        
+
 ; just return from the interslot call after handling it
                                 pop hl
                                 pop de
                                 pop bc
-                                pop af  
+                                pop af
                                 ret
 
 exit:
@@ -62,12 +62,12 @@ exit:
                                 pop af
 
                                 jp $56D3
-                                
-                                
+
+
 BDOS_0FH:
                                 DEBUGMESSAGE "BDOS CALL 0FH"
                                 DEBUGDUMPREGISTERS
-                                
+
                                 push hl
                                 push de
                                 call sendRegisters
@@ -79,25 +79,25 @@ BDOS_0FH:
                                 ld a,(de)
                                 or a
                                 jr nz,.nodefault
-                                ld a,($F247)                    ; todo: add a label DEFDRV? 
+                                ld a,($F247)                    ; todo: add a label DEFDRV?
                                 ld (de),a
 .nodefault:
 
                                 call sendFCB
-                                
+
                                 ; enabled slots?
-                                call enableNowindPage0          ; old page 0 slot-selection is kept in IXh 
+                                call enableNowindPage0          ; old page 0 slot-selection is kept in IXh
                                 call getHeader
                                 call receiveFCB                                         ; receive 32 bytes and write them to (DE+x)
                                 call restorePage0
-                                
+
                                 ; failed
                                 ld a,$ff
                                 ret
-                                
-                                ; resume normal operation 
+
+                                ; resume normal operation
                                 jp $42A5                        ; call was overwritten
-                                
+
 BDOS_11H:
                                 DEBUGMESSAGE "BDOS CALL 11H"
                                 DEBUGDUMPREGISTERS
@@ -110,18 +110,18 @@ BDOS_11H:
                                 pop hl
                                 call sendFCB
 
-                                call enableNowindPage0          ; old page 0 slot-selection is kept in IXh 
+                                call enableNowindPage0          ; old page 0 slot-selection is kept in IXh
                                 call getHeader
                                 call receiveFCB                                         ; receive 32 bytes and write them to (DE+x)
                                 call restorePage0
-                                
-                                ; resume normal operation 
+
+                                ; resume normal operation
                                 jp $42A5                        ; call was overwritten
-                
+
 BDOS_12H:
                                 DEBUGMESSAGE "BDOS CALL 12H"
                                 DEBUGDUMPREGISTERS
-                                
+
                                 push hl
                                 push de
                                 call sendRegisters
@@ -129,13 +129,13 @@ BDOS_12H:
                                 pop de
                                 pop hl
                                 call sendFCB                            ; send 32 bytes (DE+x) to the host
-                                
-                                call enableNowindPage0          ; old page 0 slot-selection is kept in IXh 
+
+                                call enableNowindPage0          ; old page 0 slot-selection is kept in IXh
                                 call getHeader
                                 call receiveFCB                                         ; receive 32 bytes and write them to (DE+x)
                                 call restorePage0
-                                
-                                ; resume normal operation 
+
+                                ; resume normal operation
                                 jp $440e                        ; call was overwritten
 
 

@@ -2,14 +2,14 @@
 
 nowindInit:
         ;DEBUGMESSAGE "nowindInit"
-        ld a,($faf8)										; moet volgens bifi ld a,($2d) zijn, $faf8 is op msx1 deel van de rs232 area?
-        or a 
+        ld a,($faf8)                    ; moet volgens bifi ld a,($2d) zijn, $faf8 is op msx1 deel van de rs232 area?
+        or a
         push af
         call z,CHGMOD                   ; SCREEN 0 for MSX1
         pop af
         ld ix,SDFSCR                    ; restore screen mode from clockchip
         call nz,EXTROM
-                
+
         call PRINTTEXT
         ifndef DEBUG
         db "Nowind USB Diskrom!",0
@@ -23,8 +23,8 @@ initDiskBasic:
         DEBUGMESSAGE "initDiskBasic"
         ld hl,DEVICE
         res 7,(hl)
-        
-        if MSXDOSVER = 1 
+
+        if MSXDOSVER = 1
         jp $5897
         else
         jp $495b
@@ -41,7 +41,7 @@ findStatementName:
         or a
         ret z                           ; name found
         inc de
-        jr .loop        
+        jr .loop
 .nextStatement:
         xor a
         ld c,a
@@ -49,7 +49,7 @@ findStatementName:
         inc hl
         inc hl
         or (hl)
-        jr nz,findStatementName        
+        jr nz,findStatementName
         scf                             ; not found
         ret
 
@@ -72,7 +72,7 @@ sendRegisters:
 
 ; GetHeader, returns a = 2 if timeout occurs
 ;getHeaderHigh:
-;		ld h,HIGH usbrd
+;   ld h,HIGH usbrd
 getHeader:
         ld b,HIGH 65535                 ; 42000 * 60 states ~ 0,7 sec (time out)
 .loop:  ld a,(hl)
@@ -98,7 +98,7 @@ sendMessage:
         ex (sp),hl
         push af
         push de
-        push hl        
+        push hl
         call sendRegisters
         ld (hl),C_MESSAGE
         pop hl
@@ -111,9 +111,9 @@ sendMessage:
         pop af
         ex (sp),hl
         ret
-        
+
 ; AUX device
-        
+
 newAUX: jp AUXin
         nop
         nop
@@ -126,22 +126,22 @@ AUXin:  DEBUGMESSAGE "AUX in"
         push de
         push bc
 
-		;call sendRegisters
+    ;call sendRegisters
         ;ld (hl),C_AUXIN
         ;call enableNowindPage0
         ;ld h,HIGH usbrd
         ;call getHeader
-		SEND_CMD_AND_WAIT C_AUXIN
+    SEND_CMD_AND_WAIT C_AUXIN
 
         jp nc,.getCharacter
-        
+
         DEBUGMESSAGE "not connected"
         ld a,$1a                        ; eof
 .exit:  pop bc
         pop de
         pop hl
-        jp restorePage0        
-              
+        jp restorePage0
+
 .getCharacter:
         DEBUGMESSAGE "getChar"
         call getHeader
@@ -156,7 +156,7 @@ AUXout: DEBUGMESSAGE "AUX out"
 ;        push bc
 ;        ld a,(RAMAD1) ; TODO: WTF???
 ;        call RDSLT
-        push af        
+        push af
         call sendRegisters
         ld (hl),C_AUXOUT
         pop af
@@ -170,7 +170,7 @@ AUXout: DEBUGMESSAGE "AUX out"
 sdendFCB:
         push de
         push bc
-        
+
         ld b,32
 .loop:  ld a,(de)
         ld (usbwr),a
@@ -180,29 +180,29 @@ sdendFCB:
         pop de
         ret
 
-; receive 32 bytes and write to the address specified by DE 
+; receive 32 bytes and write to the address specified by DE
 receiveFCB:
         push de
         push bc
-        
+
         ld b,32
 .loop:  ld a,(usbrd)
-	ld (usbwr),a			; loop back
+  ld (usbwr),a      ; loop back
         ld (de),a
         inc de
         djnz .loop
         pop bc
         pop de
         ret
-        
+
 blockRead:
         ;DEBUGMESSAGE "br"
         ld h,HIGH usbrd
         call getHeader
-        ret c                           ; return on timeout 
+        ret c                           ; return on timeout
         and a
         ret z                           ; resume
-        
+
         ld iy,0                         ; save stack pointer
         add iy,sp
         ld e,(hl)                       ; transfer address
@@ -210,33 +210,33 @@ blockRead:
         ex de,hl
         ld sp,hl
         ex de,hl
-        ld b,(hl)                       ; amount of 128 byte blocks (max 32kB)       
+        ld b,(hl)                       ; amount of 128 byte blocks (max 32kB)
 
 .loop:
         ld c,(hl)                       ; header
         cp 255
         jp z,.error255
 
-.good:        
+.good:
         repeat 64                       ; blocks of 128 bytes hardcoded (NowindHost.cpp)
         ld d,(hl)
         ld e,(hl)
         push de
         endrepeat
-        
+
         ld a,(hl)                       ; tail
         ld (usbwr),a
-        
+
         cp c
         jr nz,.error
 .nextLoop:
         dec b
         jp nz,.loop
-        
-        ld sp,iy                        ; restore stack pointer        
+
+        ld sp,iy                        ; restore stack pointer
         jp blockRead
-         
-.error: 
+
+.error:
         DEBUGMESSAGE ".err"
         ; TODO timeout
         ld a,(hl)
@@ -244,31 +244,31 @@ blockRead:
         jp z,.nextLoop
         jr .error
 
-.error255: 
+.error255:
         ; TODO timeout
         DEBUGMESSAGE ".err255"
         ld a,(hl)
         cp 255
         jr z,.error255
         ; b moet nog aangepast... (hoe?)
-        ld c,a 
+        ld c,a
         jp .good
-        
+
         ; include flash routine only once
-		if MSXDOSVER = 2
-        
+    if MSXDOSVER = 2
+
 flashWriter:
         ;DEBUGMESSAGE "flashWriter"
         ld a,3
         call SNSMAT
         and 8
         ret nz
-        
+
         call PRINTTEXT
         db 10,13," FlashROM",10,13," "
         ds 33,"."
         db 13," ",0
-        
+
         call getSlotPage1
         call enableSlotPage0
 
@@ -277,6 +277,6 @@ flashWriter:
         push de
         ld bc,flasherEnd - $c000
         ldir
-        ret        
-        
+        ret
+
         endif
