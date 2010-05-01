@@ -6,18 +6,18 @@ installExtendedBios:
         DEBUGMESSAGE "extbio"
         call getEntrySLTWRK             ; save previous EXTBIO hook
         inc hl
-        ex de,hl        
+        ex de,hl
         ld hl,EXTBIO
         ld bc,5
         ldir
-        
+
         push hl                         ; determine device number
         xor a
         ld de,$4e01
         call EXTBIO
         pop hl
         ld (hl),a
-                
+
         call GETSLT                     ; install new EXTBIO hook
         ld l,$f7
         ld h,a
@@ -25,7 +25,7 @@ installExtendedBios:
         ld hl,extendedBios
         ld (EXTBIO+2),hl
         ld a,$c9
-        ld (EXTBIO+4),a    
+        ld (EXTBIO+4),a
         ret
 
 extendedBios:
@@ -41,10 +41,10 @@ extendedBios:
         push hl
         push bc
         call getEntrySLTWRK
-        inc l                           ; previous EXTBIO hook 
+        inc l                           ; previous EXTBIO hook
         push hl
         pop ix
-        pop bc        
+        pop bc
         pop hl
         pop af
         jp (ix)                         ; process other EXTBIO handles
@@ -66,25 +66,25 @@ functionTable:
         dw numberOfDevices
         dw debugMessage
 
-getNowindSlot:               
+getNowindSlot:
         DEBUGMESSAGE "getNowindSlot"
         pop af
         dec a
         push af
         jp p,extendedBios.exit         ; not this device
-        
+
         pop af
         call getSlotPage1
         scf
         ret
-        
+
 numberOfDevices:
         DEBUGMESSAGE "numberOfDevices"
         pop af
         inc a
         push af
         jr extendedBios.exit
-        
+
 debugMessage:
         DEBUGMESSAGE "debugMessage"
         pop af
@@ -101,6 +101,6 @@ debugMessage:
         ld (usbwr),a
         or a
         jr nz,.loop
-        
-        pop af        
+
+        pop af
         ret

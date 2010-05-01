@@ -10,7 +10,7 @@
         db string
 .skip:
         ENDIF
-                
+
         IFDEF USBDEBUG
 ;        ASSERT ($ < $8000)
         push af
@@ -31,7 +31,7 @@
         db $ed,8
         ENDIF
         ENDM
-        
+
         MACRO DEBUGENABLEDISASM
         IFDEF DEBUG
         db $ed,$0b
@@ -43,35 +43,35 @@
         db $ed,$0c
         ENDIF
         ENDM
-        
+
         MACRO DEBUGASSERT
         IFDEF DEBUG
         db $ed,$0a
         ENDIF
         ENDM
-        
+
         MACRO DEBUGDUMPMEMHL len
         IFDEF DEBUG
         db $ed,1,len
 .skip:  nop
         ENDIF
         ENDM
-        
+
         MACRO DEBUGDUMPMEM addr, len
         IFDEF DEBUG
         db $ed,2
         dw addr
         db len
-.skip:  nop  
+.skip:  nop
         ENDIF
         ENDM
-        
-        
+
+
         MACRO DEBUGDUMPREGISTERS
         IFDEF DEBUG
         db $ed,7
         ENDIF
-        
+
         IFDEF USBDEBUG
         ASSERT($ < $8000)
         call sendCpuInfo
@@ -85,7 +85,7 @@ sendCpuInfo:
         push de
         call sendRegisters
         ld (hl),128
-        
+
         ld (usbwr),ix
         ld (usbwr),iy
         ld (usbwr),sp                   ; needs adjustment! (host does this)
@@ -113,7 +113,7 @@ sendCpuInfo:
         pop af
         ret
         ENDM
-        
+
 ; blueMSX
         MACRO BLUEMSX_BREAKPOINT
         IFDEF DEBUG
@@ -129,4 +129,4 @@ sendCpuInfo:
         dw address
         ENDIF
         ENDM
-        
+
