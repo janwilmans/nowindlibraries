@@ -34,10 +34,10 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	: drives(drives_)
 	, lastTime(0)
 	, state(STATE_SYNC1)
-	, romdisk(255)
+	, romdisk(1)
 	, allowOtherDiskroms(true)
 	, enablePhantomDrives(false)
-	, enableMSXDOS2(true)
+	, enableMSXDOS2(false)
 {
     vector<byte> requestWait;
     requestWait.push_back(1);
