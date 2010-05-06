@@ -1,9 +1,10 @@
 
-static const byte HARDCODED_READ_DATABLOCK_SIZE = 128;	// hardcoded in blockRead (common.asm)
+//static const byte HARDCODED_READ_DATABLOCK_SIZE = 128;	// hardcoded in blockRead (common.asm)
+static const byte HARDCODED_READ_DATABLOCK_SIZE = 64;	// hardcoded in blockRead (common.asm)
 
 void NowindHost::newBlockTransfer(unsigned transferAddress, unsigned amount)
 {
-    //DBERR("create new BlockTranfer: addr: 0x%04x  amount %d\n", transferAddress, amount);
+    DBERR("create new BlockTranfer: addr: 0x%04x  amount %d\n", transferAddress, amount);
     vector<byte> temp;
 	const byte* bufferPointer = &buffer[transferred];
 	for (unsigned int i=0;i<amount; i++) {
@@ -60,12 +61,13 @@ void NowindHost::blockRead(word startAddress, word size, const vector <byte >& d
 void NowindHost::sendDataBlock(unsigned int blocknr)
 {
     DataBlock* dataBlock = dataBlockQueue[blocknr];
-    //DBERR("sendDatablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
+    DBERR("sendDatablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
 
     send(dataBlock->header);    // header
     for (unsigned int i=0; i<dataBlock->data.size(); i++)
     {
         send(dataBlock->data[i]);
+        //DBERR("dataBlock[%i] -> data: 0x%02x\n", i, dataBlock->data[i]);
     }
 /*
     static int wrong = 0;

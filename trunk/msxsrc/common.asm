@@ -74,6 +74,7 @@ sendRegisters:
 ;getHeaderHigh:
 ;   ld h,HIGH usbrd
 getHeader:
+        DEBUGMESSAGE "gH"
         ld b,HIGH 65535                 ; 42000 * 60 states ~ 0,7 sec (time out)
 .loop:  ld a,(hl)
 .chkaf: cp $af
@@ -196,13 +197,21 @@ receiveFCB:
         ret
 
 blockRead:
-        ;DEBUGMESSAGE "br"
-        ld h,HIGH usbrd
+        DEBUGMESSAGE "br23"
+        DEBUGDUMPREGISTERS
+        ld h,b
+        jr .start2
+.start:
         call getHeader
+.start2:
         ret c                           ; return on timeout
         and a
         ret z                           ; resume
 
+        call .transfer
+        jr .start
+
+.transfer:
         ld iy,0                         ; save stack pointer
         add iy,sp
         ld e,(hl)                       ; transfer address
@@ -214,11 +223,11 @@ blockRead:
 
 .loop:
         ld c,(hl)                       ; header
-        cp 255
+        cp 255  ; TODO: buggie!!!! header staat hier niet in reg_a!!!
         jp z,.error255
 
 .good:
-        repeat 64                       ; blocks of 128 bytes hardcoded (NowindHost.cpp)
+        repeat 32                       ; blocks of 128 bytes hardcoded (NowindHost.cpp)
         ld d,(hl)
         ld e,(hl)
         push de
@@ -226,7 +235,6 @@ blockRead:
 
         ld a,(hl)                       ; tail
         ld (usbwr),a
-
         cp c
         jr nz,.error
 .nextLoop:
@@ -234,7 +242,7 @@ blockRead:
         jp nz,.loop
 
         ld sp,iy                        ; restore stack pointer
-        jp blockRead
+        ret
 
 .error:
         DEBUGMESSAGE ".err"
@@ -254,8 +262,78 @@ blockRead:
         ld c,a
         jp .good
 
+        PHASE $ + $4000
+        
+blockRead2:
+        DEBUGMESSAGE "br01"
+        ld h,b
+        jr .start2
+.start:
+        call getHeader + $4000
+.start2:
+        ret c                           ; return on timeout
+        and a
+        ret z                           ; resume
+
+        call .transfer
+        jr .start
+
+.transfer:
+        ld iy,0                         ; save stack pointer
+        add iy,sp
+        ld e,(hl)                       ; transfer address
+        ld d,(hl)
+        ex de,hl
+        ld sp,hl
+        ex de,hl
+        ld b,(hl)                       ; amount of 128 byte blocks (max 32kB)
+        
+.loop:
+        ld a,(hl)                       ; header
+        ld c,a
+        cp 255
+        jp z,.error255
+
+.good:
+        repeat 32                       ; blocks of 128 bytes hardcoded (NowindHost.cpp)
+        ld d,(hl)
+        ld e,(hl)
+        push de
+        endrepeat
+
+        ld a,(hl)                       ; tail
+        ld (usb2),a
+        cp c
+        jr nz,.error
+.nextLoop:
+        dec b
+        jp nz,.loop
+
+        ld sp,iy                        ; restore stack pointer
+        ret
+
+.error:
+        DEBUGMESSAGE ".err"
+        ; TODO timeout
+        ld a,(hl)
+        cp c
+        jp z,.nextLoop
+        jr .error
+
+.error255:
+        ; TODO timeout
+        DEBUGMESSAGE ".err255"
+        ld a,(hl)
+        cp 255
+        jr z,.error255
+        ; b moet nog aangepast... (hoe?)
+        ld c,a
+        jp .good
+
+        DEPHASE
+
         ; include flash routine only once
-    if MSXDOSVER = 2
+        if MSXDOSVER = 2
 
 flashWriter:
         ;DEBUGMESSAGE "flashWriter"

@@ -44,7 +44,7 @@ DRIVES:
         call sendRegisters
         ld (hl),C_DRIVES
         ld hl,drivesCommand
-        call executeCommand
+        call executeCommandNowindInPage0
 
         pop hl
         ld l,2
@@ -80,14 +80,15 @@ INIENV:
         call sendRegisters
         ld (hl),C_DRIVES
         ld hl,inienvCommand
-        call executeCommand
+        call executeCommandNowindInPage0
 
         push af
         call getEntrySLTWRK
         pop af
-        ld (hl),0
+        ld (hl),0                       ; default drive number for romdisk
         ret c
-        ld (hl),a
+        DEBUGDUMPREGISTERS
+        ld (hl),a                       ; drive number for romdisk
         ret
 
 inienvCommand:
@@ -95,8 +96,8 @@ inienvCommand:
 
 
 checkWorkArea:
-        ld a,1
-        and a
+;        ld a,1
+        cp 1
         ret
 
         push bc
@@ -135,58 +136,19 @@ dskioRead:
         rlca                            ; tranfer address < 0x8000 ?
         jr c,.page2and3
 
-        DEBUGMESSAGE "read01"
-        call getSlotPage2               ; enable nowind in page 2
-        push af
-        call getSlotPage1
-        ld ixh,a                        ; ixh = current nowind slot
-        ld h,$80
-        call ENASLT
-        jp .page2
+        DEBUGMESSAGE "blockRead01"
+        ld b,HIGH usb2
+        ld hl,blockRead2
+        call executeCommandNowindInPage2
+        DEBUGMESSAGE "back"
+        DEBUGDUMPREGISTERS
+        ret
 
-        PHASE $ + $4000
-.page2:
-        ld a,(RAMAD1)                   ; enable RAM in page 1
-        ld h,$40
-        call ENASLT
-
-        call readSectors01
-        ; TODO: carry checken?----------------------------------------------!!!!!!!!!!!!!!!
-
-        ld a,ixh                        ; enable nowind in page 1
-        ld h,$40
-        call ENASLT
-        jp .page1
-
-        DEPHASE
-.page1:
-        ld a,(usb2)
-        ld ixh,a
-        pop af
-        ld h,$80
-        call ENASLT                     ; restore page 2
-        ld a,ixh
-        or a
-        ei
-        ret z                           ; nothing more to read
-
-; protocol v1
-;.page2and3:
-        DEBUGMESSAGE "read23"
-        call enableNowindPage0
-        push iy
-        call readSectors23
-        pop iy
-        jp restorePage0
-
-; protocol v2
 .page2and3:
         DEBUGMESSAGE "blockRead23"
-        call enableNowindPage0
-        push iy
-        call blockRead
-        pop iy
-        jp restorePage0
+        ld b,HIGH usbrd
+        ld hl,blockRead
+        jp executeCommandNowindInPage0
 
 dskioWrite:
         DEBUGMESSAGE "dskwrite"
@@ -381,31 +343,6 @@ DSKFMT:
 
         PHASE $ + $4000
 
-readSectors01:
-        DEBUGMESSAGE "readSectors01"
-        ld h,HIGH usb2
-        call getHeader + $4000
-        ret c                           ; carry means timeout, no carry: A == 0 means slow transfer, A == 1 means exit, A == 2 means fast transfer
-        dec a
-        ret z
-        jp m,.slowTransfer
-        call reverseTransfer + $4000
-        ld (hl),b
-        ld (hl),c
-        jr readSectors01
-
-.slowTransfer:
-        ld e,(hl)                       ; transfer address
-        ld d,(hl)
-        ld c,(hl)                       ; transfer amount
-        ld b,(hl)
-        ldir
-
-        ld d,(hl)           ; return end marker ($af, $0f)
-        ld (hl),d
-        ld d,(hl)
-        ld (hl),d
-        jr readSectors01
 
 writeLoop01:
         ld h,HIGH usb2
@@ -435,55 +372,6 @@ writeLoop01:
 
         DEPHASE
 
-readSectors23:
-        DEBUGMESSAGE "readSectors23"
-        ld h,HIGH usbrd
-        call getHeader
-        ret c
-        dec a
-        ret z                           ; no more data
-        jp m,.slowTransfer
-        call reverseTransfer
-        ld h,HIGH usbwr
-        ld (hl),b
-        ld (hl),c
-        jr readSectors23
-
-.slowTransfer:
-        DEBUGMESSAGE "slowtransfer"
-        ld e,(hl)                       ; transfer address
-        ld d,(hl)
-        ld c,(hl)                       ; transfer amount
-        ld b,(hl)
-        ldir
-        ld d,(hl)
-        ld a,(hl)
-        ld h,HIGH usbwr
-        ld (hl),d                       ; return end marker ($af, $0f)
-        ld (hl),a
-        jr readSectors23
-
-reverseTransfer:
-        ld iy,0                         ; save stack pointer
-        add iy,sp
-        ld e,(hl)                       ; transfer address
-        ld d,(hl)
-        ex de,hl
-        ld sp,hl
-        ex de,hl
-        ld b,(hl)                       ; number of loops
-.loop:
-        repeat 32                       ; blocks of 64 bytes hardcoded (NowindHost.cpp)
-        ld d,(hl)
-        ld e,(hl)
-        push de
-        endrepeat
-        djnz .loop
-
-        ld sp,iy                        ; restore stack pointer
-        ld b,(hl)                       ; return end marker
-        ld c,(hl)
-        ret
 
 OEMSTA:
         push hl
@@ -540,28 +428,79 @@ printVdpText2:
         pop af
         ret
 
-; in: hl = callback to execute
+; in:  hl = callback to execute
+;      bc = arguments for callback
 ; out: bc = callback return data
 ; changed: all
 ; requirements: stack available
-executeCommand:
+executeCommandNowindInPage0:
         push hl
+        push bc
         call enableNowindPage0
         ld h,HIGH usbrd
         call getHeader
         jr c,.exit      ; timeout occurred?
 
+        pop bc
         ld hl,.restorePage
         ex (sp),hl
         jp (hl)     ; jump to callback, a = first data read by getHeader, ret will resume at .restorePage
 
-.exit:  pop hl
+.exit:  call .restorePage
+        pop hl
+        pop bc
         ret
 
 .restorePage:
         push bc
         call restorePage0
         pop bc
+        ret
+
+executeCommandNowindInPage2:
+        push hl
+        push bc
+
+        DEBUGMESSAGE "1"
+        call getSlotPage2               ; enable nowind in page 2
+        ld ixl,a
+        call getSlotPage1
+        ld ixh,a                        ; ixh = current nowind slot
+        ld h,$80
+        call ENASLT
+        jp .page2
+
+        PHASE $ + $4000
+.page2:
+        DEBUGMESSAGE "2"
+        ld a,(RAMAD1)                   ; enable RAM in page 1
+        ld h,$40
+        call ENASLT
+
+        ld h,HIGH usb2
+        call getHeader + $4000
+        jr c,.exit      ; timeout occurred?
+
+        pop bc
+        ld hl,.restorePage
+        ex (sp),hl
+        DEBUGMESSAGE "3"
+        jp (hl)     ; jump to callback, a = first data read by getHeader, ret will resume at .restorePage
+
+.exit:  pop bc
+        pop hl
+; reg_af moet bewaard!
+.restorePage:
+        ld a,ixh                        ; enable nowind in page 1
+        ld h,$40
+        call ENASLT
+        jp .page1
+
+        DEPHASE
+.page1:
+        ld a,ixl
+        ld h,$80
+        call ENASLT                     ; restore page 2
         ret
 
 supportedMedia:

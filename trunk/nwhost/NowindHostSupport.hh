@@ -281,7 +281,7 @@ void NowindHost::DRIVES()
 	send(reg_a | (getAllowOtherDiskroms() ? 0 : 0x80));
 	send(numberOfDrives);
 
-	romdisk = 255; // no romdisk
+//	romdisk = 255; // no romdisk
 	for (unsigned i = 0; i < drives.size(); ++i) {
 		if (drives[i]->isRomdisk()) {
 			romdisk = i;
