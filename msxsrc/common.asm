@@ -188,12 +188,86 @@ receiveFCB:
 
         ld b,32
 .loop:  ld a,(usbrd)
-  ld (usbwr),a      ; loop back
+        ld (usbwr),a      ; loop back
         ld (de),a
         inc de
         djnz .loop
         pop bc
         pop de
+        ret
+
+; in:  hl = callback to execute
+;      bc = arguments for callback
+; out: bc = callback return data
+; changed: all
+; requirements: stack available
+executeCommandNowindInPage0:
+        push hl
+        push bc
+        call enableNowindPage0
+        ld h,HIGH usbrd
+        call getHeader
+        jr c,.exit      ; timeout occurred?
+
+        pop bc
+        ld hl,.restorePage
+        ex (sp),hl
+        jp (hl)     ; jump to callback, a = first data read by getHeader, ret will resume at .restorePage
+
+.exit:  call .restorePage
+        pop hl
+        pop bc
+        ret
+
+.restorePage:
+        push bc
+        call restorePage0
+        pop bc
+        ret
+
+executeCommandNowindInPage2:
+        push hl
+        push bc
+
+        call getSlotPage2               ; enable nowind in page 2
+        ld ixl,a
+        call getSlotPage1
+        ld ixh,a                        ; ixh = current nowind slot
+        ld h,$80
+        call ENASLT
+        jp .page2
+
+        PHASE $ + $4000
+.page2:
+        ld a,(RAMAD1)                   ; enable RAM in page 1
+        ld h,$40
+        call ENASLT
+
+        ld h,HIGH usb2
+        call getHeader + $4000
+        jr c,.exit      ; timeout occurred?
+
+        pop bc
+        ld hl,.restorePage
+        ex (sp),hl
+        jp (hl)     ; jump to callback, a = first data read by getHeader, ret will resume at .restorePage
+
+.exit:  pop bc
+        pop hl
+
+.restorePage:
+        push af
+        ld a,ixh                        ; enable nowind in page 1
+        ld h,$40
+        call ENASLT
+        jp .page1
+
+        DEPHASE
+.page1:
+        ld a,ixl
+        ld h,$80
+        call ENASLT                     ; restore page 2
+        pop af
         ret
 
 blockRead:
