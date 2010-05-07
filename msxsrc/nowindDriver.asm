@@ -140,8 +140,10 @@ dskioRead:
         ld b,HIGH usb2
         ld hl,blockRead2
         call executeCommandNowindInPage2
-        ; TODO: remaining sectors in reg_b?
+        DEBUGMESSAGE "more?"
         ret c                           ; not ready
+        ; er kan nog meer komen voor de volgende page!
+        DEBUGMESSAGE "doorgaan!"
         ret
 .page23:
         DEBUGMESSAGE "blockRead23"
@@ -154,48 +156,58 @@ dskioWrite:
         rlca
         jr c,.page23
 
-        ;call enableNowindPage2 (todo: make common routine?)
-        call getSlotPage2               ; save current slot page 2
-        ld ixh,a
-        call getSlotPage1
-        ld ixl,a
-        ld h,$80
-        call ENASLT                     ; nowind in page 2
-        jp .page2
-
-        PHASE $ + $4000
-.page2:
-        ld a,(RAMAD1)
-        ld h,$40
-        call ENASLT                     ; ram in page 1
-
-        call writeLoop01
-        push af
-
-        ld a,ixl
-        ld h,$40
-        call ENASLT                     ; restore nowind in page 1
-        jp .page1
-
-        DEPHASE
-.page1:
-        ld a,ixh
-        ld h,$80
-        call ENASLT
-        pop af
+        ld b,HIGH usbrd
+        ld hl,blockWrite23
+        call executeCommandNowindInPage0
         ret c                           ; return error (error code in a)
         ret pe                          ; host returns 0xfe when data for page 2/3 is available
-        ;DEBUGMESSAGE "doorgaan!"
+        DEBUGMESSAGE "doorgaan!"
 
 .page23:
         DEBUGMESSAGE "p2&3"
         ld b,HIGH usbrd
-        ld hl,blockWrite
+        ld hl,blockWrite23
         call executeCommandNowindInPage0
         DEBUGMESSAGE "back"
         ret
 
-blockWrite:
+        PHASE $ + $4000
+
+blockWrite01:
+        DEBUGDUMPREGISTERS
+        DEBUGMESSAGE "blkWr01"
+        ld h,HIGH usb2
+        jr .start2
+.start:
+        ld h,HIGH usb2
+        call getHeader + $4000
+.start2:
+        ret c                           ; exit (not ready)
+        or a
+        ret m                           ; exit (no error)
+        jr nz,.error
+
+        DEBUGMESSAGE "wr01"
+        ld e,(hl)                       ; address
+        ld d,(hl)
+        ld c,(hl)                       ; number of bytes
+        ld b,(hl)
+        ld a,(hl)                       ; block sequence number
+
+        ex de,hl
+        ld de,usb2
+        ld (de),a                       ; mark block begin
+        ldir
+        ld (de),a                       ; mark block end
+        jr .start
+
+.error: scf
+        ld a,(hl)                       ; get error code
+        ret
+
+        DEPHASE
+
+blockWrite23:
         DEBUGDUMPREGISTERS
         DEBUGMESSAGE "blkWr23"
         ld h,HIGH usbrd
@@ -344,38 +356,6 @@ DSKFMT:
         scf
         ld a,16                         ; other error
         ret
-
-        PHASE $ + $4000
-
-
-writeLoop01:
-        ld h,HIGH usb2
-        call getHeader + $4000
-        ret c                           ; exit (not ready)
-        or a
-        ret m                           ; exit (no error)
-        jr nz,.error
-
-        DEBUGMESSAGE "send01"
-        ld e,(hl)                       ; address
-        ld d,(hl)
-        ld c,(hl)                       ; number of bytes
-        ld b,(hl)
-        ld a,(hl)                       ; block sequence number
-
-        ex de,hl
-        ld de,usb2
-        ld (de),a                       ; mark block begin
-        ldir
-        ld (de),a                       ; mark block end
-        jr writeLoop01
-
-.error: scf
-        ld a,(hl)                       ; get error code
-        ret
-
-        DEPHASE
-
 
 OEMSTA:
         push hl
