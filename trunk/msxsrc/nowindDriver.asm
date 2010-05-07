@@ -134,17 +134,16 @@ DSKIO:
 
 dskioRead:
         rlca                            ; tranfer address < 0x8000 ?
-        jr c,.page2and3
+        jr c,.page23
 
         DEBUGMESSAGE "blockRead01"
         ld b,HIGH usb2
         ld hl,blockRead2
         call executeCommandNowindInPage2
-        DEBUGMESSAGE "back"
-        DEBUGDUMPREGISTERS
+        ; TODO: remaining sectors in reg_b?
+        ret c                           ; not ready
         ret
-
-.page2and3:
+.page23:
         DEBUGMESSAGE "blockRead23"
         ld b,HIGH usbrd
         ld hl,blockRead
@@ -153,7 +152,7 @@ dskioRead:
 dskioWrite:
         DEBUGMESSAGE "dskwrite"
         rlca
-        jr c,.page2and3
+        jr c,.page23
 
         ;call enableNowindPage2 (todo: make common routine?)
         call getSlotPage2               ; save current slot page 2
@@ -188,23 +187,29 @@ dskioWrite:
         ret pe                          ; host returns 0xfe when data for page 2/3 is available
         ;DEBUGMESSAGE "doorgaan!"
 
-.page2and3:
+.page23:
         DEBUGMESSAGE "p2&3"
-        call enableNowindPage0
-        call .writeLoop23
-        jp restorePage0
+        ld b,HIGH usbrd
+        ld hl,blockWrite
+        call executeCommandNowindInPage0
+        DEBUGMESSAGE "back"
+        ret
 
-.writeLoop23:
-        ;DEBUGMESSAGE "writeLoop23"
-
+blockWrite:
+        DEBUGDUMPREGISTERS
+        DEBUGMESSAGE "blkWr23"
+        ld h,HIGH usbrd
+        jr .start2
+.start:
         ld h,HIGH usbrd
         call getHeader
+.start2:
         ret c                           ; exit (not ready)
         or a
         ret m                           ; exit (no error)
         jr nz,.error
 
-        ;DEBUGMESSAGE "send23"
+        DEBUGMESSAGE "wr23"
         ld e,(hl)                       ; address
         ld d,(hl)
         ld c,(hl)                       ; number of bytes
@@ -217,7 +222,7 @@ dskioWrite:
         ld (de),a                       ; mark block begin
         ldir
         ld (de),a                       ; mark block end
-        jr .writeLoop23
+        jr .start
 
 .error: scf
         ld a,(hl)                       ; get error code
@@ -326,15 +331,14 @@ GETDPB:
 
 CHOICE:
         ;DEBUGMESSAGE "CHOICE"
-        ifdef MSXDOS2
-        ld hl,.noFormat
+        if MSXDOSVER = 2
+        ld hl,.none
+        ret
+.none:  db 0
         else
         ld hl,0                         ; no choice
-        endif
         ret
-
-.noFormat:
-        db 0
+        endif
 
 DSKFMT:
         scf
@@ -428,80 +432,6 @@ printVdpText2:
         pop af
         ret
 
-; in:  hl = callback to execute
-;      bc = arguments for callback
-; out: bc = callback return data
-; changed: all
-; requirements: stack available
-executeCommandNowindInPage0:
-        push hl
-        push bc
-        call enableNowindPage0
-        ld h,HIGH usbrd
-        call getHeader
-        jr c,.exit      ; timeout occurred?
-
-        pop bc
-        ld hl,.restorePage
-        ex (sp),hl
-        jp (hl)     ; jump to callback, a = first data read by getHeader, ret will resume at .restorePage
-
-.exit:  call .restorePage
-        pop hl
-        pop bc
-        ret
-
-.restorePage:
-        push bc
-        call restorePage0
-        pop bc
-        ret
-
-executeCommandNowindInPage2:
-        push hl
-        push bc
-
-        DEBUGMESSAGE "1"
-        call getSlotPage2               ; enable nowind in page 2
-        ld ixl,a
-        call getSlotPage1
-        ld ixh,a                        ; ixh = current nowind slot
-        ld h,$80
-        call ENASLT
-        jp .page2
-
-        PHASE $ + $4000
-.page2:
-        DEBUGMESSAGE "2"
-        ld a,(RAMAD1)                   ; enable RAM in page 1
-        ld h,$40
-        call ENASLT
-
-        ld h,HIGH usb2
-        call getHeader + $4000
-        jr c,.exit      ; timeout occurred?
-
-        pop bc
-        ld hl,.restorePage
-        ex (sp),hl
-        DEBUGMESSAGE "3"
-        jp (hl)     ; jump to callback, a = first data read by getHeader, ret will resume at .restorePage
-
-.exit:  pop bc
-        pop hl
-; reg_af moet bewaard!
-.restorePage:
-        ld a,ixh                        ; enable nowind in page 1
-        ld h,$40
-        call ENASLT
-        jp .page1
-
-        DEPHASE
-.page1:
-        ld a,ixl
-        ld h,$80
-        call ENASLT                     ; restore page 2
-        ret
 
 supportedMedia:
 

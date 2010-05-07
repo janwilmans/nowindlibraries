@@ -37,7 +37,7 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	, romdisk(1)
 	, allowOtherDiskroms(true)
 	, enablePhantomDrives(false)
-	, enableMSXDOS2(false)
+	, enableMSXDOS2(true)
 {
     vector<byte> requestWait;
     requestWait.push_back(1);
@@ -365,6 +365,7 @@ void NowindHost::transferSectorsBackwards(unsigned transferAddress, unsigned amo
 
 void NowindHost::diskWriteInit(SectorMedium& disk)
 {
+	DBERR("diskWriteInit\n");
 	if (disk.isWriteProtected()) {
 		sendHeader();
 		send(1);
@@ -381,6 +382,7 @@ void NowindHost::diskWriteInit(SectorMedium& disk)
 
 void NowindHost::doDiskWrite1()
 {
+	DBERR("doDiskWrite1\n");
 	unsigned bytesLeft = unsigned(buffer.size()) - transferred;
 	if (bytesLeft == 0) {
 		// All data transferred!
@@ -407,6 +409,7 @@ void NowindHost::doDiskWrite1()
 		transferSize = 0x8000 - address;
 	}
 
+	DBERR("doDiskWrite1: sendHeader\n");
 	sendHeader();
 	send(0);          // data ahead!
 	send16(address);
@@ -420,6 +423,7 @@ void NowindHost::doDiskWrite1()
 
 void NowindHost::doDiskWrite2()
 {
+	DBERR("doDiskWrite2\n");
 	assert(recvCount == (transferSize + 2));
 	for (unsigned i = 0; i < transferSize; ++i) {
 		buffer[i + transferred] = extraData[i + 1];
