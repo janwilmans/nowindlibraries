@@ -296,8 +296,9 @@ blockRead:
         ld b,(hl)                       ; amount of 128 byte blocks (max 32kB)
 
 .loop:
-        ld c,(hl)                       ; header
-        cp 255  ; TODO: buggie!!!! header staat hier niet in reg_a!!!
+        ld a,(hl)                       ; header
+        ld c,a
+        cp 255
         jp z,.error255
 
 .good:
@@ -345,6 +346,7 @@ blockRead2:
 .start:
         call getHeader + $4000
 .start2:
+        DEBUGDUMPREGISTERS
         ret c                           ; return on timeout
         and a
         ret z                           ; resume
@@ -363,6 +365,7 @@ blockRead2:
         ld b,(hl)                       ; amount of 128 byte blocks (max 32kB)
         
 .loop:
+        DEBUGMESSAGE ".loop"
         ld a,(hl)                       ; header
         ld c,a
         cp 255
