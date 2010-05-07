@@ -37,7 +37,7 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	, romdisk(1)
 	, allowOtherDiskroms(true)
 	, enablePhantomDrives(false)
-	, enableMSXDOS2(true)
+	, enableMSXDOS2(false)
 {
     vector<byte> requestWait;
     requestWait.push_back(1);
@@ -409,7 +409,6 @@ void NowindHost::doDiskWrite1()
 		transferSize = 0x8000 - address;
 	}
 
-	DBERR("doDiskWrite1: sendHeader\n");
 	sendHeader();
 	send(0);          // data ahead!
 	send16(address);
