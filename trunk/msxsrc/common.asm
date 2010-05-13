@@ -276,7 +276,7 @@ blockRead:
         rlca                            ; tranfer address < 0x8000 ?
         jr c,.page23
 
-        ld hl,blockRead01
+        ld hl,blockRead01 + $4000
         call executeCommandNowindInPage2
         DEBUGMESSAGE "more?"
         ret c                           ; not ready
@@ -287,8 +287,7 @@ blockRead:
         ld hl,blockRead23
         jp executeCommandNowindInPage0
 
-        PHASE $ + $4000
-        
+     
 blockRead01:
         DEBUGMESSAGE "br01"
         ld h,HIGH usbReadPage2
@@ -299,65 +298,10 @@ blockRead01:
         DEBUGDUMPREGISTERS
         ret c                           ; return on timeout
         and a
-        ret z                           ; resume
+        ret z                           ; exit blockRead01
 
-        call .transfer
+        call blockReadTranfer + $4000
         jr .start
-
-.transfer:
-        ld iy,0                         ; save stack pointer
-        add iy,sp
-        ld e,(hl)                       ; transfer address
-        ld d,(hl)
-        ex de,hl
-        ld sp,hl
-        ex de,hl
-        ld b,(hl)                       ; amount of 128 byte blocks (max 32kB)
-        
-.loop:
-        DEBUGMESSAGE ".loop"
-        ld a,(hl)                       ; header
-        ld c,a
-        cp 255
-        jp z,.error255
-
-.good:
-        repeat 32                       ; blocks of 128 bytes hardcoded (NowindHost.cpp)
-        ld d,(hl)
-        ld e,(hl)
-        push de
-        endrepeat
-
-        ld a,(hl)                       ; tail
-        ld (usbWritePage2),a
-        cp c
-        jr nz,.error
-.nextLoop:
-        dec b
-        jp nz,.loop
-
-        ld sp,iy                        ; restore stack pointer
-        ret
-
-.error:
-        DEBUGMESSAGE ".err"
-        ; TODO timeout
-        ld a,(hl)
-        cp c
-        jp z,.nextLoop
-        jr .error
-
-.error255:
-        ; TODO timeout
-        DEBUGMESSAGE ".err255"
-        ld a,(hl)
-        cp 255
-        jr z,.error255
-        ; b moet nog aangepast... (hoe?)
-        ld c,a
-        jp .good
-
-        DEPHASE
 
 blockRead23:
         DEBUGMESSAGE "br23"
@@ -369,14 +313,28 @@ blockRead23:
 .start2:
         ret c                           ; return on timeout
         and a
-        ret z                           ; resume
+        ret z                           ; exit blockRead23
 
         DEBUGMESSAGE "br23_a"
         
-        call .transfer
+        call blockReadTranfer
         jr .start
 
-.transfer:
+; used by blockRead01 and blockRead23
+; Input:    HL = usb read address (either usbReadPage0 or usbReadPage2)
+
+error255:
+        ; TODO timeout
+        DEBUGMESSAGE ".err255"
+        ld a,(hl)
+        cp 255
+        jr z,error255
+        ; b moet nog aangepast... (hoe?)
+        ld c,a
+        jp blockReadTranfer.good
+
+blockReadTranfer:
+        DEBUGMESSAGE "btf"
         ld iy,0                         ; save stack pointer
         add iy,sp
         ld e,(hl)                       ; transfer address
@@ -385,48 +343,60 @@ blockRead23:
         ld sp,hl
         ex de,hl
         ld b,(hl)                       ; amount of 128 byte blocks (max 32kB)
-
+        DEBUGDUMPREGISTERS
 .loop:
+        DEBUGMESSAGE ".loop"
         ld a,(hl)                       ; header
         ld c,a
         cp 255
-        jp z,.error255
+        jr z,error255
 
 .good:
-        repeat 32                       ; blocks of 128 bytes hardcoded (NowindHost.cpp)
+        repeat 64                       ; blocks of 128 bytes hardcoded (NowindHost.cpp)
         ld d,(hl)
         ld e,(hl)
         push de
         endrepeat
+      
+        bit 7,h                         ; if HL < 0x8000, this code is executing in page 1 (otherwise in page 2)
+        ld a,(hl)
+        jr nz,.codeInPage2
 
-        ld a,(hl)                       ; tail
-        ld (usbWritePage1),a
+.codeInPage1:
+        ld (usbWritePage1),a            ; return tail
         cp c
-        jr nz,.error
-.nextLoop:
+        jr nz,.errorInPage1
+.nextLoopInPage1:
         dec b
         jp nz,.loop
-
         ld sp,iy                        ; restore stack pointer
         ret
-
-.error:
-        DEBUGMESSAGE ".err"
+        
+.errorInPage1:
+        DEBUGMESSAGE ".err1"
         ; TODO timeout
         ld a,(hl)
         cp c
-        jp z,.nextLoop
-        jr .error
+        jp z,.nextLoopInPage1
+        jr .errorInPage1
 
-.error255:
+.codeInPage2:
+        ld (hl),a                       ; return tail
+        cp c
+        jr nz,.errorInPage2
+        dec b
+.nextLoopInPage2:
+        jp nz,.loop + $4000
+        ld sp,iy                        ; restore stack pointer
+        ret
+        
+.errorInPage2:
+        DEBUGMESSAGE ".err2"
         ; TODO timeout
-        DEBUGMESSAGE ".err255"
         ld a,(hl)
-        cp 255
-        jr z,.error255
-        ; b moet nog aangepast... (hoe?)
-        ld c,a
-        jp .good
+        cp c
+        jr z,.nextLoopInPage2
+        jr .errorInPage2
 
 
         ; include flash routine only once

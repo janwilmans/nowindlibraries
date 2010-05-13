@@ -124,8 +124,8 @@ void NowindHost::write(byte data, unsigned int time)
 		}
 		break;
 	
-	case STATE_BLOCKREAD:
-		blockReadAck(data);
+	case STATE_BLOCKREAD_ACK:
+		blockReadAck(data);     
 		break;
 
 	default:
@@ -233,7 +233,7 @@ void NowindHost::diskReadInit(SectorMedium& disk)
 #ifdef PROTOCOL_V2
     unsigned int size = sectorAmount * 512;
     unsigned address = getCurrentAddress();
-    newBlockTransfer(address, size);
+    blockRead(address, size, buffer);
 #else
     doDiskRead1();
 #endif

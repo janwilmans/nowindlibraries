@@ -1,18 +1,7 @@
 
-//static const byte HARDCODED_READ_DATABLOCK_SIZE = 128;	// hardcoded in blockRead (common.asm)
-static const byte HARDCODED_READ_DATABLOCK_SIZE = 64;	// hardcoded in blockRead (common.asm)
+static const byte HARDCODED_READ_DATABLOCK_SIZE = 128;	// hardcoded in blockRead (common.asm)
 
-void NowindHost::newBlockTransfer(unsigned transferAddress, unsigned amount)
-{
-    DBERR("create new BlockTranfer: addr: 0x%04x  amount %d\n", transferAddress, amount);
-    vector<byte> temp;
-	const byte* bufferPointer = &buffer[transferred];
-	for (unsigned int i=0;i<amount; i++) {
-		temp.push_back(bufferPointer[i]);
-	}
-    blockRead(transferAddress, amount, temp);
-}
-
+// dummy command (reads first 16Kb of disk as test)
 void NowindHost::blockReadCmd()
 {
     SectorMedium* disk = drives[0]->getSectorMedium();
@@ -26,6 +15,25 @@ void NowindHost::blockReadCmd()
 
 void NowindHost::blockRead(word startAddress, word size, const vector <byte >& data)
 {
+    DBERR("blockRead, startAddress: 0x%04X, size: 0x%04X\n", startAddress, size);
+
+    static const word TWOBANKLIMIT = 0x8000;
+    if (startAddress < TWOBANKLIMIT)
+    {
+        word endAddress = startAddress + size;
+        word transferSize = std::min(TWOBANKLIMIT, endAddress - startAddress);
+        blockReadHelper(startAddress, transferSize, data);
+        transferred += transferSize;    // store for use in blockReadContinue()
+    }
+    else
+    {
+        blockReadHelper(startAddress, size, data);
+        transferred += transferSize;    // store for use in blockReadContinue()
+    }  
+}
+
+void NowindHost::blockReadHelper(word startAddress, word size, const vector <byte >& data)
+{
     //DBERR("blockRead() startAddress: 0x%04x, size: 0x%02x\n", startAddress, size);
 
     for(unsigned int i=0; i< dataBlockQueue.size(); i++)
@@ -35,7 +43,7 @@ void NowindHost::blockRead(word startAddress, word size, const vector <byte >& d
     dataBlockQueue.clear();
 
     word address = startAddress;
-    unsigned int offset = 0;
+    unsigned int offset = transferred;
     byte blocks = size / HARDCODED_READ_DATABLOCK_SIZE;
 
     // queue datablocks in reverse order
@@ -55,7 +63,7 @@ void NowindHost::blockRead(word startAddress, word size, const vector <byte >& d
     {
         sendDataBlock(i);
     }
-    state = STATE_BLOCKREAD;
+    state = STATE_BLOCKREAD_ACK;
 }
 
 void NowindHost::sendDataBlock(unsigned int blocknr)
@@ -84,6 +92,28 @@ void NowindHost::sendDataBlock(unsigned int blocknr)
     send(dataBlock->header);    // tail
 }
 
+void NowindHost::blockReadContinue()
+{
+    unsigned sectorAmount = getSectorAmount();
+    unsigned int size = sectorAmount * 512;
+    unsigned address = getCurrentAddress();
+    
+    if (transferred < size)
+    {
+        DBERR("blockReadContinue, do more!");
+        sendHeader();
+        send(254);
+        blockRead(address, size-transferred, buffer);   // state is set to STATE_BLOCKREAD_ACK
+    }
+    else
+    {
+        DBERR("blockReadContinue, we're done!");
+        sendHeader();
+        send(0);
+        state = STATE_SYNC1;
+    }
+}
+
 void NowindHost::blockReadAck(byte tail)
 {
     assert(dataBlockQueue.size() != 0);
@@ -96,6 +126,10 @@ void NowindHost::blockReadAck(byte tail)
         delete dataBlock;
         dataBlock = 0;
         dataBlockQueue.pop_front();
+        if (dataBlockQueue.size() == 0)
+        {
+            blockReadContinue();
+        }
     }
     else
     {
@@ -110,14 +144,6 @@ void NowindHost::blockReadAck(byte tail)
         sendDataBlock(0); // resend dataBlock
         dataBlockQueue.pop_front();
         dataBlockQueue.push_back(dataBlock);    // put dataBlock at end of queue
-    }
-
-    if (dataBlockQueue.size() == 0)
-    {
-        // all blocks ack'd, we're done
-        sendHeader();   // TODO: remove, MSX should check if errors occured
-        send(0);
-        state = STATE_SYNC1;
     }
 }
 
