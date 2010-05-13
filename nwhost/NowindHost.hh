@@ -78,7 +78,7 @@ public:
 		STATE_DEVOPEN,   // waiting for filename (11 bytes)
 		STATE_IMAGE,     // waiting for filename
 		STATE_MESSAGE,   // waiting for null-terminated message
-		STATE_BLOCKREAD
+		STATE_BLOCKREAD_ACK
 	};
 
 	virtual void debugMessage(const char *cFormat, ...) const;
@@ -174,10 +174,12 @@ private:
 
     void blockReadCmd();
     void blockRead(word startAddress, word size, const std::vector <byte >& data);
+    void blockReadHelper(word startAddress, word size, const std::vector <byte >& data);
+    void blockReadContinue();
+
     void doBlockRead();
     void sendDataBlock(unsigned int blocknr);
     void blockReadAck(byte tail);
-    void newBlockTransfer(unsigned transferAddress, unsigned amount);   // TODO: tijdelijk!
     void blockWrite();
 };
 

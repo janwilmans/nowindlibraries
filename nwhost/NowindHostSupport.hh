@@ -332,12 +332,12 @@ unsigned NowindHost::getStartAddress() const
 	byte reg_h = cmdData[5];
 	return reg_h * 256 + reg_l;
 }
+
 unsigned NowindHost::getCurrentAddress() const
 {
 	unsigned startAdress = getStartAddress();
 	return startAdress + transferred;
 }
-
 
 unsigned NowindHost::getFCB() const
 {
