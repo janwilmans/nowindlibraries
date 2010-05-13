@@ -20,8 +20,8 @@ void NowindHost::blockRead(word startAddress, word size, const vector <byte >& d
     static const word TWOBANKLIMIT = 0x8000;
     if (startAddress < TWOBANKLIMIT)
     {
-        word endAddress = startAddress + size;
-        word transferSize = std::min(TWOBANKLIMIT, endAddress - startAddress);
+        word endAddress = std::min(TWOBANKLIMIT, startAddress + size);
+        word transferSize = endAddress - startAddress;
         blockReadHelper(startAddress, transferSize, data);
         transferred += transferSize;    // store for use in blockReadContinue()
     }
@@ -34,7 +34,7 @@ void NowindHost::blockRead(word startAddress, word size, const vector <byte >& d
 
 void NowindHost::blockReadHelper(word startAddress, word size, const vector <byte >& data)
 {
-    //DBERR("blockRead() startAddress: 0x%04x, size: 0x%02x\n", startAddress, size);
+    DBERR("blockRead() blockReadHelper: 0x%04x, size: 0x%02x, transferred: 0x%02x\n", startAddress, size, transferred);
 
     for(unsigned int i=0; i< dataBlockQueue.size(); i++)
     {        
@@ -100,14 +100,14 @@ void NowindHost::blockReadContinue()
     
     if (transferred < size)
     {
-        DBERR("blockReadContinue, do more!");
+        DBERR("blockReadContinue, do more!\n");
         sendHeader();
-        send(254);
+        send(2);
         blockRead(address, size-transferred, buffer);   // state is set to STATE_BLOCKREAD_ACK
     }
     else
     {
-        DBERR("blockReadContinue, we're done!");
+        DBERR("blockReadContinue, we're done!\n");
         sendHeader();
         send(0);
         state = STATE_SYNC1;
