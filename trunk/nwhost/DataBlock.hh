@@ -12,6 +12,8 @@ public:
 
     word number;
     byte header;
+    word size;
+    bool fastTransfer;
     word transferAddress;
     std::vector < byte > data;
 
