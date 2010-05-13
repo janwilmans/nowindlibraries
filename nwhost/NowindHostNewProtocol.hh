@@ -34,36 +34,56 @@ void NowindHost::blockRead(word startAddress, word size, const vector <byte >& d
 void NowindHost::blockReadHelper(word startAddress, word size, const vector <byte >& data)
 {
     DBERR("blockRead() blockReadHelper: 0x%04x, size: 0x%02x, transferred: 0x%02x\n", startAddress, size, transferred);
-
+    word address = startAddress;
+    unsigned int offset = transferred;      //transferred is an offset within 'const vector <byte >& data'
+    unsigned int blockNr = 0;
+    
+    // delete any blocks still in the dataBlockQueue (unacknowlged by msx, could be caused by timeouts)
     for(unsigned int i=0; i< dataBlockQueue.size(); i++)
     {        
         delete dataBlockQueue[i];
     }
     dataBlockQueue.clear();
 
-    word address = startAddress;
-    unsigned int offset = transferred;
-    byte blocks = size / HARDCODED_READ_DATABLOCK_SIZE;
-
-    // queue datablocks in reverse order
-    for(int i=0; i<blocks; i++)
-    {        
-        //DBERR("newDataBlock[%u] addr: 0x%04x, offset: 0x%04x, size: %u\n", i, address, offset, READ_DATABLOCK_SIZE);
-        dataBlockQueue.push_front(new DataBlock(i, data, offset, address, HARDCODED_READ_DATABLOCK_SIZE));
-        address += HARDCODED_READ_DATABLOCK_SIZE;
-        offset += HARDCODED_READ_DATABLOCK_SIZE;
+    if (size < HARDCODED_READ_DATABLOCK_SIZE)
+    {   
+        // just 1 slow block
+        dataBlockQueue.push_front(new DataBlock(0, data, offset, address, size));
+        sendHeader();
+        send(2);        // slow tranfer
+        send16(startAddress);
+        send16(size);   // amount of bytes
+        sendDataBlock(0);
     }
-
-    sendHeader();
-    send(1);            // not end 
-    send16(startAddress+size);
-    send(blocks);
-    for (unsigned int i=0; i<blocks; i++)
+    else
     {
-        sendDataBlock(i);
-    }
-    state = STATE_BLOCKREAD_ACK;
-    transferred += size;        // store for use in blockReadContinue()
+        // fast blocks
+        word address = startAddress;
+        unsigned int offset = transferred;
+        byte blocks = size / HARDCODED_READ_DATABLOCK_SIZE;
+        unsigned int blockNr = 0;
+
+        // queue datablocks in reverse order
+        for(int i=0; i<blocks; i++)
+        {        
+            //DBERR("newDataBlock[%u] addr: 0x%04x, offset: 0x%04x, size: %u\n", i, address, offset, READ_DATABLOCK_SIZE);
+            dataBlockQueue.push_front(new DataBlock(blockNr, data, offset, address, HARDCODED_READ_DATABLOCK_SIZE));
+            address += HARDCODED_READ_DATABLOCK_SIZE;
+            offset += HARDCODED_READ_DATABLOCK_SIZE;
+            blockNr++;
+        }
+
+        sendHeader();
+        send(1);            // fast transfer
+        send16(startAddress+size);
+        send(blocks);
+        for (unsigned int i=0; i<blocks; i++)
+        {
+            sendDataBlock(i);
+        }
+        state = STATE_BLOCKREAD_ACK;
+        transferred += size;        // store for use in blockReadContinue()        
+   }
 }
 
 void NowindHost::sendDataBlock(unsigned int blocknr)
@@ -140,9 +160,19 @@ void NowindHost::blockReadAck(byte tail)
 
         DBERR("block failed! (errors: %u)\n", errors);
 	    sendHeader();
-	    send(0x01);			// not done, retry block follows
-        send16(dataBlock->transferAddress);
-        send(1);
+	    
+	    if (dataBlock->fastTransfer)
+	    {
+	        send(0x01);			// not done, retry fast block follows
+            send16(dataBlock->transferAddress);
+            send(1);
+        }
+        else
+        {
+	        send(0x02);			// not done, retry slow block follows
+            send16(dataBlock->transferAddress);
+            send16(dataBlock->size);
+        }        
         sendDataBlock(0); // resend dataBlock
         dataBlockQueue.pop_front();
         dataBlockQueue.push_back(dataBlock);    // put dataBlock at end of queue

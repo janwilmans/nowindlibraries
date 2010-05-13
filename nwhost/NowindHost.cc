@@ -390,7 +390,7 @@ void NowindHost::doDiskWrite1()
 		unsigned sectorAmount = unsigned(buffer.size()) / 512;
 		unsigned startSector = getStartSector();
 		if (SectorMedium* disk = getDisk()) {
-	        DBERR("startsector: %u  sectoramount %d\n", startSector, sectorAmount);
+	        DBERR("write to disk -> startsector: %u  sectoramount %d\n", startSector, sectorAmount);
 			if (disk->writeSectors(&buffer[0], startSector, sectorAmount)) {
 				// TODO write error
 			}
