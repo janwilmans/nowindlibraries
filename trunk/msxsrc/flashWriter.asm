@@ -6,7 +6,7 @@ waitForFlashCommand:
         
         di
 waitForHeader:
-        ld h,HIGH usbrd
+        ld h,HIGH usbReadPage0
         ld a,(hl)
 .chkbb: cp $bb
         jr nz,waitForHeader
@@ -32,7 +32,7 @@ autoselectMode:
 
         ld hl,($4000)
         ex de,hl
-        ld h,HIGH usbwr
+        ld h,HIGH usbWritePage1
         ld (hl),$aa
         ld (hl),$55
         ld (hl),e                       ; manufacturer ID (0x01 = AMD)
@@ -89,7 +89,7 @@ writeFlash:
         ld b,128                        ; data is written in blocks of 128 bytes
 .loop:  ld a,$a0
         call writeCommandSequence
-        ld a,(usbrd)
+        ld a,(usbReadPage0)
         ld (de),a                       ; write data to flash
         inc de
         call checkCommandExecution
@@ -100,7 +100,7 @@ writeFlash:
         
 verifyFlash:
         ;DEBUGMESSAGE "verify"
-        ld hl,usbrd
+        ld hl,usbReadPage0
         ld e,(hl)                       ; address
         ld d,(hl)
         ld a,(hl)                       ; bank
@@ -108,14 +108,14 @@ verifyFlash:
 
         ld b,128
 .loop:  ld a,(de)
-        ld (usbwr),a
+        ld (usbWritePage1),a
         inc de
         djnz .loop
 
         ld a,3
 
 acknowledge:        
-        ld h,HIGH usbwr
+        ld h,HIGH usbWritePage1
         ld (hl),$aa
         ld (hl),$55
         ld (hl),a

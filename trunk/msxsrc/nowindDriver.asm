@@ -21,14 +21,14 @@ INIHRD:
 
         call enableNowindPage0          ; clear hostToMSXFifo by reading 4Kb of random data
         ld bc,4096
-.loop:  ld a,(usbrd)
+.loop:  ld a,(usbReadPage0)
         dec bc
         ld a,b
         or c
         jr nz,.loop
         call restorePage0
 
-        ld h,HIGH usbwr
+        ld h,HIGH usbWritePage1
         ld (hl),$af                     ; INIHRD command
         ld (hl),$ff
         jp nowindInit
@@ -57,7 +57,7 @@ DRIVES:
         ret
 
 drivesCommand:
-        ld h,HIGH usbrd
+        ld h,HIGH usbReadPage0
         ld (LASTDRV),a                  ; install phantom drives (CRTL key)?
         ld a,(hl)                       ; allow other drives (SHIFT key)?
         ld (DEVICE),a
@@ -133,30 +133,14 @@ DSKIO:
         jr c,dskioWrite                 ; read or write?
 
 dskioRead:
-        rlca                            ; tranfer address < 0x8000 ?
-        jr c,.page23
-
-        DEBUGMESSAGE "blockRead01"
-        ld b,HIGH usb2
-        ld hl,blockRead2
-        call executeCommandNowindInPage2
-        DEBUGMESSAGE "more?"
-        ret c                           ; not ready
-        ; er kan nog meer komen voor de volgende page!
-        DEBUGMESSAGE "doorgaan!"
-        ret
-.page23:
-        DEBUGMESSAGE "blockRead23"
-        ld b,HIGH usbrd
-        ld hl,blockRead
-        jp executeCommandNowindInPage0
+        jp blockRead
 
 dskioWrite:
         DEBUGMESSAGE "dskwrite"
         rlca
         jr c,.page23
 
-        ld b,HIGH usbrd
+        ld b,HIGH usbReadPage0
         ld hl,blockWrite23
         call executeCommandNowindInPage0
         ret c                           ; return error (error code in a)
@@ -165,7 +149,7 @@ dskioWrite:
 
 .page23:
         DEBUGMESSAGE "p2&3"
-        ld b,HIGH usbrd
+        ld b,HIGH usbReadPage0
         ld hl,blockWrite23
         call executeCommandNowindInPage0
         DEBUGMESSAGE "back"
@@ -176,10 +160,10 @@ dskioWrite:
 blockWrite01:
         DEBUGDUMPREGISTERS
         DEBUGMESSAGE "blkWr01"
-        ld h,HIGH usb2
+        ld h,HIGH usbReadPage2
         jr .start2
 .start:
-        ld h,HIGH usb2
+        ld h,HIGH usbReadPage2
         call getHeader + $4000
 .start2:
         ret c                           ; exit (not ready)
@@ -195,7 +179,7 @@ blockWrite01:
         ld a,(hl)                       ; block sequence number
 
         ex de,hl
-        ld de,usb2
+        ld de,usbWritePage2
         ld (de),a                       ; mark block begin
         ldir
         ld (de),a                       ; mark block end
@@ -210,10 +194,10 @@ blockWrite01:
 blockWrite23:
         DEBUGDUMPREGISTERS
         DEBUGMESSAGE "blkWr23"
-        ld h,HIGH usbrd
+        ld h,HIGH usbReadPage0
         jr .start2
 .start:
-        ld h,HIGH usbrd
+        ld h,HIGH usbReadPage0
         call getHeader
 .start2:
         ret c                           ; exit (not ready)
@@ -230,7 +214,7 @@ blockWrite23:
 
         ;DEBUGDUMPREGISTERS
         ex de,hl
-        ld de,usbwr
+        ld de,usbWritePage1
         ld (de),a                       ; mark block begin
         ldir
         ld (de),a                       ; mark block end
@@ -262,7 +246,7 @@ DSKCHG:
         ;call sendRegisters
         ;ld (hl),C_DSKCHG
         ;call enableNowindPage0
-        ;ld h,HIGH usbrd
+        ;ld h,HIGH usbReadPage0
         ;call getHeader
 
     SEND_CMD_AND_WAIT C_DSKCHG
@@ -329,7 +313,7 @@ GETDPB:
         ;call sendRegisters
         ;ld (hl),C_GETDPB
         ;call enableNowindPage0
-        ;ld h,HIGH usbrd
+        ;ld h,HIGH usbReadPage0
         ;call getHeader
     SEND_CMD_AND_WAIT C_GETDPB
         jr c,.exit                      ; not ready
@@ -387,7 +371,7 @@ changeImage:
 call_exit:
         DEBUGMESSAGE "call_exit"
 .loop:  ld a,(hl)
-        ld (usbwr),a
+        ld (usbWritePage1),a
         cp ":"
         ret z
         or a

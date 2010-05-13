@@ -103,7 +103,7 @@ noNextCommand:
         ;call sendRegisters
         ;ld (hl),C_GETDOSVERSION
         ;call enableNowindPage0
-        ;ld h,HIGH usbrd
+        ;ld h,HIGH usbReadPage0
         ;call getHeader
     SEND_CMD_AND_WAIT C_GETDOSVERSION
 

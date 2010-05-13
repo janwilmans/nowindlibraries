@@ -36,9 +36,10 @@ GETSLT          equ $402d
 H.RUNC          equ $fecb               ; Intercepted by diskrom
 
 ; Nowind hardware addresses
-usbwr           equ $4000               ; 0x4000..0x5fff
-usbrd           equ $2000               ; 0x2000..0x3fff
-usb2            equ $8000               ; 0x8000..0x9fff (read and write)
+usbWritePage1   equ $4000               ; 0x4000..0x5fff
+usbReadPage0    equ $2000               ; 0x2000..0x3fff
+usbWritePage2   equ $8000               ; 0x8000..0x9fff (read and write)
+usbReadPage2    equ $8000               ; 0x8000..0x9fff (read and write)
 mapper          equ $6001               ; 0x6001..0x7fff (odd numbers only)
 
 ; Host commands
@@ -201,7 +202,7 @@ C_BLOCKWRITE    equ $95
         endmacro
 
 ; in: all registers, 
-; out: h = HIGH usbwr
+; out: h = HIGH usbWritePage1
 ; unchanged: bc, ix, iy
 ; requirements: stack available
 macro SEND_COMMAND cmd
@@ -210,11 +211,11 @@ macro SEND_COMMAND cmd
 endmacro
 
 ; in: none
-; out: A = first received byte, H = HIGH usbrd, CF is on timeout
+; out: A = first received byte, H = HIGH usbReadPage0, CF is on timeout
 ; unchanged: de, ix, iy
 ; requirements: nowind in page 0! (use enableNowindPage0)
 macro GET_RESPONSE
-        ld h,HIGH usbrd
+        ld h,HIGH usbReadPage0
         call getHeader
 endmacro
 
@@ -224,7 +225,7 @@ macro SEND_CMD_AND_WAIT cmd
 		ld (hl),cmd
         call enableNowindPage0
         ;call getHeaderHigh
-		ld h,HIGH usbrd
+		ld h,HIGH usbReadPage0
 		call getHeader
 endmacro
 

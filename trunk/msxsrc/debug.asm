@@ -16,7 +16,7 @@
         push af
         exx
         ld hl,.data
-        ld d,HIGH usbwr
+        ld d,HIGH usbWritePage1
         ld bc,.end-.data
         ldir
         jr .end
@@ -86,9 +86,9 @@ sendCpuInfo:
         call sendRegisters
         ld (hl),128
 
-        ld (usbwr),ix
-        ld (usbwr),iy
-        ld (usbwr),sp                   ; needs adjustment! (host does this)
+        ld (usbWritePage1),ix
+        ld (usbWritePage1),iy
+        ld (usbWritePage1),sp                   ; needs adjustment! (host does this)
 
         in a,($a8)                      ; current slotselection
         ld (hl),a
@@ -104,7 +104,7 @@ sendCpuInfo:
         ld d,16
 .loop:  ld a,(hl)
         dec hl
-        ld (usbwr),a
+        ld (usbWritePage1),a
         dec d
         jr nz,.loop
 

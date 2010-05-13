@@ -98,7 +98,7 @@ debugMessage:
         pop hl
 .loop:  ld a,(hl)
         inc hl
-        ld (usbwr),a
+        ld (usbWritePage1),a
         or a
         jr nz,.loop
 
