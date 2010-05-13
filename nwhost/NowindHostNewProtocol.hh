@@ -23,13 +23,12 @@ void NowindHost::blockRead(word startAddress, word size, const vector <byte >& d
         word endAddress = std::min(TWOBANKLIMIT, startAddress + size);
         word transferSize = endAddress - startAddress;
         blockReadHelper(startAddress, transferSize, data);
-        transferred += transferSize;    // store for use in blockReadContinue()
     }
     else
     {
         blockReadHelper(startAddress, size, data);
-        transferred += transferSize;    // store for use in blockReadContinue()
     }  
+    DBERR("blockRead, transferred: 0x%04X\n", transferred);
 }
 
 void NowindHost::blockReadHelper(word startAddress, word size, const vector <byte >& data)
@@ -64,6 +63,7 @@ void NowindHost::blockReadHelper(word startAddress, word size, const vector <byt
         sendDataBlock(i);
     }
     state = STATE_BLOCKREAD_ACK;
+    transferred += size;        // store for use in blockReadContinue()
 }
 
 void NowindHost::sendDataBlock(unsigned int blocknr)
@@ -97,6 +97,8 @@ void NowindHost::blockReadContinue()
     unsigned sectorAmount = getSectorAmount();
     unsigned int size = sectorAmount * 512;
     unsigned address = getCurrentAddress();
+
+     DBERR("blockReadContinue(), size: 0x%04x, address: 0x%04x, transferred: 0x%04x\n", size, address, transferred);
     
     if (transferred < size)
     {

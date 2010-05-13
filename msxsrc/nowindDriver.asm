@@ -118,7 +118,7 @@ DSKIO:
 ;           C   Media descriptor
 ;           DE  Logical sector number
 ;           HL  Transfer address
-; Output    F   Carry set when not succesfull
+; Output    F   Carry set when not successful
 ;           A   Error code
 ;           B   Number of remaining sectors (TODO: check! even without error?)
 
@@ -140,19 +140,20 @@ dskioWrite:
         rlca
         jr c,.page23
 
-        ld b,HIGH usbReadPage0
-        ld hl,blockWrite23
-        call executeCommandNowindInPage0
+        DEBUGMESSAGE "p01"
+        ld hl,blockWrite01
+        call executeCommandNowindInPage2
         ret c                           ; return error (error code in a)
         ret pe                          ; host returns 0xfe when data for page 2/3 is available
         DEBUGMESSAGE "doorgaan!"
 
 .page23:
-        DEBUGMESSAGE "p2&3"
-        ld b,HIGH usbReadPage0
+        DEBUGMESSAGE "p23"
         ld hl,blockWrite23
         call executeCommandNowindInPage0
+        DEBUGDUMPREGISTERS
         DEBUGMESSAGE "back"
+        xor a
         ret
 
         PHASE $ + $4000
@@ -214,7 +215,7 @@ blockWrite23:
 
         ;DEBUGDUMPREGISTERS
         ex de,hl
-        ld de,usbWritePage1
+        ld d,HIGH usbWritePage1
         ld (de),a                       ; mark block begin
         ldir
         ld (de),a                       ; mark block end
