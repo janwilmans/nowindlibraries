@@ -130,6 +130,18 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\extendedBios.asm"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\flash01.asm"
 				>
 				<FileConfiguration
@@ -194,7 +206,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assembly nowind.rom"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
 						Outputs="$(OutDir)nowind.rom"
 					/>
 				</FileConfiguration>

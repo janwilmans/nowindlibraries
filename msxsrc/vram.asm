@@ -61,12 +61,12 @@ tranferframe:
         call sendRegisters
         ld (hl),255
                 
-        ld hl,usbrd
+        ld hl,usbReadPage0
         call getHeader
         
         ld d,112                        ; 224x64 is 1 screen 2 page of data ($3800)
 write_more:        
-        ld hl,usbrd
+        ld hl,usbReadPage0
         ld bc,$0098
         repeat 128
         outi
@@ -84,7 +84,7 @@ changeColors:
         ld a,$80+16
         out ($99),a
         
-        ld hl,usbrd
+        ld hl,usbReadPage0
         ld bc,$009A             ; write to color register
 
         repeat 32

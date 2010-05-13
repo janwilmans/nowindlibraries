@@ -58,7 +58,7 @@ open:
         ldir
 
         call enableNowindPage0
-        ld h,HIGH usbrd
+        ld h,HIGH usbReadPage0
         call getHeader
         jr c,deviceIoError              ; time out?
         or a
@@ -127,7 +127,7 @@ read:
         call sendRegisters
         ld (hl),C_DEVICEREAD
         call enableNowindPage0
-        ld h,HIGH usbrd
+        ld h,HIGH usbReadPage0
         call getHeader
         jr c,deviceIoError
 

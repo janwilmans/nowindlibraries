@@ -56,7 +56,7 @@ findStatementName:
 sendRegisters:
         push af
         ld a,h
-        ld h,HIGH usbwr
+        ld h,HIGH usbWritePage1
         ld (hl),$af      ; send header
         ld (hl),$05
         ld (hl),c
@@ -72,7 +72,7 @@ sendRegisters:
 
 ; GetHeader, returns a = 2 if timeout occurs
 ;getHeaderHigh:
-;   ld h,HIGH usbrd
+;   ld h,HIGH usbReadPage0
 getHeader:
         DEBUGMESSAGE "gH"
         ld b,HIGH 65535                 ; 42000 * 60 states ~ 0,7 sec (time out)
@@ -105,7 +105,7 @@ sendMessage:
         pop hl
 .loop:  ld a,(hl)
         inc hl
-        ld (usbwr),a
+        ld (usbWritePage1),a
         or a
         jr nz,.loop
         pop de
@@ -130,7 +130,7 @@ AUXin:  DEBUGMESSAGE "AUX in"
     ;call sendRegisters
         ;ld (hl),C_AUXIN
         ;call enableNowindPage0
-        ;ld h,HIGH usbrd
+        ;ld h,HIGH usbReadPage0
         ;call getHeader
     SEND_CMD_AND_WAIT C_AUXIN
 
@@ -174,7 +174,7 @@ sdendFCB:
 
         ld b,32
 .loop:  ld a,(de)
-        ld (usbwr),a
+        ld (usbWritePage1),a
         inc de
         djnz .loop
         pop bc
@@ -187,8 +187,8 @@ receiveFCB:
         push bc
 
         ld b,32
-.loop:  ld a,(usbrd)
-        ld (usbwr),a      ; loop back
+.loop:  ld a,(usbReadPage0)
+        ld (usbWritePage1),a      ; loop back
         ld (de),a
         inc de
         djnz .loop
@@ -205,7 +205,7 @@ executeCommandNowindInPage0:
         push hl
         push bc
         call enableNowindPage0
-        ld h,HIGH usbrd
+        ld h,HIGH usbReadPage0
         call getHeader
         jr c,.exit      ; timeout occurred?
 
@@ -243,7 +243,7 @@ executeCommandNowindInPage2:
         ld h,$40
         call ENASLT
 
-        ld h,HIGH usb2
+        ld h,HIGH usbReadPage2
         call getHeader + $4000
         jr c,.exit      ; timeout occurred?
 
@@ -271,77 +271,27 @@ executeCommandNowindInPage2:
         ret
 
 blockRead:
-        DEBUGMESSAGE "br23"
-        DEBUGDUMPREGISTERS
-        ld h,b
-        jr .start2
-.start:
-        call getHeader
-.start2:
-        ret c                           ; return on timeout
-        and a
-        ret z                           ; resume
+; Input     A   Transfer address (high byte)
 
-        call .transfer
-        jr .start
+        rlca                            ; tranfer address < 0x8000 ?
+        jr c,.page23
 
-.transfer:
-        ld iy,0                         ; save stack pointer
-        add iy,sp
-        ld e,(hl)                       ; transfer address
-        ld d,(hl)
-        ex de,hl
-        ld sp,hl
-        ex de,hl
-        ld b,(hl)                       ; amount of 128 byte blocks (max 32kB)
-
-.loop:
-        ld a,(hl)                       ; header
-        ld c,a
-        cp 255
-        jp z,.error255
-
-.good:
-        repeat 32                       ; blocks of 128 bytes hardcoded (NowindHost.cpp)
-        ld d,(hl)
-        ld e,(hl)
-        push de
-        endrepeat
-
-        ld a,(hl)                       ; tail
-        ld (usbwr),a
-        cp c
-        jr nz,.error
-.nextLoop:
-        dec b
-        jp nz,.loop
-
-        ld sp,iy                        ; restore stack pointer
+        ld hl,blockRead01
+        call executeCommandNowindInPage2
+        DEBUGMESSAGE "more?"
+        ret c                           ; not ready
+        ; er kan nog meer komen voor de volgende page!
+        DEBUGMESSAGE "doorgaan!"
         ret
-
-.error:
-        DEBUGMESSAGE ".err"
-        ; TODO timeout
-        ld a,(hl)
-        cp c
-        jp z,.nextLoop
-        jr .error
-
-.error255:
-        ; TODO timeout
-        DEBUGMESSAGE ".err255"
-        ld a,(hl)
-        cp 255
-        jr z,.error255
-        ; b moet nog aangepast... (hoe?)
-        ld c,a
-        jp .good
+.page23:
+        ld hl,blockRead23
+        jp executeCommandNowindInPage0
 
         PHASE $ + $4000
         
-blockRead2:
+blockRead01:
         DEBUGMESSAGE "br01"
-        ld h,b
+        ld h,HIGH usbReadPage2
         jr .start2
 .start:
         call getHeader + $4000
@@ -379,7 +329,7 @@ blockRead2:
         endrepeat
 
         ld a,(hl)                       ; tail
-        ld (usb2),a
+        ld (usbWritePage2),a
         cp c
         jr nz,.error
 .nextLoop:
@@ -408,6 +358,76 @@ blockRead2:
         jp .good
 
         DEPHASE
+
+blockRead23:
+        DEBUGMESSAGE "br23"
+        DEBUGDUMPREGISTERS
+        ld h,HIGH usbReadPage0
+        jr .start2
+.start:
+        call getHeader
+.start2:
+        ret c                           ; return on timeout
+        and a
+        ret z                           ; resume
+
+        DEBUGMESSAGE "br23_a"
+        
+        call .transfer
+        jr .start
+
+.transfer:
+        ld iy,0                         ; save stack pointer
+        add iy,sp
+        ld e,(hl)                       ; transfer address
+        ld d,(hl)
+        ex de,hl
+        ld sp,hl
+        ex de,hl
+        ld b,(hl)                       ; amount of 128 byte blocks (max 32kB)
+
+.loop:
+        ld a,(hl)                       ; header
+        ld c,a
+        cp 255
+        jp z,.error255
+
+.good:
+        repeat 32                       ; blocks of 128 bytes hardcoded (NowindHost.cpp)
+        ld d,(hl)
+        ld e,(hl)
+        push de
+        endrepeat
+
+        ld a,(hl)                       ; tail
+        ld (usbWritePage1),a
+        cp c
+        jr nz,.error
+.nextLoop:
+        dec b
+        jp nz,.loop
+
+        ld sp,iy                        ; restore stack pointer
+        ret
+
+.error:
+        DEBUGMESSAGE ".err"
+        ; TODO timeout
+        ld a,(hl)
+        cp c
+        jp z,.nextLoop
+        jr .error
+
+.error255:
+        ; TODO timeout
+        DEBUGMESSAGE ".err255"
+        ld a,(hl)
+        cp 255
+        jr z,.error255
+        ; b moet nog aangepast... (hoe?)
+        ld c,a
+        jp .good
+
 
         ; include flash routine only once
         if MSXDOSVER = 2
