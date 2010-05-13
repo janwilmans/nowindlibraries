@@ -118,13 +118,15 @@ void NowindHost::blockReadContinue()
     unsigned int size = sectorAmount * 512;
     unsigned address = getCurrentAddress();
 
-     DBERR("blockReadContinue(), size: 0x%04x, address: 0x%04x, transferred: 0x%04x\n", size, address, transferred);
+    DBERR("blockReadContinue(), size: 0x%04x, address: 0x%04x, transferred: 0x%04x\n", size, address, transferred);
+    
+    // we should determine here, where to send 0, 1, 2 or 3!!!
     
     if (transferred < size)
     {
         DBERR("blockReadContinue, do more!\n");
         sendHeader();
-        send(2);
+        send(3);    
         blockRead(address, size-transferred, buffer);   // state is set to STATE_BLOCKREAD_ACK
     }
     else

@@ -280,7 +280,7 @@ blockRead:
         call executeCommandNowindInPage2
         ret c                           ; not ready
 
-        cp 2
+        cp 3                ; more data ahead for .page23?
         scf
         ccf
         ret nz
@@ -289,7 +289,6 @@ blockRead:
 .page23:
         ld hl,blockRead23
         jp executeCommandNowindInPage0
-
      
 blockRead01:
         DEBUGMESSAGE "br01"
@@ -302,10 +301,17 @@ blockRead01:
         ret c                           ; return on timeout
 
         and a
-        ret z                           ; exit blockRead01
-        cp 2
-        ret z                           ; more data for page23!        
+        ret z                           ; exit blockRead01 (no more data)
+        cp 1
+        jr z,.fastTransfer
+        cp 3
+        ret z                           ; exit blockRead01 (more data for .page23)
 
+        call slowTransfer + $4000
+        ld (usbWritePage2),a            ; return header
+        jr .start
+
+.fastTransfer:
         call blockReadTranfer + $4000
         jr .start
 
@@ -320,9 +326,14 @@ blockRead23:
         ret c                           ; return on timeout
         and a
         ret z                           ; exit blockRead23
+        cp 1
+        jr z,.fastTransfer
 
-        DEBUGMESSAGE "br23_a"
-        
+        call slowTransfer
+        ld (usbWritePage1),a            ; return header
+        jr .start
+
+.fastTransfer:
         call blockReadTranfer
         jr .start
 
@@ -404,6 +415,17 @@ blockReadTranfer:
         jr z,.nextLoopInPage2
         jr .errorInPage2
 
+slowTransfer:
+        ld e,(hl)                       ; slow transfer
+        ld d,(hl)
+        ld c,(hl)        
+        ld b,(hl)
+        ld a,(hl)                       ; header
+        ldir
+        ld b,(hl)
+        cp a                            ; check block (header == tail?)
+        ld a,b
+        ret
 
         ; include flash routine only once
         if MSXDOSVER = 2
