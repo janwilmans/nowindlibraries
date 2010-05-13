@@ -366,6 +366,7 @@ void NowindHost::transferSectorsBackwards(unsigned transferAddress, unsigned amo
 void NowindHost::diskWriteInit(SectorMedium& disk)
 {
 	DBERR("diskWriteInit\n");
+	DBERR("startsector: %u  sectoramount %d\n", getStartSector(), getSectorAmount());
 	if (disk.isWriteProtected()) {
 		sendHeader();
 		send(1);
@@ -389,6 +390,7 @@ void NowindHost::doDiskWrite1()
 		unsigned sectorAmount = unsigned(buffer.size()) / 512;
 		unsigned startSector = getStartSector();
 		if (SectorMedium* disk = getDisk()) {
+	        DBERR("startsector: %u  sectoramount %d\n", startSector, sectorAmount);
 			if (disk->writeSectors(&buffer[0], startSector, sectorAmount)) {
 				// TODO write error
 			}
@@ -409,6 +411,8 @@ void NowindHost::doDiskWrite1()
 		transferSize = 0x8000 - address;
 	}
 
+    DBERR(" address: 0x%04x, transferSize: 0x%04X \n", address, transferSize);
+    
 	sendHeader();
 	send(0);          // data ahead!
 	send16(address);
@@ -439,10 +443,10 @@ void NowindHost::doDiskWrite2()
 		if ((address == 0x8000) && (bytesLeft > 0)) {
 			sendHeader();
 			send(254); // more data for page 2/3
+	        DBERR(" more data for page 2/3\n");
 		}
 	} else {
-		// ERROR!!!
-		// This situation is still not handled correctly!
+	    DBERR(" ERROR!!! This situation is still not handled correctly!\n");
 		purge();
 	}
 
