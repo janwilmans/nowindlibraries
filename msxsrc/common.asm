@@ -278,11 +278,14 @@ blockRead:
 
         ld hl,blockRead01 + $4000
         call executeCommandNowindInPage2
-        DEBUGMESSAGE "more?"
         ret c                           ; not ready
-        ; er kan nog meer komen voor de volgende page!
+
+        cp 2
+        scf
+        ccf
+        ret nz
         DEBUGMESSAGE "doorgaan!"
-        ret
+
 .page23:
         ld hl,blockRead23
         jp executeCommandNowindInPage0
@@ -297,8 +300,11 @@ blockRead01:
 .start2:
         DEBUGDUMPREGISTERS
         ret c                           ; return on timeout
+
         and a
         ret z                           ; exit blockRead01
+        cp 2
+        ret z                           ; more data for page23!        
 
         call blockReadTranfer + $4000
         jr .start
