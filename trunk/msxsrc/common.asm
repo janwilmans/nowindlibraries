@@ -284,7 +284,7 @@ blockRead:
         scf
         ccf
         ret nz
-        DEBUGMESSAGE "doorgaan!"
+        DEBUGMESSAGE "more data for .page23, doorgaan!"
 
 .page23:
         ld hl,blockRead23
@@ -329,11 +329,13 @@ blockRead23:
         cp 1
         jr z,.fastTransfer
 
+        DEBUGMESSAGE "slow"
         call slowTransfer
         ld (usbWritePage1),a            ; return header
         jr .start
 
 .fastTransfer:
+        DEBUGMESSAGE "fast"
         call blockReadTranfer
         jr .start
 
@@ -362,7 +364,7 @@ blockReadTranfer:
         ld b,(hl)                       ; amount of 128 byte blocks (max 32kB)
         DEBUGDUMPREGISTERS
 .loop:
-        DEBUGMESSAGE ".loop"
+        ;DEBUGMESSAGE ".loop"
         ld a,(hl)                       ; header
         ld c,a
         cp 255
@@ -416,15 +418,18 @@ blockReadTranfer:
         jr .errorInPage2
 
 slowTransfer:
+        DEBUGMESSAGE "SlowTR"
         ld e,(hl)                       ; slow transfer
         ld d,(hl)
         ld c,(hl)        
         ld b,(hl)
         ld a,(hl)                       ; header
+        DEBUGDUMPREGISTERS
         ldir
         ld b,(hl)
         cp a                            ; check block (header == tail?)
         ld a,b
+        DEBUGDUMPREGISTERS
         ret
 
         ; include flash routine only once

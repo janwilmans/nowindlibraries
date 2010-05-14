@@ -21,7 +21,6 @@ first the 2 header bytes AF 05 are sent, then all registers are send (8 bytes) a
 */
 
 #define DBERR debugMessage
-#define PROTOCOL_V2
 
 using std::string;
 using std::vector;
@@ -81,13 +80,6 @@ void NowindHost::write(byte data, unsigned int time)
 		cmdData[recvCount] = data;
 		if (++recvCount == 9) {
 			executeCommand();
-		}
-		break;
-	case STATE_DISKREAD:
-		assert(recvCount < 2);
-		extraData[recvCount] = data;
-		if (++recvCount == 2) {
-			doDiskRead2();
 		}
 		break;
 	case STATE_DISKWRITE:
@@ -231,13 +223,9 @@ void NowindHost::diskReadInit(SectorMedium& disk)
 	transferred = 0;
 	retryCount = 0;
 
-#ifdef PROTOCOL_V2
     unsigned int size = sectorAmount * 512;
     unsigned address = getCurrentAddress();
     blockReadInit(address, size, buffer);
-#else
-    doDiskRead1();
-#endif
 }
 
 void NowindHost::blockReadInit(word startAddress, word size, const vector <byte >& data)
@@ -245,130 +233,6 @@ void NowindHost::blockReadInit(word startAddress, word size, const vector <byte 
     transferingToPage01 = true;
     blockRead(startAddress, size, data);
 }
-
-void NowindHost::doDiskRead1()
-{
-	//DBERR("doDiskRead1\n");
-    unsigned bytesLeft = unsigned(buffer.size()) - transferred;
-	if (bytesLeft == 0) {
-		sendHeader();
-		send(0x01); // end of receive-loop
-		send(0x00); // no more data
-		state = STATE_SYNC1;
-        DBERR("finished. (%d retries)\n", readRetries);
-		return;
-	}
-
-    state = STATE_DISKREAD;
-
-    static const unsigned NUMBEROFBLOCKS = 128; // 64 * 64 bytes = 4192 bytes
-	transferSize = std::min(bytesLeft, NUMBEROFBLOCKS * 64); // hardcoded in firmware
-
-	unsigned address = getCurrentAddress();
-	if (address >= 0x8000) {
-		if (transferSize & 0x003F) {
-			transferSectors(address, transferSize);
-		} else {
-			transferSectorsBackwards(address, transferSize);
-		}
-	} else {
-		// transfer below 0x8000
-		unsigned endAddress = address + transferSize;
-		if (endAddress <= 0x8000) {
-			transferSectorsBackwards(address, transferSize);
-		} else {
-			transferSize = 0x8000 - address;
-			transferSectors(address, transferSize);
-		}
-	}
-	recvCount = 0;
-}
-
-void NowindHost::doDiskRead2()
-{
-	// diskrom sends back the last two bytes read
-	//DBERR("doDiskRead2\n");
-    assert(recvCount == 2);
-	byte tail1 = extraData[0];
-	byte tail2 = extraData[1];
-	if ((tail1 == 0xAF) && (tail2 == 0x07)) {
-		transferred += transferSize;
-		retryCount = 0;
-
-		unsigned address = getCurrentAddress();
-		size_t bytesLeft = buffer.size() - transferred;
-		if ((address == 0x8000) && (bytesLeft > 0)) {
-			sendHeader();
-			send(0x01); // end of receive-loop
-			send(0xff); // more data for page 2/3
-		}
-
-		// continue the rest of the disk read
-		doDiskRead1();
-	} else {
-		purge();
-		if (++retryCount == 500) {
-			// do nothing, timeout on MSX
-			// too many retries, aborting readDisk()
-            DBERR("Too many retries, returning to STATE_SYNC1\n");
-			state = STATE_SYNC1;
-			return;
-		}
-
-        readRetries++;
-		doDiskRead1(); // try again
-		recvCount = 0;
-	}
-}
-
-// sends "02" + "transfer_addr" + "amount" + "data" + "0F 07"
-void NowindHost::transferSectors(unsigned transferAddress, unsigned amount)
-{
-	sendHeader();
-	send(0x00); // don't exit command, (more) data is coming
-	send16(transferAddress);
-	send16(amount);
-
-	const byte* bufferPointer = &buffer[transferred];
-	for (unsigned i = 0; i < amount; ++i) {
-		send(bufferPointer[i]);
-	}
-    sendTrailer(); // used for validation
-}
-
-void NowindHost::sendTrailer()
-{
-	send(0xAF);
-    /*
-    static int failOnPurpose = 0;
-    failOnPurpose++;
-    if (failOnPurpose == 5)
-    {
-        // to test the protocols error-correction, make every 5th transfer fail :)
-        failOnPurpose = 0;
-        DBERR("Fail on purpose!\n");
-    	send(0xFF); // screw up the transmission on purpose
-    }
-    */
-    send(0x07);
-}
-
- // sends "02" + "transfer_addr" + "amount" + "data" + "0F 07"
-void NowindHost::transferSectorsBackwards(unsigned transferAddress, unsigned amount)
-{
-	DBERR("tranferAddr: 0x%04x  amount %d (retries: %u)\n", transferAddress, amount, readRetries);
-	sendHeader();
-	send(0x02); // don't exit command, (more) data is coming            // jan: doesn't '0x02' mean 'backwards' transfer
-	send16(transferAddress + amount);
-	send(amount / 64);
-
-	const byte* bufferPointer = &buffer[transferred];
-	for (int i = amount - 1; i >= 0; --i) {
-		send(bufferPointer[i]);
-	}
-	sendTrailer(); // used for validation
-}
-
 
 void NowindHost::diskWriteInit(SectorMedium& disk)
 {
