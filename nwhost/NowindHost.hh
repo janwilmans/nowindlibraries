@@ -171,8 +171,11 @@ private:
 	bool enablePhantomDrives;
 	bool enableMSXDOS2;
     int readRetries;
-
+    bool transferingToPage01;   // used to known in which state the MSX is during block-tranfers
+    
     void blockReadCmd();
+    
+    void blockReadInit(word startAddress, word size, const std::vector <byte >& data);  // just wraps the the first blockRead() and initializes some vars
     void blockRead(word startAddress, word size, const std::vector <byte >& data);
     void blockReadHelper(word startAddress, word size, const std::vector <byte >& data);
     void blockReadContinue();

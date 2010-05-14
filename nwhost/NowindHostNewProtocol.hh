@@ -1,5 +1,6 @@
 
 static const byte HARDCODED_READ_DATABLOCK_SIZE = 128;	// hardcoded in blockRead (common.asm)
+static const word TWOBANKLIMIT = 0x8000;
 
 // dummy command (reads first 16Kb of disk as test)
 void NowindHost::blockReadCmd()
@@ -16,8 +17,7 @@ void NowindHost::blockReadCmd()
 void NowindHost::blockRead(word startAddress, word size, const vector <byte >& data)
 {
     DBERR("blockRead, startAddress: 0x%04X, size: 0x%04X\n", startAddress, size);
-
-    static const word TWOBANKLIMIT = 0x8000;
+    
     if (startAddress < TWOBANKLIMIT)
     {
         word endAddress = std::min(TWOBANKLIMIT, startAddress + size);
@@ -33,7 +33,7 @@ void NowindHost::blockRead(word startAddress, word size, const vector <byte >& d
 
 void NowindHost::blockReadHelper(word startAddress, word size, const vector <byte >& data)
 {
-    DBERR("blockRead() blockReadHelper: 0x%04x, size: 0x%02x, transferred: 0x%02x\n", startAddress, size, transferred);
+    DBERR("blockReadHelper(): size: 0x%02x, transferred: 0x%02x\n", size, transferred);
     word address = startAddress;
     unsigned int offset = transferred;      //transferred is an offset within 'const vector <byte >& data'
     unsigned int blockNr = 0;
@@ -48,12 +48,15 @@ void NowindHost::blockReadHelper(word startAddress, word size, const vector <byt
     if (size < HARDCODED_READ_DATABLOCK_SIZE)
     {   
         // just 1 slow block
+        DBERR("create slow block of size: 0x%02x\n", size);
+
         dataBlockQueue.push_front(new DataBlock(0, data, offset, address, size));
         sendHeader();
         send(2);        // slow tranfer
         send16(startAddress);
         send16(size);   // amount of bytes
         sendDataBlock(0);
+        transferred += size;
     }
     else
     {
@@ -62,6 +65,7 @@ void NowindHost::blockReadHelper(word startAddress, word size, const vector <byt
         unsigned int offset = transferred;
         byte blocks = size / HARDCODED_READ_DATABLOCK_SIZE;
         unsigned int blockNr = 0;
+        DBERR("create fast block of size: 0x%02x\n", blocks*HARDCODED_READ_DATABLOCK_SIZE);
 
         // queue datablocks in reverse order
         for(int i=0; i<blocks; i++)
@@ -82,7 +86,7 @@ void NowindHost::blockReadHelper(word startAddress, word size, const vector <byt
             sendDataBlock(i);
         }
         state = STATE_BLOCKREAD_ACK;
-        transferred += size;        // store for use in blockReadContinue()        
+        transferred += (blocks*HARDCODED_READ_DATABLOCK_SIZE);        // store for use in blockReadContinue()        
    }
 }
 
@@ -122,11 +126,18 @@ void NowindHost::blockReadContinue()
     
     // we should determine here, where to send 0, 1, 2 or 3!!!
     
-    if (transferred < size)
+    if (transferred < size)                             // still bytes to be transferred?
     {
         DBERR("blockReadContinue, do more!\n");
-        sendHeader();
-        send(3);    
+        
+        if (transferingToPage01 && address >= TWOBANKLIMIT && transferred > 0) // address >= 0x8000 and this is not the first transfer?
+        {
+                DBERR("send 3 -> continue at page 2/3\n");
+                // switch to page23-transfers
+                sendHeader();
+                send(3); 
+                transferingToPage01 = false;   
+        }
         blockRead(address, size-transferred, buffer);   // state is set to STATE_BLOCKREAD_ACK
     }
     else
@@ -161,8 +172,8 @@ void NowindHost::blockReadAck(byte tail)
         errors++;
 
         DBERR("block failed! (errors: %u)\n", errors);
+
 	    sendHeader();
-	    
 	    if (dataBlock->fastTransfer)
 	    {
 	        send(0x01);			// not done, retry fast block follows
