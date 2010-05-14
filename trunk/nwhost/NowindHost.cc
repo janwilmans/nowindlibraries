@@ -54,7 +54,8 @@ NowindHost::~NowindHost()
 // send:  msx -> pc
 void NowindHost::write(byte data, unsigned int time)
 {
-	unsigned duration = time - lastTime;
+    // TODO: re-enable host-timeout
+	unsigned duration = 0; // time - lastTime;
 	lastTime = time;
 	if ((duration >= 500) && (state != STATE_SYNC1)) {
 		// timeout (500ms), start looking for AF05
@@ -233,10 +234,16 @@ void NowindHost::diskReadInit(SectorMedium& disk)
 #ifdef PROTOCOL_V2
     unsigned int size = sectorAmount * 512;
     unsigned address = getCurrentAddress();
-    blockRead(address, size, buffer);
+    blockReadInit(address, size, buffer);
 #else
     doDiskRead1();
 #endif
+}
+
+void NowindHost::blockReadInit(word startAddress, word size, const vector <byte >& data)
+{
+    transferingToPage01 = true;
+    blockRead(startAddress, size, data);
 }
 
 void NowindHost::doDiskRead1()
