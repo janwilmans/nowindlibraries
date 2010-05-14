@@ -49,12 +49,10 @@ NowindHost::~NowindHost()
 {
 }
 
-
 // send:  msx -> pc
 void NowindHost::write(byte data, unsigned int time)
 {
-    // TODO: re-enable host-timeout
-	unsigned duration = 0; // time - lastTime;
+	unsigned duration = time - lastTime;
 	lastTime = time;
 	if ((duration >= 500) && (state != STATE_SYNC1)) {
 		// timeout (500ms), start looking for AF05
@@ -228,12 +226,6 @@ void NowindHost::diskReadInit(SectorMedium& disk)
     blockReadInit(address, size, buffer);
 }
 
-void NowindHost::blockReadInit(word startAddress, word size, const vector <byte >& data)
-{
-    transferingToPage01 = true;
-    blockRead(startAddress, size, data);
-}
-
 void NowindHost::diskWriteInit(SectorMedium& disk)
 {
 	DBERR("diskWriteInit\n");
@@ -323,6 +315,18 @@ void NowindHost::doDiskWrite2()
 
 	// continue the rest of the disk write
 	doDiskWrite1();
+}
+
+// dummy command (reads first 16Kb of disk as test)
+void NowindHost::blockReadCmd()
+{
+    SectorMedium* disk = drives[0]->getSectorMedium();
+    
+    vector<byte> data(16*1024);
+	if (disk->readSectors(&data[0], 0, 32)) {
+		DBERR("readSectors error reading sector 0-31\n");
+	}
+    blockRead(0x8000, 0x4000, data);
 }
 
 // quick and dirty split NowindHost.cc into more files, todo: create different classes

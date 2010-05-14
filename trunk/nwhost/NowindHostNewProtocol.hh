@@ -2,16 +2,10 @@
 static const byte HARDCODED_READ_DATABLOCK_SIZE = 128;	// hardcoded in blockRead (common.asm)
 static const word TWOBANKLIMIT = 0x8000;
 
-// dummy command (reads first 16Kb of disk as test)
-void NowindHost::blockReadCmd()
+void NowindHost::blockReadInit(word startAddress, word size, const vector <byte >& data)
 {
-    SectorMedium* disk = drives[0]->getSectorMedium();
-    
-    vector<byte> data(16*1024);
-	if (disk->readSectors(&data[0], 0, 32)) {
-		DBERR("readSectors error reading sector 0-31\n");
-	}
-    blockRead(0x8000, 0x4000, data);
+    transferingToPage01 = true;
+    blockRead(startAddress, size, data);
 }
 
 void NowindHost::blockRead(word startAddress, word size, const vector <byte >& data)
@@ -34,22 +28,21 @@ void NowindHost::blockRead(word startAddress, word size, const vector <byte >& d
 void NowindHost::blockReadHelper(word startAddress, word size, const vector <byte >& data)
 {
     DBERR("blockReadHelper(): size: 0x%02x, transferred: 0x%02x\n", size, transferred);
-    word address = startAddress;
-    unsigned int offset = transferred;      //transferred is an offset within 'const vector <byte >& data'
-    unsigned int blockNr = 0;
     
     // delete any blocks still in the dataBlockQueue (unacknowlged by msx, could be caused by timeouts)
     for(unsigned int i=0; i< dataBlockQueue.size(); i++)
     {        
         delete dataBlockQueue[i];
     }
-    dataBlockQueue.clear();
+    dataBlockQueue.clear();    
+    
+    word address = startAddress;
+    unsigned int offset = transferred;      //transferred is an offset within 'const vector <byte >& data'
 
     if (size < HARDCODED_READ_DATABLOCK_SIZE)
     {   
         // just 1 slow block
-        DBERR("create slow block of size: 0x%02x\n", size);
-
+        DBERR("create slow block starting at: 0x%04X, size: 0x%02x\n", address, size);
         dataBlockQueue.push_front(new DataBlock(0, data, offset, address, size));
         sendHeader();
         send(2);        // slow tranfer
@@ -61,11 +54,10 @@ void NowindHost::blockReadHelper(word startAddress, word size, const vector <byt
     else
     {
         // fast blocks
-        word address = startAddress;
-        unsigned int offset = transferred;
         byte blocks = size / HARDCODED_READ_DATABLOCK_SIZE;
+        word actualTransferSize = blocks*HARDCODED_READ_DATABLOCK_SIZE;
         unsigned int blockNr = 0;
-        DBERR("create fast block of size: 0x%02x\n", blocks*HARDCODED_READ_DATABLOCK_SIZE);
+        DBERR("create fast block of size: 0x%02x\n", actualTransferSize);
 
         // queue datablocks in reverse order
         for(int i=0; i<blocks; i++)
@@ -79,14 +71,14 @@ void NowindHost::blockReadHelper(word startAddress, word size, const vector <byt
 
         sendHeader();
         send(1);            // fast transfer
-        send16(startAddress+size);
+        send16(startAddress+actualTransferSize);
         send(blocks);
         for (unsigned int i=0; i<blocks; i++)
         {
             sendDataBlock(i);
         }
         state = STATE_BLOCKREAD_ACK;
-        transferred += (blocks*HARDCODED_READ_DATABLOCK_SIZE);        // store for use in blockReadContinue()        
+        transferred += actualTransferSize;        // store for use in blockReadContinue()        
    }
 }
 
@@ -153,7 +145,7 @@ void NowindHost::blockReadAck(byte tail)
 {
     assert(dataBlockQueue.size() != 0);
     DataBlock* dataBlock = dataBlockQueue[0];
-    //DBERR("ACK -> Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
+    DBERR("ACK -> Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
 
     if (dataBlock->header == tail)
     {

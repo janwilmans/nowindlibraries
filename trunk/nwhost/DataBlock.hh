@@ -3,6 +3,7 @@
 
 #include "NowindTypes.hh"
 #include <vector>
+#include <deque>
 
 namespace nwhost {
 
@@ -15,7 +16,7 @@ public:
     word size;
     bool fastTransfer;
     word transferAddress;
-    std::vector < byte > data;
+    std::deque < byte > data;
 
     ~DataBlock();
 
