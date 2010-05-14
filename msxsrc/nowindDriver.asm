@@ -133,8 +133,13 @@ DSKIO:
         jr c,dskioWrite                 ; read or write?
 
 dskioRead:
-        jp blockRead
-
+        call blockRead
+        DEBUGMESSAGE "exit_dskio"
+        DEBUGDUMPREGISTERS
+        ret c                           ; return error (error code in a)
+        xor a                           ; no error, clear a
+        ret
+        
 dskioWrite:
         DEBUGMESSAGE "dskwrite"
         rlca
@@ -153,7 +158,8 @@ dskioWrite:
         call executeCommandNowindInPage0
         DEBUGDUMPREGISTERS
         DEBUGMESSAGE "back"
-        xor a
+        ret c                           ; return error (error code in a)
+        xor a                           ; some software (wb?) requires that a is zero, because they do not check the carry
         ret
 
         PHASE $ + $4000

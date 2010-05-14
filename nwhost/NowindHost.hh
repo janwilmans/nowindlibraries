@@ -73,7 +73,6 @@ public:
 		STATE_SYNC1,     // waiting for AF
 		STATE_SYNC2,     // waiting for 05
 		STATE_COMMAND,   // waiting for command (9 bytes)
-		STATE_DISKREAD,  // waiting for AF07
 		STATE_DISKWRITE, // waiting for AA<data>AA
 		STATE_DEVOPEN,   // waiting for filename (11 bytes)
 		STATE_IMAGE,     // waiting for filename
@@ -112,11 +111,17 @@ private:
 	unsigned getStartAddress() const;
 	unsigned getCurrentAddress() const;
 
+    void blockReadCmd();
+
 	void diskReadInit(SectorMedium& disk);
-	void doDiskRead1();
-	void doDiskRead2();
-	void transferSectors(unsigned transferAddress, unsigned amount);
-	void transferSectorsBackwards(unsigned transferAddress, unsigned amount);
+    void blockReadInit(word startAddress, word size, const std::vector <byte >& data);  // just wraps the the first blockRead() and initializes some vars
+    void blockRead(word startAddress, word size, const std::vector <byte >& data);
+    void blockReadHelper(word startAddress, word size, const std::vector <byte >& data);
+    void blockReadContinue();
+    void sendDataBlock(unsigned int blocknr);
+    void blockReadAck(byte tail);
+
+    void blockWrite();
 
 	void diskWriteInit(SectorMedium& disk);
 	void doDiskWrite1();
@@ -173,17 +178,6 @@ private:
     int readRetries;
     bool transferingToPage01;   // used to known in which state the MSX is during block-tranfers
     
-    void blockReadCmd();
-    
-    void blockReadInit(word startAddress, word size, const std::vector <byte >& data);  // just wraps the the first blockRead() and initializes some vars
-    void blockRead(word startAddress, word size, const std::vector <byte >& data);
-    void blockReadHelper(word startAddress, word size, const std::vector <byte >& data);
-    void blockReadContinue();
-
-    void doBlockRead();
-    void sendDataBlock(unsigned int blocknr);
-    void blockReadAck(byte tail);
-    void blockWrite();
 };
 
 } // namespace nowind
