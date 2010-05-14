@@ -88,7 +88,6 @@ void Image::setRomdisk() {
 bool Image::reOpenDiskImage() {
 
     bool fileOpenError = false;
-    // TODO: image.dsk is specified in maincons.cpp can be removed here ?
     if (stream != 0) delete stream;
 	stream = new fstream(filename.c_str(),ios::binary | ios::in | ios::out);
 	if (stream->fail()) {
@@ -97,18 +96,7 @@ bool Image::reOpenDiskImage() {
 			delete stream;
 			stream = new fstream(filename.c_str(),ios::binary | ios::in);
 			if (stream->fail()) {
-					DBERR("Error opening file %s for read !\n", filename.c_str());
-/*
-    				string image = "disks/image.dsk";
-    				DBERR("Trying " %s instead...\n", image);
-    				stream = new fstream(image.c_str(),ios::binary | ios::in | ios::out);
-    				if (stream->fail()) {
-    						DBERR("Error opening file %s read/write !\n", image);
-    				} else {
-    				    containsDisk = true;
-    					readOnly = false;    
-					}    
-*/					
+			    DBERR("Error opening file %s for read !\n", filename.c_str());
 			} else { 
                 fileOpenError = false;
                 containsDisk = true;
