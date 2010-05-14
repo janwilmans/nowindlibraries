@@ -6,18 +6,20 @@
 #endif 
 
 #include "NowindHost.hh"
+#include "NowindHostSupportDebug.h"
 #include <stdarg.h>		// for va_list
-
-#include "NwhostExports.h"
 
 namespace nwhost {
 
-class NWHOST_API NowindHostDebug : public NowindHost
+class NowindHostDebug : public NowindHost
 {
 public:
-	NowindHostDebug(const std::vector<DiskHandler*>& drives) : NowindHost(drives) {}
-	virtual ~NowindHostDebug() {}
+	NowindHostDebug(const std::vector<DiskHandler*>& drives);
+	virtual ~NowindHostDebug();
+	
+	virtual void Initialize();
 	virtual void debugMessage(const char *cFormat, ...) const;
+
 };
 
 } // namespace nowind

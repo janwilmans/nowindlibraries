@@ -11,6 +11,8 @@
 
 #include "NwhostExports.h"
 #include "DataBlock.hh"
+#include "BlockRead.hh"
+#include "NowindHostSupport.hh"
 
 namespace nwhost {
 
@@ -46,6 +48,7 @@ class NWHOST_API NowindHost
 public:
 	NowindHost(const std::vector<DiskHandler*>& drives);
 	virtual ~NowindHost();
+    virtual void Initialize();
 
 	// public for usb-host implementation
 	bool isDataAvailable() const;
@@ -177,6 +180,10 @@ private:
 	bool enableMSXDOS2;
     int readRetries;
     bool transferingToPage01;   // used to known in which state the MSX is during block-tranfers
+    
+    BlockRead blockReadObject;
+protected:    
+    NowindHostSupport* nwhSupport;          // pointer to the NowindHostSupport instance that is actually used (can be subclassed to provide implemenation specific debug-support)
     
 };
 

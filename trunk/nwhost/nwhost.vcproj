@@ -198,6 +198,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\NowindHostSupportDebug.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\nowindusb.cpp"
 				>
 			</File>
@@ -236,6 +240,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\NowindHostSupportDebug.h"
+				>
+			</File>
+			<File
 				RelativePath=".\nowindusb.h"
 				>
 			</File>
@@ -259,6 +267,14 @@
 		<Filter
 			Name="Shared Files"
 			>
+			<File
+				RelativePath=".\BlockRead.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\BlockRead.hh"
+				>
+			</File>
 			<File
 				RelativePath=".\DataBlock.cc"
 				>
@@ -298,26 +314,14 @@
 			<File
 				RelativePath=".\NowindHostNewProtocol.hh"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\NowindHostSupport.cc"
+				>
 			</File>
 			<File
 				RelativePath=".\NowindHostSupport.hh"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\NowindTypes.hh"

@@ -6,8 +6,7 @@
  *
  */
  
-#define NWHOST_API_EXPORT
-#include "NowindHostDebug.h"
+#include "NowindHostSupportDebug.h"
 #include <libgeneral.h>
 
 #include "NwhostInternal.h"
@@ -16,24 +15,17 @@
 using namespace general;
 using namespace nwhost;
 
-NowindHostDebug::NowindHostDebug(const std::vector<DiskHandler*>& drives) : 
-    NowindHost(drives)
+NowindHostSupportDebug::NowindHostSupportDebug()
 {
-    
+  
 }
 
-void NowindHostDebug::Initialize()
-{
-    nwhSupport = new NowindHostSupportDebug();
-    NowindHost::Initialize();
-}
-
-NowindHostDebug::~NowindHostDebug()
+NowindHostSupportDebug::~NowindHostSupportDebug()
 {
 
-}
+}	
 
-void NowindHostDebug::debugMessage(const char *cFormat, ...) const
+void NowindHostSupportDebug::debugMessage(const char *cFormat, ...) const
 {
 	va_list arg_list;
 	char scratch[2000];
