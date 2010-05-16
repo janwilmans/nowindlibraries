@@ -83,7 +83,7 @@ bool NowindHost::isDataAvailable() const
 // send:  msx -> pc
 void NowindHost::write(byte data, unsigned int time)
 {
-	unsigned duration = time - lastTime;
+	unsigned duration = 0; //time - lastTime;
 	lastTime = time;
 	if ((duration >= 500) && (state != STATE_SYNC1)) {
 		// timeout (500ms), start looking for AF05
@@ -147,8 +147,6 @@ void NowindHost::write(byte data, unsigned int time)
 		break;
 	
 	case STATE_BLOCKREAD:
-		//blockReadAck(data);  
-	
 		// in STATE_BLOCKREAD we receive ack's from the send blocks and continue to send new blocks    
 		blockReadObject.ack(data);     
 		if (blockReadObject.isDone())
@@ -371,18 +369,11 @@ void NowindHost::blockReadCmd()
 	
     blockReadObject.Init(0x8000, 0x4000, data);
     state = STATE_BLOCKREAD;	
-    //blockRead(0x8000, 0x4000, data);
 }
 
 void NowindHost::blockWriteCmd()
 {
-
 }
-
-// quick and dirty split NowindHost.cc into more files, todo: create different classes
-
-//#include "NowindHostNewProtocol.hh"
-
 
 void NowindHost::debugMessage(const char *, ...) const
 {
