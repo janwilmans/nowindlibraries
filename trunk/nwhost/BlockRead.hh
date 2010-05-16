@@ -22,9 +22,8 @@ public:
 
     void Init(word startAddress, word size, const std::vector <byte >& data);  // just wraps the the first blockRead() and initializes some vars
     void ack(byte tail);
-    void blockReadInit(word startAddress, word size, const std::vector <byte >& data);  // just wraps the the first blockRead() and initializes some vars
-    void blockRead(word startAddress, word size, const std::vector <byte >& data);
-    void blockReadHelper(word startAddress, word size, const std::vector <byte >& data);
+    void blockRead(word startAddress, word size);
+    void blockReadHelper(word startAddress, word size);
     void blockReadContinue();
     void sendDataBlock(unsigned int blocknr);
     void blockReadAck(byte tail);

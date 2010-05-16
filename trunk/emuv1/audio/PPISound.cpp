@@ -70,7 +70,7 @@ void PPISound::sync(unsigned int) {
 
 void PPISound::updateBuffer(unsigned int samples) {
 
-	const float gain = 0.997;
+	const float gain = 0.997f;
 
 	AudioMixer::Lock();
 	for (unsigned int i=0;i<samples;i++) {
