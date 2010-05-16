@@ -64,6 +64,22 @@ NowindHost::~NowindHost()
     }
 }
 
+byte NowindHost::peek() const
+{
+	return nwhSupport->peek();
+}
+
+byte NowindHost::read()
+{
+	return nwhSupport->read();  // msx <- pc
+}
+
+bool NowindHost::isDataAvailable() const
+{
+	return nwhSupport->isDataAvailable();
+}
+
+
 // send:  msx -> pc
 void NowindHost::write(byte data, unsigned int time)
 {
@@ -72,7 +88,7 @@ void NowindHost::write(byte data, unsigned int time)
 	if ((duration >= 500) && (state != STATE_SYNC1)) {
 		// timeout (500ms), start looking for AF05
         DBERR("Protocol timeout occurred in state %d, purge buffers and switch back to STATE_SYNC1\n", state);
-		purge();
+		nwhSupport->purge();
 		state = STATE_SYNC1;
 	}
     //DBERR("received: 0x%02x (in state: %d)\n", data, state);
@@ -130,8 +146,15 @@ void NowindHost::write(byte data, unsigned int time)
 		}
 		break;
 	
-	case STATE_BLOCKREAD_ACK:
-		blockReadAck(data);     
+	case STATE_BLOCKREAD:
+		//blockReadAck(data);  
+	
+		// in STATE_BLOCKREAD we receive ack's from the send blocks and continue to send new blocks    
+		blockReadObject.ack(data);     
+		if (blockReadObject.isDone())
+		{
+		    state = STATE_SYNC1;
+		}
 		break;
 
 	default:
@@ -211,7 +234,7 @@ void NowindHost::executeCommand()
 	case 0x93: commandRequested(); state = STATE_SYNC1; break;
 	//case 0xFF: vramDump();
 	case 0x94: blockReadCmd(); break;
-    case 0x95: blockWrite(); break;
+    case 0x95: blockWriteCmd(); break;
 	default:
 		// Unknown USB command!
 		state = STATE_SYNC1;
@@ -238,10 +261,11 @@ void NowindHost::diskReadInit(SectorMedium& disk)
 
     unsigned int size = sectorAmount * 512;
     unsigned address = getCurrentAddress();
-    blockReadInit(address, size, buffer);
+    //blockReadInit(address, size, buffer);
     
     // todo: move all blockread-methods into BlockRead class
     blockReadObject.Init(address, size, buffer);
+    state = STATE_BLOCKREAD;
 }
 
 void NowindHost::diskWriteInit(SectorMedium& disk)
@@ -249,9 +273,9 @@ void NowindHost::diskWriteInit(SectorMedium& disk)
 	DBERR("diskWriteInit\n");
 	DBERR("startsector: %u  sectoramount %d\n", getStartSector(), getSectorAmount());
 	if (disk.isWriteProtected()) {
-		sendHeader();
-		send(1);
-		send(0); // WRITEPROTECTED
+		nwhSupport->sendHeader();
+		nwhSupport->send(1);
+		nwhSupport->send(0); // WRITEPROTECTED
 		state = STATE_SYNC1;
 		return;
 	}
@@ -276,8 +300,8 @@ void NowindHost::doDiskWrite1()
 				// TODO write error
 			}
 		}
-		sendHeader();
-		send(255);
+		nwhSupport->sendHeader();
+		nwhSupport->send(255);
 		state = STATE_SYNC1;
 		return;
 	}
@@ -294,11 +318,11 @@ void NowindHost::doDiskWrite1()
 
     DBERR(" address: 0x%04x, transferSize: 0x%04X \n", address, transferSize);
     
-	sendHeader();
-	send(0);          // data ahead!
-	send16(address);
-	send16(transferSize);
-	send(0xaa);
+	nwhSupport->sendHeader();
+	nwhSupport->send(0);          // data ahead!
+	nwhSupport->send16(address);
+	nwhSupport->send16(transferSize);
+	nwhSupport->send(0xaa);
 
 	// wait for data
 	state = STATE_DISKWRITE;
@@ -322,13 +346,13 @@ void NowindHost::doDiskWrite2()
 		unsigned address = getCurrentAddress();
 		size_t bytesLeft = buffer.size() - transferred;
 		if ((address == 0x8000) && (bytesLeft > 0)) {
-			sendHeader();
-			send(254); // more data for page 2/3
+			nwhSupport->sendHeader();
+			nwhSupport->send(254); // more data for page 2/3
 	        DBERR(" more data for page 2/3\n");
 		}
 	} else {
 	    DBERR(" ERROR!!! This situation is still not handled correctly!\n");
-		purge();
+		nwhSupport->purge();
 	}
 
 	// continue the rest of the disk write
@@ -344,12 +368,20 @@ void NowindHost::blockReadCmd()
 	if (disk->readSectors(&data[0], 0, 32)) {
 		DBERR("readSectors error reading sector 0-31\n");
 	}
-    blockRead(0x8000, 0x4000, data);
+	
+    blockReadObject.Init(0x8000, 0x4000, data);
+    state = STATE_BLOCKREAD;	
+    //blockRead(0x8000, 0x4000, data);
+}
+
+void NowindHost::blockWriteCmd()
+{
+
 }
 
 // quick and dirty split NowindHost.cc into more files, todo: create different classes
 
-#include "NowindHostNewProtocol.hh"
+//#include "NowindHostNewProtocol.hh"
 
 
 void NowindHost::debugMessage(const char *, ...) const
@@ -379,28 +411,6 @@ void NowindHost::setEnableMSXDOS2(bool enable)
 	enableMSXDOS2 = enable;
 }
 
-byte NowindHost::peek() const
-{
-	return isDataAvailable() ? hostToMsxFifo.front() : 0xFF;
-}
-
-// receive:  msx <- pc
-byte NowindHost::read()
-{
-	if (!isDataAvailable()) {
-		return 0xff;
-	}
-	byte result = hostToMsxFifo.front();
-	hostToMsxFifo.pop_front();
-	return result;
-}
-
-bool NowindHost::isDataAvailable() const
-{
-	return !hostToMsxFifo.empty();
-}
-
-
 void NowindHost::msxReset()
 {
 	for (unsigned i = 0; i < MAX_DEVICES; ++i) {
@@ -424,13 +434,13 @@ void NowindHost::auxIn()
 {
 	char input;
 	DBERR("auxIn\n");
-	sendHeader();
+	nwhSupport->sendHeader();
 
 	dumpRegisters();
 	std::cin >> input;
 
-	sendHeader();
-	send(input);
+	nwhSupport->sendHeader();
+	nwhSupport->send(input);
     DBERR("auxIn returning 0x%02x\n", input);
 }
 
@@ -447,30 +457,6 @@ void NowindHost::dumpRegisters()
 	DBERR("AF: 0x%04X, BC: 0x%04X, DE: 0x%04X, HL: 0x%04X, CMD: 0x%02X\n", cmdData[7] * 256 + cmdData[6], cmdData[1] * 256 + cmdData[0], cmdData[3] * 256 + cmdData[2], cmdData[5] * 256 + cmdData[4], cmdData[8]);
 }
 
-// send:  pc -> msx
-void NowindHost::send(byte value)
-{
-	hostToMsxFifo.push_back(value);
-}
-
-void NowindHost::send16(word value)
-{
-	hostToMsxFifo.push_back(value & 255);
-	hostToMsxFifo.push_back(value >> 8);
-}
-
-void NowindHost::purge()
-{
-	hostToMsxFifo.clear();
-}
-
-void NowindHost::sendHeader()
-{
-	send(0xFF); // needed because first read might fail (hardware design choise)!
-	send(0xAF);
-	send(0x05);
-}
-
 void NowindHost::DSKCHG()
 {
 	SectorMedium* disk = getDisk();
@@ -479,21 +465,21 @@ void NowindHost::DSKCHG()
 		return;
 	}
 
-	sendHeader();
+	nwhSupport->sendHeader();
 	byte num = cmdData[7]; // reg_a
 	assert(num < drives.size());
 	if (drives[num]->diskChanged()) {
-		send(255); // changed
+		nwhSupport->send(255); // changed
 		// read first FAT sector (contains media descriptor)
 		byte sectorBuffer[512];
 		if (disk->readSectors(sectorBuffer, 1, 1)) {
 			// TODO read error
 			sectorBuffer[0] = 0;
 		}
-		send(sectorBuffer[0]); // new mediadescriptor
+		nwhSupport->send(sectorBuffer[0]); // new mediadescriptor
 	} else {
-		send(0);   // not changed
-		send(255); // dummy
+		nwhSupport->send(0);   // not changed
+		nwhSupport->send(255); // dummy
 	}
 }
 
@@ -607,16 +593,16 @@ void NowindHost::GETDPB()
 	dpb_pre[16] = 0x11;
 	dpb_pre[17] = 0x00;
 
-	sendHeader();
+	nwhSupport->sendHeader();
 	// send dest. address
-	send(cmdData[2]);	// reg_e
-	send(cmdData[3]);	// reg_d
+	nwhSupport->send(cmdData[2]);	// reg_e
+	nwhSupport->send(cmdData[3]);	// reg_d
 	byte * refData = (byte *) &dpb_pre;
 	byte * sendBuffer = (byte *) &dpb;
 
 	for (int i=0;i<18;i++) {
 		DBERR("GETDPB offset [%d]: 0x%02X, correct: 0x%02X\n", i+1, sendBuffer[i], refData[i]);
-		send(sendBuffer[i]);
+		nwhSupport->send(sendBuffer[i]);
 	}
 }
 
@@ -627,10 +613,10 @@ void NowindHost::DRIVES()
 	byte numberOfDrives = std::max<byte>(1, byte(drives.size()));
 
 	byte reg_a = cmdData[7];
-	sendHeader();
-	send(getEnablePhantomDrives() ? 0x02 : 0);
-	send(reg_a | (getAllowOtherDiskroms() ? 0 : 0x80));
-	send(numberOfDrives);
+	nwhSupport->sendHeader();
+	nwhSupport->send(getEnablePhantomDrives() ? 0x02 : 0);
+	nwhSupport->send(reg_a | (getAllowOtherDiskroms() ? 0 : 0x80));
+	nwhSupport->send(numberOfDrives);
 
 //	romdisk = 255; // no romdisk
 	for (unsigned i = 0; i < drives.size(); ++i) {
@@ -643,8 +629,8 @@ void NowindHost::DRIVES()
 
 void NowindHost::INIENV()
 {
-	sendHeader();
-	send(romdisk); // calculated in DRIVES()
+	nwhSupport->sendHeader();
+	nwhSupport->send(romdisk); // calculated in DRIVES()
 }
 
 void NowindHost::setDateMSX()
@@ -652,10 +638,10 @@ void NowindHost::setDateMSX()
 	time_t td = time(NULL);
 	struct tm* tm = localtime(&td);
 
-	sendHeader();
-	send(tm->tm_mday);          // day
-	send(tm->tm_mon + 1);       // month
-	send16(tm->tm_year + 1900); // year
+	nwhSupport->sendHeader();
+	nwhSupport->send(tm->tm_mday);          // day
+	nwhSupport->send(tm->tm_mon + 1);       // month
+	nwhSupport->send16(tm->tm_year + 1900); // year
 }
 
 unsigned NowindHost::getSectorAmount() const
@@ -687,8 +673,8 @@ unsigned NowindHost::getStartAddress() const
 
 unsigned NowindHost::getCurrentAddress() const
 {
-	unsigned startAdress = getStartAddress();
-	return startAdress + transferred;
+	unsigned startAddress = getStartAddress();
+	return startAddress + transferred;
 }
 
 unsigned NowindHost::getFCB() const
@@ -760,7 +746,7 @@ void NowindHost::deviceOpen()
 	devices[dev].fs.reset(new fstream()); // takes care of deleting old fs
 	devices[dev].fcb = fcb;
 
-	sendHeader();
+	nwhSupport->sendHeader();
 	byte errorCode = 0;
 	byte openMode = cmdData[2]; // reg_e
 	switch (openMode) {
@@ -777,16 +763,16 @@ void NowindHost::deviceOpen()
 		errorCode = 53; // file not found
 		break;
 	case 4:
-		send(58); // sequential I/O only
+		nwhSupport->send(58); // sequential I/O only
 		return;
 	default:
-		send(0xFF); // TODO figure out a good error number
+		nwhSupport->send(0xFF); // TODO figure out a good error number
 		return;
 	}
 	assert(errorCode != 0);
 	if (devices[dev].fs->fail()) {
 		devices[dev].fs.reset();
-		send(errorCode);
+		nwhSupport->send(errorCode);
 		return;
 	}
 
@@ -800,19 +786,19 @@ void NowindHost::deviceOpen()
 		eof = readLen < 256;
 	}
 
-	send(0x00); // no error
-	send16(fcb);
-	send16(9 + readLen + (eof ? 1 : 0)); // number of bytes to transfer
+	nwhSupport->send(0x00); // no error
+	nwhSupport->send16(fcb);
+	nwhSupport->send16(9 + readLen + (eof ? 1 : 0)); // number of bytes to transfer
 
-	send(openMode);
-	send(0);
-	send(0);
-	send(0);
-	send(cmdData[3]); // reg_d
-	send(0);
-	send(0);
-	send(0);
-	send(0);
+	nwhSupport->send(openMode);
+	nwhSupport->send(0);
+	nwhSupport->send(0);
+	nwhSupport->send(0);
+	nwhSupport->send(cmdData[3]); // reg_d
+	nwhSupport->send(0);
+	nwhSupport->send(0);
+	nwhSupport->send(0);
+	nwhSupport->send(0);
 
 	if (openMode == 1) {
 		readHelper2(readLen, buffer);
@@ -842,11 +828,11 @@ void NowindHost::deviceRead()
 	char buffer[256];
 	unsigned readLen = readHelper1(dev, buffer);
 	bool eof = readLen < 256;
-	send(0xAF);
-	send(0x05);
-	send(0x00); // dummy
-	send16(getFCB() + 9);
-	send16(readLen + (eof ? 1 : 0));
+	nwhSupport->send(0xAF);
+	nwhSupport->send(0x05);
+	nwhSupport->send(0x00); // dummy
+	nwhSupport->send16(getFCB() + 9);
+	nwhSupport->send16(readLen + (eof ? 1 : 0));
 	readHelper2(readLen, buffer);
 }
 
@@ -864,10 +850,10 @@ unsigned NowindHost::readHelper1(unsigned dev, char* buffer)
 void NowindHost::readHelper2(unsigned len, const char* buffer)
 {
 	for (unsigned i = 0; i < len; ++i) {
-		send(buffer[i]);
+		nwhSupport->send(buffer[i]);
 	}
 	if (len < 256) {
-		send(0x1A); // end-of-file
+		nwhSupport->send(0x1A); // end-of-file
 	}
 }
 
@@ -903,8 +889,8 @@ void NowindHost::callImage(const string& filename)
 
 void NowindHost::getDosVersion()
 {
-	sendHeader();
-	send(enableMSXDOS2 ? 1:0);
+	nwhSupport->sendHeader();
+	nwhSupport->send(enableMSXDOS2 ? 1:0);
 }
 
 
@@ -950,12 +936,12 @@ void NowindHost::commandRequestedAtStartup(byte reset)
         DBERR("INIHRD hook requests next command at startup\n");
     }
 
-    sendHeader();
+    nwhSupport->sendHeader();
 
     std::vector<byte> command;
     if (index >= startupRequestQueue.size())
     {
-        send(0);   // no more commands 
+        nwhSupport->send(0);   // no more commands 
     }
     else
     {
@@ -964,7 +950,7 @@ void NowindHost::commandRequestedAtStartup(byte reset)
 
         for (unsigned int i=0;i<command.size();i++)
         {
-            send(command[i]);
+            nwhSupport->send(command[i]);
         }
     }
 }
@@ -973,10 +959,10 @@ void NowindHost::commandRequestedAtStartup(byte reset)
 // and are them removed from the queue
 void NowindHost::commandRequestedAnytime()
 {
-    sendHeader();
+    nwhSupport->sendHeader();
     if (requestQueue.empty())
     {
-        send(0);
+        nwhSupport->send(0);
     }
     else
     {
@@ -985,16 +971,16 @@ void NowindHost::commandRequestedAnytime()
         requestQueue.pop_front();
 		if (requestQueue.empty())
 		{
-			send(0);
+			nwhSupport->send(0);
 		}
 		else
 		{
-			send(1);
+			nwhSupport->send(1);
 		}
 
         for (unsigned int i=0;i<command.size();i++)
 	    {
-            send(command[i]);
+            nwhSupport->send(command[i]);
 	    }
     }
 }

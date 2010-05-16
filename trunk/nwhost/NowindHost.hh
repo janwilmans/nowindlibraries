@@ -80,12 +80,11 @@ public:
 		STATE_DEVOPEN,   // waiting for filename (11 bytes)
 		STATE_IMAGE,     // waiting for filename
 		STATE_MESSAGE,   // waiting for null-terminated message
-		STATE_BLOCKREAD_ACK
+		STATE_BLOCKREAD
 	};
 
 	virtual void debugMessage(const char *cFormat, ...) const;
 
-    void sendTrailer();
     void clearStartupRequests();
     void addStartupRequest(std::vector<byte> command);
     void clearRequests();
@@ -96,11 +95,6 @@ private:
 	void msxReset();
 	SectorMedium* getDisk();
 	void executeCommand();
-
-	void send(byte value);
-	void send16(word value);
-	void sendHeader();
-	void purge();
 
 	void DRIVES();
 	void DSKCHG();
@@ -115,16 +109,18 @@ private:
 	unsigned getCurrentAddress() const;
 
     void blockReadCmd();
+    void blockWriteCmd();
 
 	void diskReadInit(SectorMedium& disk);
+	
+	/*
     void blockReadInit(word startAddress, word size, const std::vector <byte >& data);  // just wraps the the first blockRead() and initializes some vars
     void blockRead(word startAddress, word size, const std::vector <byte >& data);
     void blockReadHelper(word startAddress, word size, const std::vector <byte >& data);
     void blockReadContinue();
     void sendDataBlock(unsigned int blocknr);
     void blockReadAck(byte tail);
-
-    void blockWrite();
+    */
 
 	void diskWriteInit(SectorMedium& disk);
 	void doDiskWrite1();
@@ -149,13 +145,9 @@ private:
     void commandRequestedAnytime();
 	std::deque< std::vector<byte> > startupRequestQueue;   // queue for commandRequest() at startup
 	std::deque< std::vector<byte> > requestQueue;   // queue for commandRequest()
-	std::deque< DataBlock* > dataBlockQueue;
 
 	void callImage(const std::string& filename);
 	const std::vector<DiskHandler*>& drives;
-
-	// queue
-	std::deque<byte> hostToMsxFifo;
 
     // state-machine
 	unsigned lastTime;       // last time a byte was received from MSX

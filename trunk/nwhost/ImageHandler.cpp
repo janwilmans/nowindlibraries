@@ -1,7 +1,7 @@
 // ImageHandler.cpp
 
 #include <stdio.h>
-#include <assert.h>
+#include <cassert>
 
 #include "ImageHandler.h"
 
