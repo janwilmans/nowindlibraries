@@ -312,10 +312,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\NowindHostNewProtocol.hh"
-				>
-			</File>
-			<File
 				RelativePath=".\NowindHostSupport.cc"
 				>
 			</File>
