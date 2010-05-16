@@ -396,15 +396,15 @@ blockReadTranfer:
         ; TODO timeout
         ld a,(hl)
         cp c
-        jp z,.nextLoopInPage1
+        jr z,.nextLoopInPage1
         jr .errorInPage1
 
 .codeInPage2:
         ld (hl),a                       ; return tail
         cp c
         jr nz,.errorInPage2
-        dec b
 .nextLoopInPage2:
+        dec b
         jp nz,.loop + $4000
         ld sp,iy                        ; restore stack pointer
         ret

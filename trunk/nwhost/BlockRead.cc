@@ -77,7 +77,7 @@ void BlockRead::blockReadHelper(word startAddress, word size)
     if (size < HARDCODED_READ_DATABLOCK_SIZE)
     {   
         // just 1 slow block
-        //DBERR("create slow block starting at: 0x%04X, size: 0x%02x\n", address, size);
+        DBERR("create slow block starting at: 0x%04X, size: 0x%02x\n", address, size);
         dataBlockQueue.push_front(new DataBlock(0, buffer, offset, address, size));
         nwhSupport->sendHeader();
         nwhSupport->send(2);        // slow tranfer
@@ -92,7 +92,7 @@ void BlockRead::blockReadHelper(word startAddress, word size)
         byte blocks = size / HARDCODED_READ_DATABLOCK_SIZE;
         word actualTransferSize = blocks*HARDCODED_READ_DATABLOCK_SIZE;
         unsigned int blockNr = 0;
-        //DBERR("create fast block of size: 0x%02x\n", actualTransferSize);
+        DBERR("create fast block of size: 0x%02x\n", actualTransferSize);
 
         // queue datablocks in reverse order
         for(int i=0; i<blocks; i++)
@@ -127,18 +127,18 @@ void BlockRead::sendDataBlock(unsigned int blocknr)
         nwhSupport->send(dataBlock->data[i]);
         //DBERR("dataBlock[%i] -> data: 0x%02x\n", i, dataBlock->data[i]);
     }
-
-    //static int wrong = 0;
-    //if (wrong == 0)
-    //{
-    //    send(0xff); // insert extra 0xff to simulate buffer underrun
-    //    send(0xff); // insert extra 0xff to simulate buffer underrun
-    //    send(0xff); // insert extra 0xff to simulate buffer underrun
-    //    send(0xff); // insert extra 0xff to simulate buffer underrun
-    //}
-    //wrong++;
-    //if (wrong == 50) wrong=0;
-
+/*
+    static int wrong = 0;
+    if (wrong == 0)
+    {
+        nwhSupport->send(0xff); // insert extra 0xff to simulate buffer underrun
+        nwhSupport->send(0xff); // insert extra 0xff to simulate buffer underrun
+        nwhSupport->send(0xff); // insert extra 0xff to simulate buffer underrun
+        nwhSupport->send(0xff); // insert extra 0xff to simulate buffer underrun
+    }
+    wrong++;
+    if (wrong == 50) wrong=0;
+*/
     nwhSupport->send(dataBlock->header);    // tail
 }
 
