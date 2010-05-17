@@ -22,10 +22,10 @@ NowindHostDebug::NowindHostDebug(const std::vector<DiskHandler*>& drives) :
     
 }
 
-void NowindHostDebug::Initialize()
+void NowindHostDebug::initialize()
 {
     nwhSupport = new NowindHostSupportDebug();
-    NowindHost::Initialize();
+    NowindHost::initialize();
 }
 
 NowindHostDebug::~NowindHostDebug()

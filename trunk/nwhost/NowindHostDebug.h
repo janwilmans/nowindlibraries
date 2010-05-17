@@ -17,7 +17,7 @@ public:
 	NowindHostDebug(const std::vector<DiskHandler*>& drives);
 	virtual ~NowindHostDebug();
 	
-	virtual void Initialize();
+	virtual void initialize();
 	virtual void debugMessage(const char *cFormat, ...) const;
 
 };

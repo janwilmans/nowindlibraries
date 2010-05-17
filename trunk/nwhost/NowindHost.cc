@@ -1,5 +1,7 @@
 #include "DiskHandler.hh"
 #include "SectorMedium.hh"
+#include "NowindHostSupport.hh"
+
 #include <fstream>
 #include <algorithm>
 #include <cassert>
@@ -46,13 +48,14 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
     addStartupRequest(requestWait);
 }
 
-void NowindHost::Initialize()
+void NowindHost::initialize()
 {
     if (nwhSupport == 0)
     {
         nwhSupport = new NowindHostSupport();
     }
-    blockReadObject.Initialize(nwhSupport);
+    blockRead.initialize(nwhSupport);
+    device.initialize(nwhSupport);
 }
 
 NowindHost::~NowindHost()
@@ -122,7 +125,8 @@ void NowindHost::write(byte data, unsigned int time)
 		assert(recvCount < 11);
 		extraData[recvCount] = data;
 		if (++recvCount == 11) {
-			deviceOpen();
+		    state = STATE_SYNC1;
+			device.open(cmdData, extraData);
 		}
 		break;
 	case STATE_IMAGE:
@@ -148,8 +152,8 @@ void NowindHost::write(byte data, unsigned int time)
 	
 	case STATE_BLOCKREAD:
 		// in STATE_BLOCKREAD we receive ack's from the send blocks and continue to send new blocks    
-		blockReadObject.ack(data);     
-		if (blockReadObject.isDone())
+		blockRead.ack(data);     
+		if (blockRead.isDone())
 		{
 		    state = STATE_SYNC1;
 		}
@@ -218,10 +222,10 @@ void NowindHost::executeCommand()
 	case 0x87: setDateMSX();  state = STATE_SYNC1; break;
 
 	case 0x88: state = STATE_DEVOPEN; recvCount = 0; break;
-	case 0x89: deviceClose(); state = STATE_SYNC1; break;
+	case 0x89: device.close(cmdData); state = STATE_SYNC1; break;
 	//case 0x8A: deviceRandomIO(fcb);
-	case 0x8B: deviceWrite(); state = STATE_SYNC1; break;
-	case 0x8C: deviceRead();  state = STATE_SYNC1; break;
+	case 0x8B: device.write(cmdData); state = STATE_SYNC1; break;
+	case 0x8C: device.read(cmdData); state = STATE_SYNC1; break;
 	//case 0x8D: deviceEof(fcb);
 	case 0x8E: auxIn();       state = STATE_SYNC1; break;
 	case 0x8F: auxOut();      state = STATE_SYNC1; break;
@@ -243,26 +247,18 @@ void NowindHost::executeCommand()
 
 void NowindHost::diskReadInit(SectorMedium& disk)
 {
-    readRetries = 0;
 	unsigned sectorAmount = getSectorAmount();
 	buffer.resize(sectorAmount * 512);
 	unsigned startSector = getStartSector();
-    //DBERR("startSector: %u\n", startSector);
     if (disk.readSectors(&buffer[0], startSector, sectorAmount)) {
 		// read error
 		state = STATE_SYNC1;
 		return;
 	}
 
-	transferred = 0;
-	retryCount = 0;
-
     unsigned int size = sectorAmount * 512;
     unsigned address = getCurrentAddress();
-    //blockReadInit(address, size, buffer);
-    
-    // todo: move all blockread-methods into BlockRead class
-    blockReadObject.Init(address, size, buffer);
+    blockRead.init(address, size, buffer);
     state = STATE_BLOCKREAD;
 }
 
@@ -367,7 +363,7 @@ void NowindHost::blockReadCmd()
 		DBERR("readSectors error reading sector 0-31\n");
 	}
 	
-    blockReadObject.Init(0x8000, 0x4000, data);
+    blockRead.init(0x8000, 0x4000, data);
     state = STATE_BLOCKREAD;	
 }
 
@@ -404,9 +400,7 @@ void NowindHost::setEnableMSXDOS2(bool enable)
 
 void NowindHost::msxReset()
 {
-	for (unsigned i = 0; i < MAX_DEVICES; ++i) {
-		devices[i].fs.reset();
-	}
+    device.reset();
 	DBERR("MSX reset\n");
 }
 
@@ -666,186 +660,6 @@ unsigned NowindHost::getCurrentAddress() const
 {
 	unsigned startAddress = getStartAddress();
 	return startAddress + transferred;
-}
-
-unsigned NowindHost::getFCB() const
-{
-	// note: same code as getStartAddress(), merge???
-	byte reg_l = cmdData[4];
-	byte reg_h = cmdData[5];
-	return reg_h * 256 + reg_l;
-}
-
-string NowindHost::extractName(int begin, int end) const
-{
-	string result;
-	for (int i = begin; i < end; ++i) {
-		char c = extraData[i];
-		if (c == ' ') break;
-		result += toupper(c);
-	}
-	return result;
-}
-
-int NowindHost::getDeviceNum() const
-{
-	unsigned fcb = getFCB();
-	for (unsigned i = 0; i < MAX_DEVICES; ++i) {
-		if (devices[i].fs.get() &&
-		    devices[i].fcb == fcb) {
-			return i;
-		}
-	}
-	return -1;
-}
-
-int NowindHost::getFreeDeviceNum()
-{
-	int dev = getDeviceNum();
-	if (dev != -1) {
-		// There already was a device open with this fcb address,
-		// reuse that device.
-		return dev;
-	}
-	// Search for free device.
-	for (unsigned i = 0; i < MAX_DEVICES; ++i) {
-		if (!devices[i].fs.get()) {
-			return i;
-		}
-	}
-	// All devices are in use. This can't happen when the MSX software
-	// functions correctly. We'll simply reuse the first device. It would
-	// be nicer if we reuse the oldest device, but that's harder to
-	// implement, and actually it doesn't really matter.
-	return 0;
-}
-
-void NowindHost::deviceOpen()
-{
-	state = STATE_SYNC1;
-
-	assert(recvCount == 11);
-	string filename = extractName(0, 8);
-	string ext      = extractName(8, 11);
-	if (!ext.empty()) {
-		filename += '.';
-		filename += ext;
-	}
-
-	unsigned fcb = getFCB();
-	unsigned dev = getFreeDeviceNum();
-	devices[dev].fs.reset(new fstream()); // takes care of deleting old fs
-	devices[dev].fcb = fcb;
-
-	nwhSupport->sendHeader();
-	byte errorCode = 0;
-	byte openMode = cmdData[2]; // reg_e
-	switch (openMode) {
-	case 1: // read-only mode
-		devices[dev].fs->open(filename.c_str(), ios::in  | ios::binary);
-		errorCode = 53; // file not found
-		break;
-	case 2: // create new file, write-only
-		devices[dev].fs->open(filename.c_str(), ios::out | ios::binary);
-		errorCode = 56; // bad file name
-		break;
-	case 8: // append to existing file, write-only
-		devices[dev].fs->open(filename.c_str(), ios::out | ios::binary | ios::app);
-		errorCode = 53; // file not found
-		break;
-	case 4:
-		nwhSupport->send(58); // sequential I/O only
-		return;
-	default:
-		nwhSupport->send(0xFF); // TODO figure out a good error number
-		return;
-	}
-	assert(errorCode != 0);
-	if (devices[dev].fs->fail()) {
-		devices[dev].fs.reset();
-		nwhSupport->send(errorCode);
-		return;
-	}
-
-	unsigned readLen = 0;
-	bool eof = false;
-	char buffer[256];
-	if (openMode == 1) {
-		// read-only mode, already buffer first 256 bytes
-		readLen = readHelper1(dev, buffer);
-		assert(readLen <= 256);
-		eof = readLen < 256;
-	}
-
-	nwhSupport->send(0x00); // no error
-	nwhSupport->send16(fcb);
-	nwhSupport->send16(9 + readLen + (eof ? 1 : 0)); // number of bytes to transfer
-
-	nwhSupport->send(openMode);
-	nwhSupport->send(0);
-	nwhSupport->send(0);
-	nwhSupport->send(0);
-	nwhSupport->send(cmdData[3]); // reg_d
-	nwhSupport->send(0);
-	nwhSupport->send(0);
-	nwhSupport->send(0);
-	nwhSupport->send(0);
-
-	if (openMode == 1) {
-		readHelper2(readLen, buffer);
-	}
-}
-
-void NowindHost::deviceClose()
-{
-	int dev = getDeviceNum();
-	if (dev == -1) return;
-	devices[dev].fs.reset();
-}
-
-void NowindHost::deviceWrite()
-{
-	int dev = getDeviceNum();
-	if (dev == -1) return;
-	char data = cmdData[0]; // reg_c
-	devices[dev].fs->write(&data, 1);
-}
-
-void NowindHost::deviceRead()
-{
-	int dev = getDeviceNum();
-	if (dev == -1) return;
-
-	char buffer[256];
-	unsigned readLen = readHelper1(dev, buffer);
-	bool eof = readLen < 256;
-	nwhSupport->send(0xAF);
-	nwhSupport->send(0x05);
-	nwhSupport->send(0x00); // dummy
-	nwhSupport->send16(getFCB() + 9);
-	nwhSupport->send16(readLen + (eof ? 1 : 0));
-	readHelper2(readLen, buffer);
-}
-
-unsigned NowindHost::readHelper1(unsigned dev, char* buffer)
-{
-	assert(dev < MAX_DEVICES);
-	unsigned len = 0;
-	for (/**/; len < 256; ++len) {
-		devices[dev].fs->read(&buffer[len], 1);
-		if (devices[dev].fs->eof()) break;
-	}
-	return len;
-}
-
-void NowindHost::readHelper2(unsigned len, const char* buffer)
-{
-	for (unsigned i = 0; i < len; ++i) {
-		nwhSupport->send(buffer[i]);
-	}
-	if (len < 256) {
-		nwhSupport->send(0x1A); // end-of-file
-	}
 }
 
 // strips a string from outer double-quotes and anything outside them

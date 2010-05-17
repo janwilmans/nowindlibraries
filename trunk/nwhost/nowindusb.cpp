@@ -80,7 +80,7 @@ void nowindusb_startup(void)
 {
 	drives.push_back(new ImageHandler());
 	nowindHost = new nwhost::NowindHostDebug(drives);
-	nowindHost->Initialize();
+	nowindHost->initialize();
 	nowindusb_debug("nowindusb_startup\n");
 
 	//nowindusb_set_image(0, "c:\\disk_dos2.dsk");

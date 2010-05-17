@@ -18,9 +18,9 @@ class BlockRead
 public:
 	BlockRead();
 	virtual ~BlockRead();
-	void Initialize(NowindHostSupport* aSupport);
+	void initialize(NowindHostSupport* aSupport);
 
-    void Init(word startAddress, word size, const std::vector <byte >& data);  // just wraps the the first blockRead() and initializes some vars
+    void init(word startAddress, word size, const std::vector <byte >& data);  // just wraps the the first blockRead() and initializes some vars
     void ack(byte tail);
     void blockRead(word startAddress, word size);
     void blockReadHelper(word startAddress, word size);

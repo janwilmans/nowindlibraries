@@ -5,14 +5,12 @@
 #include <deque>
 #include <vector>
 #include <string>
-#include <memory>
 #include <iosfwd>
-#include <fstream>
 
 #include "NwhostExports.h"
 #include "DataBlock.hh"
 #include "BlockRead.hh"
-#include "NowindHostSupport.hh"
+#include "Device.hh"
 
 namespace nwhost {
 
@@ -48,7 +46,7 @@ class NWHOST_API NowindHost
 public:
 	NowindHost(const std::vector<DiskHandler*>& drives);
 	virtual ~NowindHost();
-    virtual void Initialize();
+    virtual void initialize();
 
 	// public for usb-host implementation
 	bool isDataAvailable() const;
@@ -107,35 +105,15 @@ private:
 	unsigned getStartSector() const;
 	unsigned getStartAddress() const;
 	unsigned getCurrentAddress() const;
-
+    
     void blockReadCmd();
     void blockWriteCmd();
 
 	void diskReadInit(SectorMedium& disk);
-	
-	/*
-    void blockReadInit(word startAddress, word size, const std::vector <byte >& data);  // just wraps the the first blockRead() and initializes some vars
-    void blockRead(word startAddress, word size, const std::vector <byte >& data);
-    void blockReadHelper(word startAddress, word size, const std::vector <byte >& data);
-    void blockReadContinue();
-    void sendDataBlock(unsigned int blocknr);
-    void blockReadAck(byte tail);
-    */
-
 	void diskWriteInit(SectorMedium& disk);
 	void doDiskWrite1();
 	void doDiskWrite2();
 
-	unsigned getFCB() const;
-	std::string extractName(int begin, int end) const;
-	unsigned readHelper1(unsigned dev, char* buffer);
-	void readHelper2(unsigned len, const char* buffer);
-	int getDeviceNum() const;
-	int getFreeDeviceNum();
-	void deviceOpen();
-	void deviceClose();
-	void deviceWrite();
-	void deviceRead();
 	void auxIn();
 	void auxOut();
 	void dumpRegisters();
@@ -154,26 +132,19 @@ private:
 	State state;
 	unsigned recvCount;      // how many bytes recv in this state
 	byte cmdData[9];         // reg_[cbedlhfa] + cmd
-	byte extraData[240 + 2]; // extra data for diskread/write
-	std::vector<byte> buffer;// work buffer for diskread/write
-	unsigned transferred;     // progress within diskread/write
-	unsigned retryCount;     // only used for diskread
-	unsigned transferSize;   // size of current chunk
-
-	static const unsigned MAX_DEVICES = 16;
-	struct {
-		std::auto_ptr<std::fstream> fs; // not in use when fs == NULL
-		unsigned fcb;
-	} devices[MAX_DEVICES];
+	byte extraData[240 + 2]; // extra data for image/message/write
+	std::vector<byte> buffer;// work buffer for sector read/write
+	unsigned transferred;    // progress within diskwrite
+	unsigned transferSize;   // size of current diskwrite chunk
 
 	byte romdisk;            // index of romdisk (255 = no romdisk)
 	bool allowOtherDiskroms;
 	bool enablePhantomDrives;
 	bool enableMSXDOS2;
-    int readRetries;
     bool transferingToPage01;   // used to known in which state the MSX is during block-tranfers
     
-    BlockRead blockReadObject;
+    BlockRead blockRead;
+    Device device;
 protected:    
     NowindHostSupport* nwhSupport;          // pointer to the NowindHostSupport instance that is actually used (can be subclassed to provide implemenation specific debug-support)
     
