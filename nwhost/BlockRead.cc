@@ -1,5 +1,4 @@
 
-#define NWHOST_API_EXPORT
 #include "BlockRead.hh"
 #include "DataBlock.hh"
 #include "NowindHostSupport.hh"
@@ -14,7 +13,7 @@ BlockRead::BlockRead()
 {
 }
 
-void BlockRead::Initialize(NowindHostSupport* aSupport)
+void BlockRead::initialize(NowindHostSupport* aSupport)
 {
     nwhSupport = aSupport;
 }
@@ -28,7 +27,7 @@ bool BlockRead::isDone() const
     return done;
 }
 
-void BlockRead::Init(word aStartAddress, word aSize, const std::vector <byte >& data)
+void BlockRead::init(word aStartAddress, word aSize, const std::vector <byte >& data)
 {
     //DBERR("BlockRead::Init(startAddress: 0x%04x, size: 0x%04x\n", aStartAddress, aSize);
     transferingToPage01 = (startAddress >= TWOBANKLIMIT);

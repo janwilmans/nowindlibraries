@@ -284,6 +284,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Device.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\Device.hh"
+				>
+			</File>
+			<File
 				RelativePath=".\DiskHandler.hh"
 				>
 			</File>
