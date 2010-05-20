@@ -255,16 +255,9 @@ void NowindHost::diskReadInit(SectorMedium& disk)
 		state = STATE_SYNC1;
 		return;
 	}
-// PANIEK
-// PANIEK
-// TODO: JAN! kun je dit even checken? Kan transferred weg als we blockWrite.cc maken?
-    transferred = 0;
-// PANIEK
-// PANIEK
-// PANIEK
 
     unsigned int size = sectorAmount * 512;
-    unsigned address = getCurrentAddress();
+    unsigned address = getStartAddress();
     blockRead.init(address, size, buffer);
     state = STATE_BLOCKREAD;
 }
