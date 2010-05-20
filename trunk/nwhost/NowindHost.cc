@@ -453,6 +453,7 @@ void NowindHost::DSKCHG()
 	nwhSupport->sendHeader();
 	byte num = cmdData[7]; // reg_a
 	assert(num < drives.size());
+
 	if (drives[num]->diskChanged()) {
 		nwhSupport->send(255); // changed
 		// read first FAT sector (contains media descriptor)
