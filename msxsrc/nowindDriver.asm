@@ -250,22 +250,31 @@ DSKCHG:
         pop af
 
         push hl
+        call sendRegisters
+        ld (hl),C_DSKCHG
+        ld hl,dskchgCommand
+        call executeCommandNowindInPage0
+        pop hl
+        ret c                   ; not ready (reg_a = 2)
+
+;        push hl
         ;call sendRegisters
         ;ld (hl),C_DSKCHG
         ;call enableNowindPage0
         ;ld h,HIGH usbReadPage0
         ;call getHeader
 
-    SEND_CMD_AND_WAIT C_DSKCHG
+;    SEND_CMD_AND_WAIT C_DSKCHG
 
-        ld c,(hl)               ; media descriptor (when disk was changed)
-        push af
-        push bc
-        call restorePage0
-        pop bc
-        pop af
-        pop hl
-        ret c           ; not ready
+;        ld c,(hl)               ; media descriptor (when disk was changed)
+;        push af
+;        push bc
+;        call restorePage0
+;        pop bc
+;        pop af
+;        pop hl
+;        ret c           ; not ready
+
         or a
         ld b,1
         ret z           ; not changed
@@ -274,6 +283,11 @@ DSKCHG:
         ld a,10
         ret c
         ld b,255
+        ret
+
+dskchgCommand:
+        ld h,HIGH usbReadPage0
+        ld c,(hl)
         ret
 
 GETDPB:

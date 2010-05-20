@@ -29,10 +29,11 @@ bool BlockRead::isDone() const
 
 void BlockRead::init(word aStartAddress, word aSize, const std::vector <byte >& data)
 {
-    //DBERR("BlockRead::Init(startAddress: 0x%04x, size: 0x%04x\n", aStartAddress, aSize);
-    transferingToPage01 = (startAddress >= TWOBANKLIMIT);
+    DBERR("BlockRead::Init(startAddress: 0x%04x, size: 0x%04x\n", aStartAddress, aSize);
     startAddress = aStartAddress;
     transferSize = aSize;
+
+    transferingToPage01 = (startAddress <= TWOBANKLIMIT);
     transferredData = 0;
     done = false;
     
@@ -44,7 +45,7 @@ void BlockRead::init(word aStartAddress, word aSize, const std::vector <byte >& 
 
 void BlockRead::blockRead(word startAddress, word size)
 {
-    //DBERR("blockRead, startAddress: 0x%04X, size: 0x%04X\n", startAddress, size);
+    DBERR("blockRead, startAddress: 0x%04X, size: 0x%04X\n", startAddress, size);
     
     if (startAddress < TWOBANKLIMIT)
     {
@@ -61,7 +62,7 @@ void BlockRead::blockRead(word startAddress, word size)
 
 void BlockRead::blockReadHelper(word startAddress, word size)
 {
-    //DBERR("blockReadHelper(): size: 0x%02x, transferred: 0x%02x\n", size, transferredData);
+    DBERR("blockReadHelper(): size: 0x%02x, transferred: 0x%02x\n", size, transferredData);
     
     // delete any blocks still in the dataBlockQueue (unacknowlged by msx, could be caused by timeouts)
     for(unsigned int i=0; i< dataBlockQueue.size(); i++)
@@ -145,15 +146,21 @@ void BlockRead::blockReadContinue()
 {
     unsigned address = startAddress + transferredData;
 
-    //DBERR("blockReadContinue(), size: 0x%04x, address: 0x%04x, transferred: 0x%04x\n", transferSize, address, transferredData);
+    DBERR("blockReadContinue(), size: 0x%04x, address: 0x%04x, transferred: 0x%04x\n", transferSize, address, transferredData);
     
     if (transferredData < transferSize)     // still bytes to be transferred?
     {
-        //DBERR("blockReadContinue, do more!\n");
+        DBERR("blockReadContinue, do more!\n");
+        if (transferingToPage01) {
+            DBERR("transferingToPage0 = TRUE!\n");
+        } 
+        else {
+            DBERR("transferingToPage0 = FALSE!\n");
+        }
         
         if (transferingToPage01 && address >= TWOBANKLIMIT && transferredData > 0) // address >= 0x8000 and this is not the first transfer?
         {
-                //DBERR("send 3 -> continue at page 2/3\n");
+                DBERR("send 3 -> continue at page 2/3\n");
                 // switch to page23-transfers
                 nwhSupport->sendHeader();
                 nwhSupport->send(3); 
@@ -163,7 +170,7 @@ void BlockRead::blockReadContinue()
     }
     else
     {
-        //DBERR("blockReadContinue, we're done!\n");
+        DBERR("blockReadContinue, we're done!\n");
         nwhSupport->sendHeader();
         nwhSupport->send(0);
         done = true;
