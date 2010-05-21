@@ -206,8 +206,8 @@ C_BLOCKWRITE    equ $95
 ; unchanged: bc, ix, iy
 ; requirements: stack available
 macro SEND_COMMAND cmd
-    call sendRegisters
-    ld (hl),cmd
+        call sendRegisters
+        ld (hl),cmd
 endmacro
 
 ; in: none
@@ -215,17 +215,14 @@ endmacro
 ; unchanged: de, ix, iy
 ; requirements: nowind in page 0! (use enableNowindPage0)
 macro GET_RESPONSE
-        ld h,HIGH usbReadPage0
-        call getHeader
+        call getHeaderInPage0
 endmacro
 
 
 macro SEND_CMD_AND_WAIT cmd
-		call sendRegisters
-		ld (hl),cmd
+        call sendRegisters
+        ld (hl),cmd
         call enableNowindPage0
-        ;call getHeaderHigh
-		ld h,HIGH usbReadPage0
-		call getHeader
+	call getHeaderInPage0
 endmacro
 

@@ -473,7 +473,7 @@ void NowindHost::GETDPB()
 {
 	byte num = cmdData[7]; // reg_a
 
-	DBERR("GETDPB, reg_a: 0x%02X\n", num);
+	DBERR("GETDPB,  : 0x%02X\n", num);
 	SectorMedium* disk = getDisk();
 	if (!disk) {
 		// no such drive or no disk inserted
@@ -491,7 +491,7 @@ void NowindHost::GETDPB()
 	// the actual dpb[0] (drive number) is not send
 	dpbType dpb;
 	word sectorSize = sectorBuffer[12]*256+sectorBuffer[11];	// normally 512 bytes per sector, 4 sectors per cluster
-
+DBERR("GETDPB sectorSize: %u\n", sectorSize);
 	dpb.ID = sectorBuffer[21];	   	         // offset 1 = 0xF0;  
 	dpb.SECSIZ_L = sectorSize & 0xff;	     // offset 2 = 0x00;  
 	dpb.SECSIZ_H = sectorSize >> 8;		     // offset 3 = 0x02;  
@@ -589,6 +589,7 @@ void NowindHost::GETDPB()
 	for (int i=0;i<18;i++) {
 		DBERR("GETDPB offset [%d]: 0x%02X, correct: 0x%02X\n", i+1, sendBuffer[i], refData[i]);
 		nwhSupport->send(sendBuffer[i]);
+		//nwhSupport->send(refData[i]);
 	}
 }
 

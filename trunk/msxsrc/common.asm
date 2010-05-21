@@ -72,9 +72,12 @@ sendRegisters:
 
 ; GetHeader, returns a = 2 if timeout occurs
 ;getHeaderHigh:
-;   ld h,HIGH usbReadPage0
-getHeader:
-        DEBUGMESSAGE "gH"
+
+
+getHeaderInPage0:
+        DEBUGMESSAGE "gH0"
+        ld h,HIGH usbReadPage0
+.init:
         ld b,HIGH 65535                 ; 42000 * 60 states ~ 0,7 sec (time out)
 .loop:  ld a,(hl)
 .chkaf: cp $af
@@ -93,6 +96,15 @@ getHeader:
         jr nz,.chkaf
         ld a,(hl)
         ret
+
+        PHASE $ + $4000
+
+getHeaderInPage2:
+        DEBUGMESSAGE "gH2"
+        ld h,HIGH usbReadPage2
+        jr getHeaderInPage0.init + $4000 
+        
+        DEPHASE
 
 sendMessage:
         ;DEBUGMESSAGE "sendMsg"
@@ -145,7 +157,7 @@ AUXin:  DEBUGMESSAGE "AUX in"
 
 .getCharacter:
         DEBUGMESSAGE "getChar"
-        call getHeader
+        call getHeaderInPage0
         jr c,.getCharacter
         jr .exit
 
@@ -205,8 +217,7 @@ executeCommandNowindInPage0:
         push hl
         push bc
         call enableNowindPage0
-        ld h,HIGH usbReadPage0
-        call getHeader
+        call getHeaderInPage0
         jr c,.exit      ; timeout occurred?
 
         pop bc
@@ -243,8 +254,7 @@ executeCommandNowindInPage2:
         ld h,$40
         call ENASLT
 
-        ld h,HIGH usbReadPage2
-        call getHeader + $4000
+        call getHeaderInPage2
         jr c,.exit      ; timeout occurred?
 
         pop bc
@@ -295,7 +305,7 @@ blockRead01:
         ld h,HIGH usbReadPage2
         jr .start2
 .start:
-        call getHeader + $4000
+        call getHeaderInPage2
 .start2:
         DEBUGDUMPREGISTERS
         ret c                           ; return on timeout
@@ -321,7 +331,7 @@ blockRead23:
         ld h,HIGH usbReadPage0
         jr .start2
 .start:
-        call getHeader
+        call getHeaderInPage0
 .start2:
         ret c                           ; return on timeout
         and a

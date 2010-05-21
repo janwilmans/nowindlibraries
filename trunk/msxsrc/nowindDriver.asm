@@ -170,8 +170,7 @@ blockWrite01:
         ld h,HIGH usbReadPage2
         jr .start2
 .start:
-        ld h,HIGH usbReadPage2
-        call getHeader + $4000
+        call getHeaderInPage2
 .start2:
         ret c                           ; exit (not ready)
         or a
@@ -204,8 +203,7 @@ blockWrite23:
         ld h,HIGH usbReadPage0
         jr .start2
 .start:
-        ld h,HIGH usbReadPage0
-        call getHeader
+        call getHeaderInPage0
 .start2:
         ret c                           ; exit (not ready)
         or a
@@ -377,8 +375,8 @@ OEMSTA:
 .statement:
         db "IMAGE",0
         dw changeImage
-        db "VSTREAM",0
-        dw videoStream
+;        db "VSTREAM",0
+;        dw videoStream
         db 0
 
 ; send arguments, command, filename, end with ":"
@@ -400,11 +398,11 @@ call_exit:
         inc hl
         jr .loop
 
-videoStream:
-        push hl
-        include "vram.asm"
-        pop hl
-        jp call_exit
+;videoStream:
+;        push hl
+;        include "vram.asm"
+;        pop hl
+;        jp call_exit
 
 ; hl points to text
 printVdpText2:
