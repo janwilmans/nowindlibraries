@@ -132,100 +132,21 @@ DSKIO:
 
         call sendRegisters
         ld (hl),C_DSKIO
-        jr c,dskioWrite                 ; read or write?
-
-dskioRead:
+        jr c,.write
+.read:
         call blockRead
-        DEBUGMESSAGE "exit_dskio"
-        DEBUGDUMPREGISTERS
+        DEBUGMESSAGE "exit_dskio_rd"
         ret c                           ; return error (error code in a)
         xor a                           ; no error, clear a
         ret
         
-dskioWrite:
-        DEBUGMESSAGE "dskwrite"
-        rlca
-        jr c,.page23
-
-        DEBUGMESSAGE "p01"
-        ld hl,blockWrite01
-        call executeCommandNowindInPage2
-        ret c                           ; return error (error code in a)
-        ret pe                          ; host returns 0xfe when data for page 2/3 is available
-        DEBUGMESSAGE "doorgaan!"
-
-.page23:
-        DEBUGMESSAGE "p23"
-        ld hl,blockWrite23
-        call executeCommandNowindInPage0
-        DEBUGDUMPREGISTERS
-        DEBUGMESSAGE "back"
-        ret c                           ; return error (error code in a)
-        xor a                           ; some software (wb?) requires that a is zero, because they do not check the carry
+.write:
+        call blockWrite
+        DEBUGMESSAGE "exit_dskio_wrt"
+        ret c
+        xor a
         ret
-
-        PHASE $ + $4000
-
-blockWrite01:
-        DEBUGDUMPREGISTERS
-        DEBUGMESSAGE "blkWr01"
-.start:
-        call getHeaderInPage2
-        ret c                           ; exit (not ready)
-        or a
-        ret m                           ; exit (no error)
-        jr nz,.error
-
-        DEBUGMESSAGE "wr01"
-        ld e,(hl)                       ; address
-        ld d,(hl)
-        ld c,(hl)                       ; number of bytes
-        ld b,(hl)
-        ld a,(hl)                       ; block sequence number
-
-        ex de,hl
-        ld de,usbWritePage2
-        ld (de),a                       ; mark block begin
-        ldir
-        ld (de),a                       ; mark block end
-        jr .start
-
-.error: scf
-        ld a,(hl)                       ; get error code
-        ret
-
-        DEPHASE
-
-blockWrite23:
-        DEBUGDUMPREGISTERS
-        DEBUGMESSAGE "blkWr23"
-.start:
-        call getHeaderInPage0
-        ret c                           ; exit (not ready)
-        or a
-        ret m                           ; exit (no error)
-        jr nz,.error
-
-        DEBUGMESSAGE "wr23"
-        ld e,(hl)                       ; address
-        ld d,(hl)
-        ld c,(hl)                       ; number of bytes
-        ld b,(hl)
-        ld a,(hl)                       ; block sequence number
-
-        ;DEBUGDUMPREGISTERS
-        ex de,hl
-        ld d,HIGH usbWritePage1
-        ld (de),a                       ; mark block begin
-        ldir
-        ld (de),a                       ; mark block end
-        jr .start
-
-.error: scf
-        ld a,(hl)                       ; get error code
-        ret
-
-
+        
 DSKCHG:
 ; Input     A   Drive number
 ;           B   0
