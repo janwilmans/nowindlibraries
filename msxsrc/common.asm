@@ -211,9 +211,6 @@ executeCommandNowindInPage0:
         push hl
         push bc
         call enableNowindPage0
-        call getHeaderInPage0
-        jr c,.exit      ; timeout occurred?
-
         pop bc
         ld hl,.restorePage
         ex (sp),hl
@@ -322,11 +319,8 @@ blockRead01:
 blockRead23:
         DEBUGMESSAGE "br23"
         DEBUGDUMPREGISTERS
-        ld h,HIGH usbReadPage0
-        jr .start2
 .start:
         call getHeaderInPage0
-.start2:
         ret c                           ; return on timeout
         and a
         ret z                           ; exit blockRead23

@@ -57,7 +57,8 @@ DRIVES:
         ret
 
 drivesCommand:
-        ld h,HIGH usbReadPage0
+        call getHeaderInPage0
+        ret c
         ld (LASTDRV),a                  ; install phantom drives (CRTL key)?
         ld a,(hl)                       ; allow other drives (SHIFT key)?
         ld (DEVICE),a
@@ -92,6 +93,7 @@ INIENV:
         ret
 
 inienvCommand:
+        call getHeaderInPage0
         ret
 
 
@@ -200,11 +202,8 @@ blockWrite01:
 blockWrite23:
         DEBUGDUMPREGISTERS
         DEBUGMESSAGE "blkWr23"
-        ld h,HIGH usbReadPage0
-        jr .start2
 .start:
         call getHeaderInPage0
-.start2:
         ret c                           ; exit (not ready)
         or a
         ret m                           ; exit (no error)
@@ -284,7 +283,8 @@ DSKCHG:
         ret
 
 dskchgCommand:
-        ld h,HIGH usbReadPage0
+        call getHeaderInPage0
+        ret c                
         ld c,(hl)
         ret
 
