@@ -200,29 +200,3 @@ C_BLOCKWRITE    equ $95
         db 0
 .skip:
         endmacro
-
-; in: all registers, 
-; out: h = HIGH usbWritePage1
-; unchanged: bc, ix, iy
-; requirements: stack available
-macro SEND_COMMAND cmd
-        call sendRegisters
-        ld (hl),cmd
-endmacro
-
-; in: none
-; out: A = first received byte, H = HIGH usbReadPage0, CF is on timeout
-; unchanged: de, ix, iy
-; requirements: nowind in page 0! (use enableNowindPage0)
-macro GET_RESPONSE
-        call getHeaderInPage0
-endmacro
-
-
-macro SEND_CMD_AND_WAIT cmd
-        call sendRegisters
-        ld (hl),cmd
-        call enableNowindPage0
-	call getHeaderInPage0
-endmacro
-

@@ -70,10 +70,6 @@ sendRegisters:
         ld (hl),d        ; send register a
         ret
 
-; GetHeader, returns a = 2 if timeout occurs
-;getHeaderHigh:
-
-
 getHeaderInPage0:
         DEBUGMESSAGE "gH0"
         ld h,HIGH usbReadPage0
@@ -86,7 +82,7 @@ getHeaderInPage0:
         ld a,b
         or c
         jr nz,.loop
-        DEBUGMESSAGE "getHeader timeout!"
+        DEBUGMESSAGE "Timeout!"
         ld a,2                          ; not ready
         scf
         ret
@@ -139,12 +135,10 @@ AUXin:  DEBUGMESSAGE "AUX in"
         push de
         push bc
 
-    ;call sendRegisters
-        ;ld (hl),C_AUXIN
-        ;call enableNowindPage0
-        ;ld h,HIGH usbReadPage0
-        ;call getHeader
-    SEND_CMD_AND_WAIT C_AUXIN
+        call sendRegisters
+        ld (hl),C_AUXIN
+        call enableNowindPage0
+        call getHeaderInPage0
 
         jp nc,.getCharacter
 

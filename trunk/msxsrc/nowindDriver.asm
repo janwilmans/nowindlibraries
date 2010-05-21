@@ -277,7 +277,7 @@ DSKCHG:
         ld b,1
         ret z           ; not changed
         ld b,c
-        call GETDPB
+        call GETDPB     ; TODO: restore reg_a for drive number!
         ld a,10
         ret c
         ld b,255
@@ -329,12 +329,11 @@ GETDPB:
         DEBUGMESSAGE ".hddImage"
         ;MESSAGE "HOST GETDPB"
 
-        ;call sendRegisters
-        ;ld (hl),C_GETDPB
-        ;call enableNowindPage0
-        ;ld h,HIGH usbReadPage0
-        ;call getHeader
-    SEND_CMD_AND_WAIT C_GETDPB
+        call sendRegisters
+        ld (hl),C_GETDPB
+        call enableNowindPage0
+        call getHeaderInPage0
+
         jr c,.exit                      ; not ready
         ld e,a                          ; destination
         ld d,(hl)
