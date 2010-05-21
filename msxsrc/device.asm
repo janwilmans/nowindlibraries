@@ -1,6 +1,11 @@
 ; device.asm
 ; implements a basic now: device
 
+beginCodeDevice:
+        PATCH $4006, device
+        
+        code @ beginCodeDevice
+
 device:
         push hl
         ld hl,deviceFunctions

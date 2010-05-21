@@ -86,7 +86,7 @@ bool NowindHost::isDataAvailable() const
 // send:  msx -> pc
 void NowindHost::write(byte data, unsigned int time)
 {
-	unsigned duration = 0; //time - lastTime;
+	unsigned duration = time - lastTime;
 	lastTime = time;
 	if ((duration >= 500) && (state != STATE_SYNC1)) {
 		// timeout (500ms), start looking for AF05

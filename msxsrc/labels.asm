@@ -2,11 +2,9 @@
 ; it provides names for several memory addresses and some macros
 
 ; BIOS routines
-RDSLT           equ $000c
-WRSLT           equ $0014
 CALSLT          equ $001c
 ENASLT          equ $0024
-CHGMOD          equ $005f
+INITXT          equ $006C
 SNSMAT          equ $0141
 EXTROM          equ $015f
 SDFSCR          equ $0185               ; restore screen parameters from clockchip (in SUBROM)

@@ -14,10 +14,11 @@
         output "nowind.rom"
         include "labels.asm"
 
-        defpage 0, $4000, $4000      ; MSXDOS2 bank 0
+        defpage 0, $4000, $4000         ; MSXDOS2 bank 0
         defpage 1, $4000, 3 * $4000     ; MSXDOS2 bank 1..3
-        defpage 2, $4000, $4000      ; MSXDOS1
-
+        defpage 2, $4000, $4000         ; MSXDOS1
+        defpage 3, 0, (512-80)*1024     ; empty
+        
         ; insert MSXDOS2
 
         page 0
@@ -29,8 +30,6 @@
 
         incbin "..\roms\MSXDOS22.ROM", 0, $72f0-$4000
 
-        PATCH $4006, device
-
         code ! $4010
         jp DSKIO
         jp DSKCHG
@@ -40,7 +39,7 @@
         db 0,0,0                        ; no DRVOFF
 
         PATCH $47d7, getBootArgs        ; INIHDR
-        ;        PATCH $47dd, 0                  ; do not check for MSX1
+        ;PATCH $47dd, 0                  ; do not check for MSX1
         PATCH $488d, MYSIZE
         PATCH $489f, SECLEN
         PATCH $48b9, DRIVES
@@ -54,17 +53,6 @@
         db LOW initDiskBasic
         code ! $4884
         db HIGH initDiskBasic
-
-        code ! $49a3
-        ld hl,newAUX                    ; redirect AUX to host
-        ld de,$f327
-        ld bc,10
-        ldir
-        nop
-        nop
-        nop
-        nop
-        nop                             ; nops needed to override existing code!
 
         code @ $72f0
 
@@ -124,6 +112,7 @@ bootMSXDOS1:
         include "nowindDriver.asm"
         include "romdisk.asm"
         include "flashWriter.asm"  ; todo: remove, and use bootcommand to flash
+        include "dos_aux.asm"
         include "device.asm"
 
         ds $8000-(endCopyFromBank-copyFromBank)-$, $ff
@@ -162,8 +151,6 @@ endCopyFromBank:
 
         incbin "..\roms\DISK.ROM", 0, $7405-$4000
 
-        PATCH $4006, device
-
         code ! $4010
         jp DSKIO
         jp DSKCHG
@@ -184,25 +171,16 @@ endCopyFromBank:
         PATCH $5809, initDiskBasic      ; HRUNC
         ;PATCH $5b9a, getHostDate        ; get date from host when no clockchip found (different 5b95)
 
-        code ! $595d
-        ld hl,newAUX                    ; redirect AUX to host
-        ld de,$f327
-        ld bc,10
-        ldir
-        nop
-        nop
-        nop
-        nop                             ; do not remove!
-
         code @ $7405
 
         include "common.asm"
-        include "extendedBios.asm"
+        include "extendedBios.asm"        
         include "slotRoutines.asm"
         include "nowindDriver.asm"
         include "romdisk.asm"
         include "device.asm"
-
+        include "dos_aux.asm"
+        
         ifdef BDOS_NOWIND
         include "nowindbdos.asm"
         endif
@@ -222,7 +200,5 @@ enableBank0:
 endCopyFromBank:
 
 
-
-        defpage 3, 0, (512-80)*1024
         page 3
-        ds (512-80)*1024, $ba
+        ds (512-80)*1024, $ff
