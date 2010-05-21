@@ -333,7 +333,7 @@ error255:
         jr z,error255
         ; b moet nog aangepast... (hoe?)
         ld c,a
-        jp blockReadTranfer.good
+        jr blockReadTranfer.good
 
 blockReadTranfer:
         DEBUGMESSAGE "btf"

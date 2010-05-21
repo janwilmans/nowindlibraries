@@ -71,7 +71,7 @@
 getBootArgs:
 ; tijdelijke test
 
-        call flashWriter                ; TODO: zoek betere plek (tijdelijk geen ruimte in dos1 rom)
+        call flashWriter                ; TODO: zoek betere plek
         DEBUGMESSAGE "Any commands?"
         call enableNowindPage0
         ld c,0                      ; c=0 means reset startup queue index
@@ -104,7 +104,7 @@ noNextCommand:
         call sendRegisters
         ld (hl),C_GETDOSVERSION
         call enableNowindPage0
-	call getHeaderInPage0
+        call getHeaderInPage0
 
         call restorePage0
         jp c,bootMSXDOS1                ; no reply (host not connected?)
