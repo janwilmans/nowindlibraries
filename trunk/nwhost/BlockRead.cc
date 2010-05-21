@@ -121,13 +121,25 @@ void BlockRead::sendDataBlock(unsigned int blocknr)
     DataBlock* dataBlock = dataBlockQueue[blocknr];
     //DBERR("sendDatablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
 
+
+    static int error255 = 0;
+    if (error255 == 0)
+    {
+        nwhSupport->send(0xff); // insert extra 0xff to simulate buffer underrun
+        nwhSupport->send(0xff); // insert extra 0xff to simulate buffer underrun
+        nwhSupport->send(0xff); // insert extra 0xff to simulate buffer underrun
+        nwhSupport->send(0xff); // insert extra 0xff to simulate buffer underrun
+    }
+    error255++;
+    if (error255 == 20) error255=0;
+
     nwhSupport->send(dataBlock->header);    // header
     for (unsigned int i=0; i<dataBlock->data.size(); i++)
     {
         nwhSupport->send(dataBlock->data[i]);
         //DBERR("dataBlock[%i] -> data: 0x%02x\n", i, dataBlock->data[i]);
     }
-/*
+
     static int wrong = 0;
     if (wrong == 0)
     {
@@ -137,8 +149,8 @@ void BlockRead::sendDataBlock(unsigned int blocknr)
         nwhSupport->send(0xff); // insert extra 0xff to simulate buffer underrun
     }
     wrong++;
-    if (wrong == 50) wrong=0;
-*/
+    if (wrong == 20) wrong=0;
+
     nwhSupport->send(dataBlock->header);    // tail
 }
 
@@ -152,10 +164,10 @@ void BlockRead::blockReadContinue()
     {
         DBERR("blockReadContinue, do more!\n");
         if (transferingToPage01) {
-            DBERR("transferingToPage0 = TRUE!\n");
+            DBERR("transferingToPage01 = TRUE!\n");
         } 
         else {
-            DBERR("transferingToPage0 = FALSE!\n");
+            DBERR("transferingToPage01 = FALSE!\n");
         }
         
         if (transferingToPage01 && address >= TWOBANKLIMIT && transferredData > 0) // address >= 0x8000 and this is not the first transfer?

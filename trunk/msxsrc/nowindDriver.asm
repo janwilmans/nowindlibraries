@@ -164,37 +164,22 @@ DSKCHG:
         jp z,ROMDISK_DSKCHG
         pop af
 
+        push af
         push hl
         call sendRegisters
         ld (hl),C_DSKCHG
         ld hl,dskchgCommand
         call executeCommandNowindInPage0
         pop hl
+        pop de
         ret c                   ; not ready (reg_a = 2)
-
-;        push hl
-        ;call sendRegisters
-        ;ld (hl),C_DSKCHG
-        ;call enableNowindPage0
-        ;ld h,HIGH usbReadPage0
-        ;call getHeader
-
-;    SEND_CMD_AND_WAIT C_DSKCHG
-
-;        ld c,(hl)               ; media descriptor (when disk was changed)
-;        push af
-;        push bc
-;        call restorePage0
-;        pop bc
-;        pop af
-;        pop hl
-;        ret c           ; not ready
 
         or a
         ld b,1
-        ret z           ; not changed
+        ret z                   ; not changed
+        ld a,d
         ld b,c
-        call GETDPB     ; TODO: restore reg_a for drive number!
+        call GETDPB
         ld a,10
         ret c
         ld b,255
@@ -222,7 +207,7 @@ GETDPB:
         cp $f0
         ld a,h
         DEBUGDUMPREGISTERS
-        ;jr z,.hddImage
+        jr z,.hddImage
 
 ;        MESSAGE "ROM GETDPB"
 
