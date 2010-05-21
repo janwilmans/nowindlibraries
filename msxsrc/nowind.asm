@@ -76,8 +76,9 @@ getBootArgs:
         call enableNowindPage0
         ld c,0                      ; c=0 means reset startup queue index
 .loop:  ld b,0                      ; b=0 means request startup command
-        SEND_COMMAND C_CMDREQUEST
-        GET_RESPONSE
+        call sendRegisters
+        ld (hl),C_CMDREQUEST
+        call getHeaderInPage0
         jr c,noNextCommand
 
         ld d,(hl)
@@ -100,12 +101,10 @@ noNextCommand:
         call restorePage0
         DEBUGMESSAGE "End of startup cmds"
 
-        ;call sendRegisters
-        ;ld (hl),C_GETDOSVERSION
-        ;call enableNowindPage0
-        ;ld h,HIGH usbReadPage0
-        ;call getHeader
-    SEND_CMD_AND_WAIT C_GETDOSVERSION
+        call sendRegisters
+        ld (hl),C_GETDOSVERSION
+        call enableNowindPage0
+	call getHeaderInPage0
 
         call restorePage0
         jp c,bootMSXDOS1                ; no reply (host not connected?)
