@@ -245,8 +245,8 @@ executeCommandNowindInPage2:
         ld h,$40
         call ENASLT
 
-        call getHeaderInPage2
-        jr c,.exit      ; timeout occurred?
+;        call getHeaderInPage2
+;        jr c,.exit      ; timeout occurred?
 
         pop bc
         ld hl,.restorePage
@@ -293,14 +293,9 @@ blockRead:
      
 blockRead01:
         DEBUGMESSAGE "br01"
-        ld h,HIGH usbReadPage2
-        jr .start2
 .start:
         call getHeaderInPage2
-.start2:
-        DEBUGDUMPREGISTERS
         ret c                           ; return on timeout
-
         and a
         ret z                           ; exit blockRead01 (no more data)
         cp 1
