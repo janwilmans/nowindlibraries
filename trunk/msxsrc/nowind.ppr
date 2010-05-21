@@ -35,19 +35,36 @@ nowind
 		rs232.asm
 		slotRoutines.asm
 		nowindDriver.asm
+		dos_aux.asm
 [Open project files]
 0=common.asm
 1=nowindDriver.asm
 2=nowind.asm
+3=labels.asm
+4=dos_aux.asm
+5=nowind.lst
+6=device.asm
 [Selected Project Files]
 Main=
-Selected=common.asm
+Selected=nowind.asm
 [common.asm]
-TopLine=322
-Caret=11,336
+TopLine=69
+Caret=1,131
 [nowindDriver.asm]
-TopLine=200
-Caret=9,210
+TopLine=3
+Caret=67,23
 [nowind.asm]
-TopLine=88
-Caret=1,104
+TopLine=154
+Caret=9,183
+[labels.asm]
+TopLine=51
+Caret=13,40
+[dos_aux.asm]
+TopLine=1
+Caret=37,33
+[nowind.lst]
+TopLine=1374
+Caret=15,1384
+[device.asm]
+TopLine=1
+Caret=31,7

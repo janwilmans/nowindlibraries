@@ -15,21 +15,12 @@ define  PRETEND_2B_DOS23
 
 INIHRD:
         DEBUGMESSAGE "INIHRD"
-
+        
 ;        call getWorkArea
 ;        DEBUGDUMPREGISTERS
 
-        call enableNowindPage0          ; clear hostToMSXFifo by reading 4Kb of random data
-        ld bc,4096
-.loop:  ld a,(usbReadPage0)
-        dec bc
-        ld a,b
-        or c
-        jr nz,.loop
-        call restorePage0
-
         ld h,HIGH usbWritePage1
-        ld (hl),$af                     ; INIHRD command
+        ld (hl),$af                     ; signal MSX reset to host
         ld (hl),$ff
         jp nowindInit
 

@@ -1,13 +1,13 @@
 ; Nowind specific
 
 nowindInit:
-        ;DEBUGMESSAGE "nowindInit"
-        ld a,($faf8)                    ; moet volgens bifi ld a,($2d) zijn, $faf8 is op msx1 deel van de rs232 area?
+        DEBUGMESSAGE "nowindInit"
+        ld a,($2d)
         or a
         push af
-        call z,CHGMOD                   ; SCREEN 0 for MSX1
+        call z,INITXT                   ; SCREEN 0 (MSX1)
         pop af
-        ld ix,SDFSCR                    ; restore screen mode from clockchip
+        ld ix,SDFSCR                    ; restore screen mode from clockchip (on MSX2 and higher)
         call nz,EXTROM
 
         call PRINTTEXT
@@ -17,7 +17,15 @@ nowindInit:
         db "Nowind USB Diskrom! [debug]",0
         endif
 
-        ret
+        call enableNowindPage0          ; clear hostToMSXFifo by reading 4Kb of random data
+        ld bc,4096
+.loop:  ld a,(usbReadPage0)
+        dec bc
+        ld a,b
+        or c
+        jr nz,.loop
+        jp restorePage0
+
 
 initDiskBasic:
         DEBUGMESSAGE "initDiskBasic"
@@ -57,17 +65,17 @@ sendRegisters:
         push af
         ld a,h
         ld h,HIGH usbWritePage1
-        ld (hl),$af      ; send header
+        ld (hl),$af                     ; send header
         ld (hl),$05
         ld (hl),c
         ld (hl),b
         ld (hl),e
         ld (hl),d
         ld (hl),l
-        ld (hl),a        ; send register h
+        ld (hl),a                       ; send register h
         pop de
-        ld (hl),e        ; send register f
-        ld (hl),d        ; send register a
+        ld (hl),e                       ; send register f
+        ld (hl),d                       ; send register a
         ret
 
 getHeaderInPage0:
@@ -121,58 +129,6 @@ sendMessage:
         ex (sp),hl
         ret
 
-; AUX device
-
-newAUX: jp AUXin
-        nop
-        nop
-        jp AUXout
-        nop
-        nop
-
-AUXin:  DEBUGMESSAGE "AUX in"
-        push hl
-        push de
-        push bc
-
-        call sendRegisters
-        ld (hl),C_AUXIN
-        call enableNowindPage0
-        call getHeaderInPage0
-
-        jp nc,.getCharacter
-
-        DEBUGMESSAGE "not connected"
-        ld a,$1a                        ; eof
-.exit:  pop bc
-        pop de
-        pop hl
-        jp restorePage0
-
-.getCharacter:
-        DEBUGMESSAGE "getChar"
-        call getHeaderInPage0
-        jr c,.getCharacter
-        jr .exit
-
-
-AUXout: DEBUGMESSAGE "AUX out"
-        DEBUGDUMPREGISTERS
-        push hl
-        push de
-;        push bc
-;        ld a,(RAMAD1) ; TODO: WTF???
-;        call RDSLT
-        push af
-        call sendRegisters
-        ld (hl),C_AUXOUT
-        pop af
-;        pop bc
-        pop de
-        pop hl
-        ret
-
-
 ; send 32 bytes starting from address specified by DE to the usb
 sdendFCB:
         push de
@@ -208,7 +164,6 @@ receiveFCB:
 ; changed: all
 ; requirements: stack available
 executeCommandNowindInPage0:
-
         ld de,.restorePage
         push de
         push hl                         ; address callback
@@ -224,7 +179,6 @@ executeCommandNowindInPage0:
         ret
 
 executeCommandNowindInPage2:
-
         ld de,.restorePage
         push de
         push hl                         ; address callback

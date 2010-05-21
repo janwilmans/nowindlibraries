@@ -120,8 +120,7 @@ void BlockRead::sendDataBlock(unsigned int blocknr)
 {
     DataBlock* dataBlock = dataBlockQueue[blocknr];
     //DBERR("sendDatablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
-
-
+/*
     static int error255 = 0;
     if (error255 == 0)
     {
@@ -132,14 +131,14 @@ void BlockRead::sendDataBlock(unsigned int blocknr)
     }
     error255++;
     if (error255 == 20) error255=0;
-
+*/
     nwhSupport->send(dataBlock->header);    // header
     for (unsigned int i=0; i<dataBlock->data.size(); i++)
     {
         nwhSupport->send(dataBlock->data[i]);
         //DBERR("dataBlock[%i] -> data: 0x%02x\n", i, dataBlock->data[i]);
     }
-
+/*
     static int wrong = 0;
     if (wrong == 0)
     {
@@ -150,7 +149,7 @@ void BlockRead::sendDataBlock(unsigned int blocknr)
     }
     wrong++;
     if (wrong == 20) wrong=0;
-
+*/
     nwhSupport->send(dataBlock->header);    // tail
 }
 
@@ -193,7 +192,7 @@ void BlockRead::ack(byte tail)
 {
     assert(dataBlockQueue.size() != 0);
     DataBlock* dataBlock = dataBlockQueue[0];
-    //DBERR("ACK -> Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
+    DBERR("ACK -> Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
 
     if (dataBlock->header == tail)
     {
@@ -211,7 +210,7 @@ void BlockRead::ack(byte tail)
         static int errors = 0;
         errors++;
 
-        DBERR("block: %u failed! (errors: %u)\n", dataBlock->number, errors);
+        DBERR("block: %u failed! (errors: %u, tail: 0x%02x)\n", dataBlock->number, errors, tail);
 
 	    nwhSupport->sendHeader();
 	    if (dataBlock->fastTransfer)
