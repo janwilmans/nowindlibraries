@@ -169,11 +169,8 @@ dskioWrite:
 blockWrite01:
         DEBUGDUMPREGISTERS
         DEBUGMESSAGE "blkWr01"
-        ld h,HIGH usbReadPage2
-        jr .start2
 .start:
         call getHeaderInPage2
-.start2:
         ret c                           ; exit (not ready)
         or a
         ret m                           ; exit (no error)
