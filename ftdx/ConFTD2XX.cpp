@@ -186,10 +186,16 @@ int ConFTD2XX::readBlocking(unsigned char * aBuffer, unsigned long aMaxBytesToRe
 void ConFTD2XX::write(unsigned char * aBuffer, unsigned long aBytesToWrite, unsigned long * aBytesWritten)
 {
 	*aBytesWritten = 0;
+
 	FT_STATUS ftStatus = FT_Write(mHandle, aBuffer, aBytesToWrite, aBytesWritten); 
 	if (ftStatus != FT_OK) {  
-		Util::debug("FTD2XX [%u of %u bytes written] error: %s\n", *aBytesWritten, aBytesToWrite, ftdiErrorString[ftStatus]);
+		Util::debug("FTD2XX error: %s\n", ftdiErrorString[ftStatus]);
 	}
+	
+	if (aBytesToWrite != *aBytesWritten) {  
+		Util::debug("FTD2XX [%u of %u bytes written] not all bytes written.\n", *aBytesWritten, aBytesToWrite);
+	}
+		
     //Util::debug("FTD2XX [%u of %u bytes written]\n", *aBytesWritten, aBytesToWrite);
 }
 
