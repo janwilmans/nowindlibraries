@@ -354,7 +354,7 @@ void NwhostService::hostImage() {
     //nowindusb_set_dataavailable_callback(&read_data_available);
    // nowindusb_set_purge_callback(&purge_buffers);
 
-	mUsbStream->setTimeouts(100, 100);
+	mUsbStream->setTimeouts(100, 5000);
 	bool lConnected = false;
     mRunning = true;
     while (mRunning) {
@@ -398,7 +398,7 @@ void NwhostService::hostImage() {
 		if (lBytesWritten != buffer.size())
 		{
 			//TODO: handle error..
-			Util::debug("Error: lBytesWritten != buffer.size()!\n");
+			Util::debug("Error: lBytesWritten (%u) != buffer.size (%u)!\n", lBytesWritten, buffer.size());
 		}
 
     }
