@@ -258,14 +258,16 @@ void NowindHost::diskReadInit(SectorMedium& disk)
 
     unsigned int size = sectorAmount * 512;
     unsigned address = getStartAddress();
+    
+	DBERR("NowindHost::diskRead, startSector: %u  sectorAmount: %u, address: 0x%04x\n", startSector, sectorAmount, address);
+    
     blockRead.init(address, size, buffer);
     state = STATE_BLOCKREAD;
 }
 
 void NowindHost::diskWriteInit(SectorMedium& disk)
 {
-	DBERR("diskWriteInit\n");
-	DBERR("startsector: %u  sectoramount %d\n", getStartSector(), getSectorAmount());
+	DBERR("NowindHost::diskWrite, startSector: %u  sectorAmount: %u\n", getStartSector(), getSectorAmount());
 	if (disk.isWriteProtected()) {
 		nwhSupport->sendHeader();
 		nwhSupport->send(1);

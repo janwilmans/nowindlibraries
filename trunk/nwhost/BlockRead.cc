@@ -29,7 +29,7 @@ bool BlockRead::isDone() const
 
 void BlockRead::init(word aStartAddress, word aSize, const std::vector <byte >& data)
 {
-    DBERR("BlockRead::Init(startAddress: 0x%04x, size: 0x%04x\n", aStartAddress, aSize);
+    //DBERR("BlockRead::init(startAddress: 0x%04x, size: 0x%04x\n", aStartAddress, aSize);
     startAddress = aStartAddress;
     transferSize = aSize;
 
@@ -45,7 +45,7 @@ void BlockRead::init(word aStartAddress, word aSize, const std::vector <byte >& 
 
 void BlockRead::blockRead(word startAddress, word size)
 {
-    DBERR("blockRead, startAddress: 0x%04X, size: 0x%04X\n", startAddress, size);
+    //DBERR("BlockRead::blockRead, startAddress: 0x%04X, size: 0x%04X\n", startAddress, size);
     
     if (startAddress < TWOBANKLIMIT)
     {
@@ -62,7 +62,7 @@ void BlockRead::blockRead(word startAddress, word size)
 
 void BlockRead::blockReadHelper(word startAddress, word size)
 {
-    DBERR("blockReadHelper(): size: 0x%02x, transferred: 0x%02x\n", size, transferredData);
+    //DBERR("BlockRead::blockReadHelper, size: 0x%02x, transferred: 0x%02x\n", size, transferredData);
     
     // delete any blocks still in the dataBlockQueue (unacknowlged by msx, could be caused by timeouts)
     for(unsigned int i=0; i< dataBlockQueue.size(); i++)
@@ -77,7 +77,7 @@ void BlockRead::blockReadHelper(word startAddress, word size)
     if (size < HARDCODED_READ_DATABLOCK_SIZE)
     {   
         // just 1 slow block
-        DBERR("create slow block starting at: 0x%04X, size: 0x%02x\n", address, size);
+        //DBERR("create slow block starting at: 0x%04X, size: 0x%02x\n", address, size);
         dataBlockQueue.push_front(new DataBlock(0, buffer, offset, address, size));
         nwhSupport->sendHeader();
         nwhSupport->send(2);        // slow tranfer
@@ -92,7 +92,7 @@ void BlockRead::blockReadHelper(word startAddress, word size)
         byte blocks = size / HARDCODED_READ_DATABLOCK_SIZE;
         word actualTransferSize = blocks*HARDCODED_READ_DATABLOCK_SIZE;
         unsigned int blockNr = 0;
-        DBERR("create fast block of size: 0x%02x\n", actualTransferSize);
+        //DBERR("create fast block of size: 0x%02x\n", actualTransferSize);
 
         // queue datablocks in reverse order
         for(int i=0; i<blocks; i++)
@@ -156,11 +156,9 @@ void BlockRead::sendDataBlock(unsigned int blocknr)
 void BlockRead::blockReadContinue()
 {
     unsigned address = startAddress + transferredData;
-
-    DBERR("blockReadContinue(), size: 0x%04x, address: 0x%04x, transferred: 0x%04x\n", transferSize, address, transferredData);
-    
     if (transferredData < transferSize)     // still bytes to be transferred?
     {
+    /*
         DBERR("blockReadContinue, do more!\n");
         if (transferingToPage01) {
             DBERR("transferingToPage01 = TRUE!\n");
@@ -168,10 +166,10 @@ void BlockRead::blockReadContinue()
         else {
             DBERR("transferingToPage01 = FALSE!\n");
         }
-        
+    */
         if (transferingToPage01 && address >= TWOBANKLIMIT && transferredData > 0) // address >= 0x8000 and this is not the first transfer?
         {
-                DBERR("send 3 -> continue at page 2/3\n");
+                //DBERR("send 3 -> continue at page 2/3\n");
                 // switch to page23-transfers
                 nwhSupport->sendHeader();
                 nwhSupport->send(3); 
@@ -181,7 +179,7 @@ void BlockRead::blockReadContinue()
     }
     else
     {
-        DBERR("blockReadContinue, we're done!\n");
+        //DBERR("blockReadContinue, we're done!\n");
         nwhSupport->sendHeader();
         nwhSupport->send(0);
         done = true;
@@ -192,7 +190,7 @@ void BlockRead::ack(byte tail)
 {
     assert(dataBlockQueue.size() != 0);
     DataBlock* dataBlock = dataBlockQueue[0];
-    DBERR("ACK -> Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
+    //DBERR("ACK -> Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
 
     if (dataBlock->header == tail)
     {
