@@ -291,34 +291,13 @@ call_exit:
         inc hl
         jr .loop
 
-;videoStream:
-;        push hl
-;        include "vram.asm"
-;        pop hl
-;        jp call_exit
-
-; hl points to text
-printVdpText2:
-        push af
-.loop:  ld a,(hl)
-        out ($98),a
-        inc hl
-        or a
-        jr nz,.loop
-        pop af
-        ret
-
-
 supportedMedia:
 
-.f8:    MAKEDPB $f8, 512, 2, 112, 1 * 80 * 9, 2, 2      ; 360 kB (1 side * 80 tracks * 9 tracks/sector)
-.def:   MAKEDPB $f9, 512, 2, 112, 2 * 80 * 9, 3, 2      ; 720 kB
+        MAKEDPB $f8, 512, 2, 112, 1 * 80 * 9, 2, 2      ; 360 kB (1 side * 80 tracks * 9 tracks/sector)
+DEFDPB: MAKEDPB $f9, 512, 2, 112, 2 * 80 * 9, 3, 2      ; 720 kB
         MAKEDPB $fa, 512, 2, 112, 1 * 80 * 8, 1, 2      ; 320 kB
         MAKEDPB $fb, 512, 2, 112, 2 * 80 * 8, 2, 2      ; 640 kB
         MAKEDPB $fc, 512, 1, 64,  1 * 40 * 9, 2, 2      ; 180 kB
         MAKEDPB $fd, 512, 2, 112, 2 * 40 * 9, 2, 2      ; 360 kB
         MAKEDPB $fe, 512, 1, 64,  1 * 40 * 8, 1, 2      ; 160 kB
         MAKEDPB $ff, 512, 2, 112, 2 * 40 * 8, 1, 1      ; 320 kB
-
-; WARNING: in some cases DEFDPB-1 is expected!
-DEFDPB  equ supportedMedia.def
