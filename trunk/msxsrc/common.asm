@@ -299,7 +299,7 @@ blockReadTranfer:
         ld sp,hl
         ex de,hl
         ld b,(hl)                       ; amount of 128 byte blocks (max 32kB)
-        DEBUGDUMPREGISTERS
+        ;DEBUGDUMPREGISTERS
 .loop:
         ;DEBUGMESSAGE ".loop"
         ld a,(hl)                       ; header

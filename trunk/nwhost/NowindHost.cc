@@ -490,74 +490,82 @@ void NowindHost::GETDPB()
 		DBERR("GETDPB error reading sector 0\n");
 	}
 
+	word bytesPerSector = sectorBuffer[11]+256*sectorBuffer[12];
+	byte sectorsPerCluster = sectorBuffer[13];
+	word firstFatSector = sectorBuffer[14]+256*sectorBuffer[15];    // reserved sectors officially?
+	byte fatCopies = sectorBuffer[16];
+	word rootDirEntries = sectorBuffer[17]+256*sectorBuffer[18];
+	word numberOfSectors = sectorBuffer[19]+256*sectorBuffer[20];
+	byte mediaType = sectorBuffer[21];
+	word sectorsPerFat = sectorBuffer[22]+256*sectorBuffer[23];
+	// sectorsPerTrack -> sectorBuffer[24..25]
+	// numberOfHeads -> sectorBuffer[26..27]
+	// numberOfHeads -> sectorBuffer[28..31]
+	// numberOfHeads -> sectorBuffer[28..31]
+	// sectorsBig -> sectorBuffer[32..35]
+
+    if (numberOfSectors == 0) {
+        // TODO: check if this should really be done this way!
+        numberOfSectors = sectorBuffer[32] + 256*sectorBuffer[33] + 256*256*sectorBuffer[34] + 256*256*256*sectorBuffer[35];
+        DBERR("Using bigSectors (%u) in stead of numberOfSectors!\n", numberOfSectors);
+    }
+
+    if (rootDirEntries > 254) {
+        DBERR("rootDirEnties too big for MSXDOS1(%u)! Limited to 254 in DPB now!\n", rootDirEntries);
+        rootDirEntries = 254;
+    }
+
+	word firstDirSector = firstFatSector + (fatCopies * sectorsPerFat);
+	word entriesPerSector = bytesPerSector / 16;
+	word directorySizeInSectors = (rootDirEntries * entriesPerSector)/bytesPerSector;   // TODO: should be rounded up!?
+	word firstRecordSector = firstDirSector + directorySizeInSectors;
+    word maxClusters = ((numberOfSectors - firstRecordSector)/sectorsPerCluster) + 1;
+
+    if (sectorsPerFat > 3) {
+        DBERR("Size of FAT too large! (MSXDOS reserved 3 sectors when default DPB is $f9)\n");
+        return;
+    }
+
 	// the actual dpb[0] (drive number) is not send
 	dpbType dpb;
-	word sectorSize = sectorBuffer[12]*256+sectorBuffer[11];	// normally 512 bytes per sector, 4 sectors per cluster
-DBERR("GETDPB sectorSize: %u\n", sectorSize);
-	dpb.ID = sectorBuffer[21];	   	         // offset 1 = 0xF0;  
-	dpb.SECSIZ_L = sectorSize & 0xff;	     // offset 2 = 0x00;  
-	dpb.SECSIZ_H = sectorSize >> 8;		     // offset 3 = 0x02;  
-	dpb.DIRMSK = (sectorSize/32)-1;	         // offset 4 = 0x0F, (SECSIZE/32)-1
+	
+	dpb.ID = mediaType;     	   	         // offset 1 = 0xF0;  
+	dpb.SECSIZ_L = bytesPerSector & 0xff;    // offset 2 = 0x00;  
+	dpb.SECSIZ_H = bytesPerSector >> 8;	     // offset 3 = 0x02;  
+	dpb.DIRMSK = (bytesPerSector/32)-1;	     // offset 4 = 0x0F, (SECSIZE/32)-1 (TODO: check berekening!)
 
 	byte dirShift;
 	for(dirShift=0;dpb.DIRMSK & (1<<dirShift);dirShift++) {}
 
 	dpb.DIRSHFT = dirShift;		             // offset 5 = 0x04, nr of 1-bits in DIRMSK
-	dpb.CLUSMSK = sectorBuffer[13]-1;        // offset 6 = 0x03, nr of (sectors/cluster)-1
+	dpb.CLUSMSK = sectorsPerCluster - 1;     // offset 6 = 0x03, nr of (sectors/cluster)-1
 
 	byte cluShift;
 	for(cluShift=0;dpb.CLUSMSK & (1<<cluShift);cluShift++) {}
 
 	dpb.CLUSSHFT = cluShift+1;            	 // offset 7 = 0x03, nr of bits in clusterMask+1 
 
-	word firstFATsector = sectorBuffer[15]*256+sectorBuffer[14];
-
-	dpb.FIRFAT_L = firstFATsector & 0xFF;    // offset 8 = 0x01, sectornumber of first FAT (normally just the bootsector is reserved)
-	dpb.FIRFAT_H = firstFATsector >> 8;      // offset 9 = 0x00, idem 
-
-	if (firstFATsector != 1) {
-		// todo: notice when this happens
-	}
-
-	dpb.FATCNT = sectorBuffer[16];     	     // offset 10 = 0x02, number of FATs
-
-	byte maxEnt = 254;						
-	word rootDIRentries = sectorBuffer[18]*256+sectorBuffer[17];
-	if (rootDIRentries < 255) maxEnt = rootDIRentries;
-
-	dpb.MAXENT = maxEnt;              	     // offset 11 = 0x00;  // we come up with 0xFE here, why?
-
-	word sectorsPerFAT = sectorBuffer[23]*256+sectorBuffer[22];
-	if (sectorsPerFAT > 255)
-	{
-		//todo: notice when this happens
-	}
-	word firstDIRsector = firstFATsector + (dpb.FATCNT * sectorsPerFAT);
+	dpb.FIRFAT_L = firstFatSector & 0xFF;    // offset 8 = 0x01, sectornumber of first FAT (normally just the bootsector is reserved)
+	dpb.FIRFAT_H = firstFatSector >> 8;      // offset 9 = 0x00, idem 
+	dpb.FATCNT = fatCopies;          	     // offset 10 = 0x02, number of FATs
+	dpb.MAXENT = rootDirEntries;       	     // offset 11 = 0x00;  // we come up with 0xFE here, why?
 
 	// the data of the disk starts at the firstDIRsector + size of the directory area
 	// (the "directory" area contains max. 254 entries of 16 bytes, one entry of each file)
-	word firstRecord = firstDIRsector+(maxEnt/(sectorSize/32));
 
-	dpb.FIRREC_L = 0x21; //firstDIRsector & 0xFF;    // offset 12 = 0x21, number of first data sector
-	dpb.FIRREC_H = 0; // firstDIRsector >> 8;      // offset 13 = 0x0, idem 
+	dpb.FIRREC_L = firstRecordSector & 0xFF; // offset 12 = 0x21, number of first data sector
+	dpb.FIRREC_H = firstRecordSector >> 8;   // offset 13 = 0x0, idem 
 	
 	// maxClus is the number of clusters on disk not including reserved sector, 
 	// fat sectors or directory sectors, see p260 of Msx Redbook
 
-	// bigSectors is only used for the F0 media type, it is a 32bit entry
-	// for the total amount of sectors on disk
-	unsigned int bigSectors = sectorBuffer[35]*256*256*256+sectorBuffer[34]*256*256+sectorBuffer[33]*256+sectorBuffer[32];
-	DBERR("bigSectors: %u\n", bigSectors);		//  we come up with sectorBuffer[18] here???
+	dpb.MAXCLUS_L = maxClusters & 0xFF;      // offset 14 = 0xF8, highest cluster number
+	dpb.MAXCLUS_H = maxClusters >> 8;        // offset 15 = 0x9, idem
 
-	word sectorsPerCluster = sectorBuffer[13];
-	word maxClus = ((bigSectors-firstRecord)/sectorsPerCluster)+1;
+	dpb.FATSIZ = sectorsPerFat;              // offset 16 = 0x8, number of sectors/FAT	 
 
-	dpb.MAXCLUS_L = maxClus & 0xFF;          // offset 14 = 0xF8, highest cluster number
-	dpb.MAXCLUS_H = maxClus >> 8;            // offset 15 = 0x9, idem
-	dpb.FATSIZ = sectorBuffer[22];           // offset 16 = 0x8, number of sectors/FAT	 
-
-	dpb.FIRDIR_L = firstDIRsector & 0xFF;    // offset 17 = 0x11;
-	dpb.FIRDIR_H = firstDIRsector >> 8;      // offset 18 = 0x00; 
+	dpb.FIRDIR_L = firstDirSector & 0xFF;    // offset 17 = 0x11;
+	dpb.FIRDIR_H = firstDirSector >> 8;      // offset 18 = 0x00; 
 
 	// We dont know what sectorBuffer 0x1C-1F contains on MSX harddisk images 
 

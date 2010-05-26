@@ -102,27 +102,26 @@ C_BLOCKWRITE    equ $95
         endmacro
 
 ; MAKEDPB macro
-        macro MAKEDPB media, sectorSize, sectorsPerCluster, maxEnt, maxSector, fatSiz, fatCount
-.firfat equ 1
-.firdir equ .firfat+(fatCount*fatSiz)
-.firrec equ .firdir+(maxEnt/(sectorSize/32))
-        if sectorSize = 512
-.shft   equ 4
-        elseif sectorSize = 256
-.shft   equ 3
-        endif
+        macro MAKEDPB media, sectorsPerCluster, maxEnt, maxSector, fatSiz, fatCount
+
+        define sectorSize 512
+        define dirMask ((sectorSize/32)-1)
+        define dirShift 4                               ; number of 1-bits in dirMask (sectorsize is always 512 in MSX)
+        define firstFat 1
+        define firstDir (firstFat + (fatCount*fatSiz))
+        define firstRec (firstDir + (maxEnt/(sectorSize/32)))
         
         db media                                        ; media descriptor
         dw sectorSize                                   ; sector size
-        db (sectorSize/32)-1, .shft                     ; dirmsk
+        db (sectorSize/32)-1, dirShift                  ; dirmsk
         db sectorsPerCluster-1                          ; clusmsk 
         db sectorsPerCluster                            ; clusshft (TODO: only correct for 1 and 2 sec/clus)         
-        dw .firfat
+        dw firstFat
         db fatCount, maxEnt
-        dw .firrec
-        dw (maxSector-.firrec)/sectorsPerCluster+1      ; maxclus
+        dw firstRec
+        dw ((maxSector-firstRec)/sectorsPerCluster)+1   ; maxclus
         db fatSiz
-        dw .firdir
+        dw firstDir
         endmacro
 
 
@@ -186,15 +185,4 @@ C_BLOCKWRITE    equ $95
         ld b,b
         jr $+2
         endmacro
-       
-        macro PRINTVDPTEXT string
         
-        push hl
-        ld hl,.text 
-        call printVdpText2
-        pop hl
-        jr .skip
-.text   db string
-        db 0
-.skip:
-        endmacro
