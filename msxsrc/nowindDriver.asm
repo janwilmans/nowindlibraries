@@ -116,6 +116,7 @@ DSKIO:
 ;           B   Number of remaining sectors (TODO: check! even without error?)
 
         DEBUGMESSAGE "DSKIO"
+        DEBUGDUMPREGISTERS
         push af
         call checkWorkArea
         jp z,ROMDISK_DSKIO
@@ -127,6 +128,7 @@ DSKIO:
 .read:
         call blockRead
         DEBUGMESSAGE "exit_dskio_rd"
+        DEBUGDUMPREGISTERS
         ret c                           ; return error (error code in a)
         xor a                           ; no error, clear a
         ret
@@ -150,8 +152,11 @@ DSKCHG:
 ;           A   Error code
 
         DEBUGMESSAGE "DSKCHG"
+        DEBUGDUMPREGISTERS
         push af
+        push hl
         call checkWorkArea
+        pop hl
         jp z,ROMDISK_DSKCHG
         pop af
 
@@ -163,16 +168,22 @@ DSKCHG:
         call executeCommandNowindInPage0
         pop hl
         pop de
-        ret c                   ; not ready (reg_a = 2)
+        ret c                           ; not ready (reg_a = 2)
 
         or a
         ld b,1
-        ret z                   ; not changed
-        ld a,d
+        ret z                           ; not changed
+
+        if MSXDOSVER == 1
+        
+        ld a,d                          ; update dpb in MSXDOS1
         ld b,c
         call GETDPB
         ld a,10
         ret c
+        
+        endif
+        
         ld b,255
         ret
 
@@ -197,7 +208,6 @@ GETDPB:
         ld a,b
         cp $f0
         ld a,h
-        DEBUGDUMPREGISTERS
         jr z,.hddImage
 
 ;        MESSAGE "ROM GETDPB"
@@ -221,21 +231,23 @@ GETDPB:
 
 .hddImage:
         DEBUGMESSAGE ".hddImage"
-        ;MESSAGE "HOST GETDPB"
-
+        DEBUGDUMPREGISTERS
         call sendRegisters
         ld (hl),C_GETDPB
-        call enableNowindPage0
-        call getHeaderInPage0
+        ld hl,getdpbCommand
+        jp executeCommandNowindInPage0
 
-        jr c,.exit                      ; not ready
-        ld e,a                          ; destination
+getdpbCommand:
+        call getHeaderInPage0
+        ret c
+        ld e,a                          ; get destination from host
         ld d,(hl)
         ld bc,18
+        DEBUGMESSAGE ".ldir"
         DEBUGDUMPREGISTERS
         ldir
-        ;DB $ed, $0a
-.exit:  jp restorePage0
+        ret
+
 
 CHOICE:
         ;DEBUGMESSAGE "CHOICE"
@@ -249,8 +261,8 @@ CHOICE:
         endif
 
 DSKFMT:
-        scf
         ld a,16                         ; other error
+        scf
         ret
 
 OEMSTA:
@@ -293,11 +305,17 @@ call_exit:
 
 supportedMedia:
 
-        MAKEDPB $f8, 512, 2, 112, 1 * 80 * 9, 2, 2      ; 360 kB (1 side * 80 tracks * 9 tracks/sector)
-DEFDPB: MAKEDPB $f9, 512, 2, 112, 2 * 80 * 9, 3, 2      ; 720 kB
-        MAKEDPB $fa, 512, 2, 112, 1 * 80 * 8, 1, 2      ; 320 kB
-        MAKEDPB $fb, 512, 2, 112, 2 * 80 * 8, 2, 2      ; 640 kB
-        MAKEDPB $fc, 512, 1, 64,  1 * 40 * 9, 2, 2      ; 180 kB
-        MAKEDPB $fd, 512, 2, 112, 2 * 40 * 9, 2, 2      ; 360 kB
-        MAKEDPB $fe, 512, 1, 64,  1 * 40 * 8, 1, 2      ; 160 kB
-        MAKEDPB $ff, 512, 2, 112, 2 * 40 * 8, 1, 1      ; 320 kB
+        MAKEDPB $f8, 2, 112, 1 * 80 * 9, 2, 2      ; 360 kB (1 side * 80 tracks * 9 tracks/sector)
+DEFDPB: MAKEDPB $f9, 2, 112, 2 * 80 * 9, 3, 2      ; 720 kB
+        MAKEDPB $fa, 2, 112, 1 * 80 * 8, 1, 2      ; 320 kB
+        MAKEDPB $fb, 2, 112, 2 * 80 * 8, 2, 2      ; 640 kB
+        MAKEDPB $fc, 1, 64,  1 * 40 * 9, 2, 2      ; 180 kB
+        MAKEDPB $fd, 2, 112, 2 * 40 * 9, 2, 2      ; 360 kB
+        MAKEDPB $fe, 1, 64,  1 * 40 * 8, 1, 2      ; 160 kB
+        MAKEDPB $ff, 2, 112, 2 * 40 * 8, 1, 1      ; 320 kB
+
+; use this DPB as default to reserve a larger fat buffer
+;DEFDPB:
+;        db $f0
+;        dw 512
+;        db $f,4,3,3,1,0,2,0,$21,0,$f8,$09,8,$11,0

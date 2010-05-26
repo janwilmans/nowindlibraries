@@ -110,23 +110,6 @@ getSlotPage2:
         or c                    ; add mainSlot and expanded bit
         ret
 
-;expanded:        
-;        ld hl,EXPTBL - $0300
-;        ld b,3
-;        and b
-;        ld c,a
-;        add hl,bc      
-;        
-;        or (hl)        ; BUGGIE!!!! (a will be used again!)
-;        ret p                           ; return when slot is not expanded
-;        
-;        ld c,a
-;        ld a,4
-;        add a,l
-;        ld l,a
-;        ld a,(hl)
-;        ret
-
 expanded:        
         ld hl,EXPTBL - $0300
         ld b,3

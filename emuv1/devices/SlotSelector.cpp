@@ -114,7 +114,7 @@ void SlotSelector::configure(unsigned int msxVersion) {
 #define NOWINDDOS2_off
 #define NOWIND           // combines MSXDOS 1&2
 #define OPENDISKROM_off
-#define NORMALDISKROM_off
+#define NORMALDISKROM
 #define MSXDOS2_off
 #define WD279X_off
 
@@ -123,10 +123,10 @@ void SlotSelector::configure(unsigned int msxVersion) {
     usbInterface = new NowindInterface("../msxsrc/nowind.rom");
     addMemoryDevice(usbInterface, 2, 1, 0); 
 //  usbInterface->insertDisk("../disks/test.dsk");
-//	usbInterface->insertDisk("../disks/wb.dsk");
+    usbInterface->insertDisk("../disks/wb.dsk");
 //	usbInterface->insertDisk("../disks/hd5mbDOS2.dsk");
 //	usbInterface->insertDisk("../disks/dos2.dsk");
-	usbInterface->insertDisk("../disks/dos1.dsk");
+//	usbInterface->insertDisk("../disks/dos1.dsk");
 #endif
 
 
