@@ -223,13 +223,8 @@ blockRead:
         ld hl,blockRead01
         call executeCommandNowindInPage2
         ret c                           ; not ready
-
-        cp 3                ; more data ahead for .page23?
-        scf
-        ccf
-        ret nz
-        DEBUGMESSAGE "more data for .page23, doorgaan!"
-
+        ret z                           ; done! (no more date for page23)
+        ;DEBUGMESSAGE "more data for .page23!"
 .page23:
         ld hl,blockRead23
         jp executeCommandNowindInPage0
@@ -239,13 +234,13 @@ blockRead:
 blockRead01:
         DEBUGMESSAGE "br01"
         call getHeaderInPage2
-        ret c                           ; return on timeout
-        and a
-        ret z                           ; exit blockRead01 (no more data)
-        cp 1
+        ret c
+
+        dec a
         jr z,.fastTransfer
-        cp 3
-        ret z                           ; exit blockRead01 (more data for .page23)
+        ret m                           ; exit (more data for page23)
+        dec a
+        ret z                           ; exit (done!)        
 
         call slowTransfer + $4000
         ld (usbWritePage2),a            ; return header
@@ -261,12 +256,13 @@ blockRead23:
         DEBUGMESSAGE "br23"
         call getHeaderInPage0
         ret c                           ; return on timeout
-        and a
-        ret z                           ; exit blockRead23
-        cp 1
-        jr z,.fastTransfer
 
-        DEBUGMESSAGE "slow"
+        dec a
+        jr z,.fastTransfer
+        ; ret m (not necessary)
+        dec a
+        ret z
+        
         call slowTransfer
         ld (usbWritePage1),a            ; return header
         jr blockRead23

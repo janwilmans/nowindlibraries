@@ -80,7 +80,7 @@ void BlockRead::blockReadHelper(word startAddress, word size)
         //DBERR("create slow block starting at: 0x%04X, size: 0x%02x\n", address, size);
         dataBlockQueue.push_front(new DataBlock(0, buffer, offset, address, size));
         nwhSupport->sendHeader();
-        nwhSupport->send(2);        // slow tranfer
+        nwhSupport->send(BLOCKREAD_SLOWTRANSFER);
         nwhSupport->send16(startAddress);
         nwhSupport->send16(size);   // amount of bytes
         sendDataBlock(0);
@@ -105,7 +105,7 @@ void BlockRead::blockReadHelper(word startAddress, word size)
         }
 
         nwhSupport->sendHeader();
-        nwhSupport->send(1);            // fast transfer
+        nwhSupport->send(BLOCKREAD_FASTTRANSFER);
         nwhSupport->send16(startAddress+actualTransferSize);
         nwhSupport->send(blocks);
         for (unsigned int i=0; i<blocks; i++)
@@ -172,7 +172,7 @@ void BlockRead::blockReadContinue()
                 //DBERR("send 3 -> continue at page 2/3\n");
                 // switch to page23-transfers
                 nwhSupport->sendHeader();
-                nwhSupport->send(3); 
+                nwhSupport->send(BLOCKREAD_EXIT_MORE_DATE_AHEAD); 
                 transferingToPage01 = false;   
         }
         blockRead(address, transferSize-transferredData);   // state is set to STATE_BLOCKREAD
@@ -181,7 +181,7 @@ void BlockRead::blockReadContinue()
     {
         //DBERR("blockReadContinue, we're done!\n");
         nwhSupport->sendHeader();
-        nwhSupport->send(0);
+        nwhSupport->send(BLOCKREAD_EXIT);
         done = true;
     }
 }
@@ -213,13 +213,13 @@ void BlockRead::ack(byte tail)
 	    nwhSupport->sendHeader();
 	    if (dataBlock->fastTransfer)
 	    {
-	        nwhSupport->send(0x01);			// not done, retry fast block follows
+	        nwhSupport->send(BLOCKREAD_FASTTRANSFER);			// not done, retry fast block follows
             nwhSupport->send16(dataBlock->transferAddress);
             nwhSupport->send(1);
         }
         else
         {
-	        nwhSupport->send(0x02);			// not done, retry slow block follows
+	        nwhSupport->send(BLOCKREAD_SLOWTRANSFER);			// not done, retry slow block follows
             nwhSupport->send16(dataBlock->transferAddress);
             nwhSupport->send16(dataBlock->size);
         }        
