@@ -124,16 +124,8 @@ DSKIO:
 
         call sendRegisters
         ld (hl),C_DSKIO
-        jr c,.write
-.read:
-        call blockRead
-        DEBUGMESSAGE "exit_dskio_rd"
-        DEBUGDUMPREGISTERS
-        ret c                           ; return error (error code in a)
-        xor a                           ; no error, clear a
-        ret
-        
-.write:
+        jp nc,blockRead
+
         call blockWrite
         DEBUGMESSAGE "exit_dskio_wrt"
         ret c
