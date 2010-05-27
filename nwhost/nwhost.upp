@@ -24,8 +24,21 @@ file
 	"Shared Code" readonly separator,
 	NowindHost.cc,
 	SectorMedium.hh,
+	NowindHost.hh,
+	SectorMedium.hh,
+	NwhostInternal.h,
+	BlockRead.hh,
+	NowindHostSupport.hh,
+	DataBlock.hh,
+	Device.hh,
 	NowindTypes.hh,
 	NowindHost.hh,
+	Device.cc,
+	NowindHostSupportDebug.h,
+	BlockRead.cc,
+	NowindHostSupport.cc,
+	NowindHostSupportDebug.cpp,
+	DataBlock.cc,
 	DiskHandler.hh;
 
 mainconfig
