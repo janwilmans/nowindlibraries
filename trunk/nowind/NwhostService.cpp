@@ -8,6 +8,7 @@
 
 #include <fstream>
 #include <assert.h>
+#include <string.h>
 
 /*
  * If an "error while loading shared libraries: libX11.so.6" occurs at runtime

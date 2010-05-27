@@ -74,7 +74,7 @@ void Util::debug(const char *cFormat, ...)
 	vsnprintf(scratch, MAXMSG, cFormat, arg_list);
 	va_end (arg_list);
 
-	fprintf(stderr, scratch);
+	fprintf(stderr, "%s", scratch);
 #ifdef WIN32
     OutputDebugStringA(scratch);
 #endif
