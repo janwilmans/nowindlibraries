@@ -119,6 +119,12 @@ void NwhostService::start(FtdiDriverType aDriverType)
 {
 	delete mUsbStream;   //does nothing if mUsbStream == 0
 	mUsbStream = ftdx::newUsbStream(aDriverType);
+	
+	if (mUsbStream == 0)
+	{
+	    Util::debug("No ftdi driver available?\n");
+	    exit(0);
+	}
 }
 
 // the update firmware used hardcoded commands

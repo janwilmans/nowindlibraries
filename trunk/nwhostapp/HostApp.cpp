@@ -92,8 +92,6 @@ void HostApp::hostImage()
     // LIBUSB driver is a user-space driver, maybe slower in some cases?
     // this is strange because this shouldnt have any effect on the polling rate
     // (which is an important factor in retries)
-
-	//mHostService->start(eDRIVER_LibUsb);
 	mHostService->hostImage();
 }
 
