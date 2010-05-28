@@ -150,7 +150,7 @@ void AudioMixer::AudioInterrupt(emuTimeType scheduledTime)
 
     unsigned long long totalsamplesInEmutime = totalBuffers;
     totalsamplesInEmutime = totalsamplesInEmutime * audioBufferSize * Z80::Instance()->cpuFrequency;
-    unsigned int nextTime = totalsamplesInEmutime / sampleRate;
+    unsigned int nextTime = static_cast<unsigned int>(totalsamplesInEmutime / sampleRate);
 
     //DBERR("totalBuffers: %u, sampleRate %u, audioBufferSize: %u, nextTime: %u\n", totalBuffers, sampleRate, audioBufferSize, nextTime);
     Emulator::Instance()->scheduleAudioInterrupt(true, nextTime);

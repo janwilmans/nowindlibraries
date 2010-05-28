@@ -114,6 +114,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="$(ProjectDir)..\general;$(ProjectDir)..\ftdx;$(ProjectDir)..\nowind;$(ProjectDir)..\nwhost;."
+				PreprocessorDefinitions="WIN32"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"

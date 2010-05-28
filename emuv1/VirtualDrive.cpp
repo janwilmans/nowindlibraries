@@ -384,7 +384,7 @@ void VirtualDrive::writeLEinc(unsigned char ** pBuffer, unsigned len, unsigned l
     DBERR("writeLE:\n");
     unsigned long value = aValue;
     for (unsigned int i=len;i>0;i--) { 
-        unsigned long part = value & 0xff;
+        unsigned char part = value & 0xff;
         DBERR("value: 0x%04X\n", part);
         value = value >> 8;
         **pBuffer = part;
@@ -397,7 +397,7 @@ void VirtualDrive::writeLE(unsigned char * buffer, unsigned len, unsigned long a
     DBERR("writeLE:\n");
     unsigned long value = aValue;
     for (unsigned int i=len;i>0;i--) { 
-        unsigned long part = value & 0xff;
+        unsigned char part = value & 0xff;
         DBERR("value: 0x%04X\n", part);
         value = value >> 8;
         *buffer = part;
