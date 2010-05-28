@@ -10,9 +10,9 @@
 #include "ftdx.h"
 #include "libgeneral.h"
 
-#include "ConFTD2XX.h"
-
-#ifndef WIN32
+#ifdef WIN32
+    #include "ConFTD2XX.h"
+#else
     #include "ConFtdiSio.h"
 
     // the libftdi works on libusb-win32 aswell, _but_ libusb relies on the
@@ -34,10 +34,11 @@ ftdx::UsbStream* ftdx::newUsbStream(FtdiDriverType aDriverType)
 	UsbStream* lUsbStream = 0;
 	switch (aDriverType)
 	{
+#ifdef WIN32
 	case eDRIVER_FTD2XX:
 		lUsbStream = new ConFTD2XX();
 		break;
-#ifndef WIN32
+#else
 	case eDRIVER_LibUsb:
 		lUsbStream = new ConLibFtdi();
 		break;

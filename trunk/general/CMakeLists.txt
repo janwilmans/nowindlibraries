@@ -1,4 +1,4 @@
-PROJECT(general)
+PROJECT(nwgeneral)
 
-ADD_LIBRARY(general STATIC BaseType.cpp Util.cpp general.cpp)
+ADD_LIBRARY(nwgeneral STATIC BaseType.cpp Util.cpp general.cpp)
 

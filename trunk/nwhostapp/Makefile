@@ -39,10 +39,10 @@ RM = /usr/bin/cmake -E remove -f
 CMAKE_EDIT_COMMAND = /usr/bin/cmake-gui
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/jan/src/nowindlibraries/nwhostapp
+CMAKE_SOURCE_DIR = /workspace/src/nowindlibraries
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/jan/src/nowindlibraries/nwhostapp
+CMAKE_BINARY_DIR = /workspace/src/nowindlibraries
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -69,14 +69,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/jan/src/nowindlibraries/nwhostapp/CMakeFiles /home/jan/src/nowindlibraries/nwhostapp/CMakeFiles/progress.marks
-	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/jan/src/nowindlibraries/nwhostapp/CMakeFiles 0
+	cd /workspace/src/nowindlibraries && $(CMAKE_COMMAND) -E cmake_progress_start /workspace/src/nowindlibraries/CMakeFiles /workspace/src/nowindlibraries/nwhostapp/CMakeFiles/progress.marks
+	cd /workspace/src/nowindlibraries && $(MAKE) -f CMakeFiles/Makefile2 nwhostapp/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/src/nowindlibraries/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	$(MAKE) -f CMakeFiles/Makefile2 clean
+	cd /workspace/src/nowindlibraries && $(MAKE) -f CMakeFiles/Makefile2 nwhostapp/clean
 .PHONY : clean
 
 # The main clean target
@@ -85,90 +85,39 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /workspace/src/nowindlibraries && $(MAKE) -f CMakeFiles/Makefile2 nwhostapp/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /workspace/src/nowindlibraries && $(MAKE) -f CMakeFiles/Makefile2 nwhostapp/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /workspace/src/nowindlibraries && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
-#=============================================================================
-# Target rules for targets named nwhostapp
+# Convenience name for target.
+nwhostapp/CMakeFiles/nwhostapp.dir/rule:
+	cd /workspace/src/nowindlibraries && $(MAKE) -f CMakeFiles/Makefile2 nwhostapp/CMakeFiles/nwhostapp.dir/rule
+.PHONY : nwhostapp/CMakeFiles/nwhostapp.dir/rule
 
-# Build rule for target.
-nwhostapp: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 nwhostapp
+# Convenience name for target.
+nwhostapp: nwhostapp/CMakeFiles/nwhostapp.dir/rule
 .PHONY : nwhostapp
 
 # fast build rule for target.
 nwhostapp/fast:
-	$(MAKE) -f CMakeFiles/nwhostapp.dir/build.make CMakeFiles/nwhostapp.dir/build
+	cd /workspace/src/nowindlibraries && $(MAKE) -f nwhostapp/CMakeFiles/nwhostapp.dir/build.make nwhostapp/CMakeFiles/nwhostapp.dir/build
 .PHONY : nwhostapp/fast
-
-#=============================================================================
-# Target rules for targets named general
-
-# Build rule for target.
-general: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 general
-.PHONY : general
-
-# fast build rule for target.
-general/fast:
-	$(MAKE) -f /home/jan/src/nowindlibraries/general/CMakeFiles/general.dir/build.make /home/jan/src/nowindlibraries/general/CMakeFiles/general.dir/build
-.PHONY : general/fast
-
-#=============================================================================
-# Target rules for targets named nwhost
-
-# Build rule for target.
-nwhost: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 nwhost
-.PHONY : nwhost
-
-# fast build rule for target.
-nwhost/fast:
-	$(MAKE) -f /home/jan/src/nowindlibraries/nwhost/CMakeFiles/nwhost.dir/build.make /home/jan/src/nowindlibraries/nwhost/CMakeFiles/nwhost.dir/build
-.PHONY : nwhost/fast
-
-#=============================================================================
-# Target rules for targets named ftdx
-
-# Build rule for target.
-ftdx: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 ftdx
-.PHONY : ftdx
-
-# fast build rule for target.
-ftdx/fast:
-	$(MAKE) -f /home/jan/src/nowindlibraries/ftdx/CMakeFiles/ftdx.dir/build.make /home/jan/src/nowindlibraries/ftdx/CMakeFiles/ftdx.dir/build
-.PHONY : ftdx/fast
-
-#=============================================================================
-# Target rules for targets named nowind
-
-# Build rule for target.
-nowind: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 nowind
-.PHONY : nowind
-
-# fast build rule for target.
-nowind/fast:
-	$(MAKE) -f /home/jan/src/nowindlibraries/nowind/CMakeFiles/nowind.dir/build.make /home/jan/src/nowindlibraries/nowind/CMakeFiles/nowind.dir/build
-.PHONY : nowind/fast
 
 HostApp.o: HostApp.cpp.o
 .PHONY : HostApp.o
 
 # target to build an object file
 HostApp.cpp.o:
-	$(MAKE) -f CMakeFiles/nwhostapp.dir/build.make CMakeFiles/nwhostapp.dir/HostApp.cpp.o
+	cd /workspace/src/nowindlibraries && $(MAKE) -f nwhostapp/CMakeFiles/nwhostapp.dir/build.make nwhostapp/CMakeFiles/nwhostapp.dir/HostApp.cpp.o
 .PHONY : HostApp.cpp.o
 
 HostApp.i: HostApp.cpp.i
@@ -176,7 +125,7 @@ HostApp.i: HostApp.cpp.i
 
 # target to preprocess a source file
 HostApp.cpp.i:
-	$(MAKE) -f CMakeFiles/nwhostapp.dir/build.make CMakeFiles/nwhostapp.dir/HostApp.cpp.i
+	cd /workspace/src/nowindlibraries && $(MAKE) -f nwhostapp/CMakeFiles/nwhostapp.dir/build.make nwhostapp/CMakeFiles/nwhostapp.dir/HostApp.cpp.i
 .PHONY : HostApp.cpp.i
 
 HostApp.s: HostApp.cpp.s
@@ -184,7 +133,7 @@ HostApp.s: HostApp.cpp.s
 
 # target to generate assembly for a file
 HostApp.cpp.s:
-	$(MAKE) -f CMakeFiles/nwhostapp.dir/build.make CMakeFiles/nwhostapp.dir/HostApp.cpp.s
+	cd /workspace/src/nowindlibraries && $(MAKE) -f nwhostapp/CMakeFiles/nwhostapp.dir/build.make nwhostapp/CMakeFiles/nwhostapp.dir/HostApp.cpp.s
 .PHONY : HostApp.cpp.s
 
 getopt.o: getopt.c.o
@@ -192,7 +141,7 @@ getopt.o: getopt.c.o
 
 # target to build an object file
 getopt.c.o:
-	$(MAKE) -f CMakeFiles/nwhostapp.dir/build.make CMakeFiles/nwhostapp.dir/getopt.c.o
+	cd /workspace/src/nowindlibraries && $(MAKE) -f nwhostapp/CMakeFiles/nwhostapp.dir/build.make nwhostapp/CMakeFiles/nwhostapp.dir/getopt.c.o
 .PHONY : getopt.c.o
 
 getopt.i: getopt.c.i
@@ -200,7 +149,7 @@ getopt.i: getopt.c.i
 
 # target to preprocess a source file
 getopt.c.i:
-	$(MAKE) -f CMakeFiles/nwhostapp.dir/build.make CMakeFiles/nwhostapp.dir/getopt.c.i
+	cd /workspace/src/nowindlibraries && $(MAKE) -f nwhostapp/CMakeFiles/nwhostapp.dir/build.make nwhostapp/CMakeFiles/nwhostapp.dir/getopt.c.i
 .PHONY : getopt.c.i
 
 getopt.s: getopt.c.s
@@ -208,7 +157,7 @@ getopt.s: getopt.c.s
 
 # target to generate assembly for a file
 getopt.c.s:
-	$(MAKE) -f CMakeFiles/nwhostapp.dir/build.make CMakeFiles/nwhostapp.dir/getopt.c.s
+	cd /workspace/src/nowindlibraries && $(MAKE) -f nwhostapp/CMakeFiles/nwhostapp.dir/build.make nwhostapp/CMakeFiles/nwhostapp.dir/getopt.c.s
 .PHONY : getopt.c.s
 
 getopt1.o: getopt1.c.o
@@ -216,7 +165,7 @@ getopt1.o: getopt1.c.o
 
 # target to build an object file
 getopt1.c.o:
-	$(MAKE) -f CMakeFiles/nwhostapp.dir/build.make CMakeFiles/nwhostapp.dir/getopt1.c.o
+	cd /workspace/src/nowindlibraries && $(MAKE) -f nwhostapp/CMakeFiles/nwhostapp.dir/build.make nwhostapp/CMakeFiles/nwhostapp.dir/getopt1.c.o
 .PHONY : getopt1.c.o
 
 getopt1.i: getopt1.c.i
@@ -224,7 +173,7 @@ getopt1.i: getopt1.c.i
 
 # target to preprocess a source file
 getopt1.c.i:
-	$(MAKE) -f CMakeFiles/nwhostapp.dir/build.make CMakeFiles/nwhostapp.dir/getopt1.c.i
+	cd /workspace/src/nowindlibraries && $(MAKE) -f nwhostapp/CMakeFiles/nwhostapp.dir/build.make nwhostapp/CMakeFiles/nwhostapp.dir/getopt1.c.i
 .PHONY : getopt1.c.i
 
 getopt1.s: getopt1.c.s
@@ -232,7 +181,7 @@ getopt1.s: getopt1.c.s
 
 # target to generate assembly for a file
 getopt1.c.s:
-	$(MAKE) -f CMakeFiles/nwhostapp.dir/build.make CMakeFiles/nwhostapp.dir/getopt1.c.s
+	cd /workspace/src/nowindlibraries && $(MAKE) -f nwhostapp/CMakeFiles/nwhostapp.dir/build.make nwhostapp/CMakeFiles/nwhostapp.dir/getopt1.c.s
 .PHONY : getopt1.c.s
 
 mainUsbHost.o: mainUsbHost.cpp.o
@@ -240,7 +189,7 @@ mainUsbHost.o: mainUsbHost.cpp.o
 
 # target to build an object file
 mainUsbHost.cpp.o:
-	$(MAKE) -f CMakeFiles/nwhostapp.dir/build.make CMakeFiles/nwhostapp.dir/mainUsbHost.cpp.o
+	cd /workspace/src/nowindlibraries && $(MAKE) -f nwhostapp/CMakeFiles/nwhostapp.dir/build.make nwhostapp/CMakeFiles/nwhostapp.dir/mainUsbHost.cpp.o
 .PHONY : mainUsbHost.cpp.o
 
 mainUsbHost.i: mainUsbHost.cpp.i
@@ -248,7 +197,7 @@ mainUsbHost.i: mainUsbHost.cpp.i
 
 # target to preprocess a source file
 mainUsbHost.cpp.i:
-	$(MAKE) -f CMakeFiles/nwhostapp.dir/build.make CMakeFiles/nwhostapp.dir/mainUsbHost.cpp.i
+	cd /workspace/src/nowindlibraries && $(MAKE) -f nwhostapp/CMakeFiles/nwhostapp.dir/build.make nwhostapp/CMakeFiles/nwhostapp.dir/mainUsbHost.cpp.i
 .PHONY : mainUsbHost.cpp.i
 
 mainUsbHost.s: mainUsbHost.cpp.s
@@ -256,7 +205,7 @@ mainUsbHost.s: mainUsbHost.cpp.s
 
 # target to generate assembly for a file
 mainUsbHost.cpp.s:
-	$(MAKE) -f CMakeFiles/nwhostapp.dir/build.make CMakeFiles/nwhostapp.dir/mainUsbHost.cpp.s
+	cd /workspace/src/nowindlibraries && $(MAKE) -f nwhostapp/CMakeFiles/nwhostapp.dir/build.make nwhostapp/CMakeFiles/nwhostapp.dir/mainUsbHost.cpp.s
 .PHONY : mainUsbHost.cpp.s
 
 # Help Target
@@ -268,10 +217,6 @@ help:
 	@echo "... edit_cache"
 	@echo "... nwhostapp"
 	@echo "... rebuild_cache"
-	@echo "... general"
-	@echo "... nwhost"
-	@echo "... ftdx"
-	@echo "... nowind"
 	@echo "... HostApp.o"
 	@echo "... HostApp.i"
 	@echo "... HostApp.s"
@@ -295,6 +240,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /workspace/src/nowindlibraries && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 
