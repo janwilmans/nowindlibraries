@@ -28,8 +28,6 @@ nowind
 		labels.asm
 		nowind.asm
 		nowindbdos.asm
-		nowindDos1.asm
-		nowindDos2.asm
 		openDiskrom\openDiskrom.asm
 		romdisk.asm
 		rs232.asm
@@ -38,41 +36,25 @@ nowind
 		dos_aux.asm
 [Open project files]
 0=common.asm
-1=nowindDriver.asm
-2=nowind.asm
-3=labels.asm
-4=dos_aux.asm
-5=device.asm
-6=extendedBios.asm
-7=slotRoutines.asm
-8=..\emuv1\DPB.BAS
+1=nowind.asm
+2=labels.asm
+3=flashWriter.asm
+4=nowindDriver.asm
 [Selected Project Files]
 Main=
-Selected=common.asm
+Selected=labels.asm
 [common.asm]
-TopLine=236
-Caret=1,226
-[nowindDriver.asm]
-TopLine=103
-Caret=1,129
+TopLine=418
+Caret=8,27
 [nowind.asm]
-TopLine=154
-Caret=1,187
+TopLine=119
+Caret=12,125
 [labels.asm]
-TopLine=137
-Caret=9,188
-[dos_aux.asm]
-TopLine=1
-Caret=37,33
-[device.asm]
-TopLine=1
-Caret=31,7
-[extendedBios.asm]
-TopLine=22
-Caret=16,41
-[slotRoutines.asm]
-TopLine=102
-Caret=16,122
-[..\emuv1\DPB.BAS]
-TopLine=1
-Caret=1,21
+TopLine=130
+Caret=2,147
+[flashWriter.asm]
+TopLine=71
+Caret=1,1
+[nowindDriver.asm]
+TopLine=11
+Caret=1,1

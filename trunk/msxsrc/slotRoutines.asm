@@ -9,15 +9,6 @@ enableNowindPage0:
         call getSlotPage0
         ld ixh,a
         call getSlotPage1
-        jp enableSlotPage0       
-
-restorePage0:
-        push af
-        ld a,ixh
-        call enableSlotPage0
-;        ei
-        pop af
-        ret
 
 enableSlotPage0:
         ; HL and D remain unchanged
@@ -72,6 +63,14 @@ enableSlotPage0:
         ld b,HIGH SLTTBL
         ld a,e                          ; restore secondary slot register
         ld (bc),a
+        ret
+
+restorePage0:
+        push af
+        ld a,ixh
+        call enableSlotPage0
+;        ei
+        pop af
         ret
 
 ; These routines determine the current slot and subslot of a page.

@@ -143,8 +143,11 @@ C_BLOCKWRITE    equ $95
         call .redir                     ; DSKFMT
         ds 3,0                          ; DRVOFF
 
-        code ! .addr + $3fe7
-        org $7fe7
+;        code ! .addr + $3fe7
+;        org $7fe7
+
+        ds $7fe7 - $, $ff
+
         
 .init:  ld hl,romInit
         push hl
