@@ -219,9 +219,9 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
         xBuffer[3] = CMD_ERASE;
 
         mUsbStream->write(xBuffer, 4, &uiBytesWritten);
-        Util::debug("Waiting for erase to complete...\n");
+        Util::debug("Waiting for erase to complete...");
         waitForAck();
-	    Util::debug("\nErase complete!\n");
+	    Util::debug("\nErase Done!\n");
     }
 
     if (doSectorErase)

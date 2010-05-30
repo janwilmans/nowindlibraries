@@ -80,9 +80,14 @@ INIENV:
         call getEntrySLTWRK
         pop af
         ld (hl),0                       ; default drive number for romdisk
+
+        USB_DBMSG "INIENV2"
+
         ret c
         DEBUGDUMPREGISTERS
         ld (hl),a                       ; drive number for romdisk
+        
+        USB_DBMSG "INIENV3"
         ret
 
 inienvCommand:
