@@ -447,9 +447,17 @@ flashWriter:
         call SNSMAT
         and 8
         ret nz
+        
+        xor a
+        call CHGMOD         ; screen 0
+
+        ld a,8
+        ld ($f3ea),a        ; red background
+        xor a               ; screen 0 (width unchanged)        
+        call CHGCLR
 
         call PRINTTEXT
-        db 10,13," FlashROM",10,13," "
+        db 10,13,"Nowind Flash Writer v2.0",10,13," "
         ds 33,"."
         db 13," ",0
 

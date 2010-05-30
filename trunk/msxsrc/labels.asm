@@ -6,6 +6,8 @@ CALSLT          equ $001c
 ENASLT          equ $0024
 INITXT          equ $006C
 SNSMAT          equ $0141
+CHGMOD          equ $005f
+CHGCLR          equ $0062
 EXTROM          equ $015f
 SDFSCR          equ $0185               ; restore screen parameters from clockchip (in SUBROM)
 
