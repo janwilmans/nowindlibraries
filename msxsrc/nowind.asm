@@ -17,7 +17,7 @@
         defpage 0, $4000, $4000         ; MSXDOS2 bank 0
         defpage 1, $4000, 3 * $4000     ; MSXDOS2 bank 1..3
         defpage 2, $4000, $4000         ; MSXDOS1
-        defpage 3, 0, (512-80)*1024     ; empty
+        defpage 3, $4000, (512-80)*1024 ; empty
         
         ; insert MSXDOS2
 
@@ -101,6 +101,7 @@ noNextCommand:
         jp nz,INIHRD                    ; boot MSXDOS2
 
 bootMSXDOS1:
+        DEBUGMESSAGE "switch to DOS1"
         ld hl,$576f                     ; boot MSXDOS1
         push hl
         ld a,4
@@ -199,6 +200,10 @@ enableBank0:
         ret
 endCopyFromBank:
 
+        module remainingRom
+
+define romInit $47d6
 
         page 3
-        ds (512-80)*1024, $ff
+        ;ds (512-80)*1024, $ff
+        romheader 27

@@ -223,7 +223,7 @@ blockRead:
         ld hl,blockRead01
         call executeCommandNowindInPage2
         ret c                           ; not ready
-        ret z                           ; done! (no more date for page23)
+        ret z                           ; done! (no more data for page23)
         ;DEBUGMESSAGE "more data for .page23!"
 .page23:
         ld hl,blockRead23
@@ -357,20 +357,16 @@ slowTransfer:
         ld c,(hl)        
         ld b,(hl)
         ld a,(hl)                       ; header
-        DEBUGDUMPREGISTERS
         ldir
         ld b,(hl)
         cp a                            ; check block (header == tail?)
         ld a,b
-        DEBUGDUMPREGISTERS
         ret
 
 blockWrite:
-        DEBUGMESSAGE "dskwrite"
         rlca
         jr c,.page23
 
-        DEBUGMESSAGE "p01"
         ld hl,blockWrite01
         call executeCommandNowindInPage2
         ret c                           ; return error (error code in a)
@@ -378,10 +374,8 @@ blockWrite:
         DEBUGMESSAGE "doorgaan!"
 
 .page23:
-        DEBUGMESSAGE "p23"
         ld hl,blockWrite23
         call executeCommandNowindInPage0
-        DEBUGDUMPREGISTERS
         DEBUGMESSAGE "back"
         ret c                           ; return error (error code in a)
         xor a                           ; some software (wb?) requires that a is zero, because they do not check the carry
@@ -390,9 +384,7 @@ blockWrite:
         PHASE $ + $4000
 
 blockWrite01:
-        DEBUGDUMPREGISTERS
         DEBUGMESSAGE "blkWr01"
-.start:
         call getHeaderInPage2
         ret c                           ; exit (not ready)
         or a
@@ -411,7 +403,7 @@ blockWrite01:
         ld (de),a                       ; mark block begin
         ldir
         ld (de),a                       ; mark block end
-        jr .start
+        jr blockWrite01
 
 .error: scf
         ld a,(hl)                       ; get error code
@@ -420,9 +412,7 @@ blockWrite01:
         DEPHASE
 
 blockWrite23:
-        DEBUGDUMPREGISTERS
         DEBUGMESSAGE "blkWr23"
-.start:
         call getHeaderInPage0
         ret c                           ; exit (not ready)
         or a
@@ -436,13 +426,12 @@ blockWrite23:
         ld b,(hl)
         ld a,(hl)                       ; block sequence number
 
-        ;DEBUGDUMPREGISTERS
         ex de,hl
         ld d,HIGH usbWritePage1
         ld (de),a                       ; mark block begin
         ldir
         ld (de),a                       ; mark block end
-        jr .start
+        jr blockWrite23
 
 .error: scf
         ld a,(hl)                       ; get error code
