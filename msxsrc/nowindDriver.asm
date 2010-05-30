@@ -30,13 +30,13 @@ DRIVES:
         push bc
         push de
         ld a,(DEVICE)
-
+        
         push hl
         call sendRegisters
         ld (hl),C_DRIVES
         ld hl,drivesCommand
         call executeCommandNowindInPage0
-
+        
         pop hl
         ld l,2
         jr c,.error
@@ -66,13 +66,15 @@ INIENV:
         ld a,$23
         ld ($f313),a
         endif
-
+        
         call installExtendedBios
 
         call sendRegisters
         ld (hl),C_DRIVES
         ld hl,inienvCommand
         call executeCommandNowindInPage0
+
+        USB_DBMSG "INIENV"
 
         push af
         call getEntrySLTWRK
@@ -117,6 +119,9 @@ DSKIO:
 
         DEBUGMESSAGE "DSKIO"
         DEBUGDUMPREGISTERS
+        
+        USB_DBMSG "DSKIO"
+
         push af
         call checkWorkArea
         jp z,ROMDISK_DSKIO
@@ -152,6 +157,8 @@ DSKCHG:
         jp z,ROMDISK_DSKCHG
         pop af
 
+        USB_DBMSG "DSKCHG"
+        
         push af
         push hl
         call sendRegisters
@@ -194,6 +201,9 @@ GETDPB:
 
         DEBUGMESSAGE "GETDPB"
         DEBUGDUMPREGISTERS
+        
+        USB_DBMSG "GETDPB"
+        
         ex de,hl
         inc de
         ld h,a

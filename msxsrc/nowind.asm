@@ -1,5 +1,5 @@
-        define  DEBUG
-
+        define DEBUG
+        
         ;define NOWINDVERSION_FIRSTBATCH   ; our handmade first batch
         define NOWINDVERSION_SUNRISE    ; sunrise first batch
 
@@ -24,7 +24,7 @@
         page 0
         module MSXDOS2_PART
 
-        define  MSXDOSVER 2
+        define MSXDOSVER 2
         ; define ROMINIT $47d6
         define PRINTTEXT $728e
 
@@ -61,6 +61,7 @@ getBootArgs:
 
         call flashWriter                ; TODO: zoek betere plek
         DEBUGMESSAGE "Any commands?"
+                
         call enableNowindPage0
         ld c,0                      ; c=0 means reset startup queue index
 .loop:  ld b,0                      ; b=0 means request startup command
@@ -146,7 +147,7 @@ endCopyFromBank:
         page 2
         module MSXDOS1_PART
 
-        define  MSXDOSVER 1
+        define MSXDOSVER 1
         ; define ROMINIT $576f
         define PRINTTEXT $5f86
 

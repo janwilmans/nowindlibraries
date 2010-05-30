@@ -321,7 +321,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
         {
             string lFilename = string(optarg);
             printf("Firmware update (using sector based protocol) for Nowind interface: %s\n", lFilename.c_str());
-            mHostService->updateFirmware(lFilename, 2, false);
+            mHostService->updateFirmware(lFilename, 2, true);
             return 0;
         }
         case 'z':

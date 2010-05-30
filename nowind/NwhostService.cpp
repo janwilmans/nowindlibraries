@@ -141,7 +141,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
     unsigned int uiFlashBlock;
     char cString[250];
 
-    bool doAutoSelect = false;
+    bool doAutoSelect = true;
     bool doChipErase = true;
     bool doSectorErase = false;
     bool doWriteFlash = true;
@@ -150,7 +150,6 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
 
     if (iMethodVersion == 2)
     {
-        doAutoSelect = true;
         doChipErase = false;
         doSectorErase = true;
         doWriteFlash = true;
@@ -180,7 +179,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
         }
     }
     
-    Util::debug("Flashing %s to USB interface...\n", sImageName.c_str());
+    Util::debug("Flashing %s to Nowind Interface...\n", sImageName.c_str());
     Util::sleep(500);  // wait for buffer-flush to occur 
 	
     fs->seekg(0, ios::end);
@@ -196,8 +195,20 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
 
         mUsbStream->write(xBuffer, 4, &uiBytesWritten);
 	    mUsbStream->readExact(yBuffer, 4);
-	    Util::debug("Manufacturer Code: 0x%02x\n", yBuffer[2]);
-	    Util::debug("Device Code: 0x%02x\n", yBuffer[3]);
+	    unsigned int mCode = yBuffer[2];
+	    unsigned int dCode = yBuffer[3];
+	    Util::debug("Manufacturer Code: 0x%02x, Device Code: 0x%02x\n", mCode, dCode);
+    
+	    if (dCode == 0xA4)
+	    {
+	        Util::debug("Detected Nowind Interface Version 1 with 512KB flash rom\n");
+	    }
+	    else
+	    {
+	        Util::debug("Detected Nowind Interface Version 2 (by Sunrise) with 4MB flash rom\n");
+	    }
+	    // old flash: MC: 0x01, DC: 0xA4
+	    // new flash: MC: 0x20, DC: 0xAC
     }
 
     if (doChipErase)
@@ -229,10 +240,10 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
     	    
             xBuffer[4] = i;
 	        mUsbStream->write(xBuffer, 5, &uiBytesWritten);
-            Util::debug("Erasing flash sector %i...\r", i);
+            Util::debug("\rErasing flash sector %i...", i);
             waitForAck();
         }
-	    Util::debug("\nErase complete!\n");
+	    Util::debug("\nErase Done!\n");
     }
     
     unsigned int uiFlashBlockCount = uiFileSize/uiFlashBlockSize;
@@ -288,7 +299,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
                 }
                 waitForAck();            
         }
-        Util::debug("Write complete!\n");
+        Util::debug("Write Done!            \n");
     }
 
     if (doVerify)
@@ -319,7 +330,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
                         Util::snprintf(cString, sizeof(cString), "Verify of address 0x%04X failed! Found: 0x%02X Expected: 0x%02X\n", (uiWriteAdress+i)+(uiBank*0x4000), yBuffer[i], xBuffer[i+uiHeader]);
                         uiErrors++;
                         if (uiErrors > 25) {
-                            Util::debug("Found more than 25 error...!\n");
+                            Util::debug("Found more than 25 errors, exiting...!\n");
                             exit(1);
                         }
                         Util::debug(cString);
@@ -337,10 +348,10 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
 				    fflush(stdout);
                 }
         }
-
-        Util::debug("\nDone... %u flash blocks (%u KB) written and verified.\n", uiFlashBlock, (uiFlashBlock*uiFlashBlockSize)/1024);
+        printf("Verfiy Done!         \n");
+        
+        Util::debug("All Done, %u flash blocks (%u KB) written and verified.\n", uiFlashBlock, (uiFlashBlock*uiFlashBlockSize)/1024);
     }
-
     mUsbStream->close(); 
 }
 
