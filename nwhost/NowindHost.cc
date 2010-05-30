@@ -743,14 +743,14 @@ void NowindHost::commandRequestedAtStartup(byte reset)
     if (reset == 0x00)
     {
         // The MSX is in its diskrom startup sequence at INIHDR and requests the first startup command
-        DBERR("INIHRD hook requests command at startup\n");
+        DBERR("MSX requests command at startup\n");
         // this reset the index for startupRequestQueue
         index = 0;
     }
     else
     {
         // The MSX is in its diskrom startup sequence at INIHDR and requests the next startup command
-        DBERR("INIHRD hook requests next command at startup\n");
+        DBERR("MSX requests next command at startup\n");
     }
 
     nwhSupport->sendHeader();
@@ -759,6 +759,7 @@ void NowindHost::commandRequestedAtStartup(byte reset)
     if (index >= startupRequestQueue.size())
     {
         nwhSupport->send(0);   // no more commands 
+        DBERR("No more startup commands.\n");
     }
     else
     {
