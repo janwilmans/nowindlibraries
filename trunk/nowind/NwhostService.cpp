@@ -131,20 +131,21 @@ void NwhostService::start(FtdiDriverType aDriverType)
 // 
 void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool bVerify) {
 
-    unsigned int uiSectorSize = 128;
+    unsigned int uiFlashBlockSize = 128;
     unsigned int uiHeader = 7;
-    unsigned int uiAmount = uiSectorSize+uiHeader;
+    unsigned int uiAmount = uiFlashBlockSize+uiHeader;
     unsigned int uiAddress = 0;
     unsigned int uiWriteAdress = 0;
     unsigned int uiBank = 0;
     unsigned long uiBytesWritten = 0;
-    unsigned int uiSector;
+    unsigned int uiFlashBlock;
     char cString[250];
 
     bool doAutoSelect = false;
     bool doChipErase = true;
     bool doSectorErase = false;
     bool doWriteFlash = true;
+    bool doOnlyFirmware = false;
     bool doVerify = bVerify;
 
     if (iMethodVersion == 2)
@@ -153,6 +154,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
         doChipErase = false;
         doSectorErase = true;
         doWriteFlash = true;
+        doOnlyFirmware = true;
     }
 
 	start(eDRIVER_FTD2XX);
@@ -218,28 +220,46 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
         xBuffer[2] = 0x55;
         xBuffer[3] = CMD_ERASESECTOR;
 
-        unsigned int sizeInSectors = ((uiFileSize-1) >> 16) + 1;
-        for (unsigned int i=0; i<sizeInSectors; i++) {
+        unsigned int flashSectorsToErase = ((uiFileSize-1) >> 16) + 1;   // a flash sector (the smallest unit that can be erase) is 64KB
+        if (doOnlyFirmware)
+        {
+            flashSectorsToErase = 1;
+        }
+        for (unsigned int i=0; i<flashSectorsToErase; i++) {
     	    
             xBuffer[4] = i;
 	        mUsbStream->write(xBuffer, 5, &uiBytesWritten);
-            Util::debug("Erasing sector %i...\r", i);
+            Util::debug("Erasing flash sector %i...\r", i);
             waitForAck();
         }
 	    Util::debug("\nErase complete!\n");
     }
+    
+    unsigned int uiFlashBlockCount = uiFileSize/uiFlashBlockSize;
 
-    unsigned int uiSectorCount = uiFileSize/uiSectorSize;
+    // the flash can be written per-byte, but our flash routine only 
+    // supports per-128-byte writes.
+    if (doOnlyFirmware)
+    {
+        Util::debug("Write limited to 5 banks (firmware only update)\n");
+        const unsigned int fiveBankSize = 5*16*1024/128;
+        if (uiFlashBlockCount > fiveBankSize)
+        {
+            // when the file is bigger then 5x 16kb, just write the first 5 banks
+            uiFlashBlockCount = fiveBankSize;
+        }
+    }        
+
     unsigned int uiLastProgress = 1;
     unsigned int uiProgress = 0;
 
     if (doWriteFlash)
     {
         Util::debug("Writing to flash....\n");
-	    for (uiSector=0; uiSector<uiSectorCount; uiSector++) {
+	    for (uiFlashBlock=0; uiFlashBlock<uiFlashBlockCount; uiFlashBlock++) {
 
                 uiWriteAdress = uiAddress & 0x3fff;
-                uiBank = uiSector/uiSectorSize;                  // there are 128 x 128 bytes in a bank
+                uiBank = uiFlashBlock/uiFlashBlockSize;                  // there are 128 x 128 bytes in a bank
                 xBuffer[0] = 0xEE;
                 xBuffer[1] = 0xBB;
                 xBuffer[2] = 0x55;
@@ -248,7 +268,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
                 xBuffer[5] = (uiWriteAdress >> 8) & 0xFF;
                 xBuffer[6] = uiBank & 0xFF;
                 
-                uiProgress = (uiSector*100)/uiSectorCount;
+                uiProgress = (uiFlashBlock*100)/uiFlashBlockCount;
                 if (uiLastProgress != uiProgress)
                 {
                     uiLastProgress = uiProgress;          
@@ -256,14 +276,14 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
 				    fflush(stdout);
                 }
                 
-                fs->seekg(uiSector*uiSectorSize);
-                fs->read(cBuffer+uiHeader, uiSectorSize);
+                fs->seekg(uiFlashBlock*uiFlashBlockSize);
+                fs->read(cBuffer+uiHeader, uiFlashBlockSize);
      
                 mUsbStream->write(xBuffer, uiAmount, &uiBytesWritten);
-                uiAddress = uiAddress + uiSectorSize;
+                uiAddress = uiAddress + uiFlashBlockSize;
 
                 if (uiBytesWritten != uiAmount) {
-                    Util::debug("error: sector %u not completely send...\n", uiSector);
+                    Util::debug("error: sector %u not completely send...\n", uiFlashBlock);
                     Util::debug("       BytesWritten: %u amount: %u\n", uiBytesWritten, uiAmount);
                 }
                 waitForAck();            
@@ -276,10 +296,10 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
         uiAddress = 0;
         unsigned int uiErrors = 0;
         uiAmount = uiHeader;
-        for (uiSector=0; uiSector<uiSectorCount; uiSector++) {
+        for (uiFlashBlock=0; uiFlashBlock<uiFlashBlockCount; uiFlashBlock++) {
 
                 uiWriteAdress = (uiAddress & 0x3fff) + 0x4000;
-                uiBank = uiSector/uiSectorSize;
+                uiBank = uiFlashBlock/uiFlashBlockSize;
                 xBuffer[0] = 0xEE;
                 xBuffer[1] = 0xBB;
                 xBuffer[2] = 0x55;
@@ -290,11 +310,11 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
 
                 mUsbStream->write(xBuffer, uiAmount, &uiBytesWritten);
                 
-                fs->seekg(uiSector*uiSectorSize);
-                fs->read(cBuffer+uiHeader, uiSectorSize);
+                fs->seekg(uiFlashBlock*uiFlashBlockSize);
+                fs->read(cBuffer+uiHeader, uiFlashBlockSize);
      
-			    uiBytesWritten = mUsbStream->readExact(yBuffer, uiSectorSize);
-                for (unsigned int i=0; i<uiSectorSize; i++) {
+			    uiBytesWritten = mUsbStream->readExact(yBuffer, uiFlashBlockSize);
+                for (unsigned int i=0; i<uiFlashBlockSize; i++) {
                     if (xBuffer[i+uiHeader] != yBuffer[i]) {
                         Util::snprintf(cString, sizeof(cString), "Verify of address 0x%04X failed! Found: 0x%02X Expected: 0x%02X\n", (uiWriteAdress+i)+(uiBank*0x4000), yBuffer[i], xBuffer[i+uiHeader]);
                         uiErrors++;
@@ -309,7 +329,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
 
                 waitForAck();
                 
-                uiProgress = (uiSector*100)/uiSectorCount;
+                uiProgress = (uiFlashBlock*100)/uiFlashBlockCount;
                 if (uiLastProgress != uiProgress)
                 {
                     uiLastProgress = uiProgress;          
@@ -318,7 +338,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
                 }
         }
 
-        Util::debug("\nDone... %u sectors written and verified.\n", uiSector);
+        Util::debug("\nDone... %u flash blocks (%u KB) written and verified.\n", uiFlashBlock, (uiFlashBlock*uiFlashBlockSize)/1024);
     }
 
     mUsbStream->close(); 

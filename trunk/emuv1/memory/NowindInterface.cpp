@@ -86,8 +86,9 @@ void NowindInterface::write(nw_word address, nw_byte value) {
         // snelle hack om nowind_sunrise te ondersteunen (mapper reageert alleen op oneven adressen)
         if ((address & 1)==0) {
             DBERR(" GEEN SWITCH val: %u (at addr: 0x%04x)\n", value, address);
-            break;
+            //break;
         }
+        
         switchedBlock = value & switchedBlockMask;
         //DBERR(" NowindInterface switchedBlock: %u (at addr: 0x%04x)\n", switchedBlock, address);
 		
