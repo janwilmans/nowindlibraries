@@ -452,7 +452,7 @@ inline nw_word Z80::readMem16(nw_word address) {
 	}
 #endif	
 
-// Het volgende is alleen voor de 16 bit read van de usb interface.
+// Het volgende is alleen voor de 16 bit read van de nowind interface.
 // De read bevindt zich op 0x2000 - 0x3fff en is gemirrord in page 2 (0x8000 - 0x9fff)
     if (((address >= 0x2000) && (address < 0x4000)) || ((address >= 0x8000) && (address < 0xa000))) {
 		nw_word addressHigh = (address+1) & 0xffff;

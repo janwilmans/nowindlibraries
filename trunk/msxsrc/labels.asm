@@ -82,11 +82,13 @@ C_BLOCKWRITE    equ $95
         endif
         endmacro
 
-; MESSAGE
-        macro MESSAGE string
+; USB_DBMSG
+        macro USB_DBMSG string
+        ifdef DEBUG
         call sendMessage
         db string
 .skip2: nop
+        endif
         endmacro
 
 ; DEBUGDUMPREGISTERS
