@@ -392,7 +392,7 @@ void NwhostService::hostImage() {
     //nowindusb_set_dataavailable_callback(&read_data_available);
    // nowindusb_set_purge_callback(&purge_buffers);
 
-	mUsbStream->setTimeouts(100, 5000);
+	mUsbStream->setTimeouts(1000, 10000);
 	bool lConnected = false;
     mRunning = true;
     while (mRunning) {

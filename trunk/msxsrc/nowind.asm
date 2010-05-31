@@ -25,7 +25,6 @@
         module MSXDOS2_PART
 
         define MSXDOSVER 2
-        ; define ROMINIT $47d6
         define PRINTTEXT $728e
 
         incbin "..\roms\MSXDOS22.ROM", 0, $72f0-$4000
@@ -149,7 +148,6 @@ endCopyFromBank:
         module MSXDOS1_PART
 
         define MSXDOSVER 1
-        ; define ROMINIT $576f
         define PRINTTEXT $5f86
 
         incbin "..\roms\DISK.ROM", 0, $7405-$4000
@@ -204,9 +202,6 @@ endCopyFromBank:
 
         module remainingRom
 
-;define romInit $47d6
-define romInit MSXDOS2_PART.getBootArgs
-
         page 3
         ;ds (512-80)*1024, $ff
-        romheader 27
+        romheader 27, MSXDOS2_PART.getBootArgs

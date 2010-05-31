@@ -130,9 +130,9 @@ C_BLOCKWRITE    equ $95
 
 
 ; ROMHEADER macro
-        macro romheader r   
+        macro romheader numberOfPages,initAddress 
 .addr := $4000        
-        repeat r
+        repeat numberOfPages
         code ! .addr
 
         org $4000
@@ -153,7 +153,7 @@ C_BLOCKWRITE    equ $95
         ds $7fe7 - $, $ff
 
         
-.init:  ld hl,romInit
+.init:  ld hl,initAddress
         push hl
         jr .enableBank0        
 
