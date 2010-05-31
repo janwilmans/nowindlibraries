@@ -31,6 +31,12 @@ using std::ios;
 
 namespace nwhost {
 
+enum {
+    BLOCKWRITE_EXIT_MORE_DATE_AHEAD,
+    BLOCKWRITE_FASTTRANSFER,
+    BLOCKWRITE_EXIT,
+};
+
 NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	: drives(drives_)
 	, lastTime(0)

@@ -11,7 +11,7 @@ SECLEN          equ 512                 ; sector size
 ; if this is defined we tell DOS2.3 that we _are DOS2.3 also, so
 ; it does not try to override our initilazations
 
-define  PRETEND_2B_DOS23
+define  PRETEND_2B_DOS23_off
 
 INIHRD:
         DEBUGMESSAGE "INIHRD"
@@ -74,20 +74,19 @@ INIENV:
         ld hl,inienvCommand
         call executeCommandNowindInPage0
 
-        USB_DBMSG "INIENV"
+;        USB_DBMSG "INIENV"
 
         push af
         call getEntrySLTWRK
         pop af
         ld (hl),0                       ; default drive number for romdisk
 
-        USB_DBMSG "INIENV2"
-
         ret c
-        DEBUGDUMPREGISTERS
         ld (hl),a                       ; drive number for romdisk
         
-        USB_DBMSG "INIENV3"
+;        USB_DBMSG "INIENV3"
+;        DEBUGDISASM
+        DEBUGMESSAGE "INIENV klaar"
         ret
 
 inienvCommand:

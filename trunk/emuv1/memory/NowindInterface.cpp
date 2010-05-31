@@ -70,6 +70,7 @@ nw_byte NowindInterface::read(nw_word address) {
 void NowindInterface::write(nw_word address, nw_byte value) {
 
 	numberOfLatencyReads = 0;
+//    DBERR("flashRom write op addr: 0x%04x   case: 0x%04x\n", address, address & 0xe000);
     
     switch(address & 0xe000) {
 	case 0x0000:
@@ -90,7 +91,7 @@ void NowindInterface::write(nw_word address, nw_byte value) {
         }
         
         switchedBlock = value & switchedBlockMask;
-        //DBERR(" NowindInterface switchedBlock: %u (at addr: 0x%04x)\n", switchedBlock, address);
+        DBERR("NowindInterface switchedBlock: %u (at addr: 0x%04x)\n", switchedBlock, address);
 		
 		// both or neither might be switched, depending on current slotselection
 		slotSelector->updateSelection(2);
