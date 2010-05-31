@@ -19,7 +19,7 @@
 #define USE_NORMAL_STDOUTERR_OFF
 
 /* when ON enables logging of all calls and jumps to stderr */
-#define STACKTRACK_OFF
+#define STACKTRACK_ON
 
 /* when ON enables logging of all executed instructions */
 #define INSTRUCTIONS_ON

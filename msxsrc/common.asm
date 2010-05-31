@@ -33,8 +33,10 @@ initDiskBasic:
         res 7,(hl)
 
         if MSXDOSVER = 1
+        USB_DBMSG "initDiskBasicD1"
         jp $5897
         else
+        USB_DBMSG "initDiskBasicD2"
         jp $495b
         endif
 

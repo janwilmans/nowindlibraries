@@ -1,4 +1,4 @@
-        define DEBUG
+        ;define DEBUG
         
         ;define NOWINDVERSION_FIRSTBATCH   ; our handmade first batch
         define NOWINDVERSION_SUNRISE    ; sunrise first batch
@@ -38,7 +38,7 @@
         jp DSKFMT
         db 0,0,0                        ; no DRVOFF
 
-        PATCH $47d7, getBootArgs        ; INIHDR
+        PATCH $47d7, INIHRD        ; INIHDR
         ;PATCH $47dd, 0                  ; do not check for MSX1
         PATCH $488d, MYSIZE
         PATCH $489f, SECLEN
@@ -99,7 +99,7 @@ noNextCommand:
         jp c,bootMSXDOS1                ; no reply (host not connected?)
 
         and a
-        jp nz,INIHRD                    ; boot MSXDOS2
+        jp nz,$47d6                    ; boot MSXDOS2
 
 bootMSXDOS1:
         DEBUGMESSAGE "switch to DOS1"
@@ -116,6 +116,7 @@ bootMSXDOS1:
         include "flashWriter.asm"  ; todo: remove, and use bootcommand to flash
         include "dos_aux.asm"
         include "device.asm"
+
 
         ds $8000-(endCopyFromBank-copyFromBank)-$, $ff
 
@@ -203,7 +204,8 @@ endCopyFromBank:
 
         module remainingRom
 
-define romInit $47d6
+;define romInit $47d6
+define romInit MSXDOS2_PART.getBootArgs
 
         page 3
         ;ds (512-80)*1024, $ff

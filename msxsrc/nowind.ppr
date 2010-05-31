@@ -42,16 +42,16 @@ nowind
 4=nowindDriver.asm
 [Selected Project Files]
 Main=
-Selected=labels.asm
+Selected=nowind.asm
 [common.asm]
-TopLine=418
+TopLine=27
 Caret=8,27
 [nowind.asm]
-TopLine=119
-Caret=12,125
+TopLine=1
+Caret=10,1
 [labels.asm]
-TopLine=130
-Caret=2,147
+TopLine=139
+Caret=18,127
 [flashWriter.asm]
 TopLine=71
 Caret=1,1
