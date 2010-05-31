@@ -74,8 +74,6 @@ INIENV:
         ld hl,inienvCommand
         call executeCommandNowindInPage0
 
-;        USB_DBMSG "INIENV"
-
         push af
         call getEntrySLTWRK
         pop af
@@ -83,10 +81,6 @@ INIENV:
 
         ret c
         ld (hl),a                       ; drive number for romdisk
-        
-;        USB_DBMSG "INIENV3"
-;        DEBUGDISASM
-        DEBUGMESSAGE "INIENV klaar"
         ret
 
 inienvCommand:
@@ -124,7 +118,7 @@ DSKIO:
         DEBUGMESSAGE "DSKIO"
         DEBUGDUMPREGISTERS
         
-        USB_DBMSG "DSKIO"
+        ;USB_DBMSG "DSKIO"
 
         push af
         call checkWorkArea
@@ -161,7 +155,7 @@ DSKCHG:
         jp z,ROMDISK_DSKCHG
         pop af
 
-        USB_DBMSG "DSKCHG"
+        ;USB_DBMSG "DSKCHG"
         
         push af
         push hl
@@ -206,7 +200,7 @@ GETDPB:
         DEBUGMESSAGE "GETDPB"
         DEBUGDUMPREGISTERS
         
-        USB_DBMSG "GETDPB"
+        ;USB_DBMSG "GETDPB"
         
         ex de,hl
         inc de
