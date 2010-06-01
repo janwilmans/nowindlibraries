@@ -168,6 +168,18 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\init.asm"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\labels.asm"
 				>
 				<FileConfiguration
