@@ -1,32 +1,5 @@
 ; Nowind specific
 
-nowindInit:
-        DEBUGMESSAGE "nowindInit"
-        ld a,($2d)
-        or a
-        push af
-        call z,INITXT                   ; SCREEN 0 (MSX1)
-        pop af
-        ld ix,SDFSCR                    ; restore screen mode from clockchip (on MSX2 and higher)
-        call nz,EXTROM
-
-        call PRINTTEXT
-        ifdef DEBUG
-        db "Nowind Interface v4.0 [beta]",0
-        else
-        db "Nowind Interface v4.0",0
-        endif
-
-        call enableNowindPage0          ; clear hostToMSXFifo by reading 4Kb of random data
-        ld bc,4096
-.loop:  ld a,(usbReadPage0)
-        dec bc
-        ld a,b
-        or c
-        jr nz,.loop
-        jp restorePage0
-
-
 initDiskBasic:
         DEBUGMESSAGE "initDiskBasic"
         ld hl,DEVICE
@@ -275,13 +248,12 @@ blockRead23:
 ; used by blockRead01 and blockRead23
 ; Input:    HL = usb read address (either usbReadPage0 or usbReadPage2)
 
-error255:
+invalidHeader:
         ; TODO timeout
-        DEBUGMESSAGE ".err255"
+        DEBUGMESSAGE "invalidHeader"
         ld a,(hl)
         cp 255
-        jr z,error255
-        ; b moet nog aangepast... (hoe?)
+        jr z,invalidHeader
         ld c,a
         jr blockReadTranfer.good
 
@@ -295,13 +267,12 @@ blockReadTranfer:
         ld sp,hl
         ex de,hl
         ld b,(hl)                       ; amount of 128 byte blocks (max 32kB)
-        ;DEBUGDUMPREGISTERS
 .loop:
         ;DEBUGMESSAGE ".loop"
         ld a,(hl)                       ; header
         ld c,a
-        cp 255
-        jr z,error255
+        inc a
+        jr z,invalidHeader
 
 .good:
         repeat 64                       ; blocks of 128 bytes hardcoded (NowindHost.cpp)

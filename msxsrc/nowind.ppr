@@ -23,38 +23,43 @@ nowind
 		common.asm
 		debug.asm
 		device.asm
+		dos_aux.asm
 		extendedBios.asm
 		flashWriter.asm
+		init.asm
 		labels.asm
 		nowind.asm
 		nowindbdos.asm
+		nowindDriver.asm
 		openDiskrom\openDiskrom.asm
 		romdisk.asm
 		rs232.asm
 		slotRoutines.asm
-		nowindDriver.asm
-		dos_aux.asm
 [Open project files]
 0=common.asm
 1=nowind.asm
-2=labels.asm
-3=flashWriter.asm
-4=nowindDriver.asm
+2=flashWriter.asm
+3=nowindDriver.asm
+4=debug.asm
+5=init.asm
 [Selected Project Files]
 Main=
-Selected=nowind.asm
+Selected=common.asm
 [common.asm]
-TopLine=27
-Caret=8,27
+TopLine=246
+Caret=27,256
 [nowind.asm]
 TopLine=1
-Caret=10,1
-[labels.asm]
-TopLine=139
-Caret=18,127
+Caret=9,1
 [flashWriter.asm]
-TopLine=71
-Caret=1,1
+TopLine=1
+Caret=28,27
 [nowindDriver.asm]
-TopLine=11
-Caret=1,1
+TopLine=1
+Caret=12,25
+[debug.asm]
+TopLine=30
+Caret=33,81
+[init.asm]
+TopLine=25
+Caret=1,76
