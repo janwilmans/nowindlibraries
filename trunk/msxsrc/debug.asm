@@ -1,132 +1,87 @@
-; debug.asm
-; TODO: remove 16-bit writes!
-; TODO: implement variable amount of debug data send to host
+; debug.asm contains macros to support debugging the Nowind Interface firmware.
 
-        MACRO DEBUGMESSAGE string
-        IFDEF DEBUG
-        ; blueMSX debug info
+; DEBUGMESSAGE
+        macro DEBUGMESSAGE string
+        ifdef DEBUG
         ld d,d
         jr .skip
         db string
-.skip:
-        ENDIF
+.skip:  
+        endif
+        endmacro
 
-        IFDEF USBDEBUG
-;        ASSERT ($ < $8000)
-        push af
-        exx
-        ld hl,.data
-        ld d,HIGH usbWritePage1
-        ld bc,.end-.data
-        ldir
-        jr .end
-.data:  db $af, $66, 0, string, 0, 0
-.end:   exx
-        pop af
-        ENDIF
-        ENDM
+; USB_DBMSG
+        macro USB_DBMSG string
+        ifdef DEBUG
+        call sendMessage
+        db string
+.skip2: nop
+        endif
+        endmacro
 
-        MACRO DEBUGDUMPSLOTSELECTION
+; these macros have no effect on real hardware 
+; but provide extra debug information/functionality in the Nowind Emulator
+
+; DEBUGDUMPREGISTERS
+        macro DEBUGDUMPREGISTERS
+        ifdef DEBUG
+        db $ed,7
+        endif
+        endmacro
+
+; DEBUGDISASM
+        macro DEBUGDISASM
+        db $ed, $0b
+        endmacro
+        
+; DEBUGDISASMOFF
+        macro DEBUGDISASMOFF
+        db $ed, $0c
+        endmacro        
+
+; BREAKPOINT
+        macro BREAKPOINT
+        ld b,b
+        jr $+2
+        endmacro
+        
+; EMU_DUMPSLOTSELECTION
+        macro DEBUGDUMPSLOTSELECTION
         IFDEF DEBUG
         db $ed,8
         ENDIF
-        ENDM
+        endmacro
 
-        MACRO DEBUGENABLEDISASM
+; EMU_ASSERT
+        macro EMU_ASSERT
         IFDEF DEBUG
-        db $ed,$0b
+        db $ed, $0a
         ENDIF
-        ENDM
+        endmacro
 
-        MACRO DEBUGDISABLEDISASM
-        IFDEF DEBUG
-        db $ed,$0c
-        ENDIF
-        ENDM
-
-        MACRO DEBUGASSERT
-        IFDEF DEBUG
-        db $ed,$0a
-        ENDIF
-        ENDM
-
-        MACRO DEBUGDUMPMEMHL len
+; EMU_DUMPMEMHL
+        macro EMU_DUMPMEMHL len
         IFDEF DEBUG
         db $ed,1,len
 .skip:  nop
         ENDIF
-        ENDM
+        endmacro
 
-        MACRO DEBUGDUMPMEM addr, len
+; EMU_DUMPMEM
+        macro EMU_DUMPMEM addr, len
         IFDEF DEBUG
-        db $ed,2
+        db $ed, 2
         dw addr
         db len
 .skip:  nop
         ENDIF
-        ENDM
+        endmacro
 
-
-        MACRO DEBUGDUMPREGISTERS
-        IFDEF DEBUG
-        db $ed,7
-        ENDIF
-
-        IFDEF USBDEBUG
-        ASSERT($ < $8000)
-        call sendCpuInfo
-        ENDIF
-        ENDM
-
-        MACRO DEBUGROUTINESPAGE1
-sendCpuInfo:
-        push af
-        push hl
-        push de
-        call sendRegisters
-        ld (hl),128
-
-        ld (usbWritePage1),ix
-        ld (usbWritePage1),iy
-        ld (usbWritePage1),sp                   ; needs adjustment! (host does this)
-
-        in a,($a8)                      ; current slotselection
-        ld (hl),a
-        ld de,($fcc5)                   ; secondairy slot selection
-        ld (hl),e
-        ld (hl),d
-        ld de,($fcc7)
-        ld (hl),e
-        ld (hl),d
-
-        ld hl,-6                        ; stack dump
-        add hl,sp
-        ld d,16
-.loop:  ld a,(hl)
-        dec hl
-        ld (usbWritePage1),a
-        dec d
-        jr nz,.loop
-
-        pop de
-        pop hl
-        pop af
-        ret
-        ENDM
-
-; blueMSX
-        MACRO BLUEMSX_BREAKPOINT
-        IFDEF DEBUG
-        ld b,b
-        jr $+2
-        ENDIF
-        ENDM
-
-        MACRO BLUEMSX_SETBREAKPOINT address
-        IFDEF DEBUG
+; BLUEMSX_SETBREAKPOINT
+        macro BLUEMSX_SETBREAKPOINT address
         ld b,b
         jr $+4
         dw address
-        ENDIF
-        ENDM
+        endmacro   
+
 

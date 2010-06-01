@@ -1,4 +1,7 @@
-; Nowind specific
+; common.asm contains all code that is shared
+; between DOS1 (bank 4) and DOS2 (bank 0-3)
+; this means that this code is assembled twice, once with MSXDOSVER = 1
+; and again with MSXDOSVER = 2 and used in different contexts.
 
 initDiskBasic:
         DEBUGMESSAGE "initDiskBasic"
@@ -6,7 +9,7 @@ initDiskBasic:
         res 7,(hl)
 
         if MSXDOSVER = 1
-        jp $5897
+        jp $5897            ; todo: aaldert, please replace these magic numbers with labels
         else
         jp $495b
         endif
@@ -83,6 +86,7 @@ getHeaderInPage2:
         
         DEPHASE
 
+; used by the USB_DBMSG macro
 sendMessage:
         ;DEBUGMESSAGE "sendMsg"
         ex (sp),hl
@@ -100,6 +104,41 @@ sendMessage:
         pop de
         pop af
         ex (sp),hl
+        ret
+
+; used by the USB_SENDCPUINFO macro
+sendCpuInfo:
+        push af
+        push hl
+        push de
+        call sendRegisters
+        ld (hl),128
+
+        ld (usbWritePage1),ix
+        ld (usbWritePage1),iy
+        ld (usbWritePage1),sp                   ; needs adjustment! (host does this)
+
+        in a,($a8)                      ; current slotselection
+        ld (hl),a
+        ld de,($fcc5)                   ; secondairy slot selection
+        ld (hl),e
+        ld (hl),d
+        ld de,($fcc7)
+        ld (hl),e
+        ld (hl),d
+
+        ld hl,-6                        ; stack dump
+        add hl,sp
+        ld d,16
+.loop:  ld a,(hl)
+        dec hl
+        ld (usbWritePage1),a
+        dec d
+        jr nz,.loop
+
+        pop de
+        pop hl
+        pop af
         ret
 
 ; send 32 bytes starting from address specified by DE to the usb

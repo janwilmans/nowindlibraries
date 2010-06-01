@@ -24,7 +24,10 @@ waitForHeader:
         cp $a5
         jr z,eraseSector
         cp $a6
-        jr nz,waitForHeader
+        jr z,autoselectMode
+
+        ; unknown command, just go back
+        jr waitForHeader
     
 autoselectMode:
         ld a,$90
