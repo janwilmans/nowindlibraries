@@ -284,6 +284,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\tracer.asm"
+				>
+			</File>
+			<File
 				RelativePath=".\vram.asm"
 				>
 				<FileConfiguration

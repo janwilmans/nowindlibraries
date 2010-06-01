@@ -1,6 +1,9 @@
 ; init.asm contains initialization and startup code 
 
+        include "tracer.asm"
+
 nowindInit:
+        call installTracer
         call flashWriter
 
         DEBUGMESSAGE "nowindInit"

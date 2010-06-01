@@ -12,12 +12,19 @@
 
 ; USB_DBMSG
         macro USB_DBMSG string
-        ifdef DEBUG
+        ifdef USBDEBUG
         call sendMessage
         db string
 .skip2: nop
         endif
         endmacro
+        
+; USB_SENDCPUINFO
+        macro USB_SENDCPUINFO
+        ifdef USBDEBUG
+        call sendCpuInfo
+        endif
+        endmacro       
 
 ; these macros have no effect on real hardware 
 ; but provide extra debug information/functionality in the Nowind Emulator
@@ -31,57 +38,63 @@
 
 ; DEBUGDISASM
         macro DEBUGDISASM
+        ifdef DEBUG
         db $ed, $0b
+        endif        
         endmacro
         
 ; DEBUGDISASMOFF
         macro DEBUGDISASMOFF
+        ifdef DEBUG
         db $ed, $0c
+        endif        
         endmacro        
 
 ; BREAKPOINT
         macro BREAKPOINT
+        ifdef DEBUG
         ld b,b
         jr $+2
+        endif        
         endmacro
         
 ; EMU_DUMPSLOTSELECTION
         macro DEBUGDUMPSLOTSELECTION
-        IFDEF DEBUG
+        ifdef DEBUG
         db $ed,8
-        ENDIF
+        endif        
         endmacro
 
 ; EMU_ASSERT
         macro EMU_ASSERT
-        IFDEF DEBUG
+        ifdef DEBUG
         db $ed, $0a
-        ENDIF
+        endif        
         endmacro
 
 ; EMU_DUMPMEMHL
         macro EMU_DUMPMEMHL len
-        IFDEF DEBUG
+        ifdef DEBUG
         db $ed,1,len
 .skip:  nop
-        ENDIF
+        endif        
         endmacro
 
 ; EMU_DUMPMEM
         macro EMU_DUMPMEM addr, len
-        IFDEF DEBUG
+        ifdef DEBUG
         db $ed, 2
         dw addr
         db len
 .skip:  nop
-        ENDIF
+        endif        
         endmacro
 
 ; BLUEMSX_SETBREAKPOINT
         macro BLUEMSX_SETBREAKPOINT address
+        ifdef DEBUG
         ld b,b
         jr $+4
         dw address
+        endif        
         endmacro   
-
-
