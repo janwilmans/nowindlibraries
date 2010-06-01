@@ -22,7 +22,7 @@ INIHRD:
         ld h,HIGH usbWritePage1
         ld (hl),$af                     ; signal MSX reset to host
         ld (hl),$ff
-        jp nowindInit
+        ret
 
 DRIVES:
         DEBUGMESSAGE "DRIVES"

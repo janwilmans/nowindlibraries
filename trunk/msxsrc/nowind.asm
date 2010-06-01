@@ -1,4 +1,4 @@
-        ;define DEBUG
+        define DEBUG
         
         ;define NOWINDVERSION_FIRSTBATCH   ; our handmade first batch
         define NOWINDVERSION_SUNRISE    ; sunrise first batch
@@ -55,57 +55,7 @@
 
         code @ $72f0
 
-getBootArgs:
-; tijdelijke test
-
-        call flashWriter                ; TODO: zoek betere plek
-        DEBUGMESSAGE "Any commands?"
-                
-        call enableNowindPage0
-        ld c,0                      ; c=0 means reset startup queue index
-.loop:  ld b,0                      ; b=0 means request startup command
-        call sendRegisters
-        ld (hl),C_CMDREQUEST
-        call getHeaderInPage0
-        jr c,noNextCommand
-
-        ld d,(hl)
-        ld d,(hl)
-        ld d,(hl)
-
-        ; todo: read command here
-        and a
-        jr z,noNextCommand
-        DEBUGMESSAGE "Got cmd!"
-
-        ld a,(hl)
-        ;cp 1
-        ;jr z, Com
-
-        ld c,1
-        jr .loop
-
-noNextCommand:
-        call restorePage0
-        DEBUGMESSAGE "End of startup cmds"
-
-        call sendRegisters
-        ld (hl),C_GETDOSVERSION
-        call enableNowindPage0
-        call getHeaderInPage0
-
-        call restorePage0
-        jp c,bootMSXDOS1                ; no reply (host not connected?)
-
-        and a
-        jp nz,$47d6                    ; boot MSXDOS2
-
-bootMSXDOS1:
-        DEBUGMESSAGE "switch to DOS1"
-        ld hl,$576f                     ; boot MSXDOS1
-        push hl
-        ld a,4
-        jp switchBank
+        include "init.asm"
 
         include "common.asm"
         include "extendedBios.asm"
@@ -148,7 +98,6 @@ endCopyFromBank:
         module MSXDOS1_PART
 
         define MSXDOSVER 1
-        define PRINTTEXT $5f86
 
         incbin "..\roms\DISK.ROM", 0, $7405-$4000
 
@@ -204,4 +153,4 @@ endCopyFromBank:
 
         page 3
         ;ds (512-80)*1024, $ff
-        romheader 27, MSXDOS2_PART.getBootArgs
+        romheader 27, MSXDOS2_PART.nowindInit
