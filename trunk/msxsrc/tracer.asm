@@ -1,10 +1,10 @@
 
-codeTracer: 
+installTracer: 
         ret
         
         di
         ld hl,h_trace
-        ld de,$fd9f
+        ld de,$fd9a
         ld bc,5
         ldir
     
@@ -24,11 +24,6 @@ h_trace:
         nop
    
 trace:        
-        ex (sp),hl
-        ld d,h
-        ld e,l
-        ex (sp),hl
-        
-        USB_DBMSG "interrupt..."   
+        USB_SENDCPUINFO
         ret
     
