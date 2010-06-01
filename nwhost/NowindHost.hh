@@ -78,7 +78,8 @@ public:
 		STATE_DEVOPEN,   // waiting for filename (11 bytes)
 		STATE_IMAGE,     // waiting for filename
 		STATE_MESSAGE,   // waiting for null-terminated message
-		STATE_BLOCKREAD
+		STATE_BLOCKREAD, // in block-transfer
+		STATE_CPUINFO,   // receiving slot/stack info
 	};
 
 	virtual void debugMessage(const char *cFormat, ...) const;
@@ -93,6 +94,7 @@ private:
 	void msxReset();
 	SectorMedium* getDisk();
 	void executeCommand();
+	void reportCpuInfo();
 
 	void DRIVES();
 	void DSKCHG();

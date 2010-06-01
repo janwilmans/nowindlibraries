@@ -155,7 +155,6 @@ void NowindHost::write(byte data, unsigned int time)
 			state = STATE_SYNC1;
 		}
 		break;
-	
 	case STATE_BLOCKREAD:
 		// in STATE_BLOCKREAD we receive ack's from the send blocks and continue to send new blocks    
 		blockRead.ack(data);     
@@ -164,10 +163,22 @@ void NowindHost::write(byte data, unsigned int time)
 		    state = STATE_SYNC1;
 		}
 		break;
-
+	case STATE_CPUINFO:
+		assert(recvCount < 27);
+		extraData[recvCount] = data;
+		if (++recvCount == 27) {
+		    state = STATE_SYNC1;
+			reportCpuInfo();
+		}
+		break;		
 	default:
 		assert(false);
 	}
+}
+
+void NowindHost::reportCpuInfo()
+{
+
 }
 
 void NowindHost::executeCommand()
