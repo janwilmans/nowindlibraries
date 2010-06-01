@@ -1,3 +1,5 @@
+; init.asm contains initialization and startup code 
+
 nowindInit:
         call flashWriter
 

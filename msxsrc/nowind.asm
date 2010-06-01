@@ -13,6 +13,7 @@
 
         output "nowind.rom"
         include "labels.asm"
+        include "debug.asm"
 
         defpage 0, $4000, $4000         ; MSXDOS2 bank 0
         defpage 1, $4000, 3 * $4000     ; MSXDOS2 bank 1..3
@@ -56,16 +57,15 @@
         code @ $72f0
 
         include "init.asm"
+        include "flashWriter.asm"  ; todo: move to flash bank 5?
 
         include "common.asm"
         include "extendedBios.asm"
         include "slotRoutines.asm"
         include "nowindDriver.asm"
         include "romdisk.asm"
-        include "flashWriter.asm"  ; todo: remove, and use bootcommand to flash
         include "dos_aux.asm"
         include "device.asm"
-
 
         ds $8000-(endCopyFromBank-copyFromBank)-$, $ff
 
@@ -151,6 +151,10 @@ endCopyFromBank:
 
         module remainingRom
 
-        page 3
+        page 3         
+        
+        ; include anything for flash bank 4 here. 
         ;ds (512-80)*1024, $ff
+        
+        ; create rom-headers required for Nowind Interface v1
         romheader 27, MSXDOS2_PART.nowindInit

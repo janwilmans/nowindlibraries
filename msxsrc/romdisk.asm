@@ -1,5 +1,10 @@
-                define ROMDSKBANK 5                    ; romdisk starts in bank 5
-                define ROMDSKLAST (FLASHROMSIZE/16)-1
+; romdisk.asm contains the methods to support the romdisk that can reside
+; in banks 6 and up of the Nowind Flashrom
+; the romdisk can be used as a smallish read-only harddisk even when
+; no host is connected
+
+        define ROMDSKBANK 5                    ; romdisk starts in bank 5
+        define ROMDSKLAST (FLASHROMSIZE/16)-1
 
 
 ROMDISK_DSKIO:

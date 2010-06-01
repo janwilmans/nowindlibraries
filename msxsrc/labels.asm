@@ -11,7 +11,7 @@ CHGCLR          equ $0062
 EXTROM          equ $015f
 SDFSCR          equ $0185               ; restore screen parameters from clockchip (in SUBROM)
 
-; BIOS variables (really?)
+; variables 
 LASTDRV         equ $f33f               ; stores CTRL-key status during boot
 RAMAD1          equ $f342
 XFER            equ $f36e
@@ -74,37 +74,6 @@ C_BLOCKWRITE    equ $95
         dw word
         endmacro
 
-; DEBUGMESSAGE
-        macro DEBUGMESSAGE string
-        ifdef DEBUG
-        ld d,d
-        jr .skip
-        db string
-.skip:  
-        endif
-        endmacro
-
-; USB_DBMSG
-        macro USB_DBMSG string
-        ifdef DEBUG
-        call sendMessage
-        db string
-.skip2: nop
-        endif
-        endmacro
-
-; DEBUGDUMPREGISTERS
-        macro DEBUGDUMPREGISTERS
-        ifdef DEBUG
-        db $ed,7
-        endif
-        
-        ifdef USBDEBUG
-        assert ($ < $8000)
-        call sendCpuInfo
-        endif
-        endmacro
-
 ; MAKEDPB macro
         macro MAKEDPB media, sectorsPerCluster, maxEnt, maxSector, fatSiz, fatCount
 
@@ -128,7 +97,6 @@ C_BLOCKWRITE    equ $95
         dw firstDir
         endmacro
 
-
 ; ROMHEADER macro
         macro romheader numberOfPages,initAddress 
 .addr := $4000        
@@ -147,10 +115,10 @@ C_BLOCKWRITE    equ $95
         call .redir                     ; DSKFMT
         ds 3,0                          ; DRVOFF
 
-;        code ! .addr + $3fe7
+;        code ! .addr + $3fe7       ; todo: aaldert, volgens mij kan dit weg
 ;        org $7fe7
 
-        ds $7fe7 - $, $ff
+        ds $7fe7 - $, $ff           ; todo: aaldert, deze magic numbers vervangen door labels aub.
 
         
 .init:  ld hl,initAddress
@@ -176,20 +144,3 @@ C_BLOCKWRITE    equ $95
 .@addr := .addr + $4000
         endrepeat
         endmacro
-
-; MACRO debugdisasm
-        macro DEBUGDISASM
-        db $ed, $0b
-        endmacro
-        
-; MACRO debugdisasmoff
-        macro DEBUGDISASMOFF
-        db $ed, $0c
-        endmacro        
-
-; MACRO breakpoint
-        macro BREAKPOINT
-        ld b,b
-        jr $+2
-        endmacro
-        
