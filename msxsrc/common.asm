@@ -112,11 +112,11 @@ sendCpuInfo:
         push hl
         push de
         call sendRegisters
-        ld (hl),128
+        ld (hl),C_CPUINFO
 
         ld (usbWritePage1),ix
         ld (usbWritePage1),iy
-        ld (usbWritePage1),sp                   ; needs adjustment! (host does this)
+        ld (usbWritePage1),sp           ; needs adjustment! (host does this)
 
         in a,($a8)                      ; current slotselection
         ld (hl),a
@@ -129,7 +129,7 @@ sendCpuInfo:
 
         ld hl,-6                        ; stack dump
         add hl,sp
-        ld d,16
+        ld d,32
 .loop:  ld a,(hl)
         dec hl
         ld (usbWritePage1),a

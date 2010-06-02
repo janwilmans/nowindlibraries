@@ -438,7 +438,7 @@ void NwhostService::hostImage() {
 			//TODO: handle error..
 			Util::debug("Error: lBytesWritten (%u) != buffer.size (%u)!\n", lBytesWritten, buffer.size());
 		}
-
+        statStopMeasument(lBytesWritten);
     }
 }
 
