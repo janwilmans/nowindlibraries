@@ -164,13 +164,17 @@ void NowindHost::write(byte data, unsigned int time)
 		}
 		break;
 	case STATE_CPUINFO:
-		assert(recvCount < 27);
+	{
+	    unsigned int databytes = 11;
+	    unsigned int stackbytes = 32;
+		assert(recvCount < (databytes+(2*stackbytes)));
 		extraData[recvCount] = data;
-		if (++recvCount == 27) {
+		if (++recvCount == (databytes+(2*stackbytes))) {
 		    state = STATE_SYNC1;
 			reportCpuInfo();
 		}
-		break;		
+		break;	
+    }	
 	default:
 		assert(false);
 	}
@@ -178,7 +182,32 @@ void NowindHost::write(byte data, unsigned int time)
 
 void NowindHost::reportCpuInfo()
 {
+//                                   01234567    8
+//	byte cmdData[9];         // reg_[cbedlhfa] + cmd
+//	byte extraData[240 + 2]; // extra data for image/message/write
 
+    word reg_bc = cmdData[0] + 256*cmdData[1];
+    word reg_de = cmdData[2] + 256*cmdData[3];
+    word reg_hl = cmdData[4] + 256*cmdData[5];
+    word reg_af = cmdData[6] + 256*cmdData[7];
+
+    word reg_ix = extraData[0] + 256*extraData[1];
+    word reg_iy = extraData[2] + 256*extraData[3];
+    word reg_sp = extraData[4] + 256*extraData[5];
+    reg_sp -= 6;
+
+    byte mainSS = extraData[6];
+    word fcc5 = extraData[7] + 256*extraData[8];
+    word fcc7 = extraData[9] + 256*extraData[10];
+    
+    DBERR("CPUINFO: bc: 0x%04x de: 0x%04x hl: 0x%04x af: 0x%04x ix: 0x%04x iy: 0x%04x sp: 0x%04x\n", \
+        reg_bc, reg_de, reg_hl, reg_af, reg_ix, reg_iy, reg_sp);
+        
+    for (int i=0; i<32; i++)
+    {
+        DBERR("  0x%04X: 0x%04x\n", reg_sp, extraData[11+(i*2)] + 256*extraData[12+(i*2)]);
+        reg_sp += 2;
+    }
 }
 
 void NowindHost::executeCommand()
@@ -246,14 +275,15 @@ void NowindHost::executeCommand()
 	//case 0x8D: deviceEof(fcb);
 	case 0x8E: auxIn();       state = STATE_SYNC1; break;
 	case 0x8F: auxOut();      state = STATE_SYNC1; break;
-	case 0x90: state = STATE_MESSAGE; recvCount = 0; break;
-	case 0x91: state = STATE_IMAGE;   recvCount = 0; break;
+	case 0x90: receiveExtraData(); state = STATE_MESSAGE; break;
+	case 0x91: receiveExtraData(); state = STATE_IMAGE; break;
 
     case 0x92: getDosVersion(); state = STATE_SYNC1; break;
 	case 0x93: commandRequested(); state = STATE_SYNC1; break;
 	//case 0xFF: vramDump();
 	case 0x94: blockReadCmd(); break;
     case 0x95: blockWriteCmd(); break;
+    case 0x96: receiveExtraData(); state = STATE_CPUINFO; break;
 	default:
 		// Unknown USB command!
 		state = STATE_SYNC1;
@@ -261,6 +291,10 @@ void NowindHost::executeCommand()
 	}
 }
 
+void NowindHost::receiveExtraData()
+{
+    recvCount = 0;
+} 
 
 void NowindHost::diskReadInit(SectorMedium& disk)
 {

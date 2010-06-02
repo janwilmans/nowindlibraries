@@ -91,6 +91,7 @@ public:
 	void getDosVersion();
 
 private:
+    void receiveExtraData();
 	void msxReset();
 	SectorMedium* getDisk();
 	void executeCommand();
