@@ -22,8 +22,8 @@
 ; USB_SENDCPUINFO
         macro USB_SENDCPUINFO
         ifdef USBDEBUG
-        call sendCpuInfo
-        endif
+        call sendCpuInfo        ; modifing this macro will affect the stack-unwind requirements, 
+        endif                   ; do not change it unless you know what your doing, see sendCpuInfo
         endmacro       
 
 ; these macros have no effect on real hardware 

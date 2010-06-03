@@ -107,6 +107,7 @@ sendMessage:
         ret
 
 ; used by the USB_SENDCPUINFO macro
+; show now only be called from $FD9A (for correct stack unwind)
 sendCpuInfo:
         push af
         push hl
@@ -127,11 +128,18 @@ sendCpuInfo:
         ld (hl),e
         ld (hl),d
 
-        ld hl,-6                        ; stack dump
+; on the stack:
+; 6 bytes (push af,hl,de at start of this routine
+; 2 bytes (the 'call sendCpuInfo' return address)
+; 2 bytes (0x0c4d, the rst $38 -> jp $0c3d -> call $FD9A return address)
+; 20 bytes (push hl,de,bc,af,hl',de',bc'af',iy,ix)
+; 2 bytes: the PC where the interrupt occurred!
+
+        ld hl,30                        ; stack dump
         add hl,sp
-        ld d,32
+        ld d,34                         ; dump the PC + 16 last bytes on the stack
 .loop:  ld a,(hl)
-        dec hl
+        inc hl
         ld (usbWritePage1),a
         dec d
         jr nz,.loop
