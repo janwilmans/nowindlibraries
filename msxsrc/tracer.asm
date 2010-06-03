@@ -3,19 +3,25 @@ installTracer:
         ret
         
         di
+        
+        ld a,32           ; enable line interrupt
+        out ($99),a
+        ld a,$80+1
+        out ($99),a
+        
         ld hl,h_trace
         ld de,$fd9a
         ld bc,5
         ldir
         
-        ld hl,$5555
+        ld hl,$5555       ; mark the stack  
         push hl
-        ld de,$6666
+        ld de,$6666       ; mark the stack  
         push de
         
-        USB_SENDCPUINFO
-        
+        DEBUGMESSAGE "start trace"
         ei          
+        nop               ; interrupt will first occur after the instruction after ei
 .loop:
         inc bc
         ld a,b
@@ -31,6 +37,6 @@ h_trace:
         nop
    
 trace:        
-        ;USB_SENDCPUINFO
+        USB_SENDCPUINFO     ; now hardcoded 
         ret
     

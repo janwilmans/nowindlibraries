@@ -166,10 +166,10 @@ void NowindHost::write(byte data, unsigned int time)
 	case STATE_CPUINFO:
 	{
 	    unsigned int databytes = 11;
-	    unsigned int stackbytes = 32;
-		assert(recvCount < (databytes+(2*stackbytes)));
+	    unsigned int stackbytes = 34;
+		assert(recvCount < (databytes+(stackbytes)));
 		extraData[recvCount] = data;
-		if (++recvCount == (databytes+(2*stackbytes))) {
+		if (++recvCount == (databytes+(stackbytes))) {
 		    state = STATE_SYNC1;
 			reportCpuInfo();
 		}
@@ -194,20 +194,24 @@ void NowindHost::reportCpuInfo()
     word reg_ix = extraData[0] + 256*extraData[1];
     word reg_iy = extraData[2] + 256*extraData[3];
     word reg_sp = extraData[4] + 256*extraData[5];
-    reg_sp -= 6;
+    reg_sp += 6;
 
     byte mainSS = extraData[6];
     word fcc5 = extraData[7] + 256*extraData[8];
     word fcc7 = extraData[9] + 256*extraData[10];
+    word reg_pc = extraData[11] + 256*extraData[12];
     
-    DBERR("CPUINFO: bc: 0x%04x de: 0x%04x hl: 0x%04x af: 0x%04x ix: 0x%04x iy: 0x%04x sp: 0x%04x\n", \
-        reg_bc, reg_de, reg_hl, reg_af, reg_ix, reg_iy, reg_sp);
-        
-    for (int i=0; i<32; i++)
+    DBERR("CPUINFO: pc: 0x%04x bc: 0x%04x de: 0x%04x hl: 0x%04x af: 0x%04x ix: 0x%04x iy: 0x%04x sp: 0x%04x\n", \
+        reg_pc, reg_bc, reg_de, reg_hl, reg_af, reg_ix, reg_iy, reg_sp);
+    
+    /*
+    // stack dump    
+    for (int i=0; i<16; i++)
     {
-        DBERR("  0x%04X: 0x%04x\n", reg_sp, extraData[11+(i*2)] + 256*extraData[12+(i*2)]);
+        DBERR("  0x%04X: 0x%04x\n", reg_sp, extraData[13+(i*2)] + 256*extraData[14+(i*2)]);
         reg_sp += 2;
     }
+    */
 }
 
 void NowindHost::executeCommand()
