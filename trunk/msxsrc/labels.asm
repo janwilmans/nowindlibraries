@@ -98,50 +98,37 @@ C_CPUINFO       equ $96
         dw firstDir
         endmacro
 
+
+        macro BANKSWITCHING bankNumber
+
+bankInit := $
+        ld hl,nowindInit
+        push hl
+        jr enableBank0        
+
+copyFromBank := $                       ; 
+        ld (mapper),a                   ; copyFromBank
+        ldir
+enableBank0 := $
+        xor a
+switchBank := $
+        ld (mapper),a
+        ret    
+        db bankNumber
+bankswitchEnd := $
+
+        endmacro                        
+
+
 ; ROMHEADER macro
-        macro romheader numberOfPages,initAddress 
-.addr := $4000        
-        repeat numberOfPages
-        code ! .addr
+        macro ROMHEADER bankNumber
 
         org $4000
         db "AB"
-        dw .init
+        dw bankInit
         ds 12,0
-
-        call .redir                     ; DSKIO
-        call .redir                     ; DSKCHG
-        call .redir                     ; GETDPB
-        call .redir                     ; CHOICE
-        call .redir                     ; DSKFMT
-        ds 3,0                          ; DRVOFF
-
-;        code ! .addr + $3fe7       ; todo: aaldert, volgens mij kan dit weg
-;        org $7fe7
-
-        ds $7fe7 - $, $ff           ; todo: aaldert, deze magic numbers vervangen door labels aub.
-
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
         
-.init:  ld hl,initAddress
-        push hl
-        jr .enableBank0        
-
-.redir: ex (sp),hl
-        dec hl
-        dec hl
-        dec hl
-        ex (sp),hl
-        jr .enableBank0
-
-        ld (mapper),a                   ; copyFromBank
-        ldir
-.enableBank0:
-        push af                         ; enable bank 0 (no registers changed)
-        xor a
-        ld (mapper),a
-        pop af
-        ret
+        BANKSWITCHING bankNumber
         
-.@addr := .addr + $4000
-        endrepeat
         endmacro

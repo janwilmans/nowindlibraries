@@ -22,6 +22,8 @@ installTracer:
         DEBUGMESSAGE "start trace"
         ei          
         nop               ; interrupt will first occur after the instruction after ei
+        halt
+        DEBUGDISASM
 .loop:
         inc bc
         ld a,b
