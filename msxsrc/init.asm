@@ -2,7 +2,7 @@
 
         include "tracer.asm"
 
-nowindInit:
+@nowindInit:                            ; the @ should NOT be removed! 
         call installTracer
         call flashWriter
 

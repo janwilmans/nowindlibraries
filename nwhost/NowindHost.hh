@@ -148,6 +148,10 @@ private:
     
     BlockRead blockRead;
     Device device;
+
+    unsigned int timer1;
+    unsigned int timer2;
+    
 protected:    
     NowindHostSupport* nwhSupport;          // pointer to the NowindHostSupport instance that is actually used (can be subclassed to provide implemenation specific debug-support)
     

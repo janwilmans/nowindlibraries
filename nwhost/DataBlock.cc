@@ -7,6 +7,7 @@ DataBlock::DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData
     number = aNumber;
     size = aSize;
     transferAddress = aTransferAddress;
+    // TODO: this assumes blocksize is 128
     fastTransfer = ((size & 0x7f) == 0);
 
     bool byteInUse[256];    // 'byte in use' map

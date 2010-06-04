@@ -32,12 +32,14 @@
         ; insert MSXDOS2
 
         page 0
-        module MSXDOS2_PART
+        module MSXDOS2_MODULE
 
         define MSXDOSVER 2
         define PRINTTEXT $728e
 
         incbin "..\roms\MSXDOS22.ROM", 0, $72f0-$4000
+
+        PATCH $4002,bankInit
 
         code ! $4010
         jp DSKIO
@@ -47,7 +49,7 @@
         jp DSKFMT
         db 0,0,0                        ; no DRVOFF
 
-        PATCH $47d7, INIHRD        ; INIHDR
+        PATCH $47d7, INIHRD
         ;PATCH $47dd, 0                  ; do not check for MSX1
         PATCH $488d, MYSIZE
         PATCH $489f, SECLEN
@@ -76,26 +78,20 @@
         include "dos_aux.asm"
         include "device.asm"
 
-        ds $8000-(endCopyFromBank-copyFromBank)-$, $ff
-
-        ; bank switching and data transfer
-copyFromBank:
-        ld (mapper),a
-        ldir
-enableBank0:
-        xor a
-switchBank:
-        push af
-        ld (mapper),a
-        pop af
-        ret
-endCopyFromBank:
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
+        BANKSWITCHING 0
 
         page 1
         incbin "..\roms\MSXDOS22.ROM", $4000, 3 * $4000
+
+;        PATCH $4002, bankInit
         PATCH $4093, mapper
+;        PATCH $8002, bankInit
         PATCH $8093, mapper
+;        PATCH $C002, bankInit
         PATCH $C093, mapper
+
+; TODO: bank switch routines!
 
         ; areas not used in MSXDOS22.ROM
         ; bank 1: 0x5CA0 - 0x7FFF (9056 bytes)
@@ -104,11 +100,13 @@ endCopyFromBank:
 
 ; insert MSXDOS1
         page 2
-        module MSXDOS1_PART
+        module MSXDOS1_MODULE
 
         define MSXDOSVER 1
 
         incbin "..\roms\DISK.ROM", 0, $7405-$4000
+
+        PATCH $4002,bankInit
 
         code ! $4010
         jp DSKIO
@@ -144,26 +142,18 @@ endCopyFromBank:
         include "nowindbdos.asm"
         endif
 
-        ds $8000-(endCopyFromBank-copyFromBank)-$, $ff
-
-        ; bank switching and data transfer
-copyFromBank:
-        ld (mapper),a
-        ldir
-enableBank0:
-        xor a
-        push af
-        ld (mapper),a
-        pop af
-        ret
-endCopyFromBank:
-
-        module remainingRom
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
+        BANKSWITCHING 4
 
         page 3         
-        
+        module REMAINING_ROM_MODULE
+                
         ; include anything for flash bank 4 here. 
         ;ds (512-80)*1024, $ff
         
         ; create rom-headers required for Nowind Interface v1
-        romheader 27, MSXDOS2_PART.nowindInit
+bankNumber := 5
+        repeat 27
+        ROMHEADER bankNumber
+bankNumber := bankNumber + 1
+        endrepeat

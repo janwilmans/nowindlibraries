@@ -103,6 +103,7 @@ void NowindHost::write(byte data, unsigned int time)
     //DBERR("received: 0x%02x (in state: %d)\n", data, state);
 	switch (state) {
 	case STATE_SYNC1:
+		timer1 = time;
 		if (data == 0xAF) state = STATE_SYNC2;
 		break;
 	case STATE_SYNC2:
@@ -160,6 +161,7 @@ void NowindHost::write(byte data, unsigned int time)
 		blockRead.ack(data);     
 		if (blockRead.isDone())
 		{
+            DBERR("Blockread duration: %u\n", time-timer1);
 		    state = STATE_SYNC1;
 		}
 		break;
