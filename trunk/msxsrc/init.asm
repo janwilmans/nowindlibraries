@@ -3,8 +3,8 @@
         include "tracer.asm"
 
 @nowindInit:                            ; the @ should NOT be removed! 
-        call installTracer
         call flashWriter
+        call installTracer
 
         DEBUGMESSAGE "nowindInit"
         ld a,($2d)
