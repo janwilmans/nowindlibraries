@@ -153,7 +153,7 @@ int HostApp::execute()
           {"rom", 1, 0, 'r'},          
           {"dos2", 0, 0, '2'},
           {"allow", 0, 0, 'a'},
-          {"ctrl", 0, 0, 'c'},
+          {"phantom", 0, 0, 'p'},
           {"test", 2, 0, 't'},
           {"flash", 1, 0, 'f'},
 		  {"glash", 1, 0, 'g'},
@@ -286,7 +286,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
 			Util::debug("Allowing other diskroms to initialize after the internal nowind diskrom!\n");
 			mHostService->setAttribute(allow_other_diskroms, true);
 			break;
-        case 'c':
+        case 'p':
 			mHostService->setAttribute(enable_phantom_drives, true);
 			break;
             /*
@@ -339,15 +339,15 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
             mHostService->setRomdisk(driveNr);       
             driveNr++;
             break;        
-        case 'p':       
         	/*
+        case 'p':       
         	//todo: implement 
         	
 			nowindusb_cmd(cmd_putmem_clear, 0, 0, 0 ,0, 0);
 			// filename, start-adres, mainslot, subslot, exec-adres
 			nowindusb_cmd(cmd_putmem, optarg, 0x0000, 3, 2, 0x100);
-			*/
             break;        
+			*/
         case '?':
           hasErrors = true;
           Util::debug("hasErrors = true;\n");
@@ -387,7 +387,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
         printf("         --flash, -f    update firmware (compatible for v1 nowind interface)\n");
         printf("         --glash, -g    update firmware (faster, but does not verify nor update romheaders!)\n");
         printf("         --dos2, -2     boot MSXDOS 2\n");
-        printf("         --ctrl, -c     only 1 drive per diskrom (same as holding CTRL)\n");
+        printf("         --phantom, -p  create phantom drives (like NOT holding CTRL on MSX)\n");
         printf("         --allow, -a    allow more diskroms to initialize\n");        
         printf("         --dsk2rom, -z  convert 360 kB image to romdisk.bin\n");
         printf("         --debug, -d    enable debug loginfo from libnowind\n");
