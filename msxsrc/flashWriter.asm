@@ -1,19 +1,43 @@
 ; flashWriter.asm
 ; Flashes and erases the AMD29F040/M29F032-D
-
+            
+; this label is before the _PHASE_ so it's address refers to the actual rom location
+; not the 'copied' $c000 location            
 waitForFlashCommand:
+
         PHASE $c000  
-        
+
+flasherStart:     
+
         di
-waitForHeader:
+        
+        in a,($aa)
+        and $f0
+        out ($aa),a     ; select keyboard row 0 
+        
+.loop
+        in a,($a9)
+        bit 1,a
+        ld b,1
+        jr z,.switchSlot            ; '1' pressed?
+        bit 2,a
+        ld b,2
+        jr z,.switchSlot            ; '2' pressed?
+        
         ld h,HIGH usbReadPage0
-        ld a,(hl)
+        ld a,(hl)                   ; header $BB ?
 .chkbb: cp $bb
-        jr nz,waitForHeader
+        jr nz,.loop
         ld a,(hl)
         cp $55
-        jr nz,.chkbb       
+        call z,.cmd
+        jr .loop  
 
+.switchSlot:
+        call enableFlashMainslot
+        jr .loop  
+
+.cmd:
         ld a,(hl)
         cp $a2
         jp z,verifyFlash
@@ -24,11 +48,42 @@ waitForHeader:
         cp $a5
         jr z,eraseSector
         cp $a6
-        jr z,autoselectMode
+        jr z,autoselectMode     
 
         ; unknown command, just go back
-        jr waitForHeader
+        jr .loop
+     
+; in: b = main slot to enable for page 0 and 1   
+enableFlashMainslot: 
+
+        
+        ld a,(currectSlot)
+        cp b
+        ret z               ; do nothing if already selected
+        ld a,b
+        ld (currectSlot),a
+        
+        push bc
+        and 3
+        ld b,a
+        rlca
+        rlca
+        or b
+        ld c,a
+
+  		in a,($a8)
+		and $f0
+		or c
+		out ($a8),a         ; switch mainslot of page 0 and 1 
+		pop bc
+		
+		ld a,48
+		add b
+		out ($98),a         ; print 1/2	
+		ret        
     
+; 'autoselect' is flashrom feature, has nothing to do with 'selectSlot'
+; the 'autoselect' feature can be used to identify the type of flashrom
 autoselectMode:
         ld a,$90
         call writeCommandSequence
@@ -42,7 +97,7 @@ autoselectMode:
         ld (hl),d                       ; device ID (0xA4 = AM29F040, 0x41 = AM29F032B)
 
         call resetFlashDevice
-        jr waitForHeader
+        ret
 
 eraseSector:
         ;DEBUGMESSAGE "sector erase"
@@ -122,7 +177,7 @@ acknowledge:
         ld (hl),$aa
         ld (hl),$55
         ld (hl),a
-        jp waitForHeader
+        ret
 
 updateBar:
         ld a,"w"  
@@ -158,6 +213,9 @@ resetFlashDevice:
         ld a,$f0                        ; write RESET command
         ld (0),a
         ret
+           
+currectSlot:
+        db $ff
                       
 flasherEnd:
         DEPHASE

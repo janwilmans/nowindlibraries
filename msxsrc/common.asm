@@ -460,11 +460,11 @@ blockWrite23:
         if MSXDOSVER = 2
 
 flashWriter:
-        ;DEBUGMESSAGE "flashWriter"
+        DEBUGMESSAGE "flashWriter"
         ld a,3
         call SNSMAT
         and 8
-        ret nz
+        ret nz              ; 'f' pressed?
         
         xor a
         call CHGMOD         ; screen 0
@@ -483,10 +483,10 @@ flashWriter:
         call enableSlotPage0
 
         ld hl,waitForFlashCommand
-        ld de,$c000
+        ld de,flasherStart
         push de
-        ld bc,flasherEnd - $c000
+        ld bc,flasherEnd - flasherStart
         ldir
-        ret
+        ret     ; jump to the address push'ed from 'de'
 
         endif
