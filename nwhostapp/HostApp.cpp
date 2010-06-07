@@ -384,8 +384,9 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
         printf("         --physical, -y specify physical disk\n");
         printf("         --romdisk, -j  enable romdisk\n");
         //printf("         --rom, -r      specify rom image\n");
-        printf("         --flash, -f    update firmware\n");
-        //printf("         --dos2, -2     boot MSXDOS 2\n");
+        printf("         --flash, -f    update firmware (compatible for v1 nowind interface)\n");
+        printf("         --glash, -g    update firmware (faster, but does not verify nor update romheaders!)\n");
+        printf("         --dos2, -2     boot MSXDOS 2\n");
         printf("         --ctrl, -c     only 1 drive per diskrom (same as holding CTRL)\n");
         printf("         --allow, -a    allow more diskroms to initialize\n");        
         printf("         --dsk2rom, -z  convert 360 kB image to romdisk.bin\n");
