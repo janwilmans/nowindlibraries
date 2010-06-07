@@ -100,7 +100,7 @@ int HostApp::execute()
     Util::debug("Nowind Interface USB host application v4.1\n");
 
     mHostService->setAttribute(enable_phantom_drives, false);
-	mHostService->setAttribute(allow_other_diskroms, true);
+	mHostService->setAttribute(allow_other_diskroms, false);
 	mHostService->setAttribute(enable_dos2, false);
 
     mHostService->addStartupRequest(requestWait);
