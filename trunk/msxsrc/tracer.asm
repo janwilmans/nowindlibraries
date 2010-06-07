@@ -1,9 +1,12 @@
 
 installTracer: 
-        ret
+        ;DEBUGMESSAGE "tracer"
+        ld a,5
+        call SNSMAT
+        and 2
+        ret nz              ; 't' pressed?
         
         di
-        
         ld a,32           ; enable line interrupt
         out ($99),a
         ld a,$80+1
@@ -20,8 +23,9 @@ installTracer:
         push de
         
         DEBUGMESSAGE "start trace"
-        ei          
-        nop               ; interrupt will first occur after the instruction after ei
+        ;DEBUGDISASM
+        ei       
+        halt            
         halt
         DEBUGDISASM
 .loop:
