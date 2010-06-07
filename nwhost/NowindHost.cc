@@ -203,8 +203,8 @@ void NowindHost::reportCpuInfo()
     word fcc7 = extraData[9] + 256*extraData[10];
     word reg_pc = extraData[11] + 256*extraData[12];
     
-    DBERR("CPUINFO: pc: 0x%04x bc: 0x%04x de: 0x%04x hl: 0x%04x af: 0x%04x ix: 0x%04x iy: 0x%04x sp: 0x%04x\n", \
-        reg_pc, reg_bc, reg_de, reg_hl, reg_af, reg_ix, reg_iy, reg_sp);
+    DBERR("PC:%04X AF:%04X BC:%04X DE:%04X HL:%04X IX:%04X IY:%04X S:%04X\n", \
+        reg_pc, reg_af, reg_bc, reg_de, reg_hl, reg_ix, reg_iy, reg_sp);
     
     /*
     // stack dump    
