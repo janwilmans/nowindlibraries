@@ -71,12 +71,13 @@ unsigned char xBuffer[RXTX_BUFFER_SIZE];
 unsigned char yBuffer[RXTX_BUFFER_SIZE];
 char * cBuffer = (char *) &xBuffer[0];
 
-static const unsigned int CMD_PRINT = 0xA1;
-static const unsigned int CMD_VERIFY = 0xA2;
-static const unsigned int CMD_WRITE = 0xA3;
-static const unsigned int CMD_ERASE = 0xA4;
-static const unsigned int CMD_ERASESECTOR = 0xA5;
-static const unsigned int CMD_AUTOSELECTMODE = 0xA6;
+enum LOWLEVEL_COMMANDS {
+    CMD_VERIFY = 0xA2,
+    CMD_WRITE = 0xA3,
+    CMD_ERASE = 0xA4,
+    CMD_ERASESECTOR = 0xA5,
+    CMD_AUTOSELECTMODE = 0xA6
+};
 
 void NwhostService::debugout(const char *msg)
 {
@@ -141,7 +142,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
     unsigned int uiFlashBlock;
     char cString[250];
 
-    bool doAutoSelect = true;
+    bool doAutoSelect = false;
     bool doChipErase = true;
     bool doSectorErase = false;
     bool doWriteFlash = true;
@@ -184,7 +185,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
 	
     fs->seekg(0, ios::end);
 	unsigned int uiFileSize = fs->tellg();
-
+	
     if (doAutoSelect)
     {
 	    Util::debug("Send autoselect command to flash....\n");
@@ -219,7 +220,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
         xBuffer[3] = CMD_ERASE;
 
         mUsbStream->write(xBuffer, 4, &uiBytesWritten);
-        Util::debug("Waiting for erase to complete...");
+        Util::debug("Waiting for chip-erase to complete...");
         waitForAck();
 	    Util::debug("\nErase Done!\n");
     }
@@ -355,28 +356,6 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
     mUsbStream->close(); 
 }
 
-/*
-// called when data is available from the NowindHost to be send back to the msx
-void NwhostService::read_data_available()
-{
-	unsigned int lBytesToSend = 0;
-	unsigned long lBytesWritten = 0;
-	lBytesToSend = nowindusb_readbuf(xBuffer);
-
-	assert(lBytesToSend < RXTX_BUFFER_SIZE);
-	if (lBytesToSend > 0) {
-		mUsbStream->write(xBuffer, lBytesToSend, &lBytesWritten);
-		if (lBytesToSend != lBytesWritten)
-		{
-			Util::debug("Failed to send all data, %i of %i bytes sent (mUsbStream lost?)\n", lBytesWritten, lBytesToSend);
-			// the NowindHost will timeout and reset its state
-			return;
-		}
-	}
-	statStopMeasument(lBytesWritten);
-}
-*/
-
 void NwhostService::purge_buffers()
 {
 	Util::debug("Internal buffers purged!\n");
@@ -466,7 +445,7 @@ void NwhostService::statStopMeasument(unsigned int aBytes)
     
 	mTransferredBytes += aBytes;
 	unsigned long lKbps = ((mTransferredBytes * 1000) / mTotalTime)/1024;		//*1000 ms->seconds /1024 bytes->kbytes
-	Util::debug("sending response of %u bytes. (%u Kbps)\n", aBytes, lKbps);
+	//Util::debug("sending response of %u bytes. (%u Kbps)\n", aBytes, lKbps);
 }
 
 void NwhostService::diskToRom(string imageName) {
