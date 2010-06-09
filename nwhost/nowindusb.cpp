@@ -157,22 +157,30 @@ unsigned int NowindHost_InsertHarddiskPartitions(unsigned int driveNr, std::stri
 
 /* usb communication */
 
-bool nowindusb_set_image(unsigned int driveNr, const char *filename)
+bool nowindusb_add_drive(unsigned int driveNr)
 {
-	//driveNr = 0;
-	//DBERR("nowindusb_set_image patched using driver 0 anyway\n");
-
-	DBERR("nowindusb_set_image %u, %s\n", driveNr, filename);
+	DBERR("nowindusb_add_drive %u\n", driveNr);
 
 	if (driveNr >= MAX_MEDIA) {
-		DBERR("Too many images! (%s ignored)\n", filename);
+		DBERR("Too many images!\n");
 		return false;
 	}
 
 	while (drives.size() <= driveNr) {
 		drives.push_back(new ImageHandler());
 	}
+	return true;
+}
 
+bool nowindusb_set_image(unsigned int driveNr, const char *filename)
+{
+	DBERR("nowindusb_set_image %u, %s\n", driveNr, filename);
+
+    if (!nowindusb_add_drive(driveNr))
+    {
+        DBERR("ignoring image %s\n", filename);
+        return false;
+    }
 	int result = drives[driveNr]->insertDisk(filename);
 	return (result == 0);
 }
@@ -208,17 +216,13 @@ unsigned int nowindusb_set_harddisk_image(unsigned int driveNr, int partitionNum
 
 bool nowindusb_set_romdisk(unsigned int driveNr)
 {
-	/*
-	bool result = false;
-	if (driveNr < MAX_MEDIA) {
-        nowindHost->media[driveNr]->setRomdisk();
-		result = true;
-    } else {
-        DBERR("Too many images! (no romdisk)\n");
+    if (!nowindusb_add_drive(driveNr))
+    {
+        DBERR("ignoring romdisk option\n");
+        return false;
     }
-	return result;
-	*/
-	return 0;
+    drives[driveNr]->insertDisk(strRomdisk);
+    return true;
 }
 
 void nowindusb_write(unsigned char value)     // (msx -> pc)

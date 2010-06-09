@@ -12,6 +12,8 @@
 
 using namespace nwhost;
 
+static const char* strRomdisk = "__romdisk__";
+
 class ImageHandler : public DiskHandler {
 
 private:

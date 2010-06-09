@@ -12,6 +12,11 @@ SectorMedium * ImageHandler::getSectorMedium() {
 }
 
 int ImageHandler::insertDisk(std::string filename) {
+    if (filename == strRomdisk)
+    {
+        image.setRomdisk();
+        return 0; // always successful
+    }
 	return image.openDiskImage(filename) ? 0 : -1;
 }
 
