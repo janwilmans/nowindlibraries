@@ -98,24 +98,35 @@ C_CPUINFO       equ $96
         dw firstDir
         endmacro
 
-
+; BANKSWITCHING macro
         macro BANKSWITCHING bankNumber
 
 bankInit := $
         ld hl,nowindInit
         push hl
-        jr enableBank0        
-
-copyFromBank := $                       ; 
-        ld (mapper),a                   ; copyFromBank
-        ldir
-enableBank0 := $
         xor a
+        jr switchBank        
+
+copyFromBank := $ 
+        ldir
+        ret
+        
+callInBank := $
+        push hl
+        ld h,bankNumber                 ; store current bank
+        ex (sp),hl
+        ld (mapper),a                   ; enable new bank
+        call jumpIX
+        pop af
 switchBank := $
-        ld (mapper),a
-        ret    
-        db bankNumber
+        ld (mapper),a                   ; restore bank
+        ret
+
+jumpIX := $
+        jp (ix)
+
 bankswitchEnd := $
+
 
         endmacro                        
 
@@ -123,12 +134,67 @@ bankswitchEnd := $
 ; ROMHEADER macro
         macro ROMHEADER bankNumber
 
-        org $4000
-        db "AB"
-        dw bankInit
-        ds 12,0
+        MSXROMHEADER
         ds $8000-(bankswitchEnd - bankInit)-$, $ff
         
         BANKSWITCHING bankNumber
         
+        endmacro
+
+; ROMDISK macro
+        macro INCLUDE_ROMDISK_360KB dskimage
+        
+bankNumber := 5
+offset := 0
+
+        repeat 3
+
+; 3 empty banks with rom headers
+        MSXROMHEADER
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
+        BANKSWITCHING bankNumber        
+bankNumber := bankNumber + 1        
+        endrepeat
+        
+; 22 banks with sector data
+        repeat 22
+        
+        MSXROMHEADER        
+        ds $4100 - $, $ff
+        incbin dskimage, offset+512, 16384-512
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
+        BANKSWITCHING bankNumber
+        
+bankNumber := bankNumber + 1
+offset := offset + 16384        
+        
+        endrepeat
+
+; 1 bank with remaining 8192 bytes       
+        MSXROMHEADER
+        ds $4100 - $, $ff
+        incbin dskimage, offset, 8192
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
+        BANKSWITCHING bankNumber        
+bankNumber := bankNumber + 1
+
+; 1 bank with sectors 00, 32, 64, ...
+        MSXROMHEADER        
+offset := 0
+        ds $4100 - $, $ff
+        repeat 23
+        incbin dskimage, offset, 512
+offset := offset + 16384
+        endrepeat
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
+        BANKSWITCHING bankNumber        
+        
+        endmacro
+        
+; MSXROMHEADER
+        macro MSXROMHEADER
+        org $4000
+        db "AB"
+        dw bankInit
+        ds 12,0
         endmacro

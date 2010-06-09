@@ -114,7 +114,7 @@ void SlotSelector::configure(unsigned int msxVersion) {
 #define NOWINDDOS2_off
 #define NOWIND           // combines MSXDOS 1&2
 #define OPENDISKROM_off
-#define NORMALDISKROM
+#define NORMALDISKROM_off
 #define MSXDOS2_off
 #define WD279X_off
 
