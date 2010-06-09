@@ -46,17 +46,12 @@ void HostApp::initialize()
 }
 
 HostApp::HostApp() {
-
-    Util::debug("HostApp destruction...\n");
 	mHostService = new NwhostService();
 	mHostApp = this;
 }
 
 HostApp::~HostApp() {
 	//dont delete mHostService here atexit() will do it.
-
-    // set the static reference to us to zero
-    mHostApp = 0;
 }
 
 void HostApp::setParameters(int argc, char *argv[])
@@ -420,7 +415,7 @@ void HostApp::processExit()
 {
 	if (mDebug) Util::debug("process closing down...\n");
 	
-	//delete the object here, otherwise the HostApp destructor will not run if ctrl-c is pressed
-	//delete HostApp::mHostApp;	   mHostApp is baadfood??	
+	//delete the mHostService object here, otherwise the destructor will not run if ctrl-c is pressed
+	delete HostApp::mHostApp->mHostService;
 	if (mDebug) Util::debug("done.\n");
 }
