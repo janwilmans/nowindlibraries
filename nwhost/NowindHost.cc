@@ -161,7 +161,7 @@ void NowindHost::write(byte data, unsigned int time)
 		blockRead.ack(data);     
 		if (blockRead.isDone())
 		{
-            DBERR("Blockread duration: %u\n", time-timer1);
+            //DBERR("Blockread duration: %u\n", time-timer1);
 		    state = STATE_SYNC1;
 		}
 		break;
@@ -665,6 +665,9 @@ void NowindHost::DRIVES()
 {
 	// at least one drive (MSXDOS1 cannot handle 0 drives)
 	byte numberOfDrives = std::max<byte>(1, byte(drives.size()));
+    if (romdisk != 255) {
+        numberOfDrives++;
+    }
 
 	byte reg_a = cmdData[7];
 	nwhSupport->sendHeader();
@@ -672,7 +675,6 @@ void NowindHost::DRIVES()
 	nwhSupport->send(reg_a | (getAllowOtherDiskroms() ? 0 : 0x80));
 	nwhSupport->send(numberOfDrives);
 
-//	romdisk = 255; // no romdisk
 	for (unsigned i = 0; i < drives.size(); ++i) {
 		if (drives[i]->isRomdisk()) {
 			romdisk = i;
@@ -684,6 +686,7 @@ void NowindHost::DRIVES()
 void NowindHost::INIENV()
 {
 	nwhSupport->sendHeader();
+	DBERR("romdrv nr: %i\n", romdisk);
 	nwhSupport->send(romdisk); // calculated in DRIVES()
 }
 

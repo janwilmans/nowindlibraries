@@ -38,7 +38,7 @@ DRIVES:
         call executeCommandNowindInPage0
         
         pop hl
-        ld l,2
+        ld l,1
         jr c,.error
         ld l,a
 .error:
@@ -70,7 +70,7 @@ INIENV:
         call installExtendedBios
 
         call sendRegisters
-        ld (hl),C_DRIVES
+        ld (hl),C_INIENV
         ld hl,inienvCommand
         call executeCommandNowindInPage0
 
@@ -80,6 +80,8 @@ INIENV:
         ld (hl),0                       ; default drive number for romdisk
 
         ret c
+        DEBUGMESSAGE "romdrv?"
+        DEBUGDUMPREGISTERS
         ld (hl),a                       ; drive number for romdisk
         ret
 
@@ -87,22 +89,6 @@ inienvCommand:
         call getHeaderInPage0
         ret
 
-
-checkWorkArea:
-;        ld a,1
-        cp 1
-        ret
-
-        push bc
-        push hl
-        push af
-;        call GETWRK
-        call getEntrySLTWRK
-        pop af
-        cp (hl)
-        pop hl
-        pop bc
-        ret
 
 DSKIO:
 ; Input     F   Carry for set for write, reset for read
@@ -149,9 +135,7 @@ DSKCHG:
         DEBUGMESSAGE "DSKCHG"
         DEBUGDUMPREGISTERS
         push af
-        push hl
         call checkWorkArea
-        pop hl
         jp z,ROMDISK_DSKCHG
         pop af
 
@@ -302,6 +286,19 @@ call_exit:
         ret z
         inc hl
         jr .loop
+
+
+checkWorkArea:
+        push bc
+        push hl
+        push af
+        call getEntrySLTWRK
+        pop af
+        cp (hl)
+        pop hl
+        pop bc
+        ret
+
 
 supportedMedia:
 

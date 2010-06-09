@@ -10,7 +10,7 @@
         define USBDEBUG
         
         ;define NOWINDVERSION_FIRSTBATCH   ; our handmade first batch
-        define NOWINDVERSION_SUNRISE    ; sunrise first batch
+        define NOWINDVERSION_FIRSTBATCH    ; sunrise first batch
 
         ifdef NOWINDVERSION_FIRSTBATCH
         define FLASHROMSIZE 512
@@ -147,13 +147,13 @@
 
         page 3         
         module REMAINING_ROM_MODULE
-                
-        ; include anything for flash bank 4 here. 
-        ;ds (512-80)*1024, $ff
-        
+                       
         ; create rom-headers required for Nowind Interface v1
-bankNumber := 5
-        repeat 27
-        ROMHEADER bankNumber
-bankNumber := bankNumber + 1
-        endrepeat
+
+;bankNumber := 5
+;        repeat 27
+;        ROMHEADER bankNumber
+;bankNumber := bankNumber + 1
+;        endrepeat
+
+        INCLUDE_ROMDISK_360KB "..\disks\dos2.dsk"

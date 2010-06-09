@@ -3,16 +3,17 @@
 ; the romdisk can be used as a smallish read-only harddisk even when
 ; no host is connected
 
-        define ROMDSKBANK 5                    ; romdisk starts in bank 5
+        define ROMDSKBANK 8                    ; romdisk starts in bank 8
         define ROMDSKLAST (FLASHROMSIZE/16)-1
 
 
 ROMDISK_DSKIO:
-        DEBUGMESSAGE "R_DSKIO"
+        DEBUGMESSAGE "ROM_DSKIO"
         pop af
         ld a,0
         ret c                           ; write protected
         
+        ld ix,copyFromBank
         ex de,hl
 .loop:  push bc
         push hl        
@@ -26,7 +27,7 @@ ROMDISK_DSKIO:
         call .findSector
         push de
         ld de,($f34d)        
-        call copyFromBank
+        call callInBank
         pop de
         ld bc,512
         ld hl,($f34d)
@@ -35,7 +36,7 @@ ROMDISK_DSKIO:
               
 .directCopy:                
         call .findSector  
-        call copyFromBank
+        call callInBank
 .nextSector:
         pop hl
         inc hl
@@ -73,7 +74,7 @@ ROMDISK_DSKIO:
         ret
                                          
 ROMDISK_DSKCHG:
-        ;DEBUGMESSAGE "ROM_DSKCHG"
+        DEBUGMESSAGE "ROM_DSKCHG"
         pop af
         and a
         ld b,1                          ; not changed
