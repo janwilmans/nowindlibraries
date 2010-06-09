@@ -55,7 +55,7 @@ void nowindusb_debug(const char *msg)
     // if the host registered a debug output callback function, 
     // pass the output to it
     if (mDebug_callback) {
-        Util::snprintf(lTemp, MAXMSG, "[LIBNW] %s", msg);
+        Util::snprintf(lTemp, MAXMSG, "[nwhost] %s", msg);
         mDebug_callback(lTemp);
     }
 #ifdef WIN32
