@@ -81,7 +81,7 @@ enum LOWLEVEL_COMMANDS {
 
 void NwhostService::debugout(const char *msg)
 {
-    Util::debug("[hwhost] %s", msg);
+    Util::debug("%s", msg);
 }
 
 void NwhostService::waitForAck()
