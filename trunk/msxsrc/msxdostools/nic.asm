@@ -107,7 +107,7 @@ SetImage:
       
                 LD    A,(IMAGE_TYPE)
                 CALL  sendRegisters
-                LD    (HL),$A0                  ; C_CHANGEIMAGE 
+                LD    (HL),$91                  ; C_CHANGEIMAGE 
                 LD    HL,(FILE_NAME_PTR)
                  ; TODO: add length check to prevent sending bull
 .loop:        

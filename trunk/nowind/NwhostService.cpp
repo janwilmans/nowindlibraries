@@ -55,7 +55,6 @@ NwhostService::NwhostService() {
 }
 
 NwhostService::~NwhostService() {
-    Util::debug("~NwhostService\n");
 	delete mUsbStream;
     mUsbStream = 0;
 }
@@ -154,7 +153,6 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
         doChipErase = false;
         doSectorErase = true;
         doWriteFlash = true;
-        doOnlyFirmware = true;
     }
 
 	start(eDRIVER_FTD2XX);
@@ -175,8 +173,11 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
         fs->read(cBuffer, 2);
 
         if ((xBuffer[0] != 'A') || (xBuffer[1] != 'B')) {
+			if (i == 0) {
+			    Util::debug("Error: No rom header found! (did you specify the wrong file?)\n");
+			    exit(1);
+			}
 			Util::debug("warning: No rom header found in bank %u!\n", i);
-            //exit(1);
         }
     }
     
