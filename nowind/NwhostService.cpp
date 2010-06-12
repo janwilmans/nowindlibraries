@@ -155,7 +155,11 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
         doWriteFlash = true;
     }
 
+#ifdef WIN32
 	start(eDRIVER_FTD2XX);
+#else
+	start(eDRIVER_LibUsb);
+#endif
 
 	// this should not be needed, but without it, FTD2xx::read returns too fast!
 	mUsbStream->setTimeouts(500000, 500000);

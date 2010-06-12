@@ -21,7 +21,6 @@ public:
 		
 		static void initialize();
 		void waitForAck();
-		void updateFirmware(string sImageName);
 		void hostImage();
 		void testMode(string);
 		void testModeDev();
