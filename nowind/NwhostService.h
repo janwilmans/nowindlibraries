@@ -27,7 +27,8 @@ public:
 		int execute();
 		
         static void initialize();
-        void start(ftdx::FtdiDriverType aDriverType);
+        void startDriver();
+        void startDriver(ftdx::FtdiDriverType aDriverType);
 		void waitForAck();
         void updateFirmware(std::string sImageName, int iMethodVersion, bool bVerify); 
 		void hostImage();

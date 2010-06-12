@@ -66,20 +66,8 @@ void HostApp::debugout(const char *msg)
 }
 
 void HostApp::hostImage() 
-{
-    #ifdef WIN32
-    // FTD2XX driver works in kernel-space and has much less retries at 7 MHz
-    Util::debug("Using FTD2XX\n");
-    mHostService->start(eDRIVER_FTD2XX);            
-    #else
-    Util::debug("Using LIBUSB\n");
-    // on linux we favor libusb to minimize dependencies on propriatary binaries
-    mHostService->start(eDRIVER_LibUsb);            
-	#endif    
-    
-    // LIBUSB driver is a user-space driver, maybe slower in some cases?
-    // this is strange because this shouldnt have any effect on the polling rate
-    // (which is an important factor in retries)
+{        
+    mHostService->startDriver();
 	mHostService->hostImage();
 }
 

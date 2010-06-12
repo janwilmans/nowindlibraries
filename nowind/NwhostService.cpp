@@ -115,7 +115,19 @@ chkAA:
     //Util::debug(" ACK received... %u\n", yBuffer[0]);
 }
 
-void NwhostService::start(FtdiDriverType aDriverType)
+void NwhostService::startDriver()
+{
+	delete mUsbStream;   //does nothing if mUsbStream == 0
+	mUsbStream = ftdx::newUsbStream();  // on driver-type specified, give be the OS-default driver
+	
+	if (mUsbStream == 0)
+	{
+	    Util::debug("No driver available?\n");
+	    exit(0);
+	}
+}
+
+void NwhostService::startDriver(FtdiDriverType aDriverType)
 {
 	delete mUsbStream;   //does nothing if mUsbStream == 0
 	mUsbStream = ftdx::newUsbStream(aDriverType);
@@ -155,11 +167,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
         doWriteFlash = true;
     }
 
-#ifdef WIN32
-	start(eDRIVER_FTD2XX);
-#else
-	start(eDRIVER_LibUsb);
-#endif
+    startDriver();
 
 	// this should not be needed, but without it, FTD2xx::read returns too fast!
 	mUsbStream->setTimeouts(500000, 500000);
@@ -523,7 +531,7 @@ void NwhostService::testMode(string aArgument)
 	testString[14] = 0xAA;
 	testString[15] = 0x55;
 
-    start(eDRIVER_LibUsb);
+    startDriver();
 	mUsbStream->openBlocking();
 	mUsbStream->reset();
 
