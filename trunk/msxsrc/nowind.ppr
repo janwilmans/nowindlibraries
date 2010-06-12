@@ -40,9 +40,11 @@ nowind
 1=labels.asm
 2=romdisk.asm
 3=nowindDriver.asm
+4=init.asm
+5=common.asm
 [Selected Project Files]
 Main=
-Selected=nowind.asm
+Selected=common.asm
 [nowind.asm]
 TopLine=75
 Caret=43,97
@@ -55,3 +57,9 @@ Caret=24,30
 [nowindDriver.asm]
 TopLine=17
 Caret=8,23
+[init.asm]
+TopLine=1
+Caret=1,1
+[common.asm]
+TopLine=442
+Caret=19,480
