@@ -65,15 +65,6 @@ void HostApp::debugout(const char *msg)
 	Util::debug(msg);
 }
 
-void HostApp::updateFirmware(string sImageName) 
-{
-/*
-	int lHandle = nwa_open(1);	// open first interface found
-	nwa_updatefirmware(lHandle, sImageName.c_str());
-*/
-}
-
-
 void HostApp::hostImage() 
 {
     #ifdef WIN32
