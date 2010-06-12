@@ -189,7 +189,7 @@ GETDPB:
         ld a,b
         cp $f0
         ld a,h
-        jr z,.hddImage
+        ;jr z,.hddImage                 ; commented to test on Turbo-R
 
 ;        MESSAGE "ROM GETDPB"
 
