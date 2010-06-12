@@ -29,6 +29,25 @@ void ftdx::initialize()
     general::initialize();
 }
 
+ftdx::UsbStream* ftdx::newUsbStream()
+{
+    UsbStream* lUsbStream = 0;
+#ifdef WIN32
+    // FTD2XX driver works in kernel-space and has much less retries at 7 MHz
+    Util::debug("Using FTD2XX\n");
+    lUsbStream = new ConFTD2XX();
+#else
+    // on linux we favor libusb to minimize dependencies on propriatary binaries
+    Util::debug("Using LIBUSB + LIBFTDI\n");
+    lUsbStream = new ConLibFtdi();
+    
+    // LIBUSB driver is a user-space driver, maybe slower in some cases?
+    // this is strange because this shouldnt have any effect on the polling rate
+    // (which is an important factor in retries)
+#endif
+    return lUsbStream;
+}
+
 ftdx::UsbStream* ftdx::newUsbStream(FtdiDriverType aDriverType)
 {
 	UsbStream* lUsbStream = 0;
