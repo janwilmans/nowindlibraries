@@ -157,7 +157,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
 
 	start(eDRIVER_FTD2XX);
 
-	// this should not be needed, but without it, FTD2xx::read returns to fast!
+	// this should not be needed, but without it, FTD2xx::read returns too fast!
 	mUsbStream->setTimeouts(500000, 500000);
 
 	mUsbStream->openBlocking();
