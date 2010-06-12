@@ -568,7 +568,7 @@ void NowindHost::GETDPB()
     }
 
     if (rootDirEntries > 254) {
-        DBERR("rootDirEnties too big for MSXDOS1(%u)! Limited to 254 in DPB now!\n", rootDirEntries);
+        //DBERR("rootDirEnties too big for MSXDOS1(%u)! Limited to 254 in DPB now!\n", rootDirEntries);
         rootDirEntries = 254;
     }
 
@@ -579,8 +579,8 @@ void NowindHost::GETDPB()
     word maxClusters = ((numberOfSectors - firstRecordSector)/sectorsPerCluster) + 1;
 
     if (sectorsPerFat > 3) {
-        DBERR("Size of FAT too large! (MSXDOS reserved 3 sectors when default DPB is $f9)\n");
-        return;
+        //DBERR("Size of FAT too large! (MSXDOS reserved 3 sectors when default DPB is $f9)\n");
+        //return;
     }
 
 	// the actual dpb[0] (drive number) is not send

@@ -54,7 +54,7 @@ namespace NowindInterfaceHostGUI
 
       if (Settings.Disk != "")
       {
-        nwhost.StartInfo.Arguments += String.Format(" -i {0}", Settings.Disk);
+        nwhost.StartInfo.Arguments += String.Format(" -i \"{0}\"", Settings.Disk);
       }
 
       Debug.WriteLine("[exec] " + nwhost.StartInfo.FileName + " " + nwhost.StartInfo.Arguments);
