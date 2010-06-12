@@ -39,10 +39,12 @@ bool ConLibFtdi::open()
     }
 
 	// set the latency timer as fast as possible (1ms)
-    ftdi_set_latency_timer(&mFtdiContext, 1);
-
-	mFtdiContext.usb_read_timeout = mRxTimeout;
-	mFtdiContext.usb_write_timeout = mTxTimeout;
+        ftdi_set_latency_timer(&mFtdiContext, 1);
+		
+        if (mTimeoutSet) {
+	    mFtdiContext.usb_read_timeout = mRxTimeout;
+	    mFtdiContext.usb_write_timeout = mTxTimeout;
+        }
 
 	//ftdi_read_data_set_chunksize(&mFtdiContext, 2048);
 	//ftdi_write_data_set_chunksize(&mFtdiContext, 2048);

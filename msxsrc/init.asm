@@ -17,9 +17,9 @@
 
         call PRINTTEXT
         ifdef DEBUG
-        db "Nowind Interface v4.0 [beta]",0
+        db "Nowind Interface v4.1 [beta]",0
         else
-        db "Nowind Interface v4.0",0
+        db "Nowind Interface v4.1",0
         endif
 
         call enableNowindPage0          ; clear hostToMSXFifo by reading 4Kb of random data
