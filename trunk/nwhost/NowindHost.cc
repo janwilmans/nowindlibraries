@@ -41,7 +41,7 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	: drives(drives_)
 	, lastTime(0)
 	, state(STATE_SYNC1)
-	, romdisk(1)
+	, romdisk(255)
 	, allowOtherDiskroms(true)
 	, enablePhantomDrives(false)
 	, enableMSXDOS2(false)
@@ -665,9 +665,6 @@ void NowindHost::DRIVES()
 {
 	// at least one drive (MSXDOS1 cannot handle 0 drives)
 	byte numberOfDrives = std::max<byte>(1, byte(drives.size()));
-    if (romdisk != 255) {
-        numberOfDrives++;
-    }
 
 	byte reg_a = cmdData[7];
 	nwhSupport->sendHeader();

@@ -78,8 +78,10 @@ void HostApp::hostImage()
 {
     #ifdef WIN32
     // FTD2XX driver works in kernel-space and has much less retries at 7 MHz
+    Util::debug("Using FTD2XX\n");
     mHostService->start(eDRIVER_FTD2XX);            
     #else
+    Util::debug("Using LIBUSB\n");
     // on linux we favor libusb to minimize dependencies on propriatary binaries
     mHostService->start(eDRIVER_LibUsb);            
 	#endif    
@@ -158,7 +160,7 @@ int HostApp::execute()
         };
 
 		// : means needs argument, :: means optional-argument
-		c = getopt_long (argc, argv, "i:m:jdhr:2act::f:g:z:p:y:", long_options, &option_index);
+		c = getopt_long (argc, argv, "i:m:jdhr:2apt::f:g:z:y:", long_options, &option_index);
 
         // no more parameters? stop...
         if (c == -1) break;
@@ -278,10 +280,11 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
         	mHostService->setAttribute(enable_dos2, true);
 			break;
         case 'a': 
-			Util::debug("Allowing other diskroms to initialize after the internal nowind diskrom!\n");
+			Util::debug("Allow other diskroms to initialize after the internal nowind diskrom!\n");
 			mHostService->setAttribute(allow_other_diskroms, true);
 			break;
         case 'p':
+			Util::debug("Allow diskroms to add more than one drive!\n");
 			mHostService->setAttribute(enable_phantom_drives, true);
 			break;
             /*
@@ -373,7 +376,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
 
     if (hasErrors) {
 
-        printf("Usage: usbhost [options] [diskimage.dsk] [romimage.rom]\n");
+        printf("Usage: usbhost [-2afgijmpz] [-i image.dsk] [-f firmware.rom]\n");
         printf("Options: --image, -i    specify disk image or partition image\n");
         printf("         --hdimage, -m  specify harddisk image\n");
         printf("         --physical, -y specify physical disk\n");
@@ -395,12 +398,12 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
         printf("         --test, -t[mode]  -twrite (send a fixed 'HELLO MSX' infinitely to MSX)\n");
         printf("         --test, -t[mode]  -tdev (device test, not implemented on win32)\n");
         printf("\n");
-        printf("Examples: usbhost image.dsk\n");
+        printf("Examples: usbhost -i image.dsk\n");
         //printf("          usbhost kungfu.rom\n");        
-        printf("          usbhost -2 harddiskimage.dsk\n");
-        printf("          usbhost --flash firmware.bin,none (flash new firmware and disable romdisk, but write bank-headers)\n");
-        printf("          usbhost --flash firmware.bin,myromdisk.dsk (flash new firmware and use myromdisk.dsk as romdisk)\n");
-        printf("          usbhost --flash firmware.bin,raw (only flash new firmware and do no update romdisk or bank-headers, use with caution!)\n");
+        printf("          usbhost -2 -i image.dsk\n");
+        printf("          usbhost --flash nowind.rom"); //,none (flash new firmware and disable romdisk, but write bank-headers)\n");
+//        printf("          usbhost --flash firmware.bin,myromdisk.dsk (flash new firmware and use myromdisk.dsk as romdisk)\n");
+//        printf("          usbhost --flash firmware.bin,raw (only flash new firmware and do no update romdisk or bank-headers, use with caution!)\n");
 		printf("          usbhost -m hdimage.dsk inserts the first partition\n");
 		printf("          usbhost -m hdimage.dsk:0 inserts the first partition\n");
 		printf("          usbhost -m hdimage.dsk:1-3 inserts the second, third and forth\n");
