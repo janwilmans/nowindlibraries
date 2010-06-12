@@ -208,7 +208,7 @@ void BlockRead::ack(byte tail)
         static int errors = 0;
         errors++;
 
-        DBERR("block: %u failed! (errors: %u, tail: 0x%02x)\n", dataBlock->number, errors, tail);
+        //DBERR("block: %u failed! (errors: %u, tail: 0x%02x)\n", dataBlock->number, errors, tail);
 
 	    nwhSupport->sendHeader();
 	    if (dataBlock->fastTransfer)
