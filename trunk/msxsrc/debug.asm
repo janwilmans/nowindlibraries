@@ -1,5 +1,5 @@
 ; debug.asm contains macros to support debugging the Nowind Interface firmware.
-
+ 
 ; DEBUGMESSAGE
         macro DEBUGMESSAGE string
         ifdef DEBUG
