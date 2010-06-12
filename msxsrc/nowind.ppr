@@ -36,10 +36,22 @@ nowind
 		rs232.asm
 		slotRoutines.asm
 [Open project files]
-0=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\igo2c_LIVE\domains\igo2c.nl\public_html\sites\all\themes\igotoc\igotoc.css
+0=nowind.asm
+1=labels.asm
+2=romdisk.asm
+3=nowindDriver.asm
 [Selected Project Files]
 Main=
-Selected=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\igo2c_LIVE\domains\igo2c.nl\public_html\sites\all\themes\igotoc\igotoc.css
-[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\igo2c_LIVE\domains\igo2c.nl\public_html\sites\all\themes\igotoc\igotoc.css]
-TopLine=217
-Caret=1,175
+Selected=nowind.asm
+[nowind.asm]
+TopLine=75
+Caret=43,97
+[labels.asm]
+TopLine=92
+Caret=11,114
+[romdisk.asm]
+TopLine=11
+Caret=24,30
+[nowindDriver.asm]
+TopLine=17
+Caret=8,23

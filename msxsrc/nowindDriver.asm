@@ -15,15 +15,12 @@ define  PRETEND_2B_DOS23_off
 
 INIHRD:
         DEBUGMESSAGE "INIHRD"
-        
-;        call getWorkArea
-;        DEBUGDUMPREGISTERS
-
         ld h,HIGH usbWritePage1
         ld (hl),$af                     ; signal MSX reset to host
         ld (hl),$ff
         ret
 
+; TODO:input/output 
 DRIVES:
         DEBUGMESSAGE "DRIVES"
         push af                         ; A, BC and DE should be preserved!
@@ -38,9 +35,9 @@ DRIVES:
         call executeCommandNowindInPage0
         
         pop hl
-        ld l,1
+        ld l,1                          ; install one drive when not connected to host
         jr c,.error
-        ld l,a
+        ld l,a                          ; number of drives
 .error:
         pop de
         pop bc
