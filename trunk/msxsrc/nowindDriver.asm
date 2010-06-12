@@ -11,8 +11,6 @@ SECLEN          equ 512                 ; sector size
 ; if this is defined we tell DOS2.3 that we _are DOS2.3 also, so
 ; it does not try to override our initilazations
 
-define  PRETEND_2B_DOS23_off
-
 INIHRD:
         DEBUGMESSAGE "INIHRD"
         ld h,HIGH usbWritePage1
@@ -58,7 +56,7 @@ INIENV:
 ; work area can be initialized when it was requested
         DEBUGMESSAGE "INIENV"
 
-        ifdef PRETEND_2B_DOS23
+        if MSXDOSVER == 2
         DEBUGMESSAGE "Lie about being DOS v2.31"
         ld a,$23
         ld ($f313),a
