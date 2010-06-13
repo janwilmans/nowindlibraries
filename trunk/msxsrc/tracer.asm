@@ -1,10 +1,27 @@
 
 installTracer: 
-        ;DEBUGMESSAGE "tracer"
+        DEBUGMESSAGE "tracer"
         ld a,5
         call SNSMAT
         and 2
         ret nz              ; 't' pressed?
+        
+        DEBUGDISASM
+        
+        ld a,%11110100
+        out ($a8),a         ; rom in page 0, nowind in page 1
+        
+        ld a,0      ; drivenr
+        ld b,64     ; 32kb
+        ld de,0     ; start sector
+        ld hl,0     ; start address
+        scf         ; write
+        call $4010  ; dskio
+        
+        di
+        halt       
+        
+        
         
         di
         ld a,32           ; enable line interrupt
@@ -27,7 +44,7 @@ installTracer:
         ei       
         halt            
         halt
-        DEBUGDISASM
+        DEBUGDISASM 
 .loop:
         inc bc
         ld a,b

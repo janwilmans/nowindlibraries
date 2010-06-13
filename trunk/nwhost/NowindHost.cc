@@ -341,16 +341,15 @@ void NowindHost::diskWriteInit(SectorMedium& disk)
 
 void NowindHost::doDiskWrite1()
 {
-	DBERR("doDiskWrite1\n");
 	unsigned bytesLeft = unsigned(buffer.size()) - transferred;
 	if (bytesLeft == 0) {
 		// All data transferred!
 		unsigned sectorAmount = unsigned(buffer.size()) / 512;
 		unsigned startSector = getStartSector();
 		if (SectorMedium* disk = getDisk()) {
-	        DBERR("write to disk -> startsector: %u  sectoramount %d\n", startSector, sectorAmount);
-			if (disk->writeSectors(&buffer[0], startSector, sectorAmount)) {
-				// TODO write error
+			int result = disk->writeSectors(&buffer[0], startSector, sectorAmount);
+			if (0 != result) {
+			    DBERR("Error %i writing disk image!\n", result);
 			}
 		}
 		nwhSupport->sendHeader();
@@ -384,7 +383,6 @@ void NowindHost::doDiskWrite1()
 
 void NowindHost::doDiskWrite2()
 {
-	DBERR("doDiskWrite2\n");
 	assert(recvCount == (transferSize + 2));
 	for (unsigned i = 0; i < transferSize; ++i) {
 		buffer[i + transferred] = extraData[i + 1];
