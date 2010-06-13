@@ -2,12 +2,12 @@
         ; enables messages that can only be viewed in emulation, 
         ; are harmless on real hardware but cause small delays
         ; recommened: turn off for releases
-        ;define DEBUG        
+        define DEBUG        
         
         ; enables messages for debugging can be logged even on real hardware 
         ; by sending them to the host over USB, causes somewhat larger delays
         ; but can be used to diagnose problems that are otherwise hard to debug        
-        define USBDEBUG
+        ;define USBDEBUG
         
         ;define NOWINDVERSION_FIRSTBATCH   ; our handmade first batch
         define NOWINDVERSION_FIRSTBATCH    ; sunrise first batch
