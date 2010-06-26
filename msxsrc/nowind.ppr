@@ -42,11 +42,9 @@ nowind
 2=msxdos23.asm
 3=nowind.asm
 4=debug.asm
-5=New1.asm
-6=..\..\..\Documents and Settings\kwik\Desktop\msxsyssrc\disk231\disk-s0.mac
 [Selected Project Files]
 Main=
-Selected=New1.asm
+Selected=msxdos23.asm
 [labels.asm]
 TopLine=53
 Caret=23,74
@@ -54,17 +52,11 @@ Caret=23,74
 TopLine=261
 Caret=1,300
 [msxdos23.asm]
-TopLine=29
-Caret=15,45
+TopLine=46
+Caret=2,88
 [nowind.asm]
 TopLine=29
 Caret=1,29
 [debug.asm]
 TopLine=36
 Caret=14,36
-[New1.asm]
-TopLine=406
-Caret=12,431
-[..\..\..\Documents and Settings\kwik\Desktop\msxsyssrc\disk231\disk-s0.mac]
-TopLine=1
-Caret=17,48
