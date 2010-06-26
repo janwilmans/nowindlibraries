@@ -286,6 +286,7 @@ void Z80::executeInstructions() {
     		nw_word reg2 = 0;
     		nw_word opcode = 0;
     		
+    		//if (reg_pc == 0x4a33 && readMem(0x40ff)==1) Debug::Instance()->RUNTIME_INSTRUCTIONS_ON = true;
     		opcode = opcodeFetch(reg_pc);
     
     #ifdef INSTRUCTIONS_ON

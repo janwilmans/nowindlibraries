@@ -35,31 +35,36 @@ nowind
 		romdisk.asm
 		rs232.asm
 		slotRoutines.asm
+		tracer.asm
 [Open project files]
-0=nowind.asm
-1=labels.asm
-2=romdisk.asm
-3=nowindDriver.asm
-4=init.asm
-5=common.asm
+0=labels.asm
+1=nowindDriver.asm
+2=msxdos23.asm
+3=nowind.asm
+4=debug.asm
+5=New1.asm
+6=..\..\..\Documents and Settings\kwik\Desktop\msxsyssrc\disk231\disk-s0.mac
 [Selected Project Files]
 Main=
-Selected=common.asm
-[nowind.asm]
-TopLine=75
-Caret=43,97
+Selected=New1.asm
 [labels.asm]
-TopLine=92
-Caret=11,114
-[romdisk.asm]
-TopLine=11
-Caret=24,30
+TopLine=53
+Caret=23,74
 [nowindDriver.asm]
-TopLine=17
-Caret=8,23
-[init.asm]
+TopLine=261
+Caret=1,300
+[msxdos23.asm]
+TopLine=29
+Caret=15,45
+[nowind.asm]
+TopLine=29
+Caret=1,29
+[debug.asm]
+TopLine=36
+Caret=14,36
+[New1.asm]
+TopLine=406
+Caret=12,431
+[..\..\..\Documents and Settings\kwik\Desktop\msxsyssrc\disk231\disk-s0.mac]
 TopLine=1
-Caret=1,1
-[common.asm]
-TopLine=442
-Caret=19,480
+Caret=17,48

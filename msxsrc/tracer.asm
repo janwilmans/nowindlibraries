@@ -8,16 +8,17 @@ installTracer:
         
         DEBUGDISASM
         
-        ld a,%11110100
-        out ($a8),a         ; rom in page 0, nowind in page 1
+;        ld a,%11110100
+;        out ($a8),a         ; rom in page 0, nowind in page 1
         
         ld a,0      ; drivenr
-        ld b,64     ; 32kb
+        ld b,32     ; 16kb
         ld de,0     ; start sector
         ld hl,0     ; start address
         scf         ; write
         call $4010  ; dskio
         
+        DEBUGDISASMOFF
         di
         halt       
         

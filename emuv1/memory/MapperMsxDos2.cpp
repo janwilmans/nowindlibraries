@@ -25,7 +25,7 @@ nw_byte MapperMsxDos2::read(nw_word address) {
 void MapperMsxDos2::write(nw_word address, nw_byte value) {
 
     assert (address >= 0x4000 && address <0x8000);
-//    DBERR("MapperMsxDos2::write address 0x" << hex << address << " = " << (unsigned int)value << endl);
+//    DBERR("MapperMsxDos2::write address 0x%04x = 0x%04x\n", address, value);
 
 	switch(address) {
 	case 0x6000:

@@ -2,7 +2,7 @@
 
         include "tracer.asm"
 
-@nowindInit:                            ; the @ should NOT be removed! 
+@nowindInit:                            ; this label should be accessible from others banks as well, hence the @
         call flashWriter
         call installTracer
 

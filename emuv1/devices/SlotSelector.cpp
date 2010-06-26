@@ -79,8 +79,10 @@ void SlotSelector::configure(unsigned int msxVersion) {
 		RomBlock *subRom = new RomBlock("../roms/MSX2EXT.ROM");
 		addMemoryDevice(subRom, 3, 0, 0x0000);            // MSX2 sub-rom 3-1, address 0x000
 		
-        mainRom->patch(0x0180, 0xed);   // TURBO-R CHGCPU
-        mainRom->patch(0x0181, 0x0a);   // assert(false)
+//        mainRom->patch(0x0180, 0xc9);   // TURBO-R CHGCPU
+//        mainRom->patch(0x0183, 0xaf);   // TURBO-R CHGCPU (xor a)
+//        mainRom->patch(0x0184, 0xc9);   // TURBO-R CHGCPU (ret)
+        
 		// NO start-up logo, patch should be applied to SUB-ROM 
 		subRom->patch(0x2a0e,0);
 		subRom->patch(0x2a0f,0);
@@ -112,10 +114,11 @@ void SlotSelector::configure(unsigned int msxVersion) {
 	
 #define NOWINDDOS1_off
 #define NOWINDDOS2_off
-#define NOWIND           // combines MSXDOS 1&2
+#define NOWIND_off
 #define OPENDISKROM_off
 #define NORMALDISKROM_off
 #define MSXDOS2_off
+#define MSXDOS23
 #define WD279X_off
 
 
@@ -123,10 +126,10 @@ void SlotSelector::configure(unsigned int msxVersion) {
     usbInterface = new NowindInterface("../msxsrc/nowind.rom");
     addMemoryDevice(usbInterface, 1, 0, 0); 
 //  usbInterface->insertDisk("../disks/test.dsk");
-//    usbInterface->insertDisk("../disks/wb.dsk");
+    usbInterface->insertDisk("../disks/wb.dsk");
 //	usbInterface->insertDisk("../disks/hd5mbDOS2.dsk");
 //	usbInterface->insertDisk("../disks/dos2.dsk");
-	usbInterface->insertDisk("../disks/dos1.dsk");
+//	usbInterface->insertDisk("../disks/dos1.dsk");
 #endif
 
 
@@ -202,7 +205,13 @@ void SlotSelector::configure(unsigned int msxVersion) {
 	
 #ifdef MSXDOS2
     addMemoryDevice(new MapperMsxDos2("../roms/MSXDOS22.ROM"),1,0,0x4000);
-//    addMemoryDevice(new MapperMsxDos2("../roms/MSXDOS23.ROM"),1,0,0x4000);
+#endif    
+
+#ifdef MSXDOS23
+    MapperMsxDos2* msxdos23 = new MapperMsxDos2("../msxsrc/msxdos23.out");
+    //MapperMsxDos2* msxdos23 = new MapperMsxDos2("../roms/MSXDOS23.rom");
+    addMemoryDevice(msxdos23, 3, 3, 0x4000);
+    //msxdos23->patch(0x4000,0);       
 #endif    
    		
 //    Insert a plain SCC without any megarom
