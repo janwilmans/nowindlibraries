@@ -5,6 +5,7 @@
 case 0x00:
     {
         nw_word reg_pc_was = reg_pc-2;
+        DBERR("DISK_ACCESS_SHIT: 0x%04x\n", reg_pc_was);
         if ((reg_pc_was == 0x4010 || reg_pc_was == 0x4013 || reg_pc_was == 0x4016 || reg_pc_was == 0x4019 || reg_pc_was == 0x401c || reg_pc_was == 0x401f)) {
             disk->diskIO();
         }
@@ -60,6 +61,7 @@ case 0x09:
 case 0x0a:
 	Debug::Instance()->memFileDump(readBlock,"memdump2");
     assert(false);
+    DBERR("AAAAASSSSSSSSSSSSEEEEEEEEEEEERRRRRRRRRRRTTTTTTTTTTT\n");
 	break;
 
 case 0x0b:

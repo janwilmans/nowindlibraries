@@ -56,7 +56,7 @@ INIENV:
 ; work area can be initialized when it was requested
         DEBUGMESSAGE "INIENV"
 
-        if MSXDOSVER == 2
+        if MSXDOSVER = 2
         DEBUGMESSAGE "Lie about being DOS v2.31"
         ld a,$23
         ld ($f313),a
@@ -75,8 +75,6 @@ INIENV:
         ld (hl),0                       ; default drive number for romdisk
 
         ret c
-        DEBUGMESSAGE "romdrv?"
-        DEBUGDUMPREGISTERS
         ld (hl),a                       ; drive number for romdisk
         ret
 

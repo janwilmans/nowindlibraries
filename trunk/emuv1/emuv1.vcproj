@@ -68,7 +68,7 @@
 				AdditionalLibraryDirectories="$(SolutionDir)..\SDL-1.2.13\lib"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
-				SubSystem="1"
+				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
