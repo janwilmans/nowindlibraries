@@ -85,13 +85,11 @@ DEFDPB: MAKEDPB $f9, 2, 112, 2 * 80 * 9, 3, 2      ; 720 kB
         incbin "..\roms\MSXDOS23.ROM", $4000, 3 * $4000
 
         code ! $4497
-        
-        DEBUGMESSAGE "no CPU switch"
-        ds $44ac - $, 0
+        DEBUGMESSAGE "blocked CPU switch"
         ex af,af
         call CALSLT
+        jr $44bf
         ds $44bf - $, 0
-
 
         PATCH $7fd1, MAPPER23
         PATCH $7fd1 + $4000, MAPPER23
