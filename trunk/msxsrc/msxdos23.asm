@@ -90,7 +90,7 @@ DEFDPB: MAKEDPB $f9, 2, 112, 2 * 80 * 9, 3, 2      ; 720 kB
         ds $44ac - $, 0
         ex af,af
         call CALSLT
-        ds $44be - $, 0
+        ds $44bf - $, 0
 
 
         PATCH $7fd1, MAPPER23
