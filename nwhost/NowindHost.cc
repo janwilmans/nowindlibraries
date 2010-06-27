@@ -681,7 +681,7 @@ void NowindHost::DRIVES()
 void NowindHost::INIENV()
 {
 	nwhSupport->sendHeader();
-	DBERR("romdrv nr: %i\n", romdisk);
+	DBERR("INIENV (romdrv nr: %i) \n", romdisk);
 	nwhSupport->send(romdisk); // calculated in DRIVES()
 }
 
