@@ -61,9 +61,9 @@ void SlotSelector::configure(unsigned int msxVersion) {
         usbInterface = new NowindInterface("../msxsrc/nowindDos1.rom");
 //        usbInterface = new NowindInterface("../msxsrc/nowindDos2.rom");        
         addMemoryDevice(usbInterface, 1, 0, 0x0000);
-//        usbInterface->insertDisk("../disks/MSX20th.dsk");
-//        usbInterface->insertDisk("../disks/dos2.dsk");        
-        usbInterface->insertDisk("../disks/wb.dsk");
+//        usbInterface->insertDisk(0, "../disks/MSX20th.dsk");
+//        usbInterface->insertDisk(0, "../disks/dos2.dsk");        
+        usbInterface->insertDisk(0, "../disks/wb.dsk");
 //    addMemoryDevice(new MapperMsxDos2("../roms/MSXDOS22_msx1.ROM"),3,0,0x4000);
 	}
 	
@@ -125,47 +125,47 @@ void SlotSelector::configure(unsigned int msxVersion) {
 #ifdef NOWIND
     usbInterface = new NowindInterface("../msxsrc/nowind.rom");
     addMemoryDevice(usbInterface, 1, 0, 0); 
-//  usbInterface->insertDisk("../disks/test.dsk");
-//   usbInterface->insertDisk("../disks/wb.dsk");
-//	usbInterface->insertDisk("../disks/hd5mbDOS2.dsk");
-//	usbInterface->insertDisk("../disks/dos2.dsk");
+//  usbInterface->insertDisk(0, "../disks/test.dsk");
+//   usbInterface->insertDisk(0, "../disks/wb.dsk");
+//	usbInterface->insertDisk(0, "../disks/hd5mbDOS2.dsk");
+//	usbInterface->insertDisk(0, "../disks/dos2.dsk");
 	usbInterface->insertHarddisk(0, "../disks/32mb_manuel_hd.dsk", 0);
     
-//	usbInterface->insertDisk("../disks/dos1.dsk");
+//	usbInterface->insertDisk(0, "../disks/dos1.dsk");
 #endif
 
 
 #ifdef OPENDISKROM
     usbInterface = new NowindInterface("../msxsrc/openDiskrom.rom");
     addMemoryDevice(usbInterface, 2, 1, 0); 
-//  usbInterface->insertDisk("../disks/test.dsk");
-    usbInterface->insertDisk("../disks/wb.dsk");        
+//  usbInterface->insertDisk(0, "../disks/test.dsk");
+    usbInterface->insertDisk(0, "../disks/wb.dsk");        
 #endif
 
 #ifdef NOWINDDOS1
 //    usbInterface = new NowindInterface("../msxsrc/openDiskrom.rom");
 //    usbInterface = new NowindInterface("../msxsrc/nowindDos1.rom");
 //    addMemoryDevice(usbInterface, 3, 3, 0);
-//    usbInterface->insertDisk("../disks/wb.dsk");    
+//    usbInterface->insertDisk(0, "../disks/wb.dsk");    
 
     usbInterface = new NowindInterface("../msxsrc/nowindDos1.rom");
     addMemoryDevice(usbInterface, 2, 1, 0);
-//    usbInterface->insertDisk("../disks/dos1.dsk");        
-//    usbInterface->insertDisk("../disks/test.dsk");
-//    usbInterface->insertDisk("../msxdisks/dos2.dsk");
-//    usbInterface->insertDisk("../disks/dos1.dsk");
-//    usbInterface->insertDisk("../disks/hd5mbdos2.dsk");
-//    usbInterface->insertDisk("../disks/MSX20th.dsk");
-     usbInterface->insertDisk("../disks/wb.dsk");    
+//    usbInterface->insertDisk(0, "../disks/dos1.dsk");        
+//    usbInterface->insertDisk(0, "../disks/test.dsk");
+//    usbInterface->insertDisk(0, "../msxdisks/dos2.dsk");
+//    usbInterface->insertDisk(0, "../disks/dos1.dsk");
+//    usbInterface->insertDisk(0, "../disks/hd5mbdos2.dsk");
+//    usbInterface->insertDisk(0, "../disks/MSX20th.dsk");
+     usbInterface->insertDisk(0, "../disks/wb.dsk");    
 #endif
 
 
 #ifdef NOWINDDOS2
     usbInterface = new NowindInterface("../msxsrc/nowindDos2.rom");
     addMemoryDevice(usbInterface, 2, 1, 0);
-//    usbInterface->insertDisk("../disks/dos1.dsk");    
-    usbInterface->insertDisk("../disks/hd5mbdos2.dsk");    
-//    usbInterface->insertDisk("../disks/dos2.dsk");    
+//    usbInterface->insertDisk(0, "../disks/dos1.dsk");    
+    usbInterface->insertDisk(0, "../disks/hd5mbdos2.dsk");    
+//    usbInterface->insertDisk(0, "../disks/dos2.dsk");    
 
 
 #endif

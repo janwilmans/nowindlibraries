@@ -40,9 +40,9 @@ NowindInterface::~NowindInterface() {
 //     nowindusb_cleanup();
 }
 
-void NowindInterface::insertDisk(string filename) {
+void NowindInterface::insertDisk(int driveNr, string filename) {
 
-    nowindusb_set_image(0, filename.c_str());
+    nowindusb_set_image(driveNr, filename.c_str());
 }
 
 void NowindInterface::insertHarddisk(int driveNr, string filename, int partitionNr) {
