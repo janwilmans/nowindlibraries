@@ -149,9 +149,9 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Assemble flash01.bin"
+						Description="Assemble $(InputDir)$(InputName).out"
 						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
-						Outputs="$(OutDir)flash01.bin"
+						Outputs="$(InputDir)$(InputName).out"
 					/>
 				</FileConfiguration>
 			</File>
@@ -200,6 +200,20 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\msxdos23.asm"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Assemble $(InputDir)$(InputName).out"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						Outputs="$(InputDir)$(InputName).out"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\nowind.asm"
 				>
 				<FileConfiguration
@@ -217,9 +231,9 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Assembly nowind.rom"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
-						Outputs="$(OutDir)nowind.rom"
+						Description="Assembly $(InputDir)$(InputName).out"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						Outputs="$(InputDir)$(InputName).out"
 					/>
 				</FileConfiguration>
 			</File>
