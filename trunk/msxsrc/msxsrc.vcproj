@@ -231,9 +231,9 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Assembly $(InputDir)$(InputName).bin"
+						Description="Assembly $(InputDir)$(InputName).rom"
 						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
-						Outputs="$(InputDir)$(InputName).bin"
+						Outputs="$(InputDir)$(InputName).rom"
 					/>
 				</FileConfiguration>
 			</File>
