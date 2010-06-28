@@ -291,7 +291,7 @@ void Z80::executeInstructions() {
     
     if (Z80::Instance()->emuTime > 0x00E84BE0)
     {
-        Debug::Instance()->RUNTIME_INSTRUCTIONS_ON = true;
+        //Debug::Instance()->RUNTIME_INSTRUCTIONS_ON = true;
     }
     
     #ifdef INSTRUCTIONS_ON
