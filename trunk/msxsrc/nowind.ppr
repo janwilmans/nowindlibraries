@@ -38,18 +38,14 @@ nowind
 		tracer.asm
 		msxdos23.asm
 [Open project files]
-0=msxdos23.asm
-1=nowind.asm
-2=New1.asm
+0=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\igo2c_LIVE\domains\igo2c.nl\public_html\sites\all\themes\igotoc\mimemail-message.tpl.php
+1=..\..\..\Documents and Settings\kwik\Desktop\elementen nieuwsbrief\nieuwsbrief_intermediair.html
 [Selected Project Files]
 Main=
-Selected=msxdos23.asm
-[msxdos23.asm]
-TopLine=110
-Caret=2,125
-[nowind.asm]
-TopLine=94
-Caret=1,128
-[New1.asm]
-TopLine=281
-Caret=15,301
+Selected=..\..\..\Documents and Settings\kwik\Desktop\elementen nieuwsbrief\nieuwsbrief_intermediair.html
+[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\igo2c_LIVE\domains\igo2c.nl\public_html\sites\all\themes\igotoc\mimemail-message.tpl.php]
+TopLine=1
+Caret=1,22
+[..\..\..\Documents and Settings\kwik\Desktop\elementen nieuwsbrief\nieuwsbrief_intermediair.html]
+TopLine=1
+Caret=3,31
