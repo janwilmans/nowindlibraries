@@ -529,6 +529,9 @@ inline void Z80::writeMem16(nw_word address, nw_word value) {
 
     assert(value < 0x10000);
     
+    
+    
+    
 	// this will happen when sp is decremented and the result is below 0
     assert(address < 0x10000);
 	nw_word addressHigh = (address+1) & 0xffff;

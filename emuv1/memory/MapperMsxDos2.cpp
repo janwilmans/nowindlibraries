@@ -29,6 +29,7 @@ void MapperMsxDos2::write(nw_word address, nw_byte value) {
 
 	switch(address) {
 	case 0x6000:
+		DBERR("MapperMsxDos2::switch bank %u\n", value);
 		switchedBlock = value & 3;
 		activate(2);
 		activate(3);

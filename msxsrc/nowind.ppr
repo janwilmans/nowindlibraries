@@ -1,6 +1,6 @@
 [Config]
-Compilator.FileName=C:\MSX\nowind\msxsrc\sjasm4beta\sjasm.exe
-Compilator.PSPar=nowind.asm
+Compilator.FileName=make.bat
+Compilator.DefaultDir=C:\MSX\nowindlibraries\msxsrc\
 Compilator.SaveAll=1
 Compilator.Capture=1
 Compilator.HideOutput=1
@@ -36,27 +36,20 @@ nowind
 		rs232.asm
 		slotRoutines.asm
 		tracer.asm
+		msxdos23.asm
 [Open project files]
-0=labels.asm
-1=nowindDriver.asm
-2=msxdos23.asm
-3=nowind.asm
-4=debug.asm
+0=msxdos23.asm
+1=nowind.asm
+2=New1.asm
 [Selected Project Files]
 Main=
 Selected=msxdos23.asm
-[labels.asm]
-TopLine=53
-Caret=23,74
-[nowindDriver.asm]
-TopLine=261
-Caret=1,300
 [msxdos23.asm]
-TopLine=46
-Caret=2,88
+TopLine=110
+Caret=2,125
 [nowind.asm]
-TopLine=29
-Caret=1,29
-[debug.asm]
-TopLine=36
-Caret=14,36
+TopLine=94
+Caret=1,128
+[New1.asm]
+TopLine=281
+Caret=15,301
