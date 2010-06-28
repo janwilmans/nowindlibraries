@@ -34,7 +34,7 @@ case 0x52: {                                                         // ld d,d
             char text[255];
             for (int i=0;i<len;i++) text[i] = readMem(reg_pc+i+2);
             text[len] = 0;
-            DBERR("[LDD,D] %s\n", text);
+            DBERR("[LDD,D ^ 0x%08X] %s\n", Z80::Instance()->emuTime, text);
         }
     }
     break;
