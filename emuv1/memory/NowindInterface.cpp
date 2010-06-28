@@ -45,6 +45,11 @@ void NowindInterface::insertDisk(string filename) {
     nowindusb_set_image(0, filename.c_str());
 }
 
+void NowindInterface::insertHarddisk(int driveNr, string filename, int partitionNr) {
+
+    nowindusb_set_harddisk_image(driveNr, partitionNr, false, filename.c_str());
+}
+
 /*
  * should normally not be used in a memory-device,
  * but we make an exception for the NowindInterface

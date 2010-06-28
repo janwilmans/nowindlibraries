@@ -17,6 +17,7 @@ private:
 public:
 			NowindInterface(std::string filename);
 			void insertDisk(std::string filename);
+			void insertHarddisk(int, std::string filename, int);
 			
 			bool isEnabled(nw_word address);
 			
