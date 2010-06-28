@@ -289,6 +289,11 @@ void Z80::executeInstructions() {
     		//if (reg_pc == 0x4a33 && readMem(0x40ff)==1) Debug::Instance()->RUNTIME_INSTRUCTIONS_ON = true;
     		opcode = opcodeFetch(reg_pc);
     
+    if (Z80::Instance()->emuTime > 0x00E84BE0)
+    {
+        Debug::Instance()->RUNTIME_INSTRUCTIONS_ON = true;
+    }
+    
     #ifdef INSTRUCTIONS_ON
     		if (Debug::Instance()->RUNTIME_INSTRUCTIONS_ON) {
     			string disasm = string(Disassembler::Instance()->disAsm(reg_pc, readMem16(reg_pc), readMem16(reg_pc+2)));
