@@ -571,7 +571,7 @@ void Emulator::handle_key_and_sdl_events() {
                         if (pt.y < 228) {    
                             Media::Instance()->insertMedia(fileName,0);
                         } else {
-                            SlotSelector::Instance()->usbInterface->insertDisk(fileName);
+                            SlotSelector::Instance()->usbInterface->insertDisk(0, fileName);
                             char caption[250];
                     		sprintf(caption, "Nowind MSX - USB - last inserted: %s", fileName);
                             SDL_WM_SetCaption(caption,0);
