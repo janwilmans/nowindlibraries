@@ -65,11 +65,11 @@ case 0x0a:
 	break;
 
 case 0x0b:
-    Debug::Instance()->RUNTIME_INSTRUCTIONS_ON = true;
+    Debug::Instance()->INSTRUCTION_TRACING = true;
     break;
 
 case 0x0c:
-    Debug::Instance()->RUNTIME_INSTRUCTIONS_ON = false;
+    Debug::Instance()->INSTRUCTION_TRACING = false;
     break;
     
 case 0x0d:{
@@ -77,11 +77,11 @@ case 0x0d:{
 	Uint8 count = readMem(reg_pc++);
     char c;
 	while (((c = readMem(address)) != 0) || (count == 0)) {
-		DEBUGERROR(c);
+		DBERR("%c", c);
         address++;
         count--;
 	}
-	DEBUGERROR(endl);
+	DBERR("\n");
     break;
 }
 case 0x0e:{
@@ -382,7 +382,7 @@ case 0x79: TS(10); reg_wz = reg_bc + 1; writeIo(reg_c, reg_a); TS(2); break;    
 
 case 0xA2:      // INI
 #ifdef OUT_INSTRUCTIONS_ON
-        DEBUGERROR("I: INI" << endl);
+        DBERR("I: INI\n");
 #endif
  		TS(16);
  		BLOCKIN;
@@ -392,7 +392,7 @@ case 0xA2:      // INI
         break;
 case 0xAA:      // IND
 #ifdef OUT_INSTRUCTIONS_ON
-        DEBUGERROR("I: IND" << endl);
+        DBERR("I: IND\n");
 #endif
 		TS(16);
 		BLOCKIN;
@@ -402,7 +402,7 @@ case 0xAA:      // IND
         break;
 case 0xB2:      // INIR
 #ifdef OUT_INSTRUCTIONS_ON
-        DEBUGERROR("I: INIR" << endl);
+        DBERR("I: INIR\n");
 #endif
 		BLOCKIN;
         ++reg_hl &= 0xFFFF;
@@ -412,7 +412,7 @@ case 0xB2:      // INIR
         break;
 case 0xBA:      // INDR
 #ifdef OUT_INSTRUCTIONS_ON
-        DEBUGERROR("I: INDR" << endl);
+        DBERR("I: INDR\n");
 #endif
 		BLOCKIN;
         --reg_hl &= 0xFFFF;
@@ -436,7 +436,7 @@ case 0xBA:      // INDR
 
 case 0xA3:      // OUTI
 #ifdef OUT_INSTRUCTIONS_ON
-        DEBUGERROR("I: OUTI" << endl);
+        DBERR("I: OUTI\n");
 #endif
 		TS(16);
         reg2 = READMEM(reg_hl);
@@ -445,7 +445,7 @@ case 0xA3:      // OUTI
         break;
 case 0xB3:      // OTIR
 #ifdef OUT_INSTRUCTIONS_ON
-        DEBUGERROR("I: OTIR" << endl);
+        DBERR("I: OTIR\n");
 #endif
         reg2 = READMEM(reg_hl);
         ++reg_hl &= 0xFFFF;
@@ -454,7 +454,7 @@ case 0xB3:      // OTIR
         break;
 case 0xAB:      // OUTD
 #ifdef OUT_INSTRUCTIONS_ON
-        DEBUGERROR("I: OUTD" << endl);
+        DBERR("I: OUTD\n");
 #endif
         TS(16);
         reg2 = READMEM(reg_hl);
@@ -463,7 +463,7 @@ case 0xAB:      // OUTD
         break;
 case 0xBB:      // OTDR
 #ifdef OUT_INSTRUCTIONS_ON
-        DEBUGERROR("I: OTDR" << endl);
+        DBERR("I: OTDR\n");
 #endif
         reg2 = READMEM(reg_hl);
         --reg_hl &= 0xFFFF;

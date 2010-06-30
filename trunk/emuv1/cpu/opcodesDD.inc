@@ -81,7 +81,10 @@ case 0xE9: 										// jp (ix)
 	TS(8);
     reg_pc = REGIX; 
 #ifdef STACKTRACK_ON
-    DEBUGERROR(" JP IX -> " << reg_pc << endl);
+    if (Debug::Instance()->STACK_TRACING)
+    {
+        DBERR(" JP IX -> 0x%04x\n", reg_pc);
+    }
 #endif
     break;
 
@@ -159,7 +162,7 @@ default:
 	//tijdelijk, want zexall maakt gebruik van DD instructies die geen HL in zich hebben:
 	reg_pc--;
 	
-	//DEBUGERROR("laatste opcode: DD " << hex << opcode << endl);
+	//DBERR("laatste opcode: DD %02X\n", opcode);
 	//assert(false);
 	break;
 	

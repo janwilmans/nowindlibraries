@@ -295,10 +295,6 @@ void SlotSelector::configure(unsigned int msxVersion) {
 
 void SlotSelector::setMainSlot(nw_byte selection) {
 
-#ifdef STACKTRACK_ON
-//		DBERR(" PC = 0x%X set MS: 0x%X\n",reg_pc & 0xffff, value & 255);
-#endif
-
 		selectedMainSlot[0] = selection & 0x03;
 		selectedMainSlot[1] = (selection >> 2) & 0x03;
 		selectedMainSlot[2] = (selection >> 4) & 0x03;
@@ -309,11 +305,6 @@ void SlotSelector::setMainSlot(nw_byte selection) {
 void SlotSelector::setSubSlot(nw_byte selection) {
 
         ffffRegister[selectedMainSlot[3]] = selection;
-        
-//		selectedSubSlot[0] = selection & 0x03;
-//		selectedSubSlot[1] = (selection >> 2) & 0x03;
-//		selectedSubSlot[2] = (selection >> 4) & 0x03;
-//		selectedSubSlot[3] = (selection >> 6);
 		updateSelection();
 }
 

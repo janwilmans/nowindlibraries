@@ -58,7 +58,7 @@ Z80::Z80() {
 		}
 
 		bdosCount = 0;
-		Debug::Instance()->RUNTIME_INSTRUCTIONS_ON = false;
+		Debug::Instance()->INSTRUCTION_TRACING = false;
         DBERR("Z80 constructor finished.\n");
 }
 
@@ -286,16 +286,16 @@ void Z80::executeInstructions() {
     		nw_word reg2 = 0;
     		nw_word opcode = 0;
     		
-    		//if (reg_pc == 0x4a33 && readMem(0x40ff)==1) Debug::Instance()->RUNTIME_INSTRUCTIONS_ON = true;
     		opcode = opcodeFetch(reg_pc);
     
     if (Z80::Instance()->emuTime > 0x00E84BE0)
     {
-        //Debug::Instance()->RUNTIME_INSTRUCTIONS_ON = true;
+        //Debug::Instance()->INSTRUCTION_TRACING = true;
+        Debug::Instance()->STACK_TRACING = true;
     }
     
     #ifdef INSTRUCTIONS_ON
-    		if (Debug::Instance()->RUNTIME_INSTRUCTIONS_ON) {
+    		if (Debug::Instance()->INSTRUCTION_TRACING) {
     			string disasm = string(Disassembler::Instance()->disAsm(reg_pc, readMem16(reg_pc), readMem16(reg_pc+2)));
     			DBERR("%04X %-15s ", reg_pc, disasm.c_str());
     		}
@@ -375,7 +375,7 @@ void Z80::executeInstructions() {
     #endif
     
     #ifdef INSTRUCTIONS_ON
-    		if (Debug::Instance()->RUNTIME_INSTRUCTIONS_ON) {
+    		if (Debug::Instance()->INSTRUCTION_TRACING) {
     			dumpCpuInfo();
     		}
     #endif
@@ -453,7 +453,7 @@ inline nw_word Z80::readMem16(nw_word address) {
 #ifndef FULL_SPEED_ON
 	/* hier ook rekening houden met FFFF */
     if (address == 0xfffe || address == 0xffff) {
-	   DEBUGERROR ("16 bits reading of address FFFF not implemented !!\n");
+	   DBERR("16 bits reading of address FFFF not implemented !!\n");
 //	   assert(false);
 	}
 #endif	
@@ -497,7 +497,7 @@ inline void Z80::writeMem(nw_word address, nw_byte value) {
 
 //    if (address == 0xfcc4+4) {
 //        DBERR("paniek! val: 0x%x\n", value);
-//        if (value == 0xa8) Debug::Instance()->RUNTIME_INSTRUCTIONS_ON = true;
+//        if (value == 0xa8) Debug::Instance()->INSTRUCTION_TRACING = true;
 //        dumpCpuInfo();
 //    }
 

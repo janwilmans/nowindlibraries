@@ -111,31 +111,27 @@ void Debug::memDump(const nw_byte *mem) {
 
 */
 
-
 		DBERR("(address: 0x%08X\n", mem);
-		char temp[250];
 		//memset(&temp[0],0,250);
 
 		int index = 0;
 		for (int i = 0;i<4;i++) {
 				for (int k = 0;k<8;k++) {
 						nw_word j = (nw_word) (mem[index] & 255);
-						sprintf(temp,"%02x ",j);
+						DBERR("%02x  ", j);
 						index++;
-						DEBUGERROR(temp << " ");
 				}
 				DBERR("- ");
 				for (int k = 0;k<8;k++) {
 						nw_word j = (nw_word) (mem[index] & 255);
-						sprintf(temp,"%02x ",j);
+						DBERR("%02x  ", j);
 						index++;
-						DEBUGERROR(temp << " ");
 				}
 				index -=16;
 				for (int k = 0;k<8;k++) {
 						nw_word j = (nw_word) (mem[index] & 255);
 						if (j>31 && j <140) {
-								DEBUGERROR(mem[index]);
+								DBERR("%d", mem[index]);
 						} else {
 								DBERR(".");
 						}

@@ -85,15 +85,12 @@ void YM2413::generateTables() {
 	double rate[4] = { 0.0, 1.5, 3.0, 6.0 };
 	
 	for (int ksl=0;ksl<4;ksl++) {
-//		DEBUGERROR(dec << rate[ksl] << "dB/oct\n");
 		for (int octave=0;octave<8;octave++) {
 			for(int fNumber=0;fNumber<16;fNumber++) {
 				double att = (atTable[fNumber] - (7 - octave) * 3.0) * (rate[ksl] / 3.0);
 				if (att < 0) att = 0;
 				keyScaleLevel[ksl][octave][fNumber] = att;
-//				DEBUGERROR(att << " ");
 			}
-//		DEBUGERROR(endl);
 		}
 	}
 }

@@ -19,7 +19,8 @@
 #define USE_NORMAL_STDOUTERR_OFF
 
 /* when ON enables logging of all calls and jumps to stderr */
-#define STACKTRACK_OFF
+// at runtime Debug::Instance()->STACK_TRACING must be set to 'true' for logging to be enabled.
+#define STACKTRACK_ON
 
 /* when ON enables logging of all executed instructions */
 #define INSTRUCTIONS_ON
@@ -107,7 +108,8 @@ public:
 		bool            fillInit;
 		unsigned int    fillCount;
 		unsigned int    fillLastDiff;
-		bool            RUNTIME_INSTRUCTIONS_ON;
+		bool            INSTRUCTION_TRACING;
+		bool            STACK_TRACING;
     	std::ostream 	*cerrfile;
     	std::ostream 	*coutfile;
     		
