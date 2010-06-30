@@ -25,8 +25,7 @@ Media * Media::Instance() {
 
 
 Media::Media() {
-    /* use DEBUGERROR in the Media class because it needs to be created before the 
-       emulator is properly initialized */
+
 }
 
 Media::~Media() {
@@ -137,7 +136,7 @@ fstream * Media::openfile(string filename, NW_OPENMODE mode) {
         string fullpath = Debug::Instance()->getPath() + filename;
         fstream *fs = new fstream(fullpath.c_str(), mode);
         if (fs->fail()) {
-            DEBUGERROR(fullpath << " not found!\n");
+            DBERR("%s not found!\n", fullpath);
 			assert(false);
         }    
 		return fs;

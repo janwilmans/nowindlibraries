@@ -50,11 +50,6 @@
 
 /******************************************************************/
 
-#ifndef DEBUGGING_ON
-		#define DEBUGERROR(DEMSG) //
-		#define DEBUGMESSAGE(DEMSG) //
-#endif
-
 #include "assert.h"
 
 // This shouldn't actually be in this header, but in a separate compiler/platform header
@@ -68,7 +63,6 @@
 #endif
 
 #ifdef DEBUGGING_ON
-   	#define DEBUGERROR(DEMSG) std::cerr << DEMSG
 	#define DBERL(e) Debug::debug_wrap_sprintf_erl(__FILE__, __LINE__, e)
    	#define DBERR Debug::debug_wrap_sprintf
 #endif
@@ -81,15 +75,10 @@
     #define VSPRINTF vsnprintf
 #endif
 
-/*!
- * The Debug class defines DEBUGERROR and DEBUGMESSAGE used through-out this project
- * these can be globally disabled by defining "DEBUGGING_OFF" instead of "DEBUGGING_ON"
- */
 class Debug {
 
 private:
 						Debug();
-        
 public:
 
 		static          Debug * Instance();
