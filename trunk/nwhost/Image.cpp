@@ -167,7 +167,7 @@ int Image::readSectors(nw_byte * buffer, unsigned int startSector, unsigned int 
 		sprintf(filename,"sector_%i.bin",sector);
 		ofstream ofs(filename,ios::binary|ios::trunc);
 		if (ofs.fail()) {
-				DEBUGERROR("Error opening file " << filename << "!\n");
+				DBERR("Error opening file %s!\n", filename.c_str());
 		}
 		ofs.write((char *)buf,512);
 		ofs.close();

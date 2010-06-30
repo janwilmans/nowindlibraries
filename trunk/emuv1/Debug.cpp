@@ -131,7 +131,7 @@ void Debug::memDump(const nw_byte *mem) {
 				for (int k = 0;k<8;k++) {
 						nw_word j = (nw_word) (mem[index] & 255);
 						if (j>31 && j <140) {
-								DBERR("%d", mem[index]);
+								DBERR("%c", mem[index]);
 						} else {
 								DBERR(".");
 						}
@@ -141,13 +141,13 @@ void Debug::memDump(const nw_byte *mem) {
 				for (int k = 0;k<8;k++) {
 						nw_word j = (nw_word) (mem[index] & 255);
 						if (j>31 && j <140) {
-								DEBUGERROR(mem[index]);
+								DBERR("%c", mem[index]);
 						} else {
 								DBERR(".");
 						}
 						index++;
 				}
-				DEBUGERROR(endl);
+				DBERR("\n");
 		}
 }
 

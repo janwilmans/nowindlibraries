@@ -235,8 +235,7 @@ void V9938commands::logicalOperation(int addr, nw_byte cl, nw_byte mask) {
 
 void V9938commands::commandSearch() {
 
-	bool eq = argument & EQ; 	// warning C4800: 'unsigned int' : forcing value to bool 'true' or 'false' (perf
-
+	bool eq = (argument & EQ) == EQ;
 	int step = (argument & DIX) ? -1:1;
 	unsigned int i;
 	nw_byte cl = color; 
