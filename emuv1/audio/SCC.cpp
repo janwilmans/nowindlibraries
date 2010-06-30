@@ -209,7 +209,6 @@ void SCC::updateBuffer(unsigned int samples) {
         assert(audioBufferIndex <= maxBufferSize);
 		if (audioBufferIndex == maxBufferSize) audioBufferIndex = 0;
         audioBuffer[audioBufferIndex++] = value;
-//        DEBUGERROR(value<<endl);
 	}
 	lastUpdateEmuTime += (unsigned int)((float)samples * (float)3579545 / (float)audioSampleRate); // nauwkeuriger
 	AudioMixer::Unlock();

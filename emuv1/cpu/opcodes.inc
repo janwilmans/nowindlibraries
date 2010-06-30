@@ -416,7 +416,7 @@ case 0x3F:	// ccf
 case 0x00: TS(4); break;       // nop
 case 0x76:  // halt (TODO: still burns host cpu cycles...)
         TS(4); 
-        // DEBUGERROR("HALT !\n");
+        // DBERR("HALT !\n");
         // Debug::Instance()->memDump(cpuPageRead,0xc000);
         // dumpRegisters();
         // exit(0);
@@ -430,7 +430,10 @@ case 0xF3: // di
 		Emulator::Instance()->setCPUInterrupt(false);
 		
 #ifdef STACKTRACK_ON
-	    DEBUGERROR("DI" << endl);
+        if (Debug::Instance()->STACK_TRACING)
+        {
+	        DBERR("DI\n");
+	    }
 #endif
 		break;    
 case 0xFB: // ei
@@ -443,7 +446,10 @@ case 0xFB: // ei
 		Emulator::Instance()->setCPUInterrupt(true);
 		   
 #ifdef STACKTRACK_ON
-    	DEBUGERROR("EI" << endl);
+        if (Debug::Instance()->STACK_TRACING)
+        {
+    	    DBERR("EI\n");
+    	}
 #endif
 		break;     
 
@@ -538,7 +544,10 @@ case 0xE9: // jp (hl)
 		TS(4);
 		reg_pc = reg_hl; 
 #ifdef STACKTRACK_ON
-        DEBUGERROR(" JP HL -> " << reg_pc << endl);
+        if (Debug::Instance()->STACK_TRACING)
+        {
+            DBERR(" JP HL -> 0x%04x\n", reg_pc);
+        }
 #endif
 		break;
 
@@ -555,7 +564,16 @@ case 0x10: // djnz e
     break;
 
 #ifdef STACKTRACK_ON
-    #define CALLNN { TS(17); Debug::Instance()->fill(reg_sp); reg_sp -= 2; reg_sp &= 0xffff; WRITEMEM16(reg_sp, reg_pc+2); DEBUGERROR(emuTime << " CALL: from " << hex << reg_pc-1); reg_pc = reg_wz = READMEM16(reg_pc); DEBUGERROR(" -> " << hex << reg_pc << endl); }
+    #define CALLNN \
+    { \
+    TS(17); \
+    if (Debug::Instance()->STACK_TRACING) { Debug::Instance()->fill(reg_sp); } \
+    reg_sp -= 2; reg_sp &= 0xffff; \
+    WRITEMEM16(reg_sp, reg_pc+2); \
+    if (Debug::Instance()->STACK_TRACING) { DBERR("0x%08x CALL: from 0x%04x", emuTime, reg_pc-1); } \
+    reg_pc = reg_wz = READMEM16(reg_pc); \
+    if (Debug::Instance()->STACK_TRACING) { DBERR(" -> 0x%04x\n", reg_pc); } \
+    }
 #endif
 
 #ifndef STACKTRACK_ON
@@ -577,14 +595,14 @@ case 0xFC: if (reg_f&SFLAG) CALLNN else CNEXT break; // call m,nn
 
 #ifdef STACKTRACK_ON
     #define RET reg_pc = reg_wz = READMEM16(reg_sp); reg_sp += 2; reg_sp &= 0xffff; \
-	Debug::Instance()->fill(reg_sp); DEBUGERROR("RET: to " << hex << reg_pc << endl);
+	if (Debug::Instance()->STACK_TRACING) { Debug::Instance()->fill(reg_sp); DBERR("RET: to 0x%04x\n", reg_pc); }
 #else
     #ifdef FULL_SPEED_ON
         #define RET reg_pc = reg_wz = READMEM16(reg_sp); reg_sp += 2; reg_sp &= 0xffff;
     #else
         // Quit when SP points to an empty slot
         #define RET reg_pc = reg_wz = READMEM16(reg_sp); \
-        if (reg_pc == 0xffff) {DBERR("****\nSTACK ERROR\n****\n"); assert(false);} else {reg_sp += 2; reg_sp &= 0xffff;};
+        if (reg_pc == 0xffff) { DBERR("****\nSTACK ERROR\n****\n"); assert(false);} else {reg_sp += 2; reg_sp &= 0xffff;};
     #endif
 #endif
 

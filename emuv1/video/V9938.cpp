@@ -688,14 +688,11 @@ void V9938::dumpPos(emuTimeType t) {
     emuTimeType localTime = t - fase;
 
     int frameNr = localTime / frameTime;    
-    int lineNr = (localTime % frameTime) / SCANLINETIME;    
-   
-//    lineNr -= firstDisplayLine;    
+    int lineNr = (localTime % frameTime) / SCANLINETIME;      
     int pos = (localTime % frameTime) % SCANLINETIME;
 
     char temp[250];
     sprintf(temp,"[%i,%i_%i]",frameNr, lineNr, pos);
-//    DEBUGERROR(temp);
 }
 
 bool V9938::switchFrequency() {

@@ -535,7 +535,6 @@ void Emulator::handle_key_and_sdl_events() {
             }
             break;
         case SDL_MOUSEBUTTONDOWN:
-            //Debug::Instance()->RUNTIME_INSTRUCTIONS_ON = true; // tijdelijk !!!!!!!!
             GUI::Instance()->startSelection(event.motion.x,event.motion.y);
             mouseDragging = true;
             DBERR("SDL_MOUSEBUTTONDOWN\n");
