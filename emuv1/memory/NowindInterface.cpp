@@ -83,7 +83,7 @@ void NowindInterface::write(nw_word address, nw_byte value) {
 	case 0x4000:
 	case 0x8000:
 		//DBERR("nowindusb_write(0x%02x)\n", value);
-        nowindusb_write(value);
+        nowindusb_write(value, Z80::Instance()->emuTime/Z80::Instance()->cpuFrequency);
 		break;
 
 	case 0x6000:
