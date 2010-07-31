@@ -225,9 +225,9 @@ bool nowindusb_set_romdisk(unsigned int driveNr)
     return true;
 }
 
-void nowindusb_write(unsigned char value)     // (msx -> pc)
+void nowindusb_write(unsigned char value, unsigned int msTime)     // (msx -> pc)
 {
-    nowindHost->write(value, Util::getTicks());
+    nowindHost->write(value, msTime);
 }
 
 unsigned char nowindusb_read(void)  // (msx <- pc) for emulators

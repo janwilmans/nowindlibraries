@@ -27,7 +27,7 @@ NWHOST_API unsigned int CCALL nowindusb_set_harddisk_image(unsigned int driveNr,
 NWHOST_API bool nowindusb_set_romdisk(unsigned int driveNr);
 
 // write one byte of command-data to the host       (msx -> pc)
-NWHOST_API void CCALL nowindusb_write(unsigned char);
+NWHOST_API void CCALL nowindusb_write(unsigned char, unsigned int msTime);
 
 // read one byte of response-data from the host     (msx <- pc)
 NWHOST_API unsigned char CCALL nowindusb_read(void);
