@@ -38,14 +38,22 @@ nowind
 		tracer.asm
 		msxdos23.asm
 [Open project files]
-0=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\igo2c_LIVE\domains\igo2c.nl\public_html\sites\all\themes\igotoc\mimemail-message.tpl.php
-1=..\..\..\Documents and Settings\kwik\Desktop\elementen nieuwsbrief\nieuwsbrief_intermediair.html
+0=..\..\..\Documents and Settings\kwik\Desktop\diffffffffffff\good.txt
+1=..\..\..\Documents and Settings\kwik\Desktop\diffffffffffff\bad.txt
+2=nowindDriver.asm
+3=nowind.asm
 [Selected Project Files]
 Main=
-Selected=..\..\..\Documents and Settings\kwik\Desktop\elementen nieuwsbrief\nieuwsbrief_intermediair.html
-[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\igo2c_LIVE\domains\igo2c.nl\public_html\sites\all\themes\igotoc\mimemail-message.tpl.php]
+Selected=nowindDriver.asm
+[..\..\..\Documents and Settings\kwik\Desktop\diffffffffffff\good.txt]
 TopLine=1
-Caret=1,22
-[..\..\..\Documents and Settings\kwik\Desktop\elementen nieuwsbrief\nieuwsbrief_intermediair.html]
+Caret=1,1
+[..\..\..\Documents and Settings\kwik\Desktop\diffffffffffff\bad.txt]
 TopLine=1
-Caret=3,31
+Caret=1,1
+[nowindDriver.asm]
+TopLine=169
+Caret=9,188
+[nowind.asm]
+TopLine=1
+Caret=1,1

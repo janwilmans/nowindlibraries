@@ -287,17 +287,17 @@ void Z80::executeInstructions() {
     		nw_word opcode = 0;
     		
     		opcode = opcodeFetch(reg_pc);
-    
-    if (Z80::Instance()->emuTime >= 0x00E82861)
+/*    
+    if (Z80::Instance()->emuTime >= 0x0104A1BF)
     {
         Debug::Instance()->STACK_TRACING = true;
     }
-    if (Z80::Instance()->emuTime >= 0x00e87c06)
+    if (Z80::Instance()->emuTime >= 0x010503c1)
     {
         Debug::Instance()->INSTRUCTION_TRACING = true;
     }
-    
-    
+*/
+  
     #ifdef INSTRUCTIONS_ON
     		if (Debug::Instance()->INSTRUCTION_TRACING) {
     			string disasm = string(Disassembler::Instance()->disAsm(reg_pc, readMem16(reg_pc), readMem16(reg_pc+2)));

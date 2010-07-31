@@ -59,7 +59,7 @@ INIENV:
         if MSXDOSVER = 2
         DEBUGMESSAGE "Lie about being DOS v2.31"
         ld a,$23
-        ld ($f313),a
+        ;ld ($f313),a
         endif
         
         call installExtendedBios
@@ -174,7 +174,7 @@ GETDPB:
 ;           HL  Base address of HL
 ; Output    DPB for specified drive in [HL+1]..[HL+18]
 
-        DEBUGMESSAGE "GETDPB"
+        DEBUGMESSAGE "GETDPB_"
         DEBUGDUMPREGISTERS
         
         ;USB_DBMSG "GETDPB"
@@ -185,7 +185,7 @@ GETDPB:
         ld a,b
         cp $f0
         ld a,h
-        ;jr z,.hddImage                 ; commented to test on Turbo-R
+        jr z,.hddImage                 ; commented to test on Turbo-R
 
 ;        MESSAGE "ROM GETDPB"
 

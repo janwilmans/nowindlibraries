@@ -1,6 +1,9 @@
 //! opcodes.inc
 // included in Z80.cc
 
+
+// TODO: Possible speedup, do not mask value with 0xffff. Readmem en Writemem kan mask as well. (does this reduce the number of masks?)
+
 // always include () around r to make precedence explicit
 #define HREG(r) ((r) & 0xFF00)
 #define LREG(r) ((r) & 0x00FF)
