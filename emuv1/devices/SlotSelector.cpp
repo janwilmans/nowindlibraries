@@ -184,7 +184,7 @@ void SlotSelector::configure(unsigned int msxVersion) {
 #ifdef NORMALDISKROM
 //    RomBlock *diskRom = new RomBlock("../roms/Diskroms/vy0010.rom");
     RomBlock *diskRom = new RomBlock("../roms/DISK.ROM");
-    addMemoryDevice(diskRom, 3, 3, 0x4000);
+    addMemoryDevice(diskRom, 2, 3, 0x4000);
 
 	diskRom->patch(0x4010,0xed); //DISKIO
 	diskRom->patch(0x4011,0x00);

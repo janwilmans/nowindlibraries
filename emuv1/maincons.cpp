@@ -333,7 +333,7 @@ int main(int argc, char *argv[])
     if (media.size() == 0) // no disks or roms specified on the commandline
     {
         // try image.dsk in the emulator-directory
-        Media::Instance()->insertMedia(Debug::Instance()->getPath() + "image.dsk",0);
+        Media::Instance()->insertMedia(Debug::Instance()->getPath() + "../disks/dos1.dsk",0);
     }
     else
     for(list<string>::iterator i = media.begin(); i!=media.end();i++)
