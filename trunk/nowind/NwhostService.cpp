@@ -409,7 +409,7 @@ void NwhostService::hostImage() {
 
         // copy the buffer into the nowindhost
         for (int i=0;i<lBytesReceived;i++) {
-			nowindusb_write(xBuffer[i]);
+			nowindusb_write(xBuffer[i], Util::getTicks());
         }
 
 		buffer.clear();
