@@ -42,7 +42,7 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	, lastTime(0)
 	, state(STATE_SYNC1)
 	, romdisk(255)
-	, allowOtherDiskroms(false)
+	, allowOtherDiskroms(true)
 	, enablePhantomDrives(false)
 	, enableMSXDOS2(true)
 	, nwhSupport(0)
@@ -530,7 +530,7 @@ void NowindHost::GETDPB()
 {
 	byte num = cmdData[7]; // reg_a
 
-	DBERR("GETDPB,  : 0x%02X\n", num);
+	DBERR("GETDPB driveNumber: %u\n", num);
 	SectorMedium* disk = getDisk();
 	if (!disk) {
 		// no such drive or no disk inserted

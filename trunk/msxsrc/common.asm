@@ -12,13 +12,8 @@ initDiskBasic:
         srl a
         inc a
         ld (DEVICE),a
-      
 .continue:        
-        if MSXDOSVER = 1
-        jp $5897            ; todo: aaldert, please replace these magic numbers with labels
-        else
-        jp $495b
-        endif
+        jp ORIGINAL_HOOK_RUNC
 
 ; search call statement or device name
 findStatementName:

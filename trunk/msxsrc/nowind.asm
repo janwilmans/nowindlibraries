@@ -36,6 +36,7 @@
 
         define MSXDOSVER 2
         define PRINTTEXT $728e
+        define ORIGINAL_HOOK_RUNC $495b
 
         incbin "..\roms\MSXDOS22.ROM", 0, $72f0-$4000
 
@@ -103,7 +104,8 @@
         module MSXDOS1_MODULE
 
         define MSXDOSVER 1
-
+        define ORIGINAL_HOOK_RUNC $5897
+        
         incbin "..\roms\DISK.ROM", 0, $7405-$4000
 
         PATCH $4002,bankInit
