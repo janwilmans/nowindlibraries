@@ -38,22 +38,30 @@ nowind
 		tracer.asm
 		msxdos23.asm
 [Open project files]
-0=..\..\..\Documents and Settings\kwik\Desktop\diffffffffffff\good.txt
-1=..\..\..\Documents and Settings\kwik\Desktop\diffffffffffff\bad.txt
-2=nowindDriver.asm
-3=nowind.asm
+0=nowind.asm
+1=debug.asm
+2=common.asm
+3=init.asm
+4=nowindDriver.asm
+5=labels.asm
 [Selected Project Files]
 Main=
-Selected=nowindDriver.asm
-[..\..\..\Documents and Settings\kwik\Desktop\diffffffffffff\good.txt]
-TopLine=1
-Caret=1,1
-[..\..\..\Documents and Settings\kwik\Desktop\diffffffffffff\bad.txt]
-TopLine=1
-Caret=1,1
-[nowindDriver.asm]
-TopLine=169
-Caret=9,188
+Selected=nowind.asm
 [nowind.asm]
 TopLine=1
+Caret=23,5
+[debug.asm]
+TopLine=1
 Caret=1,1
+[common.asm]
+TopLine=1
+Caret=43,9
+[init.asm]
+TopLine=1
+Caret=1,24
+[nowindDriver.asm]
+TopLine=9
+Caret=12,19
+[labels.asm]
+TopLine=3
+Caret=26,7

@@ -300,8 +300,8 @@ void Z80::executeInstructions() {
   
     #ifdef INSTRUCTIONS_ON
     		if (Debug::Instance()->INSTRUCTION_TRACING) {
-    			string disasm = string(Disassembler::Instance()->disAsm(reg_pc, readMem16(reg_pc), readMem16(reg_pc+2)));
-    			DBERR("%04X %-15s ", reg_pc, disasm.c_str());
+   			    string disasm = string(Disassembler::Instance()->disAsm(reg_pc, readMem16(reg_pc), readMem16(reg_pc+2)));
+   			    DBERR("%04X %-15s ", reg_pc, disasm.c_str());
     		}
     #endif
     

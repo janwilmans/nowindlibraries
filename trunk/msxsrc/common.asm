@@ -5,9 +5,15 @@
 
 initDiskBasic:
         DEBUGMESSAGE "initDiskBasic"
-        ld hl,DEVICE
-        res 7,(hl)
 
+        ld a,($f347)    ; TODO! use SLTWRK
+        rlca
+        jr nc,.continue
+        srl a
+        inc a
+        ld (DEVICE),a
+      
+.continue:        
         if MSXDOSVER = 1
         jp $5897            ; todo: aaldert, please replace these magic numbers with labels
         else
