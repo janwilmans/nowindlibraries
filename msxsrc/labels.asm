@@ -1,9 +1,10 @@
 ; labels.asm doesn't generate any code 
 ; it provides names for several memory addresses and some macros
 
-; BIOS routines
+; BIOS
 CALSLT          equ $001c
 ENASLT          equ $0024
+IDBYTE_2D       equ $002d
 INITXT          equ $006C
 SNSMAT          equ $0141
 CHGMOD          equ $005f

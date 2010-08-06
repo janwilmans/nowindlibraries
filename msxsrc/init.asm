@@ -7,7 +7,7 @@
         call installTracer
 
         DEBUGMESSAGE "nowindInit"
-        ld a,($2d)
+        ld a,(IDBYTE_2D)
         or a
         push af
         call z,INITXT                   ; SCREEN 0 (MSX1)
@@ -16,11 +16,11 @@
         call nz,EXTROM
 
         call PRINTTEXT
+        db "Nowind Interface v4.1"
         ifdef DEBUG
-        db "Nowind Interface v4.1 [beta]",0
-        else
-        db "Nowind Interface v4.1",0
+        db " [beta]"
         endif
+        db 0
 
         call enableNowindPage0          ; clear hostToMSXFifo by reading 4Kb of random data
         ld bc,4096

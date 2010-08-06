@@ -48,6 +48,7 @@ drivesCommand:
         ld (LASTDRV),a                  ; install phantom drives (CRTL key)?
         ld a,(hl)                       ; allow other drives (SHIFT key)?
         ld (DEVICE),a
+        ld ($f347),a                    ; TODO: move to SLTWRK entry
         ld a,(hl)                       ; number of drives
         ret
 
@@ -57,9 +58,9 @@ INIENV:
         DEBUGMESSAGE "INIENV"
 
         if MSXDOSVER = 2
-        DEBUGMESSAGE "Lie about being DOS v2.31"
-        ld a,$23
-        ;ld ($f313),a
+;        DEBUGMESSAGE "Lie about being DOS v2.31"
+;        ld a,$23
+;        ld ($f313),a
         endif
         
         call installExtendedBios
@@ -168,6 +169,13 @@ dskchgCommand:
         ret
 
 GETDPB:
+
+; TODO:
+; - onder MSXDOS1 is het beter om F0 niet te ondersteuen (ivm crash bij grote clustersize)
+; - check $f313 voor current dos version (de master kan een andere dos versie hebben, dan het actieve rom)
+; -  
+
+
 ; Input     A   Drive number
 ;           B   Media descriptor (first byte of FAT)
 ;           C   Previous media descriptor (does not seem to be used in other drivers)
