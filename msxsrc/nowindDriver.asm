@@ -56,13 +56,7 @@ INIENV:
 ; Interrupt handler can be installed here and
 ; work area can be initialized when it was requested
         DEBUGMESSAGE "INIENV"
-
-        if MSXDOSVER = 2
-;        DEBUGMESSAGE "Lie about being DOS v2.31"
-;        ld a,$23
-;        ld ($f313),a
-        endif
-        
+      
         call installExtendedBios
 
         call sendRegisters
@@ -97,7 +91,6 @@ DSKIO:
 
         DEBUGMESSAGE "DSKIO"
         DEBUGDUMPREGISTERS
-        
         ;USB_DBMSG "DSKIO"
 
         push af
@@ -109,7 +102,7 @@ DSKIO:
         ld (hl),C_DSKIO
         jp nc,blockRead
 
-        call blockWrite
+        call blockWrite                 ; TODO: should be JP, do need to return
         DEBUGMESSAGE "exit_dskio_wrt"
         ret c
         xor a
@@ -151,7 +144,7 @@ DSKCHG:
 
         if MSXDOSVER == 1
         
-        ld a,d                          ; update dpb in MSXDOS1
+        ld a,d                          ; update dpb in MSXDOS1 (TODO: other diskrom can still be master and DOS1 !!!!)
         ld b,c
         call GETDPB
         ld a,10
@@ -169,44 +162,30 @@ dskchgCommand:
         ret
 
 GETDPB:
-
-; TODO:
-; - onder MSXDOS1 is het beter om F0 niet te ondersteuen (ivm crash bij grote clustersize)
-; - check $f313 voor current dos version (de master kan een andere dos versie hebben, dan het actieve rom)
-; -  
-
-
 ; Input     A   Drive number
 ;           B   Media descriptor (first byte of FAT)
 ;           C   Previous media descriptor (does not seem to be used in other drivers)
 ;           HL  Base address of HL
 ; Output    DPB for specified drive in [HL+1]..[HL+18]
 
-        DEBUGMESSAGE "GETDPB_"
-        DEBUGDUMPREGISTERS
-        
-        ;USB_DBMSG "GETDPB"
-        
+        DEBUGMESSAGE "GETDPB"
         ex de,hl
         inc de
-        ld h,a
+        ld h,a                          ; store drive number 
         ld a,b
         cp $f0
-        ld a,h
-        jr z,.hddImage                 ; commented to test on Turbo-R
-
-;        MESSAGE "ROM GETDPB"
-
-        ld a,b
+        jr z,.makeDPB
         sub $f8
-        ret c                           ; not supported in msxdos1
-        rlca                            ; 2x
+        ret c                           ; not supported
+
+        rlca                            ; multiply by 18
         ld c,a
-        rlca                            ; 4x
-        rlca                            ; 8x
-        rlca                            ; 16x
-        add a,c                         ; 18x
-        ld c,a
+        rlca
+        rlca
+        rlca
+        add a,c
+        
+        ld c,a                          ; update DPB
         ld b,0
         ld hl,supportedMedia
         add hl,bc
@@ -214,9 +193,13 @@ GETDPB:
         ldir
         ret
 
-.hddImage:
-        DEBUGMESSAGE ".hddImage"
-        DEBUGDUMPREGISTERS
+.makeDPB:
+        DEBUGMESSAGE ".makeDPB"
+        ld a,($f313)                    ; don't support mediadescriptor F0 under MSXDOS1       
+        cp 1                            ; large clustersize causes much memory to be allocated (causing crash)
+        ret c
+
+        ld a,h                          ; restore drive number
         call sendRegisters
         ld (hl),C_GETDPB
         ld hl,getdpbCommand
