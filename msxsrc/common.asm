@@ -6,7 +6,7 @@
 initDiskBasic:
         DEBUGMESSAGE "initDiskBasic"
 
-        ld a,($f347)    ; TODO! use SLTWRK
+        ld a,($f347)                    ; TODO! use SLTWRK
         rlca
         jr nc,.continue
         srl a
