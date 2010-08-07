@@ -211,8 +211,6 @@ getdpbCommand:
         ld e,a                          ; get destination from host
         ld d,(hl)
         ld bc,18
-        DEBUGMESSAGE ".ldir"
-        DEBUGDUMPREGISTERS
         ldir
         ret
 

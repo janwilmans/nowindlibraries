@@ -126,25 +126,21 @@ void SlotSelector::configure(unsigned int msxVersion) {
     usbInterface = new NowindInterface("../msxsrc/nowind.rom");
     addMemoryDevice(usbInterface, 1, 0, 0); 
 //  usbInterface->insertDisk(0, "../disks/test.dsk");
-//   usbInterface->insertDisk(0, "../disks/wb.dsk");
-    usbInterface->insertDisk(0, "../disks/hd5mbDOS2.dsk");
-//	usbInterface->insertDisk(0, "../disks/dos2.dsk");
-//	usbInterface->insertHarddisk(0, "../disks/32mb_manuel_hd.dsk", 0);
-//	usbInterface->insertHarddisk(1, "../disks/32mb_manuel_hd.dsk", 0);
-//	usbInterface->insertHarddisk(2, "../disks/32mb_manuel_hd.dsk", 0);
-//	usbInterface->insertHarddisk(3, "../disks/32mb_manuel_hd.dsk", 0);
-//	usbInterface->insertHarddisk(4, "../disks/32mb_manuel_hd.dsk", 0);
-//	usbInterface->insertHarddisk(5, "../disks/32mb_manuel_hd.dsk", 0);
-//	usbInterface->insertHarddisk(6, "../disks/32mb_manuel_hd.dsk", 0);
-//	usbInterface->insertHarddisk(7, "../disks/32mb_manuel_hd.dsk", 0);
-
-//	usbInterface->insertHarddisk(0, "../disks/32mb_manuel_hd.dsk", 0);
-//	usbInterface->insertHarddisk(1, "../disks/32mb_manuel_hd.dsk", 1);
-//	usbInterface->insertHarddisk(2, "../disks/32mb_manuel_hd.dsk", 2);
-//	usbInterface->insertHarddisk(3, "../disks/32mb_manuel_hd.dsk", 3);
-//	usbInterface->insertHarddisk(4, "../disks/32mb_manuel_hd.dsk", 4);
-    
+//  usbInterface->insertDisk(0, "../disks/wb.dsk");
+//  usbInterface->insertDisk(0, "../disks/hd5mbDOS2.dsk");
 //	usbInterface->insertDisk(0, "../disks/dos1.dsk");
+//	usbInterface->insertDisk(0, "../disks/dos2.dsk");
+
+	usbInterface->insertHarddisk(0, "../disks/32mb_manuel_hd.dsk", 0);
+	usbInterface->insertHarddisk(1, "../disks/32mb_manuel_hd.dsk", 1);
+	usbInterface->insertHarddisk(2, "../disks/32mb_manuel_hd.dsk", 2);
+    usbInterface->insertHarddisk(3, "../disks/32mb_manuel_hd.dsk", 3);
+	usbInterface->insertHarddisk(4, "../disks/32mb_manuel_hd.dsk", 4);
+	usbInterface->insertHarddisk(5, "../disks/32mb_manuel_hd.dsk", 5);
+	usbInterface->insertHarddisk(6, "../disks/32mb_manuel_hd.dsk", 6);
+	usbInterface->insertHarddisk(7, "../disks/32mb_manuel_hd.dsk", 7);
+    
+
 #endif
 
 

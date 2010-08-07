@@ -540,121 +540,84 @@ void NowindHost::GETDPB()
 
 	byte sectorBuffer[512];
 	if (disk->readSectors(sectorBuffer, 0, 1)) {
-		// TODO read error
-		sectorBuffer[0] = 0;
 		DBERR("GETDPB error reading sector 0\n");
+		return;
 	}
 
 	word bytesPerSector = sectorBuffer[11]+256*sectorBuffer[12];
 	byte sectorsPerCluster = sectorBuffer[13];
-	word firstFatSector = sectorBuffer[14]+256*sectorBuffer[15];    // reserved sectors officially?
+	word firstFatSector = sectorBuffer[14]+256*sectorBuffer[15];
 	byte fatCopies = sectorBuffer[16];
 	word rootDirEntries = sectorBuffer[17]+256*sectorBuffer[18];
 	word numberOfSectors = sectorBuffer[19]+256*sectorBuffer[20];
 	byte mediaType = sectorBuffer[21];
 	word sectorsPerFat = sectorBuffer[22]+256*sectorBuffer[23];
-	// sectorsPerTrack -> sectorBuffer[24..25]
-	// numberOfHeads -> sectorBuffer[26..27]
-	// numberOfHeads -> sectorBuffer[28..31]
-	// numberOfHeads -> sectorBuffer[28..31]
-	// sectorsBig -> sectorBuffer[32..35]
 
     if (numberOfSectors == 0) {
-        // TODO: check if this should really be done this way!
+	    // use sectorsBig instead
         numberOfSectors = sectorBuffer[32] + 256*sectorBuffer[33] + 256*256*sectorBuffer[34] + 256*256*256*sectorBuffer[35];
         DBERR("Using bigSectors (%u) instead of numberOfSectors!\n", numberOfSectors);
     }
-/*
-    if (rootDirEntries > 254) {
-        //DBERR("rootDirEnties too big for MSXDOS1(%u)! Limited to 254 in DPB now!\n", rootDirEntries);
-        rootDirEntries = 254;
-    }
-*/
+
 	word firstDirSector = firstFatSector + (fatCopies * sectorsPerFat);
 	word entriesPerSector = bytesPerSector / 16;
 	word directorySizeInSectors = (rootDirEntries * entriesPerSector)/bytesPerSector;   // TODO: should be rounded up!?
 	word firstRecordSector = firstDirSector + directorySizeInSectors;
     word maxClusters = ((numberOfSectors - firstRecordSector)/sectorsPerCluster) + 1;
 
-    if (sectorsPerFat > 3) {
-        //DBERR("Size of FAT too large! (MSXDOS reserved 3 sectors when default DPB is $f9)\n");
-        //return;
-    }
-
 	// the actual dpb[0] (drive number) is not send
 	dpbType dpb;
 	
-	dpb.ID = mediaType;     	   	         // offset 1 = 0xF0;  
-	dpb.SECSIZ_L = bytesPerSector & 0xff;    // offset 2 = 0x00;  
-	dpb.SECSIZ_H = bytesPerSector >> 8;	     // offset 3 = 0x02;  
-	dpb.DIRMSK = (bytesPerSector/32)-1;	     // offset 4 = 0x0F, (SECSIZE/32)-1 (TODO: check berekening!)
+	dpb.ID = mediaType;     	   	         // offset 1
+	dpb.SECSIZ_L = bytesPerSector & 0xff;    // offset 2
+	dpb.SECSIZ_H = bytesPerSector >> 8;	     // offset 3
+	dpb.DIRMSK = (bytesPerSector/32)-1;	     // offset 4 (TODO: check berekening!)
 
 	byte dirShift;
-	for(dirShift=0;dpb.DIRMSK & (1<<dirShift);dirShift++) {}
+	for (dirShift=0;dpb.DIRMSK & (1<<dirShift);dirShift++) {}
 
-	dpb.DIRSHFT = dirShift;		             // offset 5 = 0x04, nr of 1-bits in DIRMSK
-	dpb.CLUSMSK = sectorsPerCluster - 1;     // offset 6 = 0x03, nr of (sectors/cluster)-1
+	dpb.DIRSHFT = dirShift;		             // offset 5 (nr of 1-bits in DIRMSK)
+	dpb.CLUSMSK = sectorsPerCluster - 1;     // offset 6
 
 	byte cluShift;
-	for(cluShift=0;dpb.CLUSMSK & (1<<cluShift);cluShift++) {}
+	for (cluShift=0;dpb.CLUSMSK & (1<<cluShift);cluShift++) {}
 
-	dpb.CLUSSHFT = cluShift+1;            	 // offset 7 = 0x03, nr of bits in clusterMask+1 
+	dpb.CLUSSHFT = cluShift+1;            	 // offset 7 (nr of bits in clusterMask+1)
 
-	dpb.FIRFAT_L = firstFatSector & 0xFF;    // offset 8 = 0x01, sectornumber of first FAT (normally just the bootsector is reserved)
-	dpb.FIRFAT_H = firstFatSector >> 8;      // offset 9 = 0x00, idem 
-	dpb.FATCNT = fatCopies;          	     // offset 10 = 0x02, number of FATs
-	dpb.MAXENT = rootDirEntries;       	     // offset 11 = 0x00;  // we come up with 0xFE here, why?
+	dpb.FIRFAT_L = firstFatSector & 0xFF;    // offset 8
+	dpb.FIRFAT_H = firstFatSector >> 8;      // offset 9
+	dpb.FATCNT = fatCopies;          	     // offset 10 (number of FATs)
+	dpb.MAXENT = rootDirEntries;       	     // offset 11
 
 	// the data of the disk starts at the firstDIRsector + size of the directory area
 	// (the "directory" area contains max. 254 entries of 16 bytes, one entry of each file)
 
-	dpb.FIRREC_L = firstRecordSector & 0xFF; // offset 12 = 0x21, number of first data sector
-	dpb.FIRREC_H = firstRecordSector >> 8;   // offset 13 = 0x0, idem 
+	dpb.FIRREC_L = firstRecordSector & 0xFF; // offset 12 (number of first data sector, low)
+	dpb.FIRREC_H = firstRecordSector >> 8;   // offset 13 (number of first data sector, high)
 	
 	// maxClus is the number of clusters on disk not including reserved sector, 
 	// fat sectors or directory sectors, see p260 of Msx Redbook
 
-	dpb.MAXCLUS_L = maxClusters & 0xFF;      // offset 14 = 0xF8, highest cluster number
-	dpb.MAXCLUS_H = maxClusters >> 8;        // offset 15 = 0x9, idem
+	dpb.MAXCLUS_L = maxClusters & 0xFF;      // offset 14 (highest cluster number, low)
+	dpb.MAXCLUS_H = maxClusters >> 8;        // offset 15 (highest cluster number, high)
 
-	dpb.FATSIZ = sectorsPerFat;              // offset 16 = 0x8, number of sectors/FAT	 
+	dpb.FATSIZ = sectorsPerFat;              // offset 16 (number of sectors/FAT)
 
-	dpb.FIRDIR_L = firstDirSector & 0xFF;    // offset 17 = 0x11;
-	dpb.FIRDIR_H = firstDirSector >> 8;      // offset 18 = 0x00; 
+	dpb.FIRDIR_L = firstDirSector & 0xFF;    // offset 17
+	dpb.FIRDIR_H = firstDirSector >> 8;      // offset 18
 
 	// We dont know what sectorBuffer 0x1C-1F contains on MSX harddisk images 
 
- 	byte dpb_pre[18];
-	dpb_pre[0] = 0xF0;
-	dpb_pre[1] = 0x00;
-	dpb_pre[2] = 0x02;
-	dpb_pre[3] = 0x0F;
-	dpb_pre[4] = 0x04;
-	dpb_pre[5] = 0x03;
-	dpb_pre[6] = 0x03;
-	dpb_pre[7] = 0x01;
-	dpb_pre[8] = 0x00;
-	dpb_pre[9] = 0x02;
-	dpb_pre[10] = 0x00;
-	dpb_pre[11] = 0x21;
-	dpb_pre[12] = 0x0;
-	dpb_pre[13] = 0xF8;
-	dpb_pre[14] = 0x9;
-	dpb_pre[15] = 0x8;
-	dpb_pre[16] = 0x11;
-	dpb_pre[17] = 0x00;
-
 	nwhSupport->sendHeader();
-	// send dest. address
+
+	// send destination address
 	nwhSupport->send(cmdData[2]);	// reg_e
 	nwhSupport->send(cmdData[3]);	// reg_d
-	byte * refData = (byte *) &dpb_pre;
-	byte * sendBuffer = (byte *) &dpb;
 
+	byte * sendBuffer = (byte *) &dpb;
 	for (int i=0;i<18;i++) {
-		DBERR("GETDPB offset [%d]: 0x%02X, correct: 0x%02X\n", i+1, sendBuffer[i], refData[i]);
+		DBERR("GETDPB offset [%d]: 0x%02X\n", i+1, sendBuffer[i]);
 		nwhSupport->send(sendBuffer[i]);
-		//nwhSupport->send(refData[i]);
 	}
 }
 
