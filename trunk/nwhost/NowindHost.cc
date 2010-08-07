@@ -43,7 +43,7 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	, state(STATE_SYNC1)
 	, romdisk(255)
 	, allowOtherDiskroms(true)
-	, enablePhantomDrives(false)
+	, enablePhantomDrives(true)
 	, enableMSXDOS2(true)
 	, nwhSupport(0)
 {
@@ -562,14 +562,14 @@ void NowindHost::GETDPB()
     if (numberOfSectors == 0) {
         // TODO: check if this should really be done this way!
         numberOfSectors = sectorBuffer[32] + 256*sectorBuffer[33] + 256*256*sectorBuffer[34] + 256*256*256*sectorBuffer[35];
-        DBERR("Using bigSectors (%u) in stead of numberOfSectors!\n", numberOfSectors);
+        DBERR("Using bigSectors (%u) instead of numberOfSectors!\n", numberOfSectors);
     }
-
+/*
     if (rootDirEntries > 254) {
         //DBERR("rootDirEnties too big for MSXDOS1(%u)! Limited to 254 in DPB now!\n", rootDirEntries);
         rootDirEntries = 254;
     }
-
+*/
 	word firstDirSector = firstFatSector + (fatCopies * sectorsPerFat);
 	word entriesPerSector = bytesPerSector / 16;
 	word directorySizeInSectors = (rootDirEntries * entriesPerSector)/bytesPerSector;   // TODO: should be rounded up!?
