@@ -90,6 +90,7 @@ public:
     void clearRequests();
     void addRequest(std::vector<byte> command);
 	void getDosVersion();
+	std::string nowMap(std::string arguments);
 
 private:
     void receiveExtraData();
