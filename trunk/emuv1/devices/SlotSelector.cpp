@@ -22,6 +22,7 @@ SlotSelector::SlotSelector() {
     DBERR("SlotSelector constructor...\n");
 
     usbInterface = 0;
+    usbInterface2 = 0;
     cpu = Z80::Instance();
 
     blockCount = 64*1024/BLOCKSIZE;
@@ -123,9 +124,9 @@ void SlotSelector::configure(unsigned int msxVersion) {
 
 
 #ifdef NOWIND
-    usbInterface2 = new NowindInterface("../msxsrc/nowind.rom");
-    addMemoryDevice(usbInterface2, 1, 0, 0);
-    usbInterface2->insertDisk(0, "../disks/dos1.dsk");
+//    usbInterface2 = new NowindInterface("../msxsrc/nowind.rom");
+//    addMemoryDevice(usbInterface2, 1, 0, 0);
+//    usbInterface2->insertDisk(0, "../disks/dos1.dsk");
 
     usbInterface = new NowindInterface("../msxsrc/nowind.rom");
     addMemoryDevice(usbInterface, 2, 0, 0); 
