@@ -93,5 +93,10 @@ writeBlock:
         dec a
         jp p,exit2
         
-        ; TODO: use blockWrite here!
-        ret  
+        push hl
+        call sendRegisters
+        ld (hl),C_BLOCKWRITE
+        pop hl
+
+        ld a,h
+        jp blockWrite

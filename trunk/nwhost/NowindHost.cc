@@ -97,8 +97,8 @@ void NowindHost::write(byte data, unsigned int time)
 	if ((duration >= 500) && (state != STATE_SYNC1)) {
 		// timeout (500ms), start looking for AF05
         DBERR("Protocol timeout occurred in state %d, purge buffers and switch back to STATE_SYNC1\n", state);
-		//nwhSupport->purge();
-		//state = STATE_SYNC1;
+		nwhSupport->purge();
+		state = STATE_SYNC1;
 	}
     //DBERR("received: 0x%02x (in state: %d)\n", data, state);
 	switch (state) {

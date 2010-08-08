@@ -55,7 +55,7 @@ nowind
 14=openDiskrom\openDiskrom.asm
 [Selected Project Files]
 Main=
-Selected=extendedBios.asm
+Selected=labels.asm
 [nowind.asm]
 TopLine=9
 Caret=29,38
@@ -72,8 +72,8 @@ Caret=55,73
 TopLine=78
 Caret=113,105
 [labels.asm]
-TopLine=73
-Caret=12,99
+TopLine=36
+Caret=2,68
 [..\emuv1\DPB.BAS]
 TopLine=1
 Caret=1,12
@@ -93,8 +93,8 @@ Caret=20,5
 TopLine=1
 Caret=1,16
 [extendedBios.asm]
-TopLine=52
-Caret=1,98
+TopLine=55
+Caret=19,98
 [slotRoutines.asm]
 TopLine=101
 Caret=16,133
