@@ -93,10 +93,7 @@ writeBlock:
         dec a
         jp p,exit2
         
-        push hl
         call sendRegisters
         ld (hl),C_BLOCKWRITE
-        pop hl
-
-        ld a,h
+        ; reg_a is reg_h
         jp blockWrite
