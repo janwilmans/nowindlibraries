@@ -283,13 +283,13 @@ void NowindHost::executeCommand()
 	case 0x8F: auxOut();      state = STATE_SYNC1; break;
 	case 0x90: receiveExtraData(); state = STATE_MESSAGE; break;
 	case 0x91: receiveExtraData(); state = STATE_IMAGE; break;
-
     case 0x92: getDosVersion(); state = STATE_SYNC1; break;
 	case 0x93: commandRequested(); state = STATE_SYNC1; break;
 	//case 0xFF: vramDump();
 	case 0x94: blockReadCmd(); break;
     case 0x95: blockWriteCmd(); break;
     case 0x96: receiveExtraData(); state = STATE_CPUINFO; break;
+    case 0x97: receiveExtraData(); state = STATE_NOWMAP; break;
 	default:
 		// Unknown USB command!
 		state = STATE_SYNC1;
@@ -727,8 +727,6 @@ void NowindHost::getDosVersion()
 	nwhSupport->sendHeader();
 	nwhSupport->send(enableMSXDOS2 ? 1:0);
 }
-
-
 
 // the MSX asks whether the host has a command  
 // waiting for it to execute

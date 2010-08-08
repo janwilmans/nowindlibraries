@@ -289,3 +289,7 @@ void Image::GetPartitionInfo(const nw_byte * mbr, PartitionInfo *info, unsigned 
 	info->mediaDescriptor = 0xff;
 }
 
+std::string Image::getDescription()
+{
+    return "ik ben een disk";
+}

@@ -25,6 +25,7 @@ public:
 	virtual int insertDisk(std::string filename);
 	virtual bool diskChanged();
 	virtual bool isRomdisk();
+	virtual std::string getDescription();
 };
 
 #endif // IMAGEHANDLER_H
