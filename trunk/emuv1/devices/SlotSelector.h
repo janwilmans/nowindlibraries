@@ -37,6 +37,7 @@ private:
         EmptyPage * emptyPage;
 public:
         NowindInterface * usbInterface;
+        NowindInterface * usbInterface2;
         WD279X * wd279x;
 
         static SlotSelector * Instance();

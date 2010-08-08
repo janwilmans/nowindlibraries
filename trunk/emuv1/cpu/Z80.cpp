@@ -429,6 +429,14 @@ TODO: voor alle pages, en geen foutmelding geven wanneer het slot niet expanded 
         }
     }
 
+    // for usbInterface testing...
+    if (slotSelector->usbInterface2 != 0) {
+        if (slotSelector->usbInterface2->isEnabled(address)) {
+            return slotSelector->usbInterface2->read(address);
+        }
+    }
+
+
     // for WD279X testing...
     if (slotSelector->wd279x != 0) {
         if (slotSelector->wd279x->isEnabled(address)) {
