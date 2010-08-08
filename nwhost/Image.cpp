@@ -291,5 +291,5 @@ void Image::GetPartitionInfo(const nw_byte * mbr, PartitionInfo *info, unsigned 
 
 std::string Image::getDescription()
 {
-    return "ik ben een disk";
+    return filename;
 }
