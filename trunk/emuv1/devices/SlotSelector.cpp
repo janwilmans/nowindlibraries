@@ -130,12 +130,12 @@ void SlotSelector::configure(unsigned int msxVersion) {
 
     usbInterface = new NowindInterface("../msxsrc/nowind.rom");
     addMemoryDevice(usbInterface, 2, 0, 0); 
-    usbInterface->insertDisk(0, "../disks/wb.dsk");
 
+//  usbInterface->insertDisk(0, "../disks/wb.dsk");
 //  usbInterface->insertDisk(0, "../disks/test.dsk");
 //  usbInterface->insertDisk(0, "../disks/hd5mbDOS2.dsk");
 //	usbInterface->insertDisk(0, "../disks/dos1.dsk");
-//	usbInterface->insertDisk(0, "../disks/dos2.dsk");
+	usbInterface->insertDisk(0, "../disks/dos2.dsk");
 
 //	usbInterface->insertHarddisk(0, "../disks/32mb_manuel_hd.dsk", 0);
 //	usbInterface->insertHarddisk(1, "../disks/32mb_manuel_hd.dsk", 1);

@@ -54,9 +54,11 @@ determineFunction:
         dec a
         jr z,debugMessage               ; function 2
         dec a
-        jr z,writeBlock                 ; function 3
+        jr z,sendCommand                ; function 3
         dec a
-        jr z,readBlock                  ; function 4
+        jr z,writeBlock                 ; function 4
+        dec a
+        jr z,readBlock                  ; function 5
 
 exit:
         pop af
@@ -94,6 +96,11 @@ debugMessage:
         ld (usbWritePage1),a
         or a
         jr nz,.loop
+        ret
+
+sendCommand:
+        call sendRegisters
+        ld (hl),C_NOWMAP
         ret
 
 writeBlock:
