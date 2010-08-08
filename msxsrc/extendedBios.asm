@@ -11,13 +11,6 @@ installExtendedBios:
         ld bc,5
         ldir
 
-        push hl                         ; determine device number
-        xor a
-        ld de,$4e01
-        call EXTBIO
-        pop hl
-        ld (hl),a
-
         call GETSLT                     ; install new EXTBIO hook
         ld l,$f7
         ld h,a
@@ -29,68 +22,59 @@ installExtendedBios:
         ret
 
 extendedBios:
-        ; broadcast (0x00) not implemented
-        ; system exclusive (0xff) not implemented
+        ; broadcast (D = 0x00) not implemented
+        ; system exclusive (D = 0xff) not implemented
 
         ei
         push af
         ld a,d
-        cp $4e
-        jr z,determineFunction
-.exit:
-        push hl
-        push bc
-        call getEntrySLTWRK
-        inc l                           ; previous EXTBIO hook
-        push hl
-        pop ix
-        pop bc
-        pop hl
-        pop af
-        jp (ix)                         ; process other EXTBIO handles
+        sub $4e                         ; Nowind device code?
+        jr nz,exit
 
 determineFunction:
-        push hl
-        ld hl,functionTable - 2 * $4e00
-        add hl,de
-        add hl,de
-        ld a,(hl)
-        inc hl
-        ld h,(hl)
-        ld l,a
+        or e                            ; reg_e contains function number
+        jr z,getNowindSlot
+        dec a
+        jr z,numberOfDevices
+        dec a
+        jr z,debugMessage
+        dec a
+        jr z,writeBlock
+exit:
+        pop af
+exit2:
+        push hl                         ; pass control to previous EXTBIO implementations
+        push bc
+        push af
+        call getEntrySLTWRK
+        pop af
+        pop bc
+        inc l                           ; previous EXTBIO hook
         ex (sp),hl
         ret
 
-functionTable:
-        dw getNowindSlot
-        dw numberOfDevices
-        dw debugMessage
-
+        
 getNowindSlot:
         DEBUGMESSAGE "getNowindSlot"
-        pop af
+        pop af                          ; this interface?
         dec a
-        push af
-        jp p,extendedBios.exit         ; not this device
+        jp p,exit2
 
-        pop af
         call getSlotPage1
-        scf
+        scf                             ; can be used to detect Nowind interface 
         ret
 
 numberOfDevices:
         DEBUGMESSAGE "numberOfDevices"
         pop af
-        inc a
-        push af
-        jr extendedBios.exit
+        inc a                           ; increment number of devices
+        jr exit2
 
 debugMessage:
         DEBUGMESSAGE "debugMessage"
-        pop af
+        pop af                          ; this interface?
         dec a
-        push af
-        jp p,extendedBios.exit
+        jp p,exit2
 
         push hl
         call sendRegisters
@@ -101,6 +85,13 @@ debugMessage:
         ld (usbWritePage1),a
         or a
         jr nz,.loop
-
-        pop af
         ret
+
+writeBlock:
+        DEBUGMESSAGE "writeBlock"
+        pop af                          ; this interface?
+        dec a
+        jp p,exit2
+        
+        ; TODO: use blockWrite here!
+        ret  

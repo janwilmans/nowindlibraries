@@ -102,7 +102,7 @@ DSKIO:
         ld (hl),C_DSKIO
         jp nc,blockRead
 
-        call blockWrite                 ; TODO: should be JP, do need to return
+        call blockWrite                 ; TODO: should be JP, no need to return (is this done to set reg_a to 0?)
         DEBUGMESSAGE "exit_dskio_wrt"
         ret c
         xor a

@@ -237,6 +237,7 @@ executeCommandNowindInPage2:
 
 blockRead:
 ; Input     A   Transfer address (high byte)
+; TODO: aaldert aanvullen!
 
         rlca                            ; tranfer address < 0x8000 ?
         jr c,.page23
@@ -383,6 +384,8 @@ slowTransfer:
         ret
 
 blockWrite:
+; TODO: aaldert documenteren!
+
         rlca
         jr c,.page23
 
