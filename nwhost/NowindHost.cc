@@ -413,6 +413,8 @@ void NowindHost::doDiskWrite2()
 // dummy command (reads first 16Kb of disk as test)
 void NowindHost::blockReadCmd()
 {
+    DBERR("blockReadCmd\n");
+/*
     SectorMedium* disk = drives[0]->getSectorMedium();
     
     vector<byte> data(16*1024);
@@ -422,10 +424,12 @@ void NowindHost::blockReadCmd()
 	
     blockRead.init(0x8000, 0x4000, data);
     state = STATE_BLOCKREAD;	
+*/
 }
 
 void NowindHost::blockWriteCmd()
 {
+    DBERR("blockWriteCmd\n");
 }
 
 void NowindHost::debugMessage(const char *, ...) const
