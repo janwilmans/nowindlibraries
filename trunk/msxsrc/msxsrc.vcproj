@@ -150,7 +150,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assemble $(InputDir)$(InputName).bin"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
 						Outputs="$(InputDir)$(InputName).bin"
 					/>
 				</FileConfiguration>
@@ -208,7 +208,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assemble $(InputDir)$(InputName).out"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
 						Outputs="$(InputDir)$(InputName).out"
 					/>
 				</FileConfiguration>
@@ -232,7 +232,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assembly $(InputDir)$(InputName).rom"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
 						Outputs="$(InputDir)$(InputName).rom"
 					/>
 				</FileConfiguration>

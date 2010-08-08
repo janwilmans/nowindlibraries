@@ -27,3 +27,7 @@ bool ImageHandler::diskChanged() {
 bool ImageHandler::isRomdisk() {
 	return image.isRomdisk();
 }
+
+std::string ImageHandler::getDescription() {
+	return image.getDescription();
+}

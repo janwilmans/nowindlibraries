@@ -16,7 +16,7 @@
         call nz,EXTROM
 
         call PRINTTEXT
-        db "Nowind Interface v4.1"
+        db "Nowind Interface v4.2"
         ifdef DEBUG
         db " [beta]"
         endif

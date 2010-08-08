@@ -73,7 +73,7 @@ void HostApp::hostImage()
 
 int HostApp::execute()
 {
-    Util::debug("Nowind Interface USB host application v4.1\n");
+    Util::debug("Nowind Interface USB host application v4.2\n");
 
     mHostService->setAttribute(enable_phantom_drives, false);
 	mHostService->setAttribute(allow_other_diskroms, false);

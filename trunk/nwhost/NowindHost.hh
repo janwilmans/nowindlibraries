@@ -80,6 +80,7 @@ public:
 		STATE_MESSAGE,   // waiting for null-terminated message
 		STATE_BLOCKREAD, // in block-transfer
 		STATE_CPUINFO,   // receiving slot/stack info
+		STATE_NOWMAP,    // receive the NOWMAP string
 	};
 
 	virtual void debugMessage(const char *cFormat, ...) const;

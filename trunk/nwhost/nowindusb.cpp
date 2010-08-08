@@ -128,9 +128,9 @@ unsigned int NowindHost_InsertHarddiskPartitions(unsigned int driveNr, std::stri
 
 	for(std::list<PartitionInfo>::iterator p = partitionList.begin(); p != partitionList.end();p++)
 	{
-		if ((*p).bootable) {
-			(*p).inserted = true;
-			unsigned int result = NowindHost_InsertPartition(driveNr, (*p).index, aHarddiskimage);
+		if (p->bootable) {
+			p->inserted = true;
+			unsigned int result = NowindHost_InsertPartition(driveNr, p->index, aHarddiskimage);
 			if (result > 0)
 			{
 				driveNr++;
@@ -142,8 +142,8 @@ unsigned int NowindHost_InsertHarddiskPartitions(unsigned int driveNr, std::stri
 
 	for(std::list<PartitionInfo>::iterator p = partitionList.begin(); p != partitionList.end();p++)
 	{
-		if ((*p).inserted) continue;
-		unsigned int result = NowindHost_InsertPartition(driveNr, (*p).index, aHarddiskimage);
+		if (p->inserted) continue;
+		unsigned int result = NowindHost_InsertPartition(driveNr, p->index, aHarddiskimage);
 		if (result > 0)
 		{
 			driveNr++;
