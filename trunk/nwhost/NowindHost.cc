@@ -1,5 +1,6 @@
 #include "DiskHandler.hh"
 #include "SectorMedium.hh"
+#include "Image.h"
 #include "NowindHostSupport.hh"
 
 #include <fstream>
@@ -295,6 +296,24 @@ void NowindHost::executeCommand()
 		state = STATE_SYNC1;
 		break;
 	}
+}
+
+// nowmap <drive> <hdd> <partition>  [/Nx]
+// ex. nowmap 1 0 1
+// ex. nowmap 1 0 1 /N1
+std::string NowindHost::nowMap(std::string arguments)
+{
+    std::string response;
+    char temp[250];
+    response = "Nowind Map v1.2\n";
+    
+    for (unsigned i = 0; i < drives.size(); ++i) {
+        sprintf(temp, "Drive %d", i);
+        response += std::string(temp);
+        Image* image = dynamic_cast<Image*>(drives[i]);
+        response += std::string(image->getDescription());
+    }
+    return "\n";
 }
 
 void NowindHost::receiveExtraData()
