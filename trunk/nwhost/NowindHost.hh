@@ -143,6 +143,7 @@ private:
 	unsigned transferSize;   // size of current diskwrite chunk
 
 	byte romdisk;            // index of romdisk (255 = no romdisk)
+	byte driveOffset;
 	bool allowOtherDiskroms;
 	bool enablePhantomDrives;
 	bool enableMSXDOS2;
