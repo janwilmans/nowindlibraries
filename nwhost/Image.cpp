@@ -59,6 +59,8 @@ bool Image::openPartitionImage(int partitionNumber, bool ignoreBootflag, string 
     if (!reOpenDiskImage()) return false;		// could not open image
 	
 	offset = 0;
+    harddiskPartition = true;
+    this->partitionNr = partitionNumber;
 
 	const nw_byte * mbr = GetNewPartitionTable();
 	PartitionInfo p;
@@ -157,23 +159,7 @@ int Image::readSectors(nw_byte * buffer, unsigned int startSector, unsigned int 
 
     stream->seekg(source);
     stream->read((char *)buffer,count);
-	if (stream->fail()) return -3;
-
-/*    
-    char *buf = buffer;
-    for(unsigned int sector=startSector;sector<sectorCount;sector++) {
-		// write sector to disk for debugging
-		char filename[250];
-		sprintf(filename,"sector_%i.bin",sector);
-		ofstream ofs(filename,ios::binary|ios::trunc);
-		if (ofs.fail()) {
-				DBERR("Error opening file %s!\n", filename.c_str());
-		}
-		ofs.write((char *)buf,512);
-		ofs.close();
-		buf+=512;
-	}
-*/   
+	if (stream->fail()) return -3; 
 	return 0;
 }
 
@@ -293,3 +279,19 @@ std::string Image::getDescription()
 {
     return filename;
 }
+
+bool Image::isHarddiskPartition()
+{
+    return harddiskPartition;
+}
+
+unsigned int Image::getPartitionNr()
+{
+    return partitionNr;
+}
+
+unsigned int Image::getPartitionOffset()
+{
+    return offset;
+}
+

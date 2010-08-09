@@ -111,7 +111,6 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="$(ProjectDir)..\general"
 				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_WARNINGS"

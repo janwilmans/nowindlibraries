@@ -1,4 +1,6 @@
 // ImageHandler.cpp
+// an image handler is like a diskdrive, it contains a SectorMedium (a disk) 
+// it mostly just passed information from/to/about the disk it contains
 
 #include <stdio.h>
 #include <cassert>

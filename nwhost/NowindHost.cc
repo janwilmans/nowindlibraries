@@ -47,6 +47,7 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	, enablePhantomDrives(true)
 	, enableMSXDOS2(true)
 	, nwhSupport(0)
+	, driveOffset(0)
 {
     // test for requestWait
     vector<byte> requestWait;
@@ -63,6 +64,7 @@ void NowindHost::initialize()
     }
     blockRead.initialize(nwhSupport);
     device.initialize(nwhSupport);
+    
 }
 
 NowindHost::~NowindHost()
@@ -219,6 +221,10 @@ void NowindHost::reportCpuInfo()
 
 void NowindHost::executeCommand()
 {
+
+    DBERR(nowMap("1 0 1").c_str());
+    DBERR("\n");
+
 	assert(recvCount == 9);
 	byte cmd = cmdData[8];
 	switch (cmd) {
@@ -303,17 +309,23 @@ void NowindHost::executeCommand()
 // ex. nowmap 1 0 1 /N1
 std::string NowindHost::nowMap(std::string arguments)
 {
-    std::string response;
     char temp[250];
-    response = "Nowind Map v1.2\n";
-    
-    for (unsigned i = 0; i < drives.size(); ++i) {
-        sprintf(temp, "Drive %d", i);
-        response += std::string(temp);
-        Image* image = dynamic_cast<Image*>(drives[i]);
-        response += std::string(image->getDescription());
+    char letter = 'A';
+    std::string response = "Nowind Map v1.2\n";
+    for (unsigned i = 0; i < driveOffset; ++i) {
+        sprintf(temp, "Drive %c: DiskRom\n", letter); // todo: get SLOT ?-? from drvtbl
+        letter++;
+        response += std::string(temp);        
     }
-    return "\n";
+  
+    for (unsigned i = 0; i < drives.size(); ++i) {
+        Image* image = dynamic_cast<Image*>(drives[i]->getSectorMedium());
+        sprintf(temp, "Drive %c: %s, part %d\n", letter, image->getDescription().c_str(), image->getPartitionNr());
+        letter++;
+        response += std::string(temp);
+    }
+    response += "\n";
+    return response;
 }
 
 void NowindHost::receiveExtraData()
@@ -644,13 +656,14 @@ void NowindHost::GETDPB()
 	}
 }
 
-
+// msx sends the amount of drives already installed in reg_a
 void NowindHost::DRIVES()
 {
+	byte reg_a = cmdData[7];
 	// at least one drive (MSXDOS1 cannot handle 0 drives)
 	byte numberOfDrives = std::max<byte>(1, byte(drives.size()));
 
-	byte reg_a = cmdData[7];
+    driveOffset = reg_a;
 	nwhSupport->sendHeader();
 	nwhSupport->send(getEnablePhantomDrives() ? 0x02 : 0);
 	nwhSupport->send(reg_a | (getAllowOtherDiskroms() ? 0 : 0x80));
