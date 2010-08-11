@@ -22,7 +22,7 @@
 #include <libgeneral.h>
 #include <libnowind.h>
 
-#define LCase(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) tolower)
+#define ToLower(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) tolower)
 
 using namespace std;
 using namespace general;
@@ -341,7 +341,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
       while (optind < argc)
       {
         string arg = string(argv[optind]);
-		LCase(arg);
+		ToLower(arg);
         if (arg.find(".dsk", 0) != string::npos) {
             mHostService->setImage(driveNr, string(argv[optind]));
 			driveNr++;

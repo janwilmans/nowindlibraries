@@ -10,8 +10,33 @@
 #include <time.h>
 #include <iostream>
 
+#define ToUpper(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper)
+
 #define NWHOST_API_EXPORT
 #include "NowindHost.hh"
+
+// splits a string into parts separated by delimeters (returns a vector of substrings)
+std::vector<std::string> split(const std::string& s, const std::string& delim, const bool keep_empty = true) {
+    std::vector<std::string> result;
+    if (delim.empty()) {
+        result.push_back(s);
+        return result;
+    }
+    std::string::const_iterator substart = s.begin(), subend;
+    while (true) {
+        subend = search(substart, s.end(), delim.begin(), delim.end());
+        std::string temp(substart, subend);
+        if (keep_empty || !temp.empty()) {
+            result.push_back(temp);
+        }
+        if (subend == s.end()) {
+            break;
+        }
+        substart = subend + delim.size();
+    }
+    return result;
+}
+
 
 /*
 For debugging:
@@ -304,11 +329,14 @@ void NowindHost::executeCommand()
 	}
 }
 
-// nowmap <drive> <hdd> <partition>  [/Nx]
-// ex. nowmap 1 0 1
-// ex. nowmap 1 0 1 /N1
+// nowmap <drive_id> <partition> [/Nx] [/L]
+// ex. nowmap 0 1
+// ex. nowmap 0 1 /N1
 std::string NowindHost::nowMap(std::string arguments)
 {
+    ToUpper(arguments);
+    DBERR("arguments: %s\n", arguments.c_str());
+
     char temp[250];
     char letter = 'A';
     std::string response = "Nowind Map v1.2\n";
@@ -320,11 +348,36 @@ std::string NowindHost::nowMap(std::string arguments)
   
     for (unsigned i = 0; i < drives.size(); ++i) {
         Image* image = dynamic_cast<Image*>(drives[i]->getSectorMedium());
-        sprintf(temp, "Drive %c: %s, part %d\n", letter, image->getDescription().c_str(), image->getPartitionNr());
+        sprintf(temp, "Drive %c, driveId %d (%s), partition %d\n", letter, i, image->getDescription().c_str(), image->getPartitionNr());
         letter++;
         response += std::string(temp);
     }
     response += "\n";
+    
+    if (arguments.find("/L") != string::npos)
+    {
+        // list drives (response already contains correct text)
+        return response;
+    }
+    
+    // interpret arguments
+    vector<string> args = split(arguments, " ");
+    if (args.size() != 2)
+    {
+        return "error: no 2 arguments found\nusage: nowmap <drive_id> <partition> [/Nx] [/L]\n";
+    }
+ 
+    unsigned int driveId = atoi(args[0].c_str());
+    unsigned int partition = atoi(args[1].c_str());
+    
+    if (driveId >= drives.size())
+    {
+        return "error: drive_id invalid!\nusage: nowmap <drive_id> <partition> [/Nx] [/L]\n";
+    }
+    Image* image = dynamic_cast<Image*>(drives[driveId]->getSectorMedium());
+    // set partition 
+    // image->
+    
     return response;
 }
 
