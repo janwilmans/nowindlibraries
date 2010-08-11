@@ -11,7 +11,7 @@
 #include <io.h>         // not portable to linux nor MacOS, TODO: fix!
 #endif
 
-#define UCase(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper)
+#define ToUpper(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper)
 
 using namespace std;
 
@@ -86,7 +86,7 @@ VirtualDrive::VirtualDrive() {
     do {
         DBERR("file: %s size: %u\n", data.name, data.size);
         string filename(data.name);
-        UCase(filename);
+        ToUpper(filename);
         addFile(Debug::Instance()->getPath()+ "virtualdisk" + DIR_SEPARATOR + filename);
     } while( _findnext(sHandle, &data) == 0 );
     _findclose( sHandle );

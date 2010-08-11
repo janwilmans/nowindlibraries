@@ -5,8 +5,8 @@
  *                    Aaldert Dekker <a.dekker@student.tue.nl>
  */
 
-#define UCase(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper)
-#define LCase(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) tolower)
+#define ToUpper(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper)
+#define ToLower(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) tolower)
  
 #include "Media.h"
 #include "Debug.h"
@@ -47,7 +47,7 @@ void Media::insertMedia(string filename, unsigned int priority) {
     if (priority != 0) priority = 1;
 
     string extention = filename.substr(filename.size()-3);
-    UCase(extention);
+    ToUpper(extention);
     
     if (extention == "DSK") { 
         // disk
@@ -86,7 +86,7 @@ void Media::insertMedia(string filename, unsigned int priority) {
 void Media::insertNowindImage(string filename, Uint32 size) {
 
     string extention = filename.substr(filename.size()-3);
-    UCase(extention);
+    ToUpper(extention);
 
     char buf[512];
     for (Uint32 i=0;i<512;i++) buf[i] = 0;
