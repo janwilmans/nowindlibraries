@@ -23,6 +23,7 @@ private:
 	unsigned int fileSize;
     unsigned int partitionNr;
     bool harddiskPartition;
+    PartitionInfo partitionInfo;
     
 public:
     std::string filename;
@@ -44,13 +45,16 @@ public:
     virtual unsigned int getPartitionNr();
     virtual unsigned int getPartitionOffset();
     
+    void SetActivePartition(int partitionNumber);
+    
     virtual int readSectors(nw_byte * buffer, unsigned int startSector, unsigned int sectorCount);
     virtual int writeSectors(nw_byte * buffer, unsigned int startSector, unsigned int sectorCount);
 
 	virtual SectorMedium * getSectorMedium() { return this; }
 
-	const nw_byte * GetNewPartitionTable();
-	static void GetPartitionInfo(const nw_byte * mbr, PartitionInfo *info, unsigned int partitionNumber);
+	const nw_byte * GetNewPartitionTable(); // obsolete, remove
+	static void GetPartitionInfo(const nw_byte * mbr, PartitionInfo *info, unsigned int partitionNumber); // obsolete, remove
+	void ReadPartitionInfo(int partitionNumber); // new
 };
 
 #endif //IMAGE_H

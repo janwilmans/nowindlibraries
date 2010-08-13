@@ -11,7 +11,6 @@ public:
     PartitionInfo();
 	virtual ~PartitionInfo();
 
-	unsigned char mediaDescriptor;
 	unsigned int index;
     unsigned int startLBA;
     unsigned int length;

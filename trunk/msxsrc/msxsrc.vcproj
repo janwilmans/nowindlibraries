@@ -150,7 +150,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assemble $(InputDir)$(InputName).bin"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
 						Outputs="$(InputDir)$(InputName).bin"
 					/>
 				</FileConfiguration>
@@ -321,6 +321,49 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<Filter
+				Name="dostools"
+				>
+				<File
+					RelativePath=".\msxdostools\nic.asm"
+					>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+							Outputs="$(InputDir)$(InputName).com"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\msxdostools\nowmap.asm"
+					>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+							Outputs="$(InputDir)$(InputName).com"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\msxdostools\nta.asm"
+					>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+							Outputs="$(InputDir)$(InputName).com"
+						/>
+					</FileConfiguration>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

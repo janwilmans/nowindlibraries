@@ -123,7 +123,7 @@ unsigned int NowindHost_InsertHarddiskPartitions(unsigned int driveNr, std::stri
 		Image::GetPartitionInfo(partitionTable, &p, i);
 		if (p.startLBA == 0 || p.length == 0) break;
 		partitionList.push_back(p);
-		DBERR("Partition: %u, bootable: %u, disabled: %u, readonly: %u, mediadescriptor: 0x%02X\n", i, p.bootable, p.disabled, p.readonly, p.mediaDescriptor);
+		DBERR("Partition: %u, bootable: %u, disabled: %u, readonly: %u\n", i, p.bootable, p.disabled, p.readonly);
 	}
 
 	for(std::list<PartitionInfo>::iterator p = partitionList.begin(); p != partitionList.end();p++)
