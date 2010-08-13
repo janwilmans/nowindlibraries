@@ -62,16 +62,14 @@ bool Image::openPartitionImage(int partitionNumber, bool ignoreBootflag, string 
     harddiskPartition = true;
     this->partitionNr = partitionNumber;
 
-	const nw_byte * mbr = GetNewPartitionTable();
-	PartitionInfo p;
-	GetPartitionInfo(mbr, &p, partitionNumber);
+    ReadPartitionInfo(partitionNumber);
 	
-	if (p.startLBA == 0 || p.length == 0) return false;   // not a valid partition entry
+	if (partitionInfo.startLBA == 0 || partitionInfo.length == 0) return false;   // not a valid partition entry
 
-	if (ignoreBootflag || (p.disabled == false) )
+	if (ignoreBootflag || (partitionInfo.disabled == false) )
 	{
-		offset = sectorSize*p.startLBA;
-		length = p.length;
+		offset = sectorSize*partitionInfo.startLBA;
+		length = partitionInfo.length;
 		return true; 
 	}
 
@@ -81,6 +79,13 @@ bool Image::openPartitionImage(int partitionNumber, bool ignoreBootflag, string 
     stream = 0;
     containsDisk = false;
     return false;
+}
+
+void Image::SetActivePartition(int partitionNumber)
+{
+    ReadPartitionInfo(partitionNumber);
+    offset = sectorSize*partitionInfo.startLBA;
+	length = partitionInfo.length;    
 }
 
 void Image::setRomdisk() {
@@ -187,37 +192,41 @@ int Image::writeSectors(nw_byte * buffer, unsigned int startSector, unsigned int
 	return 0;
 }
 
+void Image::ReadPartitionInfo(int partitionNumber)
+{
+	nw_byte * mbr = new nw_byte[sectorSize];
+    stream->seekg(0);
+    stream->read((char *) mbr, sectorSize);
+    
+	unsigned int tableEntry = 0x1EE - (partitionNumber*16);		// support more then 4 partitions
+
+	// check for disabled partition
+	unsigned int flags = mbr[tableEntry+0x00];
+
+	partitionInfo.bootable = (flags & 0x80) == 0x80;
+	partitionInfo.disabled = (flags & 0x02) == 0x02;
+	partitionInfo.readonly = (flags & 0x01) == 0x01;
+
+	// the offset for partitionNumber is read from the partitiontable
+	unsigned int startLBA = mbr[tableEntry+0x08];
+	startLBA += mbr[tableEntry+0x09]*256;
+	startLBA += mbr[tableEntry+0x0A]*256*256;
+	startLBA += mbr[tableEntry+0x0B]*256*256*256;
+	partitionInfo.startLBA = startLBA;
+
+	unsigned int length = mbr[tableEntry+0x0C];
+	length += mbr[tableEntry+0x0D]*256;
+	length += mbr[tableEntry+0x0E]*256*256;
+	length += mbr[tableEntry+0x0F]*256*256*256;	
+	partitionInfo.length = length;
+}
+
 const nw_byte * Image::GetNewPartitionTable()
 {
-	//nw_byte * table = new nw_byte[sectorSize];
-	nw_byte * table = new nw_byte[512];
-
+	nw_byte * mbr = new nw_byte[sectorSize];
     stream->seekg(0);
-    stream->read((char *) table, sectorSize);
-
-	// This code might be broken????
-
-	/// Write mbr + first FAT to file for debugging
-	nw_byte * buffer = new nw_byte[2*sectorSize];
-
-	DBERR("Alloc part: 0x%08X\n", buffer);
-    stream->seekg(0);
-    stream->read((char *) buffer, 2*sectorSize);
-
-	char filename[250];
-    Util::snprintf(filename, sizeof(filename), "mbr.bin");
-	ofstream ofs(filename,ios::binary|ios::trunc);
-	if (ofs.fail()) {
-		DBERR("Error opening file %s!\n", filename);
-	}
-	ofs.write((char *) buffer, 2*sectorSize);					// visual studio throw an exception here
-	ofs.close();
-
-	DBERR("free part: 0x%08X\n", buffer);
-
-	delete [] buffer;											// gdb chokes here (seqfault, free'd twice??)
-	/// Write mbr + first FAT to file for debugging
-	return table;
+    stream->read((char *) mbr, sectorSize);
+    return mbr;
 }
 
 /* Hardddisk image, first 512 bytes contains partition table:
@@ -270,9 +279,6 @@ void Image::GetPartitionInfo(const nw_byte * mbr, PartitionInfo *info, unsigned 
 	length += mbr[tableEntry+0x0E]*256*256;
 	length += mbr[tableEntry+0x0F]*256*256*256;	
 	info->length = length;
-
-	//todo: read partitions media-descriptor
-	info->mediaDescriptor = 0xff;
 }
 
 std::string Image::getDescription()
