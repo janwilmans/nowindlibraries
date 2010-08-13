@@ -246,7 +246,7 @@ void NowindHost::reportCpuInfo()
 
 void NowindHost::executeCommand()
 {
-    //DBERR(nowMap("1 0 1").c_str());
+    //DBERR(nowMap("0 1").c_str());
     //DBERR("\n");
 
 	assert(recvCount == 9);
@@ -373,10 +373,19 @@ std::string NowindHost::nowMap(std::string arguments)
     {
         return "error: drive_id invalid!\nusage: nowmap <drive_id> <partition> [/Nx] [/L]\n";
     }
-    Image* image = dynamic_cast<Image*>(drives[driveId]->getSectorMedium());
-    image->SetActivePartition(partition);
     
-    return response;
+    Image* image = dynamic_cast<Image*>(drives[driveId]->getSectorMedium());
+    
+    if (!image->isHarddiskPartition())
+    {
+        sprintf(temp, "error: drive is not a hdd!\nusage: nowmap <drive_id> <partition> [/Nx] [/L]\n", driveId);
+        return string(temp);
+    }
+    
+    image->SetActivePartition(partition);
+    sprintf(temp, "hdd of drive id %d was set to partition %u\n", driveId, partition);
+            
+    return string(temp);
 }
 
 void NowindHost::receiveExtraData()
