@@ -287,16 +287,18 @@ void Z80::executeInstructions() {
     		nw_word opcode = 0;
     		
     		opcode = opcodeFetch(reg_pc);
-/*    
-    if (Z80::Instance()->emuTime >= 0x0104A1BF)
+   /*
+    if (Z80::Instance()->emuTime >= 0x01491CCA)
     {
         Debug::Instance()->STACK_TRACING = true;
     }
-    if (Z80::Instance()->emuTime >= 0x010503c1)
+   
+    if (Z80::Instance()->emuTime >= 0x014b0dcd)
     {
         Debug::Instance()->INSTRUCTION_TRACING = true;
     }
-*/
+    */
+
   
     #ifdef INSTRUCTIONS_ON
     		if (Debug::Instance()->INSTRUCTION_TRACING) {

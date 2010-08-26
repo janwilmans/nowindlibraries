@@ -205,6 +205,17 @@ void NowindHost::write(byte data, unsigned int time)
 		}
 		break;	
     }	
+    case STATE_NOWMAP:
+		extraData[recvCount] = data;
+		if ((data == 0) || (++recvCount == (240 - 1))) {
+			dumpRegisters();
+			extraData[recvCount] = 0;
+			DBERR("got: nowmap %s\n", reinterpret_cast<char*>(extraData));
+			state = STATE_SYNC1;
+			std::string args(reinterpret_cast<char*>(extraData));
+			nowMap(args);
+		}
+    break;
 	default:
 		assert(false);
 	}
@@ -384,6 +395,8 @@ std::string NowindHost::nowMap(std::string arguments)
     
     image->SetActivePartition(partition);
     sprintf(temp, "hdd of drive id %d was set to partition %u\n", driveId, partition);
+    
+    DBERR("response: %s\n", temp);
             
     return string(temp);
 }
