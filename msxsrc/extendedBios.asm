@@ -103,12 +103,23 @@ sendCommand:
         ld (hl),C_NOWMAP
         ret
 
-writeBlock:
+writeBlock:     ; IS TIJDELIJK NOWMAP COMMAND
         DEBUGMESSAGE "EXTBIO wrBlk"
+        push hl
         call sendRegisters
-        ld (hl),C_BLOCKWRITE
+        ld (hl),C_NOWMAP
+
+;        call sendRegisters
+;        ld (hl),C_BLOCKWRITE
         ; reg_a is reg_h
-        jp blockWrite
+;        jp blockWrite
+        ex de,hl
+        pop hl        
+        ld b,0
+        DEBUGDUMPREGISTERS
+        ldir
+        ret      
+
 
 readBlock:
         DEBUGMESSAGE "EXTBIO rdBlk"
