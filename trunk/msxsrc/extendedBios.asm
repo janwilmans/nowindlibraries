@@ -116,9 +116,10 @@ writeBlock:     ; IS TIJDELIJK NOWMAP COMMAND
         ex de,hl
         pop hl        
         ld b,0
-        inc c
         DEBUGDUMPREGISTERS
         ldir
+        ex de,hl
+        ld (hl),b
         ret      
 
 

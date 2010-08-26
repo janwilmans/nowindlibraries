@@ -207,6 +207,7 @@ void NowindHost::write(byte data, unsigned int time)
     }	
     case STATE_NOWMAP:
 		extraData[recvCount] = data;
+		DBERR("NOWMAP: 0x%02x\n", data);
 		if ((data == 0) || (++recvCount == (240 - 1))) {
 			dumpRegisters();
 			extraData[recvCount] = 0;
