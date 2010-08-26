@@ -9,23 +9,16 @@
         
         DEBUGMESSAGE "EXnowmap"
         DEBUGDUMPREGISTERS
-        xor a                           ; first Nowind interface
-        ld b,C_NOWMAP
-        ld de,$4e03                     ; send command
-        call EXTBIO
 
         ld a,(CMD_LENGTH)
-        ld b,0
         ld c,a
         ld hl,CMD_LINE
         
         xor a                           ; first Nowind interface
-        ld de,$4e04                     ; block write
-        DEBUGDUMPREGISTERS
+        ld b,C_NOWMAP
+        ld de,$4e04                     ; send command
         call EXTBIO
-        DEBUGMESSAGE "boe"
-        DEBUGDUMPREGISTERS
-        
+
         ; host will return message
         ; print message here
         ret
