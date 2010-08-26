@@ -2,7 +2,7 @@
         ; enables messages that can only be viewed in emulation, 
         ; are harmless on real hardware but cause small delays
         ; recommened: turn off for releases
-        define DEBUG        
+        define DEBUG_off        
         
         ; enables messages for debugging can be logged even on real hardware 
         ; by sending them to the host over USB, causes somewhat larger delays

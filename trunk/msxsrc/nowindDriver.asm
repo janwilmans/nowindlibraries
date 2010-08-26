@@ -70,6 +70,7 @@ INIENV:
         ld (hl),0                       ; default drive number for romdisk
 
         ret c
+        DEBUGDUMPREGISTERS
         ld (hl),a                       ; drive number for romdisk
         ret
 

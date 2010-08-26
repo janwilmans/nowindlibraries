@@ -15,6 +15,10 @@ ProjectFilesOnly=0
 [Project tree]
 nowind
 	+msxsrc
+		+msxdostools
+			msxdostools\nta.asm
+			msxdostools\nowmap.asm
+			msxdostools\nic.asm
 		-sjasm
 			sjasm\sjasm
 			sjasm\sjasm.exe
@@ -39,37 +43,33 @@ nowind
 		msxdos23.asm
 [Open project files]
 0=nowind.asm
-1=debug.asm
-2=common.asm
-3=init.asm
-4=nowindDriver.asm
-5=labels.asm
+1=labels.asm
+2=flashWriter.asm
+3=nowindDriver.asm
+4=common.asm
+5=msxdostools\nowmap.asm
 6=extendedBios.asm
-7=msxdostools\nowmap.asm
 [Selected Project Files]
 Main=
 Selected=msxdostools\nowmap.asm
 [nowind.asm]
-TopLine=9
-Caret=29,38
-[debug.asm]
-TopLine=1
-Caret=10,7
-[common.asm]
-TopLine=407
-Caret=27,401
-[init.asm]
-TopLine=32
-Caret=55,73
-[nowindDriver.asm]
-TopLine=78
-Caret=33,85
+TopLine=33
+Caret=30,153
 [labels.asm]
-TopLine=154
-Caret=24,70
-[extendedBios.asm]
 TopLine=42
-Caret=53,61
+Caret=24,68
+[flashWriter.asm]
+TopLine=146
+Caret=1,1
+[nowindDriver.asm]
+TopLine=107
+Caret=9,104
+[common.asm]
+TopLine=49
+Caret=1,248
 [msxdostools\nowmap.asm]
 TopLine=1
-Caret=31,4
+Caret=26,23
+[extendedBios.asm]
+TopLine=70
+Caret=12,104
