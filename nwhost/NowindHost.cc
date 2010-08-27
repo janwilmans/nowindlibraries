@@ -207,14 +207,20 @@ void NowindHost::write(byte data, unsigned int time)
     }	
     case STATE_NOWMAP:
 		extraData[recvCount] = data;
-		DBERR("NOWMAP: 0x%02x\n", data);
-		if ((data == 0) || (++recvCount == (240 - 1))) {
+		if (++recvCount == cmdData[0]) {    // reg_c
 			dumpRegisters();
 			extraData[recvCount] = 0;
 			DBERR("got: nowmap %s\n", reinterpret_cast<char*>(extraData));
 			state = STATE_SYNC1;
 			std::string args(reinterpret_cast<char*>(extraData));
-			nowMap(args);
+			std::string response = nowMap(args);
+			nwhSupport->sendHeader();
+			int len = response.length();
+			nwhSupport->send16(len + 1);
+			for (int i=0; i<len; ++i) {
+                nwhSupport->send(response[i]);
+			}
+			nwhSupport->send(0);
 		}
     break;
 	default:
