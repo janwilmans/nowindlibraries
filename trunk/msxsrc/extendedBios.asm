@@ -35,6 +35,7 @@ extendedBios:
         ; broadcast (D = 0x00) not implemented
         ; system exclusive (D = 0xff) not implemented
 
+        DEBUGMESSAGE "EXTBIO"
         ei
         push af
         ld a,d
@@ -56,9 +57,11 @@ determineFunction:
         dec a
         jr z,sendCommand                ; function 3
         dec a
-        jr z,writeBlock                 ; function 4
+        jr z,sendCommandWithData        ; function 4
         dec a
-        jr z,readBlock                  ; function 5
+        jp z,sendCommandWithString      ; function 5
+        dec a
+        jp z,readData                   ; function 6
 
 exit:
         pop af
@@ -98,31 +101,67 @@ debugMessage:
         jr nz,.loop
         ret
 
+; Input:    C   command
+;           B   argument for commmand
+;           HL  argument for command
+;           other registers cannot be used
+            
 sendCommand:
+        DEBUGMESSAGE "EXTBIO sendCmd"
         call sendRegisters
-        ld (hl),C_NOWMAP
+        ld (hl),C_COMMAND
         ret
 
-writeBlock:     ; IS TIJDELIJK NOWMAP COMMAND
-        DEBUGMESSAGE "EXTBIO wrBlk"
+
+; Input:    C   command
+;           B   length of data (max 240, because of hardware buffer)
+;           HL  pointer to data
+;           IY  argument for command (is copied to DE)
+;           other registers cannot be used
+
+sendCommandWithData:
+        DEBUGMESSAGE "EXTBIO cmdWithData"
+        DEBUGDUMPREGISTERS
+        ld a,e
+        push iy
+        pop de        
         push hl
         call sendRegisters
-        ld (hl),C_NOWMAP
-
-;        call sendRegisters
-;        ld (hl),C_BLOCKWRITE
-        ; reg_a is reg_h
-;        jp blockWrite
+        ld (hl),C_COMMAND
+        pop de
         ex de,hl
-        pop hl        
+        ld c,b
         ld b,0
         ldir
-        ret      
+        ret
+        
+        
+; Input:    C   command
+;           B   string terminator
+;           HL  pointer to string
+;           other registers cannot be used
 
-
-readBlock:
-        DEBUGMESSAGE "EXTBIO rdBlk"
+sendCommandWithString:
+        DEBUGMESSAGE "EXTBIO cmdWithString"
+        push hl
         call sendRegisters
-        ld (hl),C_BLOCKREAD
-        ; reg_a is reg_h
-        jp blockRead
+        ld (hl),C_COMMAND
+        pop de
+
+.loop:  ld a,(de)
+        cp b
+        ret z
+        ld (hl),a
+        inc de
+        jr .loop
+
+
+; Input:    HL  transfer address
+
+readData:
+        DEBUGMESSAGE "EXTBIO readData"
+        ld a,h
+        call blockRead
+        DEBUGDUMPREGISTERS
+        DEBUGMESSAGE "EXTBIO readDataEnd"
+        ret

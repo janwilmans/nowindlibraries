@@ -80,8 +80,14 @@ public:
 		STATE_MESSAGE,   // waiting for null-terminated message
 		STATE_BLOCKREAD, // in block-transfer
 		STATE_CPUINFO,   // receiving slot/stack info
-		STATE_NOWMAP,    // receive the NOWMAP string
+		STATE_RECEIVE_DATA,    // receive data for API command
+		STATE_RECEIVE_STRING,  // receive string for API command
 	};
+	
+	enum ApiCommands {
+		API_NOWMAP = 0
+	};	
+	
 
 	virtual void debugMessage(const char *cFormat, ...) const;
 
@@ -98,6 +104,10 @@ private:
 	SectorMedium* getDisk();
 	void executeCommand();
 	void reportCpuInfo();
+	
+	void apiCommand();
+	void apiReceiveData(byte data);
+	void apiReceiveString(byte data);
 
 	void DRIVES();
 	void DSKCHG();
