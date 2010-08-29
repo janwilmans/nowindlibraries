@@ -336,22 +336,32 @@ void NowindHost::executeCommand()
 void NowindHost::apiCommand()
 {
     DBERR("apiCommand\n");
+    extraData[0] = 0;
     dumpRegisters();
 
     byte reg_a = cmdData[7];
     byte reg_c = cmdData[0];
+    byte reg_b = cmdData[1];
     switch (reg_c)
     {
         case API_NOWMAP:
             if (reg_a != 4)
             {   
-                DBERR("API_NOWMAP received with wrong EXTBIO function (%u)", reg_a);
+                DBERR("API_NOWMAP received with wrong EXTBIO function (%u)\n", reg_a);
                 state = STATE_SYNC1;
             }
             else
             {
-                recvCount = 0;
-                state = STATE_RECEIVE_DATA;
+                if (reg_b == 0)
+                {
+                    DBERR("API_NOWMAP received without commandline!\n");
+                    state = STATE_SYNC1;
+                }
+                else
+                {
+                    recvCount = 0;
+                    state = STATE_RECEIVE_DATA;
+                }
             }
             break;
         default:
@@ -363,6 +373,7 @@ void NowindHost::apiCommand()
 void NowindHost::apiReceiveData(byte data)
 {
     byte reg_b = cmdData[1];
+    
     extraData[recvCount] = data;
     ++recvCount;
 
@@ -381,11 +392,11 @@ void NowindHost::apiReceiveData(byte data)
             {
                 string args = string(reinterpret_cast<char*>(extraData));
                 string result = nowMap(args);
-                vector<byte> data;
-                data.assign(result.begin(), result.end());
-                data.push_back(0);
+                vector<byte> resultData;
+                resultData.assign(result.begin(), result.end());
+                resultData.push_back(0);
                 
-                blockRead.init(reg_de, data.size(), data);
+                blockRead.init(reg_de, resultData.size(), resultData);
                 state = STATE_BLOCKREAD;
                 break;
             }
@@ -411,20 +422,27 @@ std::string NowindHost::nowMap(std::string arguments)
 
     char temp[250];
     char letter = 'A';
-    std::string response = "Nowind Map v1.2\n";
+    std::string response = "Nowind Map v1.2\r\n";
     for (unsigned i = 0; i < driveOffset; ++i) {
-        sprintf(temp, "Drive %c: DiskRom\n", letter); // todo: get SLOT ?-? from drvtbl
+        sprintf(temp, "Drive %c: DiskRom\r\n", letter); // todo: get SLOT ?-? from drvtbl
         letter++;
         response += std::string(temp);        
     }
   
     for (unsigned i = 0; i < drives.size(); ++i) {
         Image* image = dynamic_cast<Image*>(drives[i]->getSectorMedium());
-        sprintf(temp, "Drive %c, driveId %d (%s), partition %d\n", letter, i, image->getDescription().c_str(), image->getPartitionNr());
+        if (image->isHarddiskPartition())
+        {
+            sprintf(temp, "Drive %c, driveId %d (%s), partition %d\r\n", letter, i, image->getDescription().c_str(), image->getPartitionNr());
+        }
+        else
+        {
+            sprintf(temp, "Drive %c, driveId %d (%s)\r\n", letter, i, image->getDescription().c_str());
+        }
         letter++;
         response += std::string(temp);
     }
-    response += "\n";
+    response += "\r\n";
     
     if (arguments.find("/L") != string::npos)
     {
