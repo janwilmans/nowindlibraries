@@ -29,7 +29,7 @@ bool BlockRead::isDone() const
 
 void BlockRead::init(word aStartAddress, word aSize, const std::vector <byte >& data)
 {
-    //DBERR("BlockRead::init(startAddress: 0x%04x, size: 0x%04x\n", aStartAddress, aSize);
+    DBERR("BlockRead::init(startAddress: 0x%04x, size: 0x%04x\n", aStartAddress, aSize);
     startAddress = aStartAddress;
     transferSize = aSize;
 
@@ -45,7 +45,7 @@ void BlockRead::init(word aStartAddress, word aSize, const std::vector <byte >& 
 
 void BlockRead::blockRead(word startAddress, word size)
 {
-    //DBERR("BlockRead::blockRead, startAddress: 0x%04X, size: 0x%04X\n", startAddress, size);
+    DBERR("BlockRead::blockRead, startAddress: 0x%04X, size: 0x%04X\n", startAddress, size);
     
     if (startAddress < TWOBANKLIMIT)
     {
@@ -62,7 +62,7 @@ void BlockRead::blockRead(word startAddress, word size)
 
 void BlockRead::blockReadHelper(word startAddress, word size)
 {
-    //DBERR("BlockRead::blockReadHelper, size: 0x%02x, transferred: 0x%02x\n", size, transferredData);
+    DBERR("BlockRead::blockReadHelper, size: 0x%02x, transferred: 0x%02x\n", size, transferredData);
     
     // delete any blocks still in the dataBlockQueue (unacknowlged by msx, could be caused by timeouts)
     for(unsigned int i=0; i< dataBlockQueue.size(); i++)
@@ -190,7 +190,7 @@ void BlockRead::ack(byte tail)
 {
     assert(dataBlockQueue.size() != 0);
     DataBlock* dataBlock = dataBlockQueue[0];
-    //DBERR("ACK -> Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
+    DBERR("ACK -> Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
 
     if (dataBlock->header == tail)
     {

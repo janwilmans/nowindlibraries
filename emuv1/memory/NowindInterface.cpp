@@ -82,7 +82,7 @@ void NowindInterface::write(nw_word address, nw_byte value) {
 		DBERR("flashRom write op addr: 0x%04X\n", address);
 	case 0x4000:
 	case 0x8000:
-		//DBERR("nowindusb_write(0x%02x)\n", value);
+		//DBERR("nowindusb_write at 0x%04X: 0x%02x\n", address,  value);
         nowindusb_write(value, Z80::Instance()->emuTime/Z80::Instance()->cpuFrequency);
 		break;
 
@@ -90,8 +90,8 @@ void NowindInterface::write(nw_word address, nw_byte value) {
 	case 0xa000:
 
         // snelle hack om nowind_sunrise te ondersteunen (mapper reageert alleen op oneven adressen)
-        if ((address & 1)==0) {
-            DBERR(" GEEN SWITCH val: %u (at addr: 0x%04x)\n", value, address);
+        if ((address & 1) == 0) {
+            DBERR("Nowind write that does nothing: %u (at addr: 0x%04x)\n", value, address);
             break;
         }
         

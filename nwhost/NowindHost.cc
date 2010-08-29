@@ -205,23 +205,10 @@ void NowindHost::write(byte data, unsigned int time)
 		}
 		break;	
     }	
-    case STATE_NOWMAP:
-		extraData[recvCount] = data;
-		if (++recvCount == cmdData[0]) {    // reg_c
-			dumpRegisters();
-			extraData[recvCount] = 0;
-			DBERR("got: nowmap %s\n", reinterpret_cast<char*>(extraData));
-			state = STATE_SYNC1;
-			std::string args(reinterpret_cast<char*>(extraData));
-			std::string response = nowMap(args);
-			nwhSupport->sendHeader();
-			int len = response.length();
-			nwhSupport->send16(len + 1);
-			for (int i=0; i<len; ++i) {
-                nwhSupport->send(response[i]);
-			}
-			nwhSupport->send(0);
-		}
+    case STATE_RECEIVE_DATA:
+        apiReceiveData(data);
+        break;
+        
     break;
 	default:
 		assert(false);
@@ -338,12 +325,80 @@ void NowindHost::executeCommand()
 	case 0x94: blockReadCmd(); break;
     case 0x95: blockWriteCmd(); break;
     case 0x96: receiveExtraData(); state = STATE_CPUINFO; break;
-    case 0x97: receiveExtraData(); state = STATE_NOWMAP; break;
+    case 0x97: apiCommand();  break;
 	default:
 		// Unknown USB command!
 		state = STATE_SYNC1;
 		break;
 	}
+}
+
+void NowindHost::apiCommand()
+{
+    DBERR("apiCommand\n");
+    dumpRegisters();
+
+    byte reg_a = cmdData[7];
+    byte reg_c = cmdData[0];
+    switch (reg_c)
+    {
+        case API_NOWMAP:
+            if (reg_a != 4)
+            {   
+                DBERR("API_NOWMAP received with wrong EXTBIO function (%u)", reg_a);
+                state = STATE_SYNC1;
+            }
+            else
+            {
+                recvCount = 0;
+                state = STATE_RECEIVE_DATA;
+            }
+            break;
+        default:
+            DBERR("apiCommand_API_??\n");
+            state = STATE_SYNC1;
+    }
+}
+
+void NowindHost::apiReceiveData(byte data)
+{
+    byte reg_b = cmdData[1];
+    extraData[recvCount] = data;
+    ++recvCount;
+
+    DBERR("apiReceiveData %u/%u: %c\n", recvCount, reg_b, data);
+
+    if (recvCount >= reg_b)
+    {
+        // all data received, execute command
+        byte reg_c = cmdData[0];
+        word reg_de = cmdData[2] + 256*cmdData[3];
+        DBERR("\n");
+
+        switch (reg_c)
+        {
+            case API_NOWMAP:
+            {
+                string args = string(reinterpret_cast<char*>(extraData));
+                string result = nowMap(args);
+                vector<byte> data;
+                data.assign(result.begin(), result.end());
+                data.push_back(0);
+                
+                blockRead.init(reg_de, data.size(), data);
+                state = STATE_BLOCKREAD;
+                break;
+            }
+            default:
+                DBERR("apiReceiveData_API_??\n");
+                state = STATE_SYNC1;
+        }
+    }
+}
+
+void NowindHost::apiReceiveString(byte data)
+{
+
 }
 
 // nowmap <drive_id> <partition> [/Nx] [/L]
@@ -403,8 +458,7 @@ std::string NowindHost::nowMap(std::string arguments)
     image->SetActivePartition(partition);
     sprintf(temp, "hdd of drive id %d was set to partition %u\n", driveId, partition);
     
-    DBERR("response: %s\n", temp);
-            
+    DBERR("response: %s\n", temp);            
     return string(temp);
 }
 
