@@ -15,6 +15,12 @@ define  DEBUG
         ld b,a
         ld hl,CMD_LINE
         
+        or a
+        jr nz,nowmap
+        ld hl,list
+        ld a,3
+        
+nowmap:        
         xor a                           ; first Nowind interface
         ld c,API_NOWMAP
         ld iy,message
@@ -34,9 +40,12 @@ define  DEBUG
 exit:   jp String.PrintAsciiz      
 
 error:  db "No connection with host!",0
+list:   db "/L",0
 
+        include "..\asmlibs\string\string.asm"
 
 message:
         db 0
+                
 
-        include "..\asmlibs\string\string.asm"
+        
