@@ -57,7 +57,7 @@ INIENV:
 ; work area can be initialized when it was requested
         DEBUGMESSAGE "INIENV"
       
-        call installExtendedBios
+        call installExtendedBios        ; TODO: move to init.asm (als set HKLVLK self)
 
         call sendRegisters
         ld (hl),C_INIENV
@@ -90,8 +90,8 @@ DSKIO:
 ;           A   Error code
 ;           B   Number of remaining sectors (TODO: check! even without error?)
 
-        DEBUGMESSAGE "DSKIO"
-        DEBUGDUMPREGISTERS
+        ;DEBUGMESSAGE "DSKIO"
+        ;DEBUGDUMPREGISTERS
         ;USB_DBMSG "DSKIO"
 
         push af
@@ -120,8 +120,8 @@ DSKCHG:
 ;           F   Carry set when not succesfull
 ;           A   Error code
 
-        DEBUGMESSAGE "DSKCHG"
-        DEBUGDUMPREGISTERS
+        ;DEBUGMESSAGE "DSKCHG"
+        ;DEBUGDUMPREGISTERS
         push af
         call checkWorkArea
         jp z,ROMDISK_DSKCHG

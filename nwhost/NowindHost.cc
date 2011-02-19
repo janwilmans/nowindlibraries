@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include <time.h>
 #include <iostream>
+#include <vector>
 
 #define ToUpper(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper)
 
@@ -68,9 +69,9 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	, lastTime(0)
 	, state(STATE_SYNC1)
 	, romdisk(255)
-	, allowOtherDiskroms(true)
-	, enablePhantomDrives(true)
-	, enableMSXDOS2(true)
+	, allowOtherDiskroms(false)
+	, enablePhantomDrives(false)
+	, enableMSXDOS2(false)
 	, nwhSupport(0)
 	, driveOffset(0)
 {
@@ -208,8 +209,15 @@ void NowindHost::write(byte data, unsigned int time)
     case STATE_RECEIVE_DATA:
         apiReceiveData(data);
         break;
-        
-    break;
+
+    case STATE_BDOS_OPEN_FILE:
+		extraData[recvCount] = data;
+		if (++recvCount == 36) {
+		    state = STATE_SYNC1;
+		    BDOS_OpenFile();
+		}
+        break;
+
 	default:
 		assert(false);
 	}
@@ -257,31 +265,32 @@ void NowindHost::executeCommand()
 	assert(recvCount == 9);
 	byte cmd = cmdData[8];
 	switch (cmd) {
+
+	case 0x0F: BDOS_0FH_OpenFile(); break;
+	case 0x10: BDOS_10H_CloseFile(); break;
+	case 0x27: BDOS_27H_ReadRandomBlock(); break;
     /*
-	case 0x0D: BDOS_0DH_DiskReset();
-	case 0x0F: BDOS_0FH_OpenFile();
-	case 0x10: BDOS_10H_CloseFile();
-	case 0x11: BDOS_11H_FindFirst();
-	case 0x12: BDOS_12H_FindNext();
-	case 0x13: BDOS_13H_DeleteFile();
-	case 0x14: BDOS_14H_ReadSeq();
-	case 0x15: BDOS_15H_WriteSeq();
-	case 0x16: BDOS_16H_CreateFile();
-	case 0x17: BDOS_17H_RenameFile();
-	case 0x21: BDOS_21H_ReadRandomFile();
-	case 0x22: BDOS_22H_WriteRandomFile();
-	case 0x23: BDOS_23H_GetFileSize();
-	case 0x24: BDOS_24H_SetRandomRecordField();
-	case 0x26: BDOS_26H_WriteRandomBlock();
-	case 0x27: BDOS_27H_ReadRandomBlock();
-	case 0x28: BDOS_28H_WriteRandomFileWithZeros();
-	case 0x2A: BDOS_2AH_GetDate();
-	case 0x2B: BDOS_2BH_SetDate();
-	case 0x2C: BDOS_2CH_GetTime();
-	case 0x2D: BDOS_2DH_SetTime();
-	case 0x2E: BDOS_2EH_Verify();
-	case 0x2F: BDOS_2FH_ReadLogicalSector();
-	case 0x30: BDOS_30H_WriteLogicalSector();
+	case 0x0D: BDOS_0DH_DiskReset(); break;
+	case 0x11: BDOS_11H_FindFirst(); break;
+	case 0x12: BDOS_12H_FindNext(); break;
+	case 0x13: BDOS_13H_DeleteFile(); break;
+	case 0x14: BDOS_14H_ReadSeq(); break;
+	case 0x15: BDOS_15H_WriteSeq(); break;
+	case 0x16: BDOS_16H_CreateFile(); break;
+	case 0x17: BDOS_17H_RenameFile(); break;
+	case 0x21: BDOS_21H_ReadRandomFile(); break;
+	case 0x22: BDOS_22H_WriteRandomFile(); break;
+	case 0x23: BDOS_23H_GetFileSize(); break;
+	case 0x24: BDOS_24H_SetRandomRecordField(); break;
+	case 0x26: BDOS_26H_WriteRandomBlock(); break;
+	case 0x28: BDOS_28H_WriteRandomFileWithZeros(); break;
+	case 0x2A: BDOS_2AH_GetDate(); break;
+	case 0x2B: BDOS_2BH_SetDate(); break;
+	case 0x2C: BDOS_2CH_GetTime(); break;
+	case 0x2D: BDOS_2DH_SetTime(); break;
+	case 0x2E: BDOS_2EH_Verify(); break;
+	case 0x2F: BDOS_2FH_ReadLogicalSector(); break;
+	case 0x30: BDOS_30H_WriteLogicalSector(); break;
     */
 
 	case 0x80: { // DSKIO
@@ -1028,5 +1037,50 @@ void NowindHost::addRequest(std::vector<byte> command)
     requestQueue.push_back(command);
 }
 
+void NowindHost::BDOS_0FH_OpenFile()
+{
+    DBERR(" >> BDOS_0FH_OpenFile\n");
+
+	state = STATE_BDOS_OPEN_FILE;
+	recvCount = 0;   
+}
+
+void NowindHost::BDOS_OpenFile()
+{
+ 	string result;
+	for (int i = 1; i < 13; ++i) {
+		char c = extraData[i];
+		result += toupper(c);
+	}
+
+    DBERR(" nu hebben we een fcb: %s\n", result.c_str());
+    //bdosFiles.push_back( new fstream(imageName.c_str(), ios::binary | ios::in);
+    //bdosfile = new fstream(result.c_str(), ios::binary | ios::in);
+    
+    state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_10H_CloseFile()
+{
+    DBERR(" >> BDOS_10H_CloseFile\n");
+    reportCpuInfo();
+    
+    state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_27H_ReadRandomBlock()
+{
+    DBERR(" >> BDOS_27H_ReadRandomBlock\n");
+    reportCpuInfo();
+    //std::vector<char> data;
+    
+    int count = 128;
+    int offset = 0;
+    //data.resize(count);
+    //bdosfile->seekg(offset);
+    //bdosfile->read(&data[0], count);
+    
+    state = STATE_SYNC1;
+}
 
 } // namespace nowind

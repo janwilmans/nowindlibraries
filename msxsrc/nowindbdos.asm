@@ -1,6 +1,7 @@
 
 ; just patching the BDOS hook will not work; not everybody uses the hook
-        ;PATCH $5d20, BDOSNW              ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW
+        
+        PATCH $5d20, nowindBDOS              ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW        
 
         ; even patching the BDOS jump table will not work; internal calls (even in command.com) bypass it
         ; jump table patches
@@ -9,136 +10,92 @@
         ;PATCH $5731, BDOS_12H_J          ; overwrite specific function 12h in jump table
 
         ; these patches are at the start of the routine themselves, the addresses are more or less "standardized"
-        ; over several brands of diskroms
-        ; in-routine patches
-        PATCH $4463, BDOS_0FH           ; overwrite function 0Fh itself!
-        PATCH $4fb9, BDOS_11H           ; overwrite function 11h itself!
-        PATCH $5007, BDOS_12H           ; overwrite function 12h itself!
 
+currentFilePosition2 := $        
+        
+;bdosOpenFile (0x0f)
+        code ! $4462
+        call bdosOpenFile
 
-BDOSNW:
-; is this a virtual drive? if not then call 56D3
+;bdosCloseFile (0x10)
+        code ! $456f
+        jp bdosCloseFile         
 
-                                DEBUGMESSAGE "BDOS CALL wrapped"
-                                DEBUGDUMPREGISTERS
-                                push af
-                                push bc
-                                push de
-                                push hl
+;bdosRandomBlockRead (0x27)
+        code ! $47b2
+        jp bdosRandomBlockRead
 
-                                ld a,c
-                                cp 0x0F
-                                jr z,hooked_bdoscall
-                                cp 0x11
-                                jr z,hooked_bdoscall
-                                cp 0x12
-                                jr z,hooked_bdoscall
-                                jr exit
+        code @ currentFilePosition2
 
-hooked_bdoscall:
+nowindBDOS:
+        DEBUGMESSAGE "nwBDOS"
+        DEBUGDUMPREGISTERS
+        jp $56d3
 
-                                push hl
-                                push de
-                                call sendRegisters
-                                ld (hl),c                                       ; send the original BDOS command code
-                                pop de
-                                pop hl
+bdosOpenFile:
+        DEBUGMESSAGE "bdosOpenFile"
+        DEBUGDUMPREGISTERS
 
-                                call sendFCB
+        push af
+        push hl
+        push de
+        push de
+        call sendRegisters
+        ld (hl),c       ; bdos command
 
-                                jr exit
+        pop de
+        ex de,hl       
+        ld bc,36
+        ldir
+        
+        pop de
+        pop hl
+        pop af
 
-; just return from the interslot call after handling it
-                                pop hl
-                                pop de
-                                pop bc
-                                pop af
-                                ret
+        ex de,hl
+        EMU_DUMPMEMHL 30
+        ex de,hl
+        jp $42a5
+        
+bdosCloseFile:
+        DEBUGMESSAGE "bdosCloseFile"
+        DEBUGDUMPREGISTERS
 
-exit:
-                                pop hl
-                                pop de
-                                pop bc
-                                pop af
+        push af
+        push hl
+        push de
 
-                                jp $56D3
+        call sendRegisters
+        ld (hl),c
 
+        pop de
+        pop hl
+        pop af
 
-BDOS_0FH:
-                                DEBUGMESSAGE "BDOS CALL 0FH"
-                                DEBUGDUMPREGISTERS
+        push de
+        pop iy
+        jp $4572        
 
-                                push hl
-                                push de
-                                call sendRegisters
-                                ld (hl),$0f                                     ; send the original BDOS command code
-                                pop de
-                                pop hl
+bdosRandomBlockRead:
+        DEBUGMESSAGE "bdosRandomBlockRead"
+        DEBUGDUMPREGISTERS
+        
+        push af
+        push hl
+        push de
 
-                                ; if first byte of FCB is 0x00 then replace it with the default drive
-                                ld a,(de)
-                                or a
-                                jr nz,.nodefault
-                                ld a,($F247)                    ; todo: add a label DEFDRV?
-                                ld (de),a
-.nodefault:
+        call sendRegisters
+        ld (hl),c
 
-                                call sendFCB
-
-                                ; enabled slots?
-                                call enableNowindPage0          ; old page 0 slot-selection is kept in IXh
-                                call getHeader
-                                call receiveFCB                                         ; receive 32 bytes and write them to (DE+x)
-                                call restorePage0
-
-                                ; failed
-                                ld a,$ff
-                                ret
-
-                                ; resume normal operation
-                                jp $42A5                        ; call was overwritten
-
-BDOS_11H:
-                                DEBUGMESSAGE "BDOS CALL 11H"
-                                DEBUGDUMPREGISTERS
-
-                                push hl
-                                push de
-                                call sendRegisters
-                                ld (hl),$11                             ; send the original BDOS command code
-                                pop de
-                                pop hl
-                                call sendFCB
-
-                                call enableNowindPage0          ; old page 0 slot-selection is kept in IXh
-                                call getHeader
-                                call receiveFCB                                         ; receive 32 bytes and write them to (DE+x)
-                                call restorePage0
-
-                                ; resume normal operation
-                                jp $42A5                        ; call was overwritten
-
-BDOS_12H:
-                                DEBUGMESSAGE "BDOS CALL 12H"
-                                DEBUGDUMPREGISTERS
-
-                                push hl
-                                push de
-                                call sendRegisters
-                                ld (hl),$12                                     ; send the original BDOS command code
-                                pop de
-                                pop hl
-                                call sendFCB                            ; send 32 bytes (DE+x) to the host
-
-                                call enableNowindPage0          ; old page 0 slot-selection is kept in IXh
-                                call getHeader
-                                call receiveFCB                                         ; receive 32 bytes and write them to (DE+x)
-                                call restorePage0
-
-                                ; resume normal operation
-                                jp $440e                        ; call was overwritten
-
-
+        pop de
+        pop hl
+        pop af
+                
+        xor a
+        ld ($f306),a
+        jp $47b6 
+        
+        
 ; http://www.konamiman.com/msx/msx-e.html#msx2th
 ; http://www.angelfire.com/art2/unicorndreams/msx/RR-BASIC.html
 ; http://msxsyssrc.cvs.sourceforge.net/msxsyssrc/diskdrvs/

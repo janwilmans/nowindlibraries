@@ -136,7 +136,7 @@ void SlotSelector::configure(unsigned int msxVersion) {
 
 	//usbInterface->insertDisk(0, "../disks/adnukes.dsk");
 
-	usbInterface->insertHarddisk(1, "../disks/32mb_manuel_hd.dsk", 0);
+//	usbInterface->insertHarddisk(1, "../disks/32mb_manuel_hd.dsk", 0);
 //	usbInterface->insertHarddisk(1, "../disks/32mb_manuel_hd.dsk", 1);
 //	usbInterface->insertHarddisk(2, "../disks/32mb_manuel_hd.dsk", 2);
 //  usbInterface->insertHarddisk(3, "../disks/32mb_manuel_hd.dsk", 3);
