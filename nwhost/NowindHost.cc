@@ -3,6 +3,10 @@
 #include "Image.h"
 #include "NowindHostSupport.hh"
 
+#ifdef WIN32
+#include <io.h>         // not portable to linux nor MacOS, TODO: fix!
+#endif
+
 #include <fstream>
 #include <algorithm>
 #include <cassert>
@@ -218,6 +222,14 @@ void NowindHost::write(byte data, unsigned int time)
 		}
         break;
 
+    case STATE_BDOS_FIND_FIRST:
+		extraData[recvCount] = data;
+		if (++recvCount == 36) {
+		    state = STATE_SYNC1;
+		    BDOS_FindFirst();
+		}
+        break;
+
 	default:
 		assert(false);
 	}
@@ -266,13 +278,13 @@ void NowindHost::executeCommand()
 	byte cmd = cmdData[8];
 	switch (cmd) {
 
-	case 0x0F: BDOS_0FH_OpenFile(); break;
-	case 0x10: BDOS_10H_CloseFile(); break;
-	case 0x27: BDOS_27H_ReadRandomBlock(); break;
+	case 0x0F: state = STATE_BDOS_OPEN_FILE; recvCount = 0; break;
+	case 0x10: BDOS_CloseFile(); break;
+	case 0x11: state = STATE_BDOS_FIND_FIRST; recvCount = 0; break;
+	case 0x12: BDOS_FindNext(); break;
+	case 0x27: BDOS_ReadRandomBlock(); break;
     /*
 	case 0x0D: BDOS_0DH_DiskReset(); break;
-	case 0x11: BDOS_11H_FindFirst(); break;
-	case 0x12: BDOS_12H_FindNext(); break;
 	case 0x13: BDOS_13H_DeleteFile(); break;
 	case 0x14: BDOS_14H_ReadSeq(); break;
 	case 0x15: BDOS_15H_WriteSeq(); break;
@@ -1038,14 +1050,6 @@ void NowindHost::addRequest(std::vector<byte> command)
     requestQueue.push_back(command);
 }
 
-void NowindHost::BDOS_0FH_OpenFile()
-{
-    DBERR(" >> BDOS_0FH_OpenFile\n");
-
-	state = STATE_BDOS_OPEN_FILE;
-	recvCount = 0;   
-}
-
 void trim(string& str)
 {
   string::size_type pos = str.find_last_not_of(' ');
@@ -1057,7 +1061,7 @@ void trim(string& str)
   else str.erase(str.begin(), str.end());
 }
 
-void NowindHost::BDOS_OpenFile()
+string NowindHost::getFilenameFromExtraData()
 {
  	string whole;
 	for (int i = 1; i < 13; ++i) {
@@ -1073,7 +1077,12 @@ void NowindHost::BDOS_OpenFile()
     {
         filename += "." + ext;
     }
+    return filename;
+}
 
+void NowindHost::BDOS_OpenFile()
+{
+    string filename = getFilenameFromExtraData();
     DBERR(" nu hebben we een fcb: %s\n", filename.c_str());
     //bdosFiles.push_back( new fstream(imageName.c_str(), ios::binary | ios::in);
     bdosfile = new fstream(filename.c_str(), ios::binary | ios::in);
@@ -1090,7 +1099,7 @@ void NowindHost::BDOS_OpenFile()
     state = STATE_SYNC1;
 }
 
-void NowindHost::BDOS_10H_CloseFile()
+void NowindHost::BDOS_CloseFile()
 {
     DBERR(" >> BDOS_10H_CloseFile\n");
     reportCpuInfo();
@@ -1098,7 +1107,61 @@ void NowindHost::BDOS_10H_CloseFile()
     state = STATE_SYNC1;
 }
 
-void NowindHost::BDOS_27H_ReadRandomBlock()
+void NowindHost::BDOS_FindFirst()
+{
+    DBERR(" >> BDOS_11H_FindFirst\n");
+    word reg_hl = cmdData[4] + 256*cmdData[5];
+    string filename = getFilenameFromExtraData();
+    
+#ifdef WIN32
+    struct _finddata_t data;
+    long sHandle = _findfirst(filename.c_str(), &data); 
+    if (sHandle == -1)
+    {
+        blockRead.cancelWithCode(128);  // file not found
+        state = STATE_SYNC1;
+    }
+    else
+    {
+        vector<byte> buffer;
+        buffer.resize(13);
+        buffer[0] = 0;
+        buffer[1] = 'B';
+        buffer[2] = 'O';
+        buffer[3] = 'E';
+        buffer[4] = ' ';
+        buffer[5] = ' ';
+        buffer[6] = ' ';
+        buffer[7] = ' ';
+        buffer[8] = ' ';
+        buffer[9] = 'J';
+        buffer[10] = 'A';
+        buffer[11] = 'N';
+        string filename(data.name);
+        ToUpper(filename);
+        
+        blockRead.init(reg_hl, buffer.size(), buffer);
+        state = STATE_BLOCKREAD;
+    }
+    
+    DBERR("file: %s size: %u\n", data.name, data.size);
+    _findclose( sHandle );
+#else
+    // linux not implemented
+    assert(false);
+#endif
+    
+}
+
+void NowindHost::BDOS_FindNext()
+{
+    DBERR(" >> BDOS_12H_FindNext\n");
+    reportCpuInfo();
+    
+    state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_ReadRandomBlock()
 {
     DBERR(" >> BDOS_27H_ReadRandomBlock\n");
     word reg_bc = cmdData[0] + 256*cmdData[1];

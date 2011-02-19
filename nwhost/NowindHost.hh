@@ -83,6 +83,7 @@ public:
 		STATE_RECEIVE_DATA,    // receive data for API command
 		STATE_RECEIVE_STRING,  // receive string for API command
 		STATE_BDOS_OPEN_FILE,  // receive FCB
+		STATE_BDOS_FIND_FIRST, // receive FCB
 	};
 	
 	enum ApiCommands {
@@ -166,10 +167,12 @@ private:
     unsigned int timer1;
     unsigned int timer2;
         
-    void BDOS_0FH_OpenFile();
+    std::string getFilenameFromExtraData();
     void BDOS_OpenFile();
-    void BDOS_10H_CloseFile();    
-    void BDOS_27H_ReadRandomBlock(); 
+    void BDOS_CloseFile();
+    void BDOS_FindFirst();
+    void BDOS_FindNext();
+    void BDOS_ReadRandomBlock(); 
     
     std::vector<std::fstream* > bdosFiles;
     std::fstream* bdosfile;

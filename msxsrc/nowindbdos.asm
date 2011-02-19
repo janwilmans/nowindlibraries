@@ -1,8 +1,10 @@
 
-BDOS_DMA        equ $f23d
+BDOS_DTA        equ $f23d
 
 BDOS_OPENFILE   equ $0f
 BDOS_CLOSEFILE  equ $10
+BDOS_FINDFIRST  equ $11
+BDOS_FINDNEXT   equ $12
 BDOS_RANDOMREAD equ $27
 
 
@@ -29,6 +31,14 @@ currentFilePosition2 := $
         code ! $456f
         jp bdosCloseFile         
 
+;bdosFindFirst (0x11)
+        code ! $4fb8
+        jp bdosFindFirst
+        
+;bdosFindNext (0x12)
+        code ! $5006
+        jp bdosFindNext  
+
 ;bdosRandomBlockRead (0x27)
         code ! $47b2
         jp bdosRandomBlockRead
@@ -43,7 +53,6 @@ nowindBDOS:
 bdosOpenFile:
         DEBUGMESSAGE "bdosOpenFile"
         DEBUGDUMPREGISTERS
-
         push de
         call sendRegisters
         ld (hl),BDOS_OPENFILE
@@ -66,7 +75,6 @@ bdosOpenFile:
 bdosCloseFile:
         DEBUGMESSAGE "bdosCloseFile"
         DEBUGDUMPREGISTERS
-
         call sendRegisters
         ld (hl),BDOS_CLOSEFILE
 
@@ -74,12 +82,48 @@ bdosCloseFile:
         ld l,a
         ret
 
+bdosFindFirst:
+        DEBUGMESSAGE "bdosFindFirst"
+        DEBUGDUMPREGISTERS
+
+        push de
+        ld hl,(BDOS_DTA)
+        call sendRegisters
+        ld (hl),BDOS_FINDFIRST
+        
+        pop de
+        ex de,hl                        ; send FCB to host
+        ld bc,36
+        ldir
+
+        call blockRead
+        jr c,.error
+
+        and a
+        jp m,.error             ; 128 means 'file not found'
+
+        xor a
+        ld l,a
+        ret z                   ; file was found! (drive number and filename copied to DTA)
+
+.error: ld a,$ff
+        ld l,a
+        ret
+
+bdosFindNext:
+        DEBUGMESSAGE "bdosFindNext"
+        DEBUGDUMPREGISTERS
+
+        call sendRegisters
+        ld (hl),BDOS_FINDNEXT
+        ret
+
 bdosRandomBlockRead:
         DEBUGMESSAGE "bdosRandomBlockRead"
         DEBUGDUMPREGISTERS
-        
+
         push hl
-        ld hl,(BDOS_DMA)
+        ld hl,(BDOS_DTA)
         ld b,h
         ld c,l
         pop hl
@@ -87,7 +131,7 @@ bdosRandomBlockRead:
         call sendRegisters
         ld (hl),BDOS_RANDOMREAD
 
-        ld a,(BDOS_DMA + 1)
+        ld a,(BDOS_DTA + 1)
         call blockRead
         
         ld hl, $4000
