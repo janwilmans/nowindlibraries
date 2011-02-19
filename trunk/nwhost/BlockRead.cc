@@ -27,11 +27,12 @@ bool BlockRead::isDone() const
     return done;
 }
 
-void BlockRead::init(word aStartAddress, word aSize, const std::vector <byte >& data)
+void BlockRead::init(word aStartAddress, word aSize, const std::vector <byte >& data, byte aReturnCode)
 {
     DBERR("BlockRead::init(startAddress: 0x%04x, size: 0x%04x\n", aStartAddress, aSize);
     startAddress = aStartAddress;
     transferSize = aSize;
+    returnCode = aReturnCode;
 
     transferingToPage01 = (startAddress <= TWOBANKLIMIT);
     transferredData = 0;
@@ -181,7 +182,7 @@ void BlockRead::blockReadContinue()
     {
         //DBERR("blockReadContinue, we're done!\n");
         nwhSupport->sendHeader();
-        nwhSupport->send(BLOCKREAD_EXIT);
+        nwhSupport->send(returnCode);
         done = true;
     }
 }
@@ -229,6 +230,11 @@ void BlockRead::ack(byte tail)
     }
 }
 
-
+void BlockRead::cancelWithCode(byte returnCode)
+{
+    nwhSupport->sendHeader();
+    nwhSupport->send(returnCode);
+    done = true;
+}
 
 } // namespace nwhost

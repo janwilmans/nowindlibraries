@@ -27,7 +27,7 @@ public:
 	virtual ~BlockRead();
 	void initialize(NowindHostSupport* aSupport);
 
-    void init(word startAddress, word size, const std::vector <byte >& data);  // just wraps the the first blockRead() and initializes some vars
+    void init(word startAddress, word size, const std::vector <byte >& data, byte returnCode = BLOCKREAD_EXIT);  // just wraps the the first blockRead() and initializes some vars
     void ack(byte tail);
     void blockRead(word startAddress, word size);
     void blockReadHelper(word startAddress, word size);
@@ -35,6 +35,7 @@ public:
     void sendDataBlock(unsigned int blocknr);
     void blockReadAck(byte tail);
     bool isDone() const;
+    void cancelWithCode(byte);
     
 private:
 	word startAddress;
@@ -46,6 +47,7 @@ private:
     std::vector<byte> buffer;                   // work buffer for current tranfer
 	std::deque< DataBlock* > dataBlockQueue;    // currently send blocks that are waiting to be acknowledged
 	bool done;
+	byte returnCode;
     
 };
 
