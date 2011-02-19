@@ -129,7 +129,7 @@ void NowindHost::write(byte data, unsigned int time)
 		nwhSupport->purge();
 		state = STATE_SYNC1;
 	}
-    //DBERR("received: 0x%02x (in state: %d)\n", data, state);
+    DBERR("received: 0x%02x (in state: %d)\n", data, state);
 	switch (state) {
 	case STATE_SYNC1:
 		timer1 = time;
@@ -337,6 +337,7 @@ void NowindHost::executeCommand()
     case 0x97: apiCommand();  break;
 	default:
 		// Unknown USB command!
+		DBERR("Unknown command! (0x%02x)\n", cmd);
 		state = STATE_SYNC1;
 		break;
 	}
@@ -1045,18 +1046,47 @@ void NowindHost::BDOS_0FH_OpenFile()
 	recvCount = 0;   
 }
 
+void trim(string& str)
+{
+  string::size_type pos = str.find_last_not_of(' ');
+  if(pos != string::npos) {
+    str.erase(pos + 1);
+    pos = str.find_first_not_of(' ');
+    if(pos != string::npos) str.erase(0, pos);
+  }
+  else str.erase(str.begin(), str.end());
+}
+
 void NowindHost::BDOS_OpenFile()
 {
- 	string result;
+ 	string whole;
 	for (int i = 1; i < 13; ++i) {
 		char c = extraData[i];
-		result += toupper(c);
+        whole += toupper(c);
 	}
+	string file = whole.substr(0, 8);
+	trim(file);
+    string filename = file;
+    string ext = whole.substr(8, 3);
+    trim(ext);
+    if (!ext.empty())
+    {
+        filename += "." + ext;
+    }
 
-    DBERR(" nu hebben we een fcb: %s\n", result.c_str());
+    DBERR(" nu hebben we een fcb: %s\n", filename.c_str());
     //bdosFiles.push_back( new fstream(imageName.c_str(), ios::binary | ios::in);
-    //bdosfile = new fstream(result.c_str(), ios::binary | ios::in);
+    bdosfile = new fstream(filename.c_str(), ios::binary | ios::in);
+    nwhSupport->sendHeader();
     
+    if (bdosfile->fail())
+    {
+        nwhSupport->send(0xff);
+    }
+    else
+    {
+        nwhSupport->send(0);
+    }
     state = STATE_SYNC1;
 }
 

@@ -1,4 +1,12 @@
 
+BDOS_DMA        equ $f23d
+
+BDOS_OPENFILE   equ $0f
+BDOS_CLOSEFILE  equ $10
+BDOS_RANDOMREAD equ $27
+
+
+
 ; just patching the BDOS hook will not work; not everybody uses the hook
         
         PATCH $5d20, nowindBDOS              ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW        
@@ -15,7 +23,7 @@ currentFilePosition2 := $
         
 ;bdosOpenFile (0x0f)
         code ! $4462
-        call bdosOpenFile
+        jp bdosOpenFile
 
 ;bdosCloseFile (0x10)
         code ! $456f
@@ -36,64 +44,60 @@ bdosOpenFile:
         DEBUGMESSAGE "bdosOpenFile"
         DEBUGDUMPREGISTERS
 
-        push af
-        push hl
-        push de
         push de
         call sendRegisters
-        ld (hl),c       ; bdos command
-
+        ld (hl),BDOS_OPENFILE
         pop de
-        ex de,hl       
+
+        ex de,hl                        ; send FCB to host
         ld bc,36
         ldir
-        
-        pop de
-        pop hl
-        pop af
 
-        ex de,hl
-        EMU_DUMPMEMHL 30
-        ex de,hl
-        jp $42a5
-        
+        call enableNowindPage0
+        call getHeaderInPage0
+        jr nc,.exit                     ; carry means is connection lost
+        ld a,255                        ; return 'file not found'
+.exit:
+        ; TODO: update FCB?
+        ld l,a
+        call restorePage0        
+        ret
+       
 bdosCloseFile:
         DEBUGMESSAGE "bdosCloseFile"
         DEBUGDUMPREGISTERS
 
-        push af
-        push hl
-        push de
-
         call sendRegisters
-        ld (hl),c
+        ld (hl),BDOS_CLOSEFILE
 
-        pop de
-        pop hl
-        pop af
-
-        push de
-        pop iy
-        jp $4572        
+        xor a
+        ld l,a
+        ret
 
 bdosRandomBlockRead:
         DEBUGMESSAGE "bdosRandomBlockRead"
         DEBUGDUMPREGISTERS
-        
-        push af
+
         push hl
-        push de
+        ld hl,(BDOS_DMA)
+        ld b,h
+        ld c,l
+        pop hl
 
         call sendRegisters
-        ld (hl),c
+        ld (hl),BDOS_RANDOMREAD
 
-        pop de
-        pop hl
-        pop af
-                
-        xor a
-        ld ($f306),a
-        jp $47b6 
+        ld a,(BDOS_DMA + 1)
+        call blockRead
+        jr c,.exit
+
+        ld hl,1
+        ret
+
+.exit:
+        ; TODO: update FCB?
+        ld a,1
+        jp restorePage0        
         
         
 ; http://www.konamiman.com/msx/msx-e.html#msx2th
