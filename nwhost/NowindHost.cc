@@ -1101,16 +1101,34 @@ void NowindHost::BDOS_10H_CloseFile()
 void NowindHost::BDOS_27H_ReadRandomBlock()
 {
     DBERR(" >> BDOS_27H_ReadRandomBlock\n");
-    reportCpuInfo();
-    //std::vector<char> data;
-    
-    int count = 128;
+    word reg_bc = cmdData[0] + 256*cmdData[1];
+    word reg_hl = cmdData[4] + 256*cmdData[5];
+
+    std::vector<byte> buffer;
+    int size = reg_hl;
     int offset = 0;
-    //data.resize(count);
-    //bdosfile->seekg(offset);
-    //bdosfile->read(&data[0], count);
+    buffer.resize(size);
+    bdosfile->seekg(offset);
+    bdosfile->read((char*)&buffer[0], size);
+    size_t actuallyRead = bdosfile->gcount();
     
-    state = STATE_SYNC1;
+    if (actuallyRead == 0)
+    {
+        blockRead.cancelWithCode(128);
+    }
+    else
+    {
+        byte returnCode = 128;
+        if (actuallyRead == reg_hl)
+        {
+            returnCode = BLOCKREAD_EXIT;
+        }
+
+        DBERR(" >> reg_hl: %u, actuallyRead: %u\n", reg_hl, actuallyRead);
+        word dmaAddres = reg_bc;
+        blockRead.init(dmaAddres, actuallyRead, buffer, returnCode);
+    }
+    state = STATE_BLOCKREAD;
 }
 
 } // namespace nowind

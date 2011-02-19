@@ -77,7 +77,7 @@ bdosCloseFile:
 bdosRandomBlockRead:
         DEBUGMESSAGE "bdosRandomBlockRead"
         DEBUGDUMPREGISTERS
-
+        
         push hl
         ld hl,(BDOS_DMA)
         ld b,h
@@ -89,15 +89,21 @@ bdosRandomBlockRead:
 
         ld a,(BDOS_DMA + 1)
         call blockRead
+        
+        ld hl, $4000
         jr c,.exit
 
-        ld hl,1
+        and a
+        jp m,.exit              ; end of file
+        
+        xor a                   ; no error
+        ; TODO: update FCB?
         ret
 
 .exit:
         ; TODO: update FCB?
         ld a,1
-        jp restorePage0        
+        ret        
         
         
 ; http://www.konamiman.com/msx/msx-e.html#msx2th
