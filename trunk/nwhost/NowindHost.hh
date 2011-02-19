@@ -166,8 +166,10 @@ private:
 
     unsigned int timer1;
     unsigned int timer2;
-        
+    long findFirstHandle;
+            
     std::string getFilenameFromExtraData();
+    void getVectorFromFileName(std::vector<byte>& buffer, std::string filename);
     void BDOS_OpenFile();
     void BDOS_CloseFile();
     void BDOS_FindFirst();

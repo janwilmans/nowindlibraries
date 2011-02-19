@@ -96,6 +96,7 @@ bdosFindFirst:
         ld bc,36
         ldir
 
+.findResult:
         call blockRead
         jr c,.error
 
@@ -106,7 +107,8 @@ bdosFindFirst:
         ld l,a
         ret z                   ; file was found! (drive number and filename copied to DTA)
 
-.error: ld a,$ff
+.error: 
+        ld a,$ff
         ld l,a
         ret
 
@@ -114,9 +116,10 @@ bdosFindNext:
         DEBUGMESSAGE "bdosFindNext"
         DEBUGDUMPREGISTERS
 
+        ld hl,(BDOS_DTA)
         call sendRegisters
         ld (hl),BDOS_FINDNEXT
-        ret
+        jp bdosFindFirst.findResult
 
 bdosRandomBlockRead:
         DEBUGMESSAGE "bdosRandomBlockRead"

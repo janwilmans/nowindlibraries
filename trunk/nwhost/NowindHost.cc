@@ -1115,37 +1115,24 @@ void NowindHost::BDOS_FindFirst()
     
 #ifdef WIN32
     struct _finddata_t data;
-    long sHandle = _findfirst(filename.c_str(), &data); 
-    if (sHandle == -1)
+    findFirstHandle = _findfirst(filename.c_str(), &data); 
+    if (findFirstHandle == -1)
     {
         blockRead.cancelWithCode(128);  // file not found
         state = STATE_SYNC1;
     }
     else
     {
-        vector<byte> buffer;
-        buffer.resize(13);
-        buffer[0] = 0;
-        buffer[1] = 'B';
-        buffer[2] = 'O';
-        buffer[3] = 'E';
-        buffer[4] = ' ';
-        buffer[5] = ' ';
-        buffer[6] = ' ';
-        buffer[7] = ' ';
-        buffer[8] = ' ';
-        buffer[9] = 'J';
-        buffer[10] = 'A';
-        buffer[11] = 'N';
         string filename(data.name);
         ToUpper(filename);
+        vector<byte> buffer;
+        getVectorFromFileName(buffer, filename);
         
         blockRead.init(reg_hl, buffer.size(), buffer);
         state = STATE_BLOCKREAD;
     }
     
     DBERR("file: %s size: %u\n", data.name, data.size);
-    _findclose( sHandle );
 #else
     // linux not implemented
     assert(false);
@@ -1153,12 +1140,74 @@ void NowindHost::BDOS_FindFirst()
     
 }
 
+void NowindHost::getVectorFromFileName(vector<byte>& buffer, string filename)
+{
+    buffer.resize(12);
+    string file = filename;
+    string ext;
+    
+    if (filename == "." || filename == "..")
+    {
+    
+    }
+    else
+    {
+        int point = filename.find('.');   
+        if (point != -1)
+        {
+            file = filename.substr(0, point);
+            ext = filename.substr(point+1);
+        }
+    }
+
+    if (file.size() > 8) file.resize(8);
+    if (ext.size() > 3) ext.resize(3);
+    for (int i=1; i< buffer.size(); i++)
+    {
+        buffer[i] = 32;
+    }
+        
+    buffer[0] = 0;
+    for (size_t i=0; i < file.size() ;i++)
+    {
+        buffer[i+1] = file[i];
+    }
+    for (size_t i=0; i < ext.size(); i++)
+    {
+        buffer[i+9] = ext[i];
+    }
+
+}
+
 void NowindHost::BDOS_FindNext()
 {
     DBERR(" >> BDOS_12H_FindNext\n");
-    reportCpuInfo();
+    word reg_hl = cmdData[4] + 256*cmdData[5];
     
-    state = STATE_SYNC1;
+#ifdef WIN32
+    struct _finddata_t data;
+    long result = _findnext(findFirstHandle, &data); 
+    if (result != 0)
+    {
+        blockRead.cancelWithCode(128);  // file not found
+        state = STATE_SYNC1;
+    }
+    else
+    {
+        string filename(data.name);
+        ToUpper(filename);
+
+        vector<byte> buffer;
+        getVectorFromFileName(buffer, filename);
+        blockRead.init(reg_hl, buffer.size(), buffer);
+        state = STATE_BLOCKREAD;
+    }
+    DBERR("file: %s size: %u\n", data.name, data.size);
+#else
+    // linux not implemented
+    assert(false);
+#endif
+    
 }
 
 void NowindHost::BDOS_ReadRandomBlock()
