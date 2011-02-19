@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="msxsrc"
 	ProjectGUID="{38CF369E-8463-4C57-9101-7A6211D45184}"
 	RootNamespace="msxsrc"
@@ -238,6 +238,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\nowindbdos.asm"
+				>
+			</File>
+			<File
 				RelativePath=".\nowindDriver.asm"
 				>
 				<FileConfiguration
@@ -333,7 +337,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Assembly using sjasm"
-							CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+							CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
 							Outputs="$(OutDir)nic.com"
 						/>
 					</FileConfiguration>
@@ -356,7 +360,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Assembly using sjasm"
-							CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+							CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
 							Outputs="$(OutDir)nowmap.com"
 						/>
 					</FileConfiguration>
@@ -379,7 +383,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Assembly using sjasm"
-							CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+							CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
 							Outputs="$(OutDir)nta.com"
 						/>
 					</FileConfiguration>

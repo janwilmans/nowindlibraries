@@ -148,6 +148,7 @@ INIENV: DEBUGMESSAGE "INIENV23dos1"
         ret
         
 DSKIO:  DEBUGMESSAGE "DSKIO23dos1"
+        DEBUGDISASM
         ld a,2
         scf
         ret

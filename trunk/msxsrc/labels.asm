@@ -75,8 +75,10 @@ API_NOWMAP      equ 0
 
 ; PATCH       
         macro PATCH address, word
+currentFilePosition := $
         code ! address
         dw word
+        code @ currentFilePosition
         endmacro
 
 ; MAKEDPB macro

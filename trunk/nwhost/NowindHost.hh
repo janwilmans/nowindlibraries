@@ -82,6 +82,7 @@ public:
 		STATE_CPUINFO,   // receiving slot/stack info
 		STATE_RECEIVE_DATA,    // receive data for API command
 		STATE_RECEIVE_STRING,  // receive string for API command
+		STATE_BDOS_OPEN_FILE,  // receive FCB
 	};
 	
 	enum ApiCommands {
@@ -164,6 +165,14 @@ private:
 
     unsigned int timer1;
     unsigned int timer2;
+        
+    void BDOS_0FH_OpenFile();
+    void BDOS_OpenFile();
+    void BDOS_10H_CloseFile();    
+    void BDOS_27H_ReadRandomBlock(); 
+    
+    std::vector<std::fstream* > bdosFiles;
+    std::fstream* bdosfile;
     
 protected:    
     NowindHostSupport* nwhSupport;          // pointer to the NowindHostSupport instance that is actually used (can be subclassed to provide implemenation specific debug-support)

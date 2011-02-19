@@ -56,7 +56,7 @@ sendRegisters:
         ret
 
 getHeaderInPage0:
-        DEBUGMESSAGE "gH0"
+        ;DEBUGMESSAGE "gH0"
         ld h,HIGH usbReadPage0
 .init:
         ld b,HIGH 65535                 ; 42000 * 60 states ~ 0,7 sec (time out)
@@ -81,7 +81,7 @@ getHeaderInPage0:
         PHASE $ + $4000
 
 getHeaderInPage2:
-        DEBUGMESSAGE "gH2"
+        ;DEBUGMESSAGE "gH2"
         ld h,HIGH usbReadPage2
         jr getHeaderInPage0.init + $4000 
         
@@ -254,7 +254,7 @@ blockRead:
         PHASE $ + $4000
 
 blockRead01:
-        DEBUGMESSAGE "br01"
+        ;DEBUGMESSAGE "br01"
         call getHeaderInPage2
         ret c
 
@@ -275,7 +275,7 @@ blockRead01:
         DEPHASE
 
 blockRead23:
-        DEBUGMESSAGE "br23"
+        ;DEBUGMESSAGE "br23"
         call getHeaderInPage0
         ret c                           ; return on timeout
 
@@ -290,7 +290,7 @@ blockRead23:
         jr blockRead23
 
 .fastTransfer:
-        DEBUGMESSAGE "fast"
+        ;DEBUGMESSAGE "fast"
         call blockReadTranfer
         jr blockRead23
 
@@ -307,7 +307,7 @@ invalidHeader:
         jr blockReadTranfer.good
 
 blockReadTranfer:
-        DEBUGMESSAGE "btf"
+        ;DEBUGMESSAGE "btf"
         ld iy,0                         ; save stack pointer
         add iy,sp
         ld e,(hl)                       ; transfer address
@@ -345,7 +345,7 @@ blockReadTranfer:
         ret
         
 .errorInPage1:
-        DEBUGMESSAGE ".err1"
+        ;DEBUGMESSAGE ".err1"
         ; TODO timeout
         ld a,(hl)
         cp c
@@ -363,7 +363,7 @@ blockReadTranfer:
         ret
         
 .errorInPage2:
-        DEBUGMESSAGE ".err2"
+        ;DEBUGMESSAGE ".err2"
         ; TODO timeout
         ld a,(hl)
         cp c
@@ -371,7 +371,7 @@ blockReadTranfer:
         jr .errorInPage2
 
 slowTransfer:
-        DEBUGMESSAGE "SlowTR"
+        ;DEBUGMESSAGE "SlowTR"
         ld e,(hl)                       ; slow transfer
         ld d,(hl)
         ld c,(hl)        
@@ -393,12 +393,12 @@ blockWrite:
         call executeCommandNowindInPage2
         ret c                           ; return error (error code in a)
         ret pe                          ; host returns 0xfe when data for page 2/3 is available
-        DEBUGMESSAGE "doorgaan!"
+        ;DEBUGMESSAGE "doorgaan!"
 
 .page23:
         ld hl,blockWrite23
         call executeCommandNowindInPage0
-        DEBUGMESSAGE "back"
+        ;DEBUGMESSAGE "back"
         ret c                           ; return error (error code in a)
         xor a                           ; some software (wb?) requires that a is zero, because they do not check the carry
         ret
@@ -406,14 +406,14 @@ blockWrite:
         PHASE $ + $4000
 
 blockWrite01:
-        DEBUGMESSAGE "blkWr01"
+        ;DEBUGMESSAGE "blkWr01"
         call getHeaderInPage2
         ret c                           ; exit (not ready)
         or a
         ret m                           ; exit (no error)
         jr nz,.error
 
-        DEBUGMESSAGE "wr01"
+        ;DEBUGMESSAGE "wr01"
         ld e,(hl)                       ; address
         ld d,(hl)
         ld c,(hl)                       ; number of bytes
@@ -434,14 +434,14 @@ blockWrite01:
         DEPHASE
 
 blockWrite23:
-        DEBUGMESSAGE "blkWr23"
+        ;DEBUGMESSAGE "blkWr23"
         call getHeaderInPage0
         ret c                           ; exit (not ready)
         or a
         ret m                           ; exit (no error)
         jr nz,.error
 
-        DEBUGMESSAGE "wr23"
+        ;DEBUGMESSAGE "wr23"
         ld e,(hl)                       ; address
         ld d,(hl)
         ld c,(hl)                       ; number of bytes

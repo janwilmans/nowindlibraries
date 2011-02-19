@@ -1,4 +1,6 @@
         
+        ;define BDOS_NOWIND
+        
         ; enables messages that can only be viewed in emulation, 
         ; are harmless on real hardware but cause small delays
         ; recommened: turn off for releases
@@ -129,6 +131,7 @@
         PATCH $65af, OEMSTA
         PATCH $5809, initDiskBasic      ; HRUNC
         ;PATCH $5b9a, getHostDate        ; get date from host when no clockchip found (different 5b95)
+
 
         code @ $7405
 

@@ -73,7 +73,7 @@ noNextCommand:
         jp nz,$47d6                     ; boot MSXDOS2
 
 bootMSXDOS1:
-        DEBUGMESSAGE "switch to DOS1"
+        DEBUGMESSAGE "boot DOS1"
         ld hl,$576f                     ; boot MSXDOS1
         push hl
         ld a,4
