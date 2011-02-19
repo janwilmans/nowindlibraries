@@ -50,22 +50,22 @@ nowind
 5=nowind.asm
 [Selected Project Files]
 Main=
-Selected=nowindbdos.asm
+Selected=common.asm
 [nowindDriver.asm]
 TopLine=93
 Caret=1,136
 [common.asm]
-TopLine=237
-Caret=10,238
+TopLine=261
+Caret=28,292
 [..\Release\stderr.txt]
 TopLine=258
 Caret=1,309
 [nowindbdos.asm]
 TopLine=77
-Caret=1,101
+Caret=23,99
 [labels.asm]
 TopLine=1
 Caret=1,1
 [nowind.asm]
-TopLine=17
+TopLine=2
 Caret=9,2
