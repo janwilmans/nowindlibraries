@@ -245,7 +245,8 @@ blockRead:
         ld hl,blockRead01
         call executeCommandNowindInPage2
         ret c                           ; not ready
-        ret z                           ; done! (no more data for page23)
+        ret nz                          ; done! (no more data for page23)
+
         ;DEBUGMESSAGE "more data for .page23!"
 .page23:
         ld hl,blockRead23
@@ -258,11 +259,12 @@ blockRead01:
         call getHeaderInPage2
         ret c
 
-        dec a
+        cp 1
         jr z,.fastTransfer
-        ret m                           ; exit (more data for page23)
-        dec a
-        ret z                           ; exit (done!)        
+        and a
+        ret z                           ; exit (more data for page23)
+        cp 2
+        ret nz                          ; exit (return code 2-255, bit7 signals error)
 
         call slowTransfer + $4000
         ld (usbWritePage2),a            ; return header
@@ -279,11 +281,12 @@ blockRead23:
         call getHeaderInPage0
         ret c                           ; return on timeout
 
-        dec a
+        cp 1
         jr z,.fastTransfer
-        ; ret m (not necessary)
-        dec a
-        ret z
+;        and a
+;        ret z                          ; exit (more data for page23)
+        cp 2
+        ret nz                          ; exit (return code 2-255, bit7 signals error)
         
         call slowTransfer
         ld (usbWritePage1),a            ; return header
