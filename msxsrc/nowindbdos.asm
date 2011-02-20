@@ -1,47 +1,66 @@
 
-BDOS_DTA        equ $f23d
+BDOS_DTA                        equ $f23d
 
-BDOS_OPENFILE   equ $0f
-BDOS_CLOSEFILE  equ $10
-BDOS_FINDFIRST  equ $11
-BDOS_FINDNEXT   equ $12
-BDOS_RANDOMREAD equ $27
+BDOS_OPENFILE                   equ $0f
+BDOS_CLOSEFILE                  equ $10
+BDOS_FINDFIRST                  equ $11
+BDOS_FINDNEXT                   equ $12
+BDOS_DELETEFILE                 equ $13
+;BDOS_SEQUENTALREAD             equ $14
+;BDOS_SEQUENTALWRITE            equ $15
+BDOS_CREATEFILE                 equ $16
+BDOS_RENAMEFILE                 equ $17
+
+;BDOS_RANDOMREAD                equ $21
+;BDOS_RANDOMWRITE               equ $22
+
+BDOS_RANDOMBLOCKWRITE           equ $26
+BDOS_RANDOMBLOCKREAD            equ $27
+;BDOS_RANDOMWRITEWITHZEROFILL   equ $28
+
+BDOS_ABSOLUTESECTORREAD         equ $2f
+BDOS_ABSOLUTESECTORWRITE        equ $30
 
 
-
-; just patching the BDOS hook will not work; not everybody uses the hook
+; Only patching the BDOS hook ($f37d) and its jumptable will not work as some routines are called directly.
+; For example, COMMAND.COM assumes these routines are at fixed places in the diskrom.
         
-        PATCH $5d20, nowindBDOS              ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW        
-
-        ; even patching the BDOS jump table will not work; internal calls (even in command.com) bypass it
-        ; jump table patches
-        ;PATCH $572b, BDOS_0FH_J          ; overwrite specific function 0Fh in jump table
-        ;PATCH $572f, BDOS_11H_J          ; overwrite specific function 11h in jump table
-        ;PATCH $5731, BDOS_12H_J          ; overwrite specific function 12h in jump table
-
-        ; these patches are at the start of the routine themselves, the addresses are more or less "standardized"
+        PATCH $5d20, nowindBDOS              ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW (for logging only)     
 
 currentFilePosition2 := $        
         
-;bdosOpenFile (0x0f)
         code ! $4462
-        jp bdosOpenFile
+        jp bdosOpenFile                 ; 0x0f
 
-;bdosCloseFile (0x10)
         code ! $456f
-        jp bdosCloseFile         
+        jp bdosCloseFile                ; 0x10         
 
-;bdosFindFirst (0x11)
         code ! $4fb8
-        jp bdosFindFirst
+        jp bdosFindFirst                ; 0x11
         
-;bdosFindNext (0x12)
         code ! $5006
-        jp bdosFindNext  
+        jp bdosFindNext                 ; 0x12  
 
-;bdosRandomBlockRead (0x27)
+        code ! $436c
+        jp bdosDeleteFile               ; 0x13
+
+        code ! $461d
+        jp bdosCreateFile               ; 0x16
+        
+        code ! $4392
+        jp bdosRenameFile               ; 0x17
+
+        code ! $47be
+        jp bdosRandomBlockWrite         ; 0x26
+
         code ! $47b2
-        jp bdosRandomBlockRead
+        jp bdosRandomBlockRead          ; 0x27
+
+        code ! $46ba
+        jp bdosAbsoluteSectorRead       ; 0x2f
+
+        code ! $4720
+        jp bdosAbsoluteSectorWrite      ; 0x30
 
         code @ currentFilePosition2
 
@@ -52,7 +71,6 @@ nowindBDOS:
 
 bdosOpenFile:
         DEBUGMESSAGE "bdosOpenFile"
-        DEBUGDUMPREGISTERS
         push de
         call sendRegisters
         ld (hl),BDOS_OPENFILE
@@ -74,7 +92,6 @@ bdosOpenFile:
        
 bdosCloseFile:
         DEBUGMESSAGE "bdosCloseFile"
-        DEBUGDUMPREGISTERS
         call sendRegisters
         ld (hl),BDOS_CLOSEFILE
 
@@ -84,8 +101,6 @@ bdosCloseFile:
 
 bdosFindFirst:
         DEBUGMESSAGE "bdosFindFirst"
-        DEBUGDUMPREGISTERS
-
         push de
         ld hl,(BDOS_DTA)
         call sendRegisters
@@ -97,6 +112,7 @@ bdosFindFirst:
         ldir
 
 .findResult:
+        ; TODO: a laden met high trasnfer address?
         call blockRead
         jr c,.error
 
@@ -109,22 +125,46 @@ bdosFindFirst:
 
 .error: 
         ld a,$ff
-        ld l,a
+        ld l,a  ; TODO: WEL NODIG? dOET BDOS HANDKER DIT NIET?
         ret
 
 bdosFindNext:
         DEBUGMESSAGE "bdosFindNext"
-        DEBUGDUMPREGISTERS
-
         ld hl,(BDOS_DTA)
         call sendRegisters
         ld (hl),BDOS_FINDNEXT
         jp bdosFindFirst.findResult
 
+bdosDeleteFile:
+        DEBUGMESSAGE "bdosDeleteFile"
+        call sendRegisters
+        ld (hl),BDOS_DELETEFILE
+        ld a,255        ; delete unsuccessful
+        ret
+        
+bdosCreateFile:
+        DEBUGMESSAGE "bdosCreateFile"
+        call sendRegisters
+        ld (hl),BDOS_CREATEFILE
+        ld a,255        ; create unsuccessful
+        ret
+
+bdosRenameFile:
+        DEBUGMESSAGE "bdosRenameFile"
+        call sendRegisters
+        ld (hl),BDOS_RENAMEFILE
+        ld a,255        ; rename unsuccessful
+        ret
+
+bdosRandomBlockWrite:     
+        DEBUGMESSAGE "bdosRandomBlockWrite"
+        call sendRegisters
+        ld (hl),BDOS_RANDOMBLOCKWRITE
+        ld a,255        ; write unsuccesful        
+        ret
+        
 bdosRandomBlockRead:
         DEBUGMESSAGE "bdosRandomBlockRead"
-        DEBUGDUMPREGISTERS
-
         push hl
         ld hl,(BDOS_DTA)
         ld b,h
@@ -132,7 +172,7 @@ bdosRandomBlockRead:
         pop hl
 
         call sendRegisters
-        ld (hl),BDOS_RANDOMREAD
+        ld (hl),BDOS_RANDOMBLOCKREAD
 
         ld a,(BDOS_DTA + 1)
         call blockRead
@@ -151,7 +191,19 @@ bdosRandomBlockRead:
         ; TODO: update FCB?
         ld a,1
         ret        
+
+
+bdosAbsoluteSectorRead:
+        DEBUGMESSAGE "bdosAbsoluteSectorRead"
+        call sendRegisters
+        ld (hl),BDOS_ABSOLUTESECTORREAD
+        ld a,2  ; not ready (TODO: check!)
+        ret
         
+bdosAbsoluteSectorWrite:
+        DEBUGMESSAGE "bdosAbsoluteSectorWrite"
+        ld a,2  ; not ready (TODO: check!)
+        ret
         
 ; http://www.konamiman.com/msx/msx-e.html#msx2th
 ; http://www.angelfire.com/art2/unicorndreams/msx/RR-BASIC.html

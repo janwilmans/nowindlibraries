@@ -48,12 +48,12 @@ nowind
 3=nowindbdos.asm
 4=labels.asm
 5=nowind.asm
-6=..\Debug\mijn.fil
+6=debug.asm
 [Selected Project Files]
 Main=
-Selected=..\Debug\mijn.fil
+Selected=nowindbdos.asm
 [nowindDriver.asm]
-TopLine=93
+TopLine=113
 Caret=1,136
 [common.asm]
 TopLine=277
@@ -62,14 +62,14 @@ Caret=26,294
 TopLine=258
 Caret=1,309
 [nowindbdos.asm]
-TopLine=91
-Caret=1,109
+TopLine=1
+Caret=6,14
 [labels.asm]
 TopLine=1
 Caret=1,1
 [nowind.asm]
-TopLine=2
+TopLine=41
 Caret=9,2
-[..\Debug\mijn.fil]
-TopLine=1
-Caret=1,2
+[debug.asm]
+TopLine=55
+Caret=25,69
