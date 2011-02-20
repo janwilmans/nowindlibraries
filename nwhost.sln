@@ -1,23 +1,43 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C++ Express 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "General", "general\General.vcxproj", "{121530D0-D7D4-487C-846F-2BBFB0CAF032}"
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "General", "general\General.vcproj", "{121530D0-D7D4-487C-846F-2BBFB0CAF032}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ftdx", "ftdx\ftdx.vcxproj", "{26FC2680-906D-4276-ABCE-B8B82D1A33B9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ftdx", "ftdx\ftdx.vcproj", "{26FC2680-906D-4276-ABCE-B8B82D1A33B9}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nowind", "nowind\nowind.vcxproj", "{96193BDE-798C-406C-84DD-82D4CBDDB0BD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nowind", "nowind\nowind.vcproj", "{96193BDE-798C-406C-84DD-82D4CBDDB0BD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{26FC2680-906D-4276-ABCE-B8B82D1A33B9} = {26FC2680-906D-4276-ABCE-B8B82D1A33B9}
+		{84CB9A93-5255-49DC-90B5-094A40902C45} = {84CB9A93-5255-49DC-90B5-094A40902C45}
+		{121530D0-D7D4-487C-846F-2BBFB0CAF032} = {121530D0-D7D4-487C-846F-2BBFB0CAF032}
+	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nwhost", "nwhost\nwhost.vcxproj", "{84CB9A93-5255-49DC-90B5-094A40902C45}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nwhost", "nwhost\nwhost.vcproj", "{84CB9A93-5255-49DC-90B5-094A40902C45}"
+	ProjectSection(ProjectDependencies) = postProject
+		{62F06547-E1A8-4538-A205-80FE27E73F7D} = {62F06547-E1A8-4538-A205-80FE27E73F7D}
+		{38CF369E-8463-4C57-9101-7A6211D45184} = {38CF369E-8463-4C57-9101-7A6211D45184}
+		{121530D0-D7D4-487C-846F-2BBFB0CAF032} = {121530D0-D7D4-487C-846F-2BBFB0CAF032}
+	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nwhostapp", "nwhostapp\nwhostapp.vcxproj", "{B130EB13-1A0D-4482-8A36-F5087F6A0230}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nwhostapp", "nwhostapp\nwhostapp.vcproj", "{B130EB13-1A0D-4482-8A36-F5087F6A0230}"
+	ProjectSection(ProjectDependencies) = postProject
+		{84CB9A93-5255-49DC-90B5-094A40902C45} = {84CB9A93-5255-49DC-90B5-094A40902C45}
+		{96193BDE-798C-406C-84DD-82D4CBDDB0BD} = {96193BDE-798C-406C-84DD-82D4CBDDB0BD}
+	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pynowind", "pynowind\pynowind.vcxproj", "{C62A3963-211E-42C2-8F66-C0CC504B555A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pynowind", "pynowind\pynowind.vcproj", "{C62A3963-211E-42C2-8F66-C0CC504B555A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{96193BDE-798C-406C-84DD-82D4CBDDB0BD} = {96193BDE-798C-406C-84DD-82D4CBDDB0BD}
+	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "emuv1", "emuv1\emuv1.vcxproj", "{7A33AB1A-80EF-441B-B444-9A01765DB48E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "emuv1", "emuv1\emuv1.vcproj", "{7A33AB1A-80EF-441B-B444-9A01765DB48E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{84CB9A93-5255-49DC-90B5-094A40902C45} = {84CB9A93-5255-49DC-90B5-094A40902C45}
+	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "msxsrc", "msxsrc\msxsrc.vcxproj", "{38CF369E-8463-4C57-9101-7A6211D45184}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "msxsrc", "msxsrc\msxsrc.vcproj", "{38CF369E-8463-4C57-9101-7A6211D45184}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sjasm", "sjasm\sjasm.vcxproj", "{62F06547-E1A8-4538-A205-80FE27E73F7D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sjasm", "sjasm\sjasm.vcproj", "{62F06547-E1A8-4538-A205-80FE27E73F7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
