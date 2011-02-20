@@ -170,12 +170,27 @@ private:
             
     std::string getFilenameFromExtraData();
     void getVectorFromFileName(std::vector<byte>& buffer, std::string filename);
-    void BDOS_OpenFile();
+
+    void BDOS_DiskReset();
+	void BDOS_OpenFile();
     void BDOS_CloseFile();
     void BDOS_FindFirst();
     void BDOS_FindNext();
-    void BDOS_ReadRandomBlock(); 
-    
+	void BDOS_DeleteFile();
+	void BDOS_ReadSeq();
+	void BDOS_WriteSeq();
+	void BDOS_CreateFile();
+	void BDOS_RenameFile();
+	void BDOS_ReadRandomFile();
+	void BDOS_WriteRandomFile();
+	void BDOS_GetFileSize();
+	void BDOS_SetRandomRecordField();
+	void BDOS_WriteRandomBlock();
+	void BDOS_ReadRandomBlock();
+	void BDOS_WriteRandomFileWithZeros();
+	void BDOS_ReadLogicalSector();
+	void BDOS_WriteLogicalSector();
+
     std::vector<std::fstream* > bdosFiles;
     std::fstream* bdosfile;
     

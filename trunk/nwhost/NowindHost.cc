@@ -278,32 +278,35 @@ void NowindHost::executeCommand()
 	byte cmd = cmdData[8];
 	switch (cmd) {
 
+	case 0x0D: BDOS_DiskReset(); break;
 	case 0x0F: state = STATE_BDOS_OPEN_FILE; recvCount = 0; break;
 	case 0x10: BDOS_CloseFile(); break;
 	case 0x11: state = STATE_BDOS_FIND_FIRST; recvCount = 0; break;
 	case 0x12: BDOS_FindNext(); break;
+	case 0x13: BDOS_DeleteFile(); break;
+	case 0x14: BDOS_ReadSeq(); break;
+	case 0x15: BDOS_WriteSeq(); break;
+	case 0x16: BDOS_CreateFile(); break;
+	case 0x17: BDOS_RenameFile(); break;
+	case 0x21: BDOS_ReadRandomFile(); break;
+	case 0x22: BDOS_WriteRandomFile(); break;
+	case 0x23: BDOS_GetFileSize(); break;
+	case 0x24: BDOS_SetRandomRecordField(); break;
+	case 0x26: BDOS_WriteRandomBlock(); break;
 	case 0x27: BDOS_ReadRandomBlock(); break;
-    /*
-	case 0x0D: BDOS_0DH_DiskReset(); break;
-	case 0x13: BDOS_13H_DeleteFile(); break;
-	case 0x14: BDOS_14H_ReadSeq(); break;
-	case 0x15: BDOS_15H_WriteSeq(); break;
-	case 0x16: BDOS_16H_CreateFile(); break;
-	case 0x17: BDOS_17H_RenameFile(); break;
-	case 0x21: BDOS_21H_ReadRandomFile(); break;
-	case 0x22: BDOS_22H_WriteRandomFile(); break;
-	case 0x23: BDOS_23H_GetFileSize(); break;
-	case 0x24: BDOS_24H_SetRandomRecordField(); break;
-	case 0x26: BDOS_26H_WriteRandomBlock(); break;
-	case 0x28: BDOS_28H_WriteRandomFileWithZeros(); break;
-	case 0x2A: BDOS_2AH_GetDate(); break;
-	case 0x2B: BDOS_2BH_SetDate(); break;
-	case 0x2C: BDOS_2CH_GetTime(); break;
-	case 0x2D: BDOS_2DH_SetTime(); break;
-	case 0x2E: BDOS_2EH_Verify(); break;
-	case 0x2F: BDOS_2FH_ReadLogicalSector(); break;
-	case 0x30: BDOS_30H_WriteLogicalSector(); break;
-    */
+	case 0x28: BDOS_WriteRandomFileWithZeros(); break;
+
+	//case 0x2A: BDOS_GetDate(); break; // no implementation needed
+	//case 0x2B: BDOS_SetDate(); break; // no implementation needed
+	//case 0x2C: BDOS_GetTime(); break; // no implementation needed
+	//case 0x2D: BDOS_SetTime(); break; // no implementation needed
+	//case 0x2E: BDOS_Verify(); break;  // no implementation needed
+
+	case 0x2F: BDOS_ReadLogicalSector(); break;
+	case 0x30: BDOS_WriteLogicalSector(); break;
+
+	// http://map.grauw.nl/resources/dos2_functioncalls.php#_SETDTA
+	// http://map.grauw.nl/resources/dos2_environment.php
 
 	case 0x80: { // DSKIO
 		SectorMedium* disk = getDisk();
@@ -1080,6 +1083,97 @@ string NowindHost::getFilenameFromExtraData()
     return filename;
 }
 
+void NowindHost::BDOS_DiskReset()
+{
+    DBERR(" >> BDOS_DiskReset\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_CloseFile()
+{
+    DBERR(" >> BDOS_CloseFile\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_DeleteFile()
+{
+    DBERR(" >> BDOS_DeleteFile\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_ReadSeq()
+{
+    DBERR(" >> BDOS_ReadSeq\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_WriteSeq()
+{
+    DBERR(" >> BDOS_WriteSeq\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_CreateFile()
+{
+    DBERR(" >> BDOS_CreateFile\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_RenameFile()
+{
+    DBERR(" >> BDOS_RenameFile\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_ReadRandomFile()
+{
+    DBERR(" >> BDOS_ReadRandomFile\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_WriteRandomFile()
+{
+    DBERR(" >> BDOS_WriteRandomFile\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_GetFileSize()
+{
+    DBERR(" >> BDOS_GetFileSize\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_SetRandomRecordField()
+{
+    DBERR(" >> BDOS_SetRandomRecordField\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_WriteRandomBlock()
+{
+    DBERR(" >> BDOS_WriteRandomBlock\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_WriteRandomFileWithZeros()
+{
+    DBERR(" >> BDOS_WriteRandomFileWithZeros\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
+}
+
 void NowindHost::BDOS_OpenFile()
 {
     string filename = getFilenameFromExtraData();
@@ -1096,14 +1190,6 @@ void NowindHost::BDOS_OpenFile()
     {
         nwhSupport->send(0);
     }
-    state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_CloseFile()
-{
-    DBERR(" >> BDOS_10H_CloseFile\n");
-    reportCpuInfo();
-    
     state = STATE_SYNC1;
 }
 
@@ -1162,7 +1248,7 @@ void NowindHost::getVectorFromFileName(vector<byte>& buffer, string filename)
 
     if (file.size() > 8) file.resize(8);
     if (ext.size() > 3) ext.resize(3);
-    for (int i=1; i< buffer.size(); i++)
+    for (size_t i=1; i< buffer.size(); i++)
     {
         buffer[i] = 32;
     }
@@ -1241,6 +1327,20 @@ void NowindHost::BDOS_ReadRandomBlock()
         blockRead.init(dmaAddres, actuallyRead, buffer, returnCode);
     }
     state = STATE_BLOCKREAD;
+}
+
+void NowindHost::BDOS_ReadLogicalSector()
+{
+    DBERR(" >> BDOS_WriteRandomBlock\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
+}
+
+void NowindHost::BDOS_WriteLogicalSector()
+{
+    DBERR(" >> BDOS_WriteRandomBlock\n");
+    reportCpuInfo();
+	state = STATE_SYNC1;
 }
 
 } // namespace nowind
