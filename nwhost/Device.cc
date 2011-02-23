@@ -3,13 +3,12 @@
 
 #include <cassert>
 
-using namespace std; // todo remove
+using namespace std;
 
 namespace nwhost {
 
 Device::Device()
 {
- 
 }
 
 void Device::initialize(NowindHostSupport* aSupport)
@@ -20,7 +19,6 @@ void Device::initialize(NowindHostSupport* aSupport)
 Device::~Device()
 {
 }
-
 
 void Device::open(const byte* cmdData, const byte* extraData)
 {

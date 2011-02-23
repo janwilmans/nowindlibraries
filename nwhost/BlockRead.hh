@@ -10,13 +10,6 @@ namespace nwhost {
 static const byte HARDCODED_READ_DATABLOCK_SIZE = 128;	// hardcoded in blockRead (common.asm)
 static const word TWOBANKLIMIT = 0x8000;
 
-enum {
-    BLOCKREAD_EXIT_MORE_DATE_AHEAD,
-    BLOCKREAD_FASTTRANSFER,
-    BLOCKREAD_SLOWTRANSFER,
-    BLOCKREAD_EXIT,
-};
-
 class NowindHostSupport;
 class DataBlock;
 
@@ -36,8 +29,18 @@ public:
     void blockReadAck(byte tail);
     bool isDone() const;
     void cancelWithCode(byte);
+
+	enum {
+		BLOCKREAD_EXIT_MORE_DATE_AHEAD,
+		BLOCKREAD_FASTTRANSFER,
+		BLOCKREAD_SLOWTRANSFER,
+		BLOCKREAD_EXIT,
+		BLOCKREAD_ERROR = 128,
+	};
     
 private:
+
+
 	word startAddress;
 	word transferredData;
 	word transferSize;

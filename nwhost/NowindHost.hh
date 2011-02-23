@@ -10,6 +10,8 @@
 #include "NwhostExports.h"
 #include "DataBlock.hh"
 #include "BlockRead.hh"
+#include "Command.hh"
+#include "BDOSProxy.hh"
 #include "Device.hh"
 
 namespace nwhost {
@@ -73,7 +75,9 @@ public:
 	enum State {
 		STATE_SYNC1,     // waiting for AF
 		STATE_SYNC2,     // waiting for 05
-		STATE_COMMAND,   // waiting for command (9 bytes)
+		STATE_RECEIVE_COMMAND,   // waiting for command (9 bytes)
+		STATE_RECEIVE_PARAMETERS,   // waiting for parameters (n bytes)
+		STATE_EXECUTE_COMMAND,
 		STATE_DISKWRITE, // waiting for AA<data>AA
 		STATE_DEVOPEN,   // waiting for filename (11 bytes)
 		STATE_IMAGE,     // waiting for filename
@@ -101,11 +105,12 @@ public:
 	std::string nowMap(std::string arguments);
 
 private:
-    void receiveExtraData();
+	void setState(State aState);
+    void receiveExtraData(); // remove
 	void msxReset();
 	SectorMedium* getDisk();
 	void executeCommand();
-	void reportCpuInfo();
+	void prepareCommand();
 	
 	void apiCommand();
 	void apiReceiveData(byte data);
@@ -126,8 +131,8 @@ private:
     void blockReadCmd();
     void blockWriteCmd();
 
-	void diskReadInit(SectorMedium& disk);
-	void diskWriteInit(SectorMedium& disk);
+	bool diskReadInit(SectorMedium& disk);
+	bool diskWriteInit(SectorMedium& disk);
 	void doDiskWrite1();
 	void doDiskWrite2();
 
@@ -162,39 +167,17 @@ private:
     bool transferingToPage01;   // used to known in which state the MSX is during block-tranfers
     
     BlockRead blockRead;
+	BDOSProxy bdosProxy;
+	Command command;
     Device device;
+
+	unsigned int parameterLength;
+	unsigned int activeCommand;
 
     unsigned int timer1;
     unsigned int timer2;
-    long findFirstHandle;
-            
-    std::string getFilenameFromExtraData();
-    void getVectorFromFileName(std::vector<byte>& buffer, std::string filename);
-
-    void BDOS_DiskReset();
-	void BDOS_OpenFile();
-    void BDOS_CloseFile();
-    void BDOS_FindFirst();
-    void BDOS_FindNext();
-	void BDOS_DeleteFile();
-	void BDOS_ReadSeq();
-	void BDOS_WriteSeq();
-	void BDOS_CreateFile();
-	void BDOS_RenameFile();
-	void BDOS_ReadRandomFile();
-	void BDOS_WriteRandomFile();
-	void BDOS_GetFileSize();
-	void BDOS_SetRandomRecordField();
-	void BDOS_WriteRandomBlock();
-	void BDOS_ReadRandomBlock();
-	void BDOS_WriteRandomFileWithZeros();
-	void BDOS_ReadLogicalSector();
-	void BDOS_WriteLogicalSector();
-
-    std::vector<std::fstream* > bdosFiles;
-    std::fstream* bdosfile;
     
-protected:    
+protected:
     NowindHostSupport* nwhSupport;          // pointer to the NowindHostSupport instance that is actually used (can be subclassed to provide implemenation specific debug-support)
     
 };
