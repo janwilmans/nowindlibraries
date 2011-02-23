@@ -3,10 +3,6 @@
 #include "Image.h"
 #include "NowindHostSupport.hh"
 
-#ifdef WIN32
-#include <io.h>         // not portable to linux nor MacOS, TODO: fix!
-#endif
-
 #include <fstream>
 #include <algorithm>
 #include <cassert>
@@ -42,15 +38,19 @@ std::vector<std::string> split(const std::string& s, const std::string& delim, c
     return result;
 }
 
+/*
+LIBRARY WISH LIST:
+	enum to string functions for printing enum-values
+*/
+
 
 /*
 For debugging:
 
-commands send for the msx to the host look like:
-
+commands send from the msx to the host look like:
 AF 05 cc bb ee dd ll hh ff aa CC
-
 first the 2 header bytes AF 05 are sent, then all registers are send (8 bytes) and finally the command is sent (1 byte)
+Some commands need extra data, up to 240 bytes are send directly following the command.
 */
 
 #define DBERR debugMessage
@@ -62,12 +62,6 @@ using std::ios;
 
 namespace nwhost {
 
-enum {
-    BLOCKWRITE_EXIT_MORE_DATE_AHEAD,
-    BLOCKWRITE_FASTTRANSFER,
-    BLOCKWRITE_EXIT,
-};
-
 NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	: drives(drives_)
 	, lastTime(0)
@@ -78,6 +72,7 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
 	, enableMSXDOS2(false)
 	, nwhSupport(0)
 	, driveOffset(0)
+	, activeCommand(0)
 {
     // test for requestWait
     vector<byte> requestWait;
@@ -93,6 +88,8 @@ void NowindHost::initialize()
         nwhSupport = new NowindHostSupport();
     }
     blockRead.initialize(nwhSupport);
+    bdosProxy.initialize(nwhSupport);
+    command.initialize(nwhSupport);
     device.initialize(nwhSupport);
     
 }
@@ -125,68 +122,83 @@ bool NowindHost::isDataAvailable() const
 // send:  msx -> pc
 void NowindHost::write(byte data, unsigned int time)
 {
+	command.data = data;
+	command.time = time;
 	unsigned duration = time - lastTime;
 	lastTime = time;
 	if ((duration >= 500) && (state != STATE_SYNC1)) {
 		// timeout (500ms), start looking for AF05
         DBERR("Protocol timeout occurred in state %d, purge buffers and switch back to STATE_SYNC1\n", state);
 		nwhSupport->purge();
-		state = STATE_SYNC1;
+		setState(STATE_SYNC1);
 	}
-    DBERR("received: 0x%02x (in state: %d)\n", data, state);
+	//DBERR("received: 0x%02x (in state: %d, activeCommand: %d (0x%02x)\n", data, state, activeCommand, activeCommand);
 	switch (state) {
 	case STATE_SYNC1:
 		timer1 = time;
-		if (data == 0xAF) state = STATE_SYNC2;
+		if (data == 0xAF) setState(STATE_SYNC2);
 		break;
 	case STATE_SYNC2:
 		switch (data) {
-		case 0x05: state = STATE_COMMAND; recvCount = 0; break;
-		case 0xAF: state = STATE_SYNC2; break;
-		case 0xFF: state = STATE_SYNC1; msxReset(); break;
-		default:   state = STATE_SYNC1; break;
+		case 0x05: setState(STATE_RECEIVE_COMMAND); break;
+		case 0xAF: setState(STATE_SYNC2); break;
+		case 0xFF: setState(STATE_SYNC1); msxReset(); break;
+		default: 
+			setState(STATE_SYNC1); 
+			break;
 		}
 		break;
-	case STATE_COMMAND:
+	case STATE_RECEIVE_COMMAND:
 		assert(recvCount < 9);
-		cmdData[recvCount] = data;
+		command.cmdData[recvCount] = data;
 		if (++recvCount == 9) {
+			prepareCommand();
+		}
+		break;
+	case STATE_RECEIVE_PARAMETERS:
+		assert(recvCount < parameterLength);
+		command.extraData[recvCount] = data;
+		if (++recvCount == parameterLength) {
+			setState(STATE_EXECUTE_COMMAND);
 			executeCommand();
 		}
 		break;
+	case STATE_EXECUTE_COMMAND:
+			executeCommand();
+		break;
 	case STATE_DISKWRITE:
 		assert(recvCount < (transferSize + 2));
-		extraData[recvCount] = data;
+		command.extraData[recvCount] = data;
 		if (++recvCount == (transferSize + 2)) {
 			doDiskWrite2();
 		}
 		break;
 	case STATE_DEVOPEN:
 		assert(recvCount < 11);
-		extraData[recvCount] = data;
+		command.extraData[recvCount] = data;
 		if (++recvCount == 11) {
-		    state = STATE_SYNC1;
-			device.open(cmdData, extraData);
+		    setState(STATE_SYNC1);
+			device.open(command.cmdData, command.extraData);
 		}
 		break;
 	case STATE_IMAGE:
 		assert(recvCount < 40);
-		extraData[recvCount] = data;
+		command.extraData[recvCount] = data;
 		if ((data == 0) || (data == ':') ||
 		    (++recvCount == 40)) {
-			char* data = reinterpret_cast<char*>(extraData);
+			char* data = reinterpret_cast<char*>(command.extraData);
 			callImage(string(data, recvCount));
-			state = STATE_SYNC1;
+			setState(STATE_SYNC1);
 		}
 		break;
 	case STATE_MESSAGE:
 		assert(recvCount < (240 - 1));
-		extraData[recvCount] = data;
+		command.extraData[recvCount] = data;
 		if ((data == 0) || (++recvCount == (240 - 1))) {
 			dumpRegisters();
-			extraData[recvCount] = 0;
-			DBERR("DBG MSG: %s\n", reinterpret_cast<char*>(extraData));
-			state = STATE_SYNC1;
+			command.extraData[recvCount] = 0;
+			DBERR("DBG MSG: %s\n", reinterpret_cast<char*>(command.extraData));
+			setState(STATE_SYNC1);
 		}
 		break;
 	case STATE_BLOCKREAD:
@@ -195,7 +207,7 @@ void NowindHost::write(byte data, unsigned int time)
 		if (blockRead.isDone())
 		{
             //DBERR("Blockread duration: %u\n", time-timer1);
-		    state = STATE_SYNC1;
+		    setState(STATE_SYNC1);
 		}
 		break;
 	case STATE_CPUINFO:
@@ -203,107 +215,106 @@ void NowindHost::write(byte data, unsigned int time)
 	    unsigned int databytes = 11;
 	    unsigned int stackbytes = 34;
 		assert(recvCount < (databytes+(stackbytes)));
-		extraData[recvCount] = data;
+		command.extraData[recvCount] = data;
 		if (++recvCount == (databytes+(stackbytes))) {
-		    state = STATE_SYNC1;
-			reportCpuInfo();
+		    setState(STATE_SYNC1);
+			command.reportCpuInfo();
 		}
 		break;	
     }	
     case STATE_RECEIVE_DATA:
         apiReceiveData(data);
         break;
-
-    case STATE_BDOS_OPEN_FILE:
-		extraData[recvCount] = data;
-		if (++recvCount == 36) {
-		    state = STATE_SYNC1;
-		    BDOS_OpenFile();
-		}
-        break;
-
+/*
     case STATE_BDOS_FIND_FIRST:
-		extraData[recvCount] = data;
+		command.extraData[recvCount] = data;
 		if (++recvCount == 36) {
 		    state = STATE_SYNC1;
-		    BDOS_FindFirst();
+		    if (bdosProxy.FindFirst(command)) state = STATE_BLOCKREAD;
 		}
         break;
-
+*/
 	default:
 		assert(false);
 	}
 }
 
-void NowindHost::reportCpuInfo()
+void NowindHost::setState(State aState)
 {
-//                                   01234567    8
-//	byte cmdData[9];         // reg_[cbedlhfa] + cmd
-//	byte extraData[240 + 2]; // extra data for image/message/write
+	state = aState;
+	switch (state)
+	{
+	case STATE_RECEIVE_COMMAND:
+	case STATE_RECEIVE_PARAMETERS:
+	case STATE_RECEIVE_DATA:
+	case STATE_DEVOPEN:
+		recvCount = 0;
+		break;
+	case STATE_SYNC1:
+		recvCount = 0;
+		activeCommand = 0;
+		break;
+	default:
+		// no nothing
+		break;
+	}
+}
 
-    word reg_bc = cmdData[0] + 256*cmdData[1];
-    word reg_de = cmdData[2] + 256*cmdData[3];
-    word reg_hl = cmdData[4] + 256*cmdData[5];
-    word reg_af = cmdData[6] + 256*cmdData[7];
+void NowindHost::prepareCommand()
+{
+	assert(activeCommand == 0);			// prepare should only be called when no command is active yet
+	assert(state == STATE_RECEIVE_COMMAND);
 
-    word reg_ix = extraData[0] + 256*extraData[1];
-    word reg_iy = extraData[2] + 256*extraData[3];
-    word reg_sp = extraData[4] + 256*extraData[5];
-    reg_sp += 6;
-
-    byte mainSS = extraData[6];
-    word fcc5 = extraData[7] + 256*extraData[8];
-    word fcc7 = extraData[9] + 256*extraData[10];
-    word reg_pc = extraData[11] + 256*extraData[12];
-    
-    DBERR("PC:%04X AF:%04X BC:%04X DE:%04X HL:%04X IX:%04X IY:%04X S:%04X\n", \
-        reg_pc, reg_af, reg_bc, reg_de, reg_hl, reg_ix, reg_iy, reg_sp);
-    
-    /*
-    // stack dump    
-    for (int i=0; i<16; i++)
-    {
-        DBERR("  0x%04X: 0x%04x\n", reg_sp, extraData[13+(i*2)] + 256*extraData[14+(i*2)]);
-        reg_sp += 2;
-    }
-    */
+	activeCommand = command.cmdData[8];
+	DBERR("prepareCommand: %d (0x%02x)\n", activeCommand, activeCommand);
+	switch (activeCommand) {
+		case 0x0F: // bdosProxy.OpenFile
+		case 0x11: // bdosProxy.FindFirst
+			parameterLength = 36;
+			setState(STATE_RECEIVE_PARAMETERS);
+			break;
+		default:
+			setState(STATE_EXECUTE_COMMAND);
+			executeCommand();
+			break;
+	}
 }
 
 void NowindHost::executeCommand()
 {
-    //DBERR(nowMap("0 1").c_str());
-    //DBERR("\n");
+	assert(activeCommand != 0);
+	assert(state == STATE_EXECUTE_COMMAND);
 
-	assert(recvCount == 9);
-	byte cmd = cmdData[8];
-	switch (cmd) {
+	State nextState = STATE_SYNC1; // unless we set the state explictly, we return to STATE_SYNC1 after the command is executed.
 
-	case 0x0D: BDOS_DiskReset(); break;
-	case 0x0F: state = STATE_BDOS_OPEN_FILE; recvCount = 0; break;
-	case 0x10: BDOS_CloseFile(); break;
-	case 0x11: state = STATE_BDOS_FIND_FIRST; recvCount = 0; break;
-	case 0x12: BDOS_FindNext(); break;
-	case 0x13: BDOS_DeleteFile(); break;
-	case 0x14: BDOS_ReadSeq(); break;
-	case 0x15: BDOS_WriteSeq(); break;
-	case 0x16: BDOS_CreateFile(); break;
-	case 0x17: BDOS_RenameFile(); break;
-	case 0x21: BDOS_ReadRandomFile(); break;
-	case 0x22: BDOS_WriteRandomFile(); break;
-	case 0x23: BDOS_GetFileSize(); break;
-	case 0x24: BDOS_SetRandomRecordField(); break;
-	case 0x26: BDOS_WriteRandomBlock(); break;
-	case 0x27: BDOS_ReadRandomBlock(); break;
-	case 0x28: BDOS_WriteRandomFileWithZeros(); break;
+	switch (activeCommand) {
+	case 0: assert(false); break; // these is no command '0', nor should there be.
+	case 0x0D: bdosProxy.DiskReset(command); break;
+	case 0x0F: bdosProxy.OpenFile(command); break;
+	case 0x10: bdosProxy.CloseFile(command); break;
+	case 0x11: if (bdosProxy.FindFirst(command)) { nextState = STATE_EXECUTE_COMMAND; } break;
+	case 0x12: if (bdosProxy.FindNext(command)) { nextState = STATE_EXECUTE_COMMAND; } break;
+	case 0x13: bdosProxy.DeleteFile(command); break;
+	case 0x14: bdosProxy.ReadSeq(command); break;
+	case 0x15: bdosProxy.WriteSeq(command); break;
+	case 0x16: bdosProxy.CreateFile(command); break;
+	case 0x17: bdosProxy.RenameFile(command); break;
+	case 0x21: bdosProxy.ReadRandomFile(command); break;
+	case 0x22: bdosProxy.WriteRandomFile(command); break;
+	case 0x23: bdosProxy.GetFileSize(command); break;
+	case 0x24: bdosProxy.SetRandomRecordField(command); break;
+	case 0x26: bdosProxy.WriteRandomBlock(command); break;
+	case 0x27: if (bdosProxy.ReadRandomBlock(command)) { nextState = STATE_EXECUTE_COMMAND; } break;
+	case 0x28: bdosProxy.WriteRandomFileWithZeros(command); break;
 
-	//case 0x2A: BDOS_GetDate(); break; // no implementation needed
-	//case 0x2B: BDOS_SetDate(); break; // no implementation needed
-	//case 0x2C: BDOS_GetTime(); break; // no implementation needed
-	//case 0x2D: BDOS_SetTime(); break; // no implementation needed
-	//case 0x2E: BDOS_Verify(); break;  // no implementation needed
+	//case 0x2A: GetDate(); break; // no implementation needed
+	//case 0x2B: SetDate(); break; // no implementation needed
+	//case 0x2C: GetTime(); break; // no implementation needed
+	//case 0x2D: SetTime(); break; // no implementation needed
+	//case 0x2E: Verify(); break;  // no implementation needed
 
-	case 0x2F: BDOS_ReadLogicalSector(); break;
-	case 0x30: BDOS_WriteLogicalSector(); break;
+	case 0x2F: bdosProxy.ReadLogicalSector(command); break;
+	case 0x30: bdosProxy.WriteLogicalSector(command); break;
 
 	// http://map.grauw.nl/resources/dos2_functioncalls.php#_SETDTA
 	// http://map.grauw.nl/resources/dos2_environment.php
@@ -312,94 +323,95 @@ void NowindHost::executeCommand()
 		SectorMedium* disk = getDisk();
 		if (!disk) {
 			// no such drive or no disk inserted
-			// (causes a timeout on the MSX side)
-			state = STATE_SYNC1;
+			// (no response, will cause a timeout on the MSX side)
 			return;
 		}
-		byte reg_f = cmdData[6];
+		byte reg_f = command.cmdData[6];
 		if (reg_f & 1) { // carry flag
-			diskWriteInit(*disk);
+			if (diskWriteInit(*disk)) nextState = STATE_DISKWRITE;
 		} else {
-			diskReadInit(*disk);
+			if (diskReadInit(*disk)) nextState = STATE_BLOCKREAD;
 		}
 		break;
 	}
 
-	case 0x81: DSKCHG();      state = STATE_SYNC1; break;
-	case 0x82: GETDPB();	  state = STATE_SYNC1; break;
+	case 0x81: DSKCHG(); break;
+	case 0x82: GETDPB(); break;
 	//case 0x83: CHOICE();
 	//case 0x84: DSKFMT();
-	case 0x85: DRIVES();      state = STATE_SYNC1; break;
-	case 0x86: INIENV();      state = STATE_SYNC1; break;
-	case 0x87: setDateMSX();  state = STATE_SYNC1; break;
+	case 0x85: DRIVES(); break;
+	case 0x86: INIENV(); break;
+	case 0x87: setDateMSX(); break;
 
-	case 0x88: state = STATE_DEVOPEN; recvCount = 0; break;
-	case 0x89: device.close(cmdData); state = STATE_SYNC1; break;
+	case 0x88: nextState = STATE_DEVOPEN; break;
+	case 0x89: device.close(command.cmdData); break;
 	//case 0x8A: deviceRandomIO(fcb);
-	case 0x8B: device.write(cmdData); state = STATE_SYNC1; break;
-	case 0x8C: device.read(cmdData); state = STATE_SYNC1; break;
+	case 0x8B: device.write(command.cmdData); break;
+	case 0x8C: device.read(command.cmdData);  break;
 	//case 0x8D: deviceEof(fcb);
-	case 0x8E: auxIn();       state = STATE_SYNC1; break;
-	case 0x8F: auxOut();      state = STATE_SYNC1; break;
-	case 0x90: receiveExtraData(); state = STATE_MESSAGE; break;
-	case 0x91: receiveExtraData(); state = STATE_IMAGE; break;
-    case 0x92: getDosVersion(); state = STATE_SYNC1; break;
-	case 0x93: commandRequested(); state = STATE_SYNC1; break;
+	case 0x8E: auxIn(); break;
+	case 0x8F: auxOut(); break;
+	case 0x90: receiveExtraData(); nextState = STATE_MESSAGE; break;
+	case 0x91: receiveExtraData(); nextState = STATE_IMAGE; break;
+    case 0x92: getDosVersion(); break;
+	case 0x93: commandRequested(); break;
 	//case 0xFF: vramDump();
 	case 0x94: blockReadCmd(); break;
     case 0x95: blockWriteCmd(); break;
-    case 0x96: receiveExtraData(); state = STATE_CPUINFO; break;
+    case 0x96: receiveExtraData(); nextState = STATE_CPUINFO; break;
     case 0x97: apiCommand();  break;
 	default:
 		// Unknown USB command!
-		DBERR("Unknown command! (0x%02x)\n", cmd);
-		state = STATE_SYNC1;
+		DBERR("Unknown command! (0x%02x)\n", activeCommand);
+		nextState = STATE_SYNC1;
 		break;
 	}
+	setState(nextState);
 }
 
 void NowindHost::apiCommand()
 {
     DBERR("apiCommand\n");
-    extraData[0] = 0;
+    command.extraData[0] = 0;
     dumpRegisters();
 
-    byte reg_a = cmdData[7];
-    byte reg_c = cmdData[0];
-    byte reg_b = cmdData[1];
+    byte reg_a = command.cmdData[7];
+    byte reg_c = command.cmdData[0];
+    byte reg_b = command.cmdData[1];
     switch (reg_c)
     {
         case API_NOWMAP:
             if (reg_a != 4)
             {   
                 DBERR("API_NOWMAP received with wrong EXTBIO function (%u)\n", reg_a);
-                state = STATE_SYNC1;
+                setState(STATE_SYNC1);
             }
             else
             {
                 if (reg_b == 0)
                 {
                     DBERR("API_NOWMAP received without commandline!\n");
-                    state = STATE_SYNC1;
+                    setState(STATE_SYNC1);
                 }
                 else
                 {
-                    recvCount = 0;
-                    state = STATE_RECEIVE_DATA;
+					setState(STATE_RECEIVE_DATA);
                 }
             }
             break;
         default:
             DBERR("apiCommand_API_??\n");
-            state = STATE_SYNC1;
+            setState(STATE_SYNC1);
+			break;
     }
 }
 
+// todo: split into seporate 'API' class?
 void NowindHost::apiReceiveData(byte data)
 {
-    byte reg_b = cmdData[1];
+    byte reg_b = command.cmdData[1];
     
-    extraData[recvCount] = data;
+    command.extraData[recvCount] = data;
     ++recvCount;
 
     DBERR("apiReceiveData %u/%u: %c\n", recvCount, reg_b, data);
@@ -407,27 +419,27 @@ void NowindHost::apiReceiveData(byte data)
     if (recvCount >= reg_b)
     {
         // all data received, execute command
-        byte reg_c = cmdData[0];
-        word reg_de = cmdData[2] + 256*cmdData[3];
+        byte reg_c = command.cmdData[0];
+        word reg_de = command.cmdData[2] + 256*command.cmdData[3];
         DBERR("\n");
 
         switch (reg_c)
         {
             case API_NOWMAP:
             {
-                string args = string(reinterpret_cast<char*>(extraData));
+                string args = string(reinterpret_cast<char*>(command.extraData));
                 string result = nowMap(args);
                 vector<byte> resultData;
                 resultData.assign(result.begin(), result.end());
                 resultData.push_back(0);
                 
                 blockRead.init(reg_de, resultData.size(), resultData);
-                state = STATE_BLOCKREAD;
+                setState(STATE_BLOCKREAD);
                 break;
             }
             default:
                 DBERR("apiReceiveData_API_??\n");
-                state = STATE_SYNC1;
+                setState(STATE_SYNC1);
         }
     }
 }
@@ -510,41 +522,42 @@ void NowindHost::receiveExtraData()
     recvCount = 0;
 } 
 
-void NowindHost::diskReadInit(SectorMedium& disk)
+bool NowindHost::diskReadInit(SectorMedium& disk)
 {
+	bool result = false;
 	unsigned sectorAmount = getSectorAmount();
 	buffer.resize(sectorAmount * 512);
 	unsigned startSector = getStartSector();
-    if (disk.readSectors(&buffer[0], startSector, sectorAmount)) {
-		// read error
-		state = STATE_SYNC1;
-		return;
+    if (!disk.readSectors(&buffer[0], startSector, sectorAmount)) {
+		unsigned int size = sectorAmount * 512;
+		unsigned address = getStartAddress();
+	    
+		DBERR("NowindHost::diskRead, startSector: %u  sectorAmount: %u, address: 0x%04x\n", startSector, sectorAmount, address);
+		blockRead.init(address, size, buffer);
+		result = true;
 	}
-
-    unsigned int size = sectorAmount * 512;
-    unsigned address = getStartAddress();
-    
-	DBERR("NowindHost::diskRead, startSector: %u  sectorAmount: %u, address: 0x%04x\n", startSector, sectorAmount, address);
-    
-    blockRead.init(address, size, buffer);
-    state = STATE_BLOCKREAD;
+	return result;
 }
 
-void NowindHost::diskWriteInit(SectorMedium& disk)
+bool NowindHost::diskWriteInit(SectorMedium& disk)
 {
+	bool result = false;
 	DBERR("NowindHost::diskWrite, startSector: %u  sectorAmount: %u\n", getStartSector(), getSectorAmount());
-	if (disk.isWriteProtected()) {
+	if (disk.isWriteProtected()) 
+	{
 		nwhSupport->sendHeader();
 		nwhSupport->send(1);
 		nwhSupport->send(0); // WRITEPROTECTED
-		state = STATE_SYNC1;
-		return;
 	}
-
-	unsigned sectorAmount = std::min(128u, getSectorAmount());
-	buffer.resize(sectorAmount * 512);
-	transferred = 0;
-	doDiskWrite1();
+	else
+	{
+		unsigned sectorAmount = std::min(128u, getSectorAmount());
+		buffer.resize(sectorAmount * 512);
+		transferred = 0;
+		doDiskWrite1();
+		result = true;
+	}
+	return result;
 }
 
 void NowindHost::doDiskWrite1()
@@ -562,7 +575,7 @@ void NowindHost::doDiskWrite1()
 		}
 		nwhSupport->sendHeader();
 		nwhSupport->send(255);
-		state = STATE_SYNC1;
+		setState(STATE_SYNC1);
 		return;
 	}
 
@@ -585,7 +598,7 @@ void NowindHost::doDiskWrite1()
 	nwhSupport->send(0xaa);
 
 	// wait for data
-	state = STATE_DISKWRITE;
+	setState(STATE_DISKWRITE);
 	recvCount = 0;
 }
 
@@ -593,11 +606,11 @@ void NowindHost::doDiskWrite2()
 {
 	assert(recvCount == (transferSize + 2));
 	for (unsigned i = 0; i < transferSize; ++i) {
-		buffer[i + transferred] = extraData[i + 1];
+		buffer[i + transferred] = command.extraData[i + 1];
 	}
 
-	byte seq1 = extraData[0];
-	byte seq2 = extraData[transferSize + 1];
+	byte seq1 = command.extraData[0];
+	byte seq2 = command.extraData[transferSize + 1];
 	if ((seq1 == 0xaa) && (seq2 == 0xaa)) {
 		// good block received
 		transferred += transferSize;
@@ -675,7 +688,7 @@ void NowindHost::msxReset()
 
 SectorMedium* NowindHost::getDisk()
 {
-	byte num = cmdData[7]; // reg_a
+	byte num = command.cmdData[7]; // reg_a
 	if (num >= drives.size()) {
 		DBERR("MSX requested non-existing drive, reg_a: 0x%02x (ignored)\n", num);
 		return 0;
@@ -700,15 +713,15 @@ void NowindHost::auxIn()
 
 void NowindHost::auxOut()
 {
-	DBERR("auxOut: %c\n", cmdData[7]);
+	DBERR("auxOut: %c\n", command.cmdData[7]);
 	dumpRegisters();
-	printf("%c", cmdData[7]);
+	printf("%c", command.cmdData[7]);
 }
 
 void NowindHost::dumpRegisters()
 {
 	//reg_[cbedlhfa] + cmd
-	DBERR("AF: 0x%04X, BC: 0x%04X, DE: 0x%04X, HL: 0x%04X, CMD: 0x%02X\n", cmdData[7] * 256 + cmdData[6], cmdData[1] * 256 + cmdData[0], cmdData[3] * 256 + cmdData[2], cmdData[5] * 256 + cmdData[4], cmdData[8]);
+	DBERR("AF: 0x%04X, BC: 0x%04X, DE: 0x%04X, HL: 0x%04X, CMD: 0x%02X\n", command.cmdData[7] * 256 + command.cmdData[6], command.cmdData[1] * 256 + command.cmdData[0], command.cmdData[3] * 256 + command.cmdData[2], command.cmdData[5] * 256 + command.cmdData[4], command.cmdData[8]);
 }
 
 void NowindHost::DSKCHG()
@@ -720,7 +733,7 @@ void NowindHost::DSKCHG()
 	}
 
 	nwhSupport->sendHeader();
-	byte num = cmdData[7]; // reg_a
+	byte num = command.cmdData[7]; // reg_a
 	assert(num < drives.size());
 
 	if (drives[num]->diskChanged()) {
@@ -740,7 +753,7 @@ void NowindHost::DSKCHG()
 
 void NowindHost::GETDPB()
 {
-	byte num = cmdData[7]; // reg_a
+	byte num = command.cmdData[7]; // reg_a
 
 	DBERR("GETDPB driveNumber: %u\n", num);
 	SectorMedium* disk = getDisk();
@@ -823,8 +836,8 @@ void NowindHost::GETDPB()
 	nwhSupport->sendHeader();
 
 	// send destination address
-	nwhSupport->send(cmdData[2]);	// reg_e
-	nwhSupport->send(cmdData[3]);	// reg_d
+	nwhSupport->send(command.cmdData[2]);	// reg_e
+	nwhSupport->send(command.cmdData[3]);	// reg_d
 
 	byte * sendBuffer = (byte *) &dpb;
 	for (int i=0;i<18;i++) {
@@ -836,7 +849,7 @@ void NowindHost::GETDPB()
 // msx sends the amount of drives already installed in reg_a
 void NowindHost::DRIVES()
 {
-	byte reg_a = cmdData[7];
+	byte reg_a = command.cmdData[7];
 	// at least one drive (MSXDOS1 cannot handle 0 drives)
 	byte numberOfDrives = std::max<byte>(1, byte(drives.size()));
 
@@ -874,15 +887,15 @@ void NowindHost::setDateMSX()
 
 unsigned NowindHost::getSectorAmount() const
 {
-	byte reg_b = cmdData[1];
+	byte reg_b = command.cmdData[1];
 	return reg_b;
 }
 
 unsigned NowindHost::getStartSector() const
 {
-	byte reg_c = cmdData[0];
-	byte reg_e = cmdData[2];
-	byte reg_d = cmdData[3];
+	byte reg_c = command.cmdData[0];
+	byte reg_e = command.cmdData[2];
+	byte reg_d = command.cmdData[3];
 	unsigned startSector = reg_e + (reg_d * 256);
 
 	if (reg_c < 0x80) {
@@ -894,8 +907,8 @@ unsigned NowindHost::getStartSector() const
 
 unsigned NowindHost::getStartAddress() const
 {
-	byte reg_l = cmdData[4];
-	byte reg_h = cmdData[5];
+	byte reg_l = command.cmdData[4];
+	byte reg_h = command.cmdData[5];
 	return reg_h * 256 + reg_l;
 }
 
@@ -925,7 +938,7 @@ static string stripquotes(const string& str)
 
 void NowindHost::callImage(const string& filename)
 {
-	byte num = cmdData[7]; // reg_a
+	byte num = command.cmdData[7]; // reg_a
 	if (num >= drives.size()) {
 		// invalid drive number
 		return;
@@ -945,8 +958,8 @@ void NowindHost::getDosVersion()
 // waiting for it to execute
 void NowindHost::commandRequested()
 {
-    char cmdType = cmdData[1]; // reg_b
-    char cmdArg = cmdData[0]; // reg_c
+    char cmdType = command.cmdData[1]; // reg_b
+    char cmdArg = command.cmdData[0]; // reg_c
 
     switch (cmdType)
     {
@@ -1053,294 +1066,5 @@ void NowindHost::addRequest(std::vector<byte> command)
     requestQueue.push_back(command);
 }
 
-void trim(string& str)
-{
-  string::size_type pos = str.find_last_not_of(' ');
-  if(pos != string::npos) {
-    str.erase(pos + 1);
-    pos = str.find_first_not_of(' ');
-    if(pos != string::npos) str.erase(0, pos);
-  }
-  else str.erase(str.begin(), str.end());
-}
-
-string NowindHost::getFilenameFromExtraData()
-{
- 	string whole;
-	for (int i = 1; i < 13; ++i) {
-		char c = extraData[i];
-        whole += toupper(c);
-	}
-	string file = whole.substr(0, 8);
-	trim(file);
-    string filename = file;
-    string ext = whole.substr(8, 3);
-    trim(ext);
-    if (!ext.empty())
-    {
-        filename += "." + ext;
-    }
-    return filename;
-}
-
-void NowindHost::BDOS_DiskReset()
-{
-    DBERR(" >> BDOS_DiskReset\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_CloseFile()
-{
-    DBERR(" >> BDOS_CloseFile\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_DeleteFile()
-{
-    DBERR(" >> BDOS_DeleteFile\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_ReadSeq()
-{
-    DBERR(" >> BDOS_ReadSeq\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_WriteSeq()
-{
-    DBERR(" >> BDOS_WriteSeq\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_CreateFile()
-{
-    DBERR(" >> BDOS_CreateFile\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_RenameFile()
-{
-    DBERR(" >> BDOS_RenameFile\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_ReadRandomFile()
-{
-    DBERR(" >> BDOS_ReadRandomFile\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_WriteRandomFile()
-{
-    DBERR(" >> BDOS_WriteRandomFile\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_GetFileSize()
-{
-    DBERR(" >> BDOS_GetFileSize\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_SetRandomRecordField()
-{
-    DBERR(" >> BDOS_SetRandomRecordField\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_WriteRandomBlock()
-{
-    DBERR(" >> BDOS_WriteRandomBlock\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_WriteRandomFileWithZeros()
-{
-    DBERR(" >> BDOS_WriteRandomFileWithZeros\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_OpenFile()
-{
-    string filename = getFilenameFromExtraData();
-    DBERR(" nu hebben we een fcb: %s\n", filename.c_str());
-    //bdosFiles.push_back( new fstream(imageName.c_str(), ios::binary | ios::in);
-    bdosfile = new fstream(filename.c_str(), ios::binary | ios::in);
-    nwhSupport->sendHeader();
-    
-    if (bdosfile->fail())
-    {
-        nwhSupport->send(0xff);
-    }
-    else
-    {
-        nwhSupport->send(0);
-    }
-    state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_FindFirst()
-{
-    DBERR(" >> BDOS_11H_FindFirst\n");
-    word reg_hl = cmdData[4] + 256*cmdData[5];
-    string filename = getFilenameFromExtraData();
-    
-#ifdef WIN32
-    struct _finddata_t data;
-    findFirstHandle = _findfirst(filename.c_str(), &data); 
-    if (findFirstHandle == -1)
-    {
-        blockRead.cancelWithCode(128);  // file not found
-        state = STATE_SYNC1;
-    }
-    else
-    {
-        string filename(data.name);
-        ToUpper(filename);
-        vector<byte> buffer;
-        getVectorFromFileName(buffer, filename);
-        
-        blockRead.init(reg_hl, buffer.size(), buffer);
-        state = STATE_BLOCKREAD;
-    }
-    
-    DBERR("file: %s size: %u\n", data.name, data.size);
-#else
-    // linux not implemented
-    assert(false);
-#endif
-    
-}
-
-void NowindHost::getVectorFromFileName(vector<byte>& buffer, string filename)
-{
-    buffer.resize(12);
-    string file = filename;
-    string ext;
-    
-    if (filename == "." || filename == "..")
-    {
-    
-    }
-    else
-    {
-        int point = filename.find('.');   
-        if (point != -1)
-        {
-            file = filename.substr(0, point);
-            ext = filename.substr(point+1);
-        }
-    }
-
-    if (file.size() > 8) file.resize(8);
-    if (ext.size() > 3) ext.resize(3);
-    for (size_t i=1; i< buffer.size(); i++)
-    {
-        buffer[i] = 32;
-    }
-        
-    buffer[0] = 0;
-    for (size_t i=0; i < file.size() ;i++)
-    {
-        buffer[i+1] = file[i];
-    }
-    for (size_t i=0; i < ext.size(); i++)
-    {
-        buffer[i+9] = ext[i];
-    }
-
-}
-
-void NowindHost::BDOS_FindNext()
-{
-    DBERR(" >> BDOS_12H_FindNext\n");
-    word reg_hl = cmdData[4] + 256*cmdData[5];
-    
-#ifdef WIN32
-    struct _finddata_t data;
-    long result = _findnext(findFirstHandle, &data); 
-    if (result != 0)
-    {
-        blockRead.cancelWithCode(128);  // file not found
-        state = STATE_SYNC1;
-    }
-    else
-    {
-        string filename(data.name);
-        ToUpper(filename);
-
-        vector<byte> buffer;
-        getVectorFromFileName(buffer, filename);
-        blockRead.init(reg_hl, buffer.size(), buffer);
-        state = STATE_BLOCKREAD;
-    }
-    DBERR("file: %s size: %u\n", data.name, data.size);
-#else
-    // linux not implemented
-    assert(false);
-#endif
-    
-}
-
-void NowindHost::BDOS_ReadRandomBlock()
-{
-    DBERR(" >> BDOS_27H_ReadRandomBlock\n");
-    word reg_bc = cmdData[0] + 256*cmdData[1];
-    word reg_hl = cmdData[4] + 256*cmdData[5];
-
-    std::vector<byte> buffer;
-    int size = reg_hl;
-    int offset = 0;
-    buffer.resize(size);
-    bdosfile->seekg(offset);
-    bdosfile->read((char*)&buffer[0], size);
-    size_t actuallyRead = bdosfile->gcount();
-    
-    if (actuallyRead == 0)
-    {
-        blockRead.cancelWithCode(128);
-    }
-    else
-    {
-        byte returnCode = 128;
-        if (actuallyRead == reg_hl)
-        {
-            returnCode = BLOCKREAD_EXIT;
-        }
-
-        DBERR(" >> reg_hl: %u, actuallyRead: %u\n", reg_hl, actuallyRead);
-        word dmaAddres = reg_bc;
-        blockRead.init(dmaAddres, actuallyRead, buffer, returnCode);
-    }
-    state = STATE_BLOCKREAD;
-}
-
-void NowindHost::BDOS_ReadLogicalSector()
-{
-    DBERR(" >> BDOS_WriteRandomBlock\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
-
-void NowindHost::BDOS_WriteLogicalSector()
-{
-    DBERR(" >> BDOS_WriteRandomBlock\n");
-    reportCpuInfo();
-	state = STATE_SYNC1;
-}
 
 } // namespace nowind

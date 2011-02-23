@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="ftdx"
 	ProjectGUID="{26FC2680-906D-4276-ABCE-B8B82D1A33B9}"
 	RootNamespace="ftdx"
@@ -214,6 +214,26 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ftdi.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\ftdx.cpp"
 				>
 			</File>
@@ -242,18 +262,6 @@
 			<File
 				RelativePath=".\FTD2XX-msc\ftd2xx.h"
 				>
-			</File>
-			<File
-				RelativePath=".\ftdi.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\ftdi.h"

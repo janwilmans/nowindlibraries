@@ -267,11 +267,27 @@
 			Name="Shared Files"
 			>
 			<File
+				RelativePath=".\BDOSProxy.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\BDOSProxy.hh"
+				>
+			</File>
+			<File
 				RelativePath=".\BlockRead.cc"
 				>
 			</File>
 			<File
 				RelativePath=".\BlockRead.hh"
+				>
+			</File>
+			<File
+				RelativePath=".\Command.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\Command.hh"
 				>
 			</File>
 			<File
