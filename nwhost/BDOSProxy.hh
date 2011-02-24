@@ -2,6 +2,7 @@
 #define BDOSPROXY_HH
 
 #include "NowindTypes.hh"
+#include "BlockRead.hh"
 #include <vector>
 #include <deque>
 
@@ -44,6 +45,7 @@ public:
 
 private:
     NowindHostSupport* nwhSupport;
+	BlockRead blockRead;
 
 	BdosState findFirstState;
 	BdosState findNextState;

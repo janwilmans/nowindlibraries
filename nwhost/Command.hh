@@ -2,7 +2,6 @@
 #define COMMAND_HH
 
 #include "NowindTypes.hh"
-#include "BlockRead.hh"
 #include <vector>
 #include <deque>
 
@@ -24,7 +23,6 @@ public:
 		
 	std::string getFilenameFromExtraData();
 	void reportCpuInfo();
-	BlockRead blockRead;
 private:
     NowindHostSupport* nwhSupport;
 
