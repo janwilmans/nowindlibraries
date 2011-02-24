@@ -38,104 +38,104 @@ BDOSProxy::~BDOSProxy()
 {
 }
 
-void BDOSProxy::DiskReset(Command& command)
+void BDOSProxy::DiskReset(const Command& command, Response& response)
 {
     DBERR(" >> DiskReset\n");
     command.reportCpuInfo();
 }
 
-void BDOSProxy::CloseFile(Command& command)
+void BDOSProxy::CloseFile(const Command& command, Response& response)
 {
     DBERR(" >> CloseFile\n");
     command.reportCpuInfo();
 }
 
-void BDOSProxy::DeleteFile(Command& command)
+void BDOSProxy::DeleteFile(const Command& command, Response& response)
 {
     DBERR(" >> DeleteFile\n");
     command.reportCpuInfo();
 }
 
-void BDOSProxy::ReadSeq(Command& command)
+void BDOSProxy::ReadSeq(const Command& command, Response& response)
 {
     DBERR(" >> ReadSeq\n");
     command.reportCpuInfo();
 }
 
-void BDOSProxy::WriteSeq(Command& command)
+void BDOSProxy::WriteSeq(const Command& command, Response& response)
 {
     DBERR(" >> WriteSeq\n");
     command.reportCpuInfo();
 }
 
-void BDOSProxy::CreateFile(Command& command)
+void BDOSProxy::CreateFile(const Command& command, Response& response)
 {
     DBERR(" >> CreateFile\n");
     command.reportCpuInfo();
 }
 
-void BDOSProxy::RenameFile(Command& command)
+void BDOSProxy::RenameFile(const Command& command, Response& response)
 {
     DBERR(" >> RenameFile\n");
     command.reportCpuInfo();
 }
 
-void BDOSProxy::ReadRandomFile(Command& command)
+void BDOSProxy::ReadRandomFile(const Command& command, Response& response)
 {
     DBERR(" >> ReadRandomFile\n");
     command.reportCpuInfo();
 }
 
-void BDOSProxy::WriteRandomFile(Command& command)
+void BDOSProxy::WriteRandomFile(const Command& command, Response& response)
 {
     DBERR(" >> WriteRandomFile\n");
     command.reportCpuInfo();
 }
 
-void BDOSProxy::GetFileSize(Command& command)
+void BDOSProxy::GetFileSize(const Command& command, Response& response)
 {
     DBERR(" >> GetFileSize\n");
     command.reportCpuInfo();
 }
 
-void BDOSProxy::SetRandomRecordField(Command& command)
+void BDOSProxy::SetRandomRecordField(const Command& command, Response& response)
 {
     DBERR(" >> SetRandomRecordField\n");
     command.reportCpuInfo();
 }
 
-void BDOSProxy::WriteRandomBlock(Command& command)
+void BDOSProxy::WriteRandomBlock(const Command& command, Response& response)
 {
     DBERR(" >> WriteRandomBlock\n");
     command.reportCpuInfo();
 }
 
-void BDOSProxy::WriteRandomFileWithZeros(Command& command)
+void BDOSProxy::WriteRandomFileWithZeros(const Command& command, Response& response)
 {
     DBERR(" >> WriteRandomFileWithZeros\n");
     command.reportCpuInfo();
 }
 
-void BDOSProxy::OpenFile(Command& command)
+void BDOSProxy::OpenFile(const Command& command, Response& response)
 {
     string filename = command.getFilenameFromExtraData();
     DBERR(" nu hebben we een fcb: %s\n", filename.c_str());
     //bdosFiles.push_back( new fstream(imageName.c_str(), ios::binary | ios::in);
     bdosfile = new fstream(filename.c_str(), ios::binary | ios::in);
-    nwhSupport->sendHeader();
+    response.sendHeader();
     
     if (bdosfile->fail())
     {
-        nwhSupport->send(0xff);
+        response.send(0xff);
     }
     else
     {
-        nwhSupport->send(0);
+        response.send(0);
     }
 }
 
 // returns true when the command is still executing.
-bool BDOSProxy::FindFirst(Command& command)
+bool BDOSProxy::FindFirst(const Command& command, Response& response)
 {
 	// this is true when the FindFirst result is being sent
 	if (findFirstState == BDOSCMD_EXECUTING)
@@ -224,7 +224,7 @@ void BDOSProxy::getVectorFromFileName(vector<byte>& buffer, string filename)
 
 }
 
-bool BDOSProxy::FindNext(Command& command)
+bool BDOSProxy::FindNext(const Command& command, Response& response)
 {
 	// this is true when the FindNext result is being sent
 	if (findNextState == BDOSCMD_EXECUTING)
@@ -269,7 +269,7 @@ bool BDOSProxy::FindNext(Command& command)
 	return found;
 }
 
-bool BDOSProxy::ReadRandomBlock(Command& command)
+bool BDOSProxy::ReadRandomBlock(const Command& command, Response& response)
 {
 	// this is true when the FindNext result is being sent
 	if (readRandomBlockState == BDOSCMD_EXECUTING)
@@ -317,13 +317,13 @@ bool BDOSProxy::ReadRandomBlock(Command& command)
 	return true;
 }
 
-void BDOSProxy::ReadLogicalSector(Command& command)
+void BDOSProxy::ReadLogicalSector(const Command& command, Response& response)
 {
     DBERR(" >> WriteRandomBlock\n");
     command.reportCpuInfo();
 }
 
-void BDOSProxy::WriteLogicalSector(Command& command)
+void BDOSProxy::WriteLogicalSector(const Command& command, Response& response)
 {
     DBERR(" >> WriteRandomBlock\n");
     command.reportCpuInfo();

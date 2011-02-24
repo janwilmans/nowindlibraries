@@ -347,6 +347,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Response.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\Response.hh"
+				>
+			</File>
+			<File
 				RelativePath=".\SectorMedium.hh"
 				>
 			</File>

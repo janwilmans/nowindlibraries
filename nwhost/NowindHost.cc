@@ -87,6 +87,9 @@ void NowindHost::initialize()
     {
         nwhSupport = new NowindHostSupport();
     }
+	
+	response = nwhSupport->getresponse();
+
     blockRead.initialize(nwhSupport);
     bdosProxy.initialize(nwhSupport);
     command.initialize(nwhSupport);
@@ -230,7 +233,7 @@ void NowindHost::write(byte data, unsigned int time)
 		command.extraData[recvCount] = data;
 		if (++recvCount == 36) {
 		    state = STATE_SYNC1;
-		    if (bdosProxy.FindFirst(command)) state = STATE_BLOCKREAD;
+		    if (bdosProxy.FindFirst(command, *response)) state = STATE_BLOCKREAD;
 		}
         break;
 */
@@ -289,23 +292,23 @@ void NowindHost::executeCommand()
 
 	switch (activeCommand) {
 	case 0: assert(false); break; // these is no command '0', nor should there be.
-	case 0x0D: bdosProxy.DiskReset(command); break;
-	case 0x0F: bdosProxy.OpenFile(command); break;
-	case 0x10: bdosProxy.CloseFile(command); break;
-	case 0x11: if (bdosProxy.FindFirst(command)) { nextState = STATE_EXECUTE_COMMAND; } break;
-	case 0x12: if (bdosProxy.FindNext(command)) { nextState = STATE_EXECUTE_COMMAND; } break;
-	case 0x13: bdosProxy.DeleteFile(command); break;
-	case 0x14: bdosProxy.ReadSeq(command); break;
-	case 0x15: bdosProxy.WriteSeq(command); break;
-	case 0x16: bdosProxy.CreateFile(command); break;
-	case 0x17: bdosProxy.RenameFile(command); break;
-	case 0x21: bdosProxy.ReadRandomFile(command); break;
-	case 0x22: bdosProxy.WriteRandomFile(command); break;
-	case 0x23: bdosProxy.GetFileSize(command); break;
-	case 0x24: bdosProxy.SetRandomRecordField(command); break;
-	case 0x26: bdosProxy.WriteRandomBlock(command); break;
-	case 0x27: if (bdosProxy.ReadRandomBlock(command)) { nextState = STATE_EXECUTE_COMMAND; } break;
-	case 0x28: bdosProxy.WriteRandomFileWithZeros(command); break;
+	case 0x0D: bdosProxy.DiskReset(command, *response); break;
+	case 0x0F: bdosProxy.OpenFile(command, *response); break;
+	case 0x10: bdosProxy.CloseFile(command, *response); break;
+	case 0x11: if (bdosProxy.FindFirst(command, *response)) { nextState = STATE_EXECUTE_COMMAND; } break;
+	case 0x12: if (bdosProxy.FindNext(command, *response)) { nextState = STATE_EXECUTE_COMMAND; } break;
+	case 0x13: bdosProxy.DeleteFile(command, *response); break;
+	case 0x14: bdosProxy.ReadSeq(command, *response); break;
+	case 0x15: bdosProxy.WriteSeq(command, *response); break;
+	case 0x16: bdosProxy.CreateFile(command, *response); break;
+	case 0x17: bdosProxy.RenameFile(command, *response); break;
+	case 0x21: bdosProxy.ReadRandomFile(command, *response); break;
+	case 0x22: bdosProxy.WriteRandomFile(command, *response); break;
+	case 0x23: bdosProxy.GetFileSize(command, *response); break;
+	case 0x24: bdosProxy.SetRandomRecordField(command, *response); break;
+	case 0x26: bdosProxy.WriteRandomBlock(command, *response); break;
+	case 0x27: if (bdosProxy.ReadRandomBlock(command, *response)) { nextState = STATE_EXECUTE_COMMAND; } break;
+	case 0x28: bdosProxy.WriteRandomFileWithZeros(command, *response); break;
 
 	//case 0x2A: GetDate(); break; // no implementation needed
 	//case 0x2B: SetDate(); break; // no implementation needed
@@ -313,8 +316,8 @@ void NowindHost::executeCommand()
 	//case 0x2D: SetTime(); break; // no implementation needed
 	//case 0x2E: Verify(); break;  // no implementation needed
 
-	case 0x2F: bdosProxy.ReadLogicalSector(command); break;
-	case 0x30: bdosProxy.WriteLogicalSector(command); break;
+	case 0x2F: bdosProxy.ReadLogicalSector(command, *response); break;
+	case 0x30: bdosProxy.WriteLogicalSector(command, *response); break;
 
 	// http://map.grauw.nl/resources/dos2_functioncalls.php#_SETDTA
 	// http://map.grauw.nl/resources/dos2_environment.php
@@ -361,7 +364,6 @@ void NowindHost::executeCommand()
     case 0x96: receiveExtraData(); nextState = STATE_CPUINFO; break;
     case 0x97: apiCommand();  break;
 	default:
-		// Unknown USB command!
 		DBERR("Unknown command! (0x%02x)\n", activeCommand);
 		nextState = STATE_SYNC1;
 		break;
