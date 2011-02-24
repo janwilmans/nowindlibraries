@@ -13,6 +13,7 @@
 #include "Command.hh"
 #include "BDOSProxy.hh"
 #include "Device.hh"
+#include "Response.hh"
 
 namespace nwhost {
 
@@ -169,6 +170,7 @@ private:
     BlockRead blockRead;
 	BDOSProxy bdosProxy;
 	Command command;
+	Response* response;
     Device device;
 
 	unsigned int parameterLength;

@@ -39,7 +39,7 @@ void trim(string& str)
   else str.erase(str.begin(), str.end());
 }
 
-string Command::getFilenameFromExtraData()
+string Command::getFilenameFromExtraData() const
 {
  	string whole;
 	for (int i = 1; i < 13; ++i) {
@@ -59,7 +59,28 @@ string Command::getFilenameFromExtraData()
 }
 
 
-void Command::reportCpuInfo()
+word Command::getBC()
+{
+	return cmdData[0] + 256*cmdData[1];
+}
+
+word Command::getDE()
+{
+	return cmdData[2] + 256*cmdData[3];
+}
+
+word Command::getHL()
+{
+	return cmdData[4] + 256*cmdData[5];
+}
+
+word Command::getAF()
+{
+	return cmdData[6] + 256*cmdData[7];
+}
+
+
+void Command::reportCpuInfo() const
 {
 //                                   01234567    8
 //	byte cmdData[9];         // reg_[cbedlhfa] + cmd

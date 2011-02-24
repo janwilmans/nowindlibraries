@@ -16,50 +16,41 @@ void NowindHostSupport::debugMessage(const char *, ...) const
     // override this method in a subclass to log messages
 }
 
-
 // send:  pc -> msx
 void NowindHostSupport::send(byte value)
 {
-	hostToMsxFifo.push_back(value);
+	response.send(value);
 }
 
 void NowindHostSupport::send16(word value)
 {
-	hostToMsxFifo.push_back(value & 255);
-	hostToMsxFifo.push_back(value >> 8);
+	response.send16(value);
 }
 
 void NowindHostSupport::purge()
 {
-	hostToMsxFifo.clear();
+	response.purge();
 }
 
 void NowindHostSupport::sendHeader()
 {
-	send(0xFF); // needed because first read might fail (hardware design choise)!
-	send(0xAF);
-	send(0x05);
+	response.sendHeader();
 }
 
 byte NowindHostSupport::peek() const
 {
-	return isDataAvailable() ? hostToMsxFifo.front() : 0xFF;
+	return response.peek();
 }
 
 // receive:  msx <- pc
 byte NowindHostSupport::read()
 {
-	if (!isDataAvailable()) {
-		return 0xff;
-	}
-	byte result = hostToMsxFifo.front();
-	hostToMsxFifo.pop_front();
-	return result;
+	return response.read();
 }
 
 bool NowindHostSupport::isDataAvailable() const
 {
-	return !hostToMsxFifo.empty();
+	return response.isDataAvailable();
 }
 
 

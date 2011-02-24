@@ -10,6 +10,7 @@ namespace nwhost {
 
 class NowindHostSupport;
 class Command;
+class Response;
 
 class BDOSProxy
 {
@@ -18,25 +19,25 @@ public:
 	virtual ~BDOSProxy();
 	void initialize(NowindHostSupport* aSupport);
 
-	void DiskReset(Command& command);
-	void OpenFile(Command& command);
-    void CloseFile(Command& command);
-    bool FindFirst(Command& command);
-    bool FindNext(Command& command);
-	void DeleteFile(Command& command);
-	void ReadSeq(Command& command);
-	void WriteSeq(Command& command);
-	void CreateFile(Command& command);
-	void RenameFile(Command& command);
-	void ReadRandomFile(Command& command);
-	void WriteRandomFile(Command& command);
-	void GetFileSize(Command& command);
-	void SetRandomRecordField(Command& command);
-	void WriteRandomBlock(Command& command);
-	bool ReadRandomBlock(Command& command);
-	void WriteRandomFileWithZeros(Command& command);
-	void ReadLogicalSector(Command& command);
-	void WriteLogicalSector(Command& command);
+	void DiskReset(const Command& command, Response& response);
+	void OpenFile(const Command& command, Response& response);
+    void CloseFile(const Command& command, Response& response);
+    bool FindFirst(const Command& command, Response& response);
+    bool FindNext(const Command& command, Response& response);
+	void DeleteFile(const Command& command, Response& response);
+	void ReadSeq(const Command& command, Response& response);
+	void WriteSeq(const Command& command, Response& response);
+	void CreateFile(const Command& command, Response& response);
+	void RenameFile(const Command& command, Response& response);
+	void ReadRandomFile(const Command& command, Response& response);
+	void WriteRandomFile(const Command& command, Response& response);
+	void GetFileSize(const Command& command, Response& response);
+	void SetRandomRecordField(const Command& command, Response& response);
+	void WriteRandomBlock(const Command& command, Response& response);
+	bool ReadRandomBlock(const Command& command, Response& response);
+	void WriteRandomFileWithZeros(const Command& command, Response& response);
+	void ReadLogicalSector(const Command& command, Response& response);
+	void WriteLogicalSector(const Command& command, Response& response);
 
 	enum BdosState {
 		BDOSCMD_EXECUTING,

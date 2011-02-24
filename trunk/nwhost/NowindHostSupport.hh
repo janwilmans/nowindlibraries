@@ -2,6 +2,8 @@
 #define NOWNDHOSTSUPPORT_HH
 
 #include "NowindTypes.hh"
+#include "Response.hh"
+
 #include <deque>
 
 namespace nwhost {
@@ -27,9 +29,9 @@ public:
 	void sendHeader();
 	void purge();
 
+	Response* getresponse() { return &response; }
 private:
-	// queue
-	std::deque<byte> hostToMsxFifo;
+	Response response;
 
 };
 
