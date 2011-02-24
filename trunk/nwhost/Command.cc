@@ -21,7 +21,6 @@ Command::Command()
 void Command::initialize(NowindHostSupport* aSupport)
 {
     nwhSupport = aSupport;
-	blockRead.initialize(aSupport);
 }
 
 Command::~Command()

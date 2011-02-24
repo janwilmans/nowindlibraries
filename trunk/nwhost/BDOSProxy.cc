@@ -31,6 +31,7 @@ BDOSProxy::BDOSProxy()
 void BDOSProxy::initialize(NowindHostSupport* aSupport)
 {
     nwhSupport = aSupport;
+	blockRead.initialize(aSupport);
 }
 
 BDOSProxy::~BDOSProxy()
@@ -139,8 +140,8 @@ bool BDOSProxy::FindFirst(Command& command)
 	// this is true when the FindFirst result is being sent
 	if (findFirstState == BDOSCMD_EXECUTING)
 	{
-		command.blockRead.ack(command.data);
-		if (command.blockRead.isDone())
+		blockRead.ack(command.data);
+		if (blockRead.isDone())
 		{
 			findFirstState = BDOSCMD_READY;
 			return false;
@@ -158,7 +159,7 @@ bool BDOSProxy::FindFirst(Command& command)
     findFirstHandle = _findfirst(filename.c_str(), &data); 
     if (findFirstHandle == -1)
     {
-        command.blockRead.cancelWithCode(128);  // file not found
+        blockRead.cancelWithCode(128);  // file not found
 		DBERR("BDOSProxy::FindFirst <file not found>\n");
 		findFirstState = BDOSCMD_READY;
     }
@@ -169,7 +170,7 @@ bool BDOSProxy::FindFirst(Command& command)
         vector<byte> buffer;
         getVectorFromFileName(buffer, filename);
         
-        command.blockRead.init(reg_hl, buffer.size(), buffer);
+        blockRead.init(reg_hl, buffer.size(), buffer);
         findFirstState = BDOSCMD_EXECUTING;
 		found = true;
 		DBERR("file: %s size: %u\n", data.name, data.size);
@@ -228,8 +229,8 @@ bool BDOSProxy::FindNext(Command& command)
 	// this is true when the FindNext result is being sent
 	if (findNextState == BDOSCMD_EXECUTING)
 	{
-		command.blockRead.ack(command.data);
-		if (command.blockRead.isDone())
+		blockRead.ack(command.data);
+		if (blockRead.isDone())
 		{
 			findNextState = BDOSCMD_READY;
 			return false;
@@ -245,7 +246,7 @@ bool BDOSProxy::FindNext(Command& command)
     long result = _findnext(findFirstHandle, &data); 
     if (result != 0)
     {
-        command.blockRead.cancelWithCode(128);
+        blockRead.cancelWithCode(128);
 		DBERR("BDOSProxy::FindNext <file not fond>\n");
     }
     else
@@ -255,7 +256,7 @@ bool BDOSProxy::FindNext(Command& command)
 
         vector<byte> buffer;
         getVectorFromFileName(buffer, filename);
-        command.blockRead.init(reg_hl, buffer.size(), buffer);
+        blockRead.init(reg_hl, buffer.size(), buffer);
 		findNextState = BDOSCMD_EXECUTING;
 		found = true;
 		DBERR("file: %s size: %u\n", data.name, data.size);
@@ -274,8 +275,8 @@ bool BDOSProxy::ReadRandomBlock(Command& command)
 	if (readRandomBlockState == BDOSCMD_EXECUTING)
 	{
 		//DBERR("> BDOSProxy::ReadRandomBlock ACK\n");
-		command.blockRead.ack(command.data);
-		if (command.blockRead.isDone())
+		blockRead.ack(command.data);
+		if (blockRead.isDone())
 		{
 			readRandomBlockState = BDOSCMD_READY;
 			return false;
@@ -298,7 +299,7 @@ bool BDOSProxy::ReadRandomBlock(Command& command)
     
     if (actuallyRead == 0)
     {
-        command.blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
+        blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
     }
     else
     {
@@ -310,7 +311,7 @@ bool BDOSProxy::ReadRandomBlock(Command& command)
 
         DBERR(" >> reg_hl: %u, actuallyRead: %u\n", reg_hl, actuallyRead);
         word dmaAddres = reg_bc;
-        command.blockRead.init(dmaAddres, actuallyRead, buffer, returnCode);
+        blockRead.init(dmaAddres, actuallyRead, buffer, returnCode);
 		readRandomBlockState = BDOSCMD_EXECUTING;
     }
 	return true;
