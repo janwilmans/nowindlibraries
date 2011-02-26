@@ -58,38 +58,12 @@ string Command::getFilenameFromExtraData() const
     return filename;
 }
 
-
-word Command::getBC()
-{
-	return cmdData[0] + 256*cmdData[1];
-}
-
-word Command::getDE()
-{
-	return cmdData[2] + 256*cmdData[3];
-}
-
-word Command::getHL()
-{
-	return cmdData[4] + 256*cmdData[5];
-}
-
-word Command::getAF()
-{
-	return cmdData[6] + 256*cmdData[7];
-}
-
-
 void Command::reportCpuInfo() const
 {
-//                                   01234567    8
-//	byte cmdData[9];         // reg_[cbedlhfa] + cmd
-//	byte extraData[240 + 2]; // extra data for image/message/write
-
-    word reg_bc = cmdData[0] + 256*cmdData[1];
-    word reg_de = cmdData[2] + 256*cmdData[3];
-    word reg_hl = cmdData[4] + 256*cmdData[5];
-    word reg_af = cmdData[6] + 256*cmdData[7];
+    word reg_bc = getBC();
+    word reg_de = getDE();
+    word reg_hl = getHL();
+    word reg_af = getAF();
 
     word reg_ix = extraData[0] + 256*extraData[1];
     word reg_iy = extraData[2] + 256*extraData[3];
