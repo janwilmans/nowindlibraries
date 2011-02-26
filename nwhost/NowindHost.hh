@@ -124,10 +124,10 @@ private:
 	void INIENV();
 	void setDateMSX();
 
-	unsigned getSectorAmount() const;
-	unsigned getStartSector() const;
-	unsigned getStartAddress() const;
-	unsigned getCurrentAddress() const;
+	unsigned int getSectorAmount() const;
+	unsigned int  getStartSector() const;
+	unsigned int  getStartAddress() const;
+	unsigned int  getCurrentAddress() const;
     
     void blockReadCmd();
     void blockWriteCmd();
@@ -154,8 +154,6 @@ private:
 	unsigned lastTime;       // last time a byte was received from MSX
 	State state;
 	unsigned recvCount;      // how many bytes recv in this state
-	byte cmdData[9];         // reg_[cbedlhfa] + cmd
-	byte extraData[240 + 2]; // extra data for image/message/write
 	std::vector<byte> buffer;// work buffer for sector read/write
 	unsigned transferred;    // progress within diskwrite
 	unsigned transferSize;   // size of current diskwrite chunk

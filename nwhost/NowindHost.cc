@@ -94,7 +94,6 @@ void NowindHost::initialize()
     bdosProxy.initialize(nwhSupport);
     command.initialize(nwhSupport);
     device.initialize(nwhSupport);
-    
 }
 
 NowindHost::~NowindHost()
@@ -108,19 +107,18 @@ NowindHost::~NowindHost()
 
 byte NowindHost::peek() const
 {
-	return nwhSupport->peek();
+	return response->peek();
 }
 
 byte NowindHost::read()
 {
-	return nwhSupport->read();  // msx <- pc
+	return response->read();  // msx <- pc
 }
 
 bool NowindHost::isDataAvailable() const
 {
-	return nwhSupport->isDataAvailable();
+	return response->isDataAvailable();
 }
-
 
 // send:  msx -> pc
 void NowindHost::write(byte data, unsigned int time)
@@ -132,7 +130,7 @@ void NowindHost::write(byte data, unsigned int time)
 	if ((duration >= 500) && (state != STATE_SYNC1)) {
 		// timeout (500ms), start looking for AF05
         DBERR("Protocol timeout occurred in state %d, purge buffers and switch back to STATE_SYNC1\n", state);
-		nwhSupport->purge();
+		response->purge();
 		setState(STATE_SYNC1);
 	}
 	//DBERR("received: 0x%02x (in state: %d, activeCommand: %d (0x%02x)\n", data, state, activeCommand, activeCommand);
@@ -268,7 +266,7 @@ void NowindHost::prepareCommand()
 	assert(activeCommand == 0);			// prepare should only be called when no command is active yet
 	assert(state == STATE_RECEIVE_COMMAND);
 
-	activeCommand = command.cmdData[8];
+	activeCommand = command.getCommand();
 	DBERR("prepareCommand: %d (0x%02x)\n", activeCommand, activeCommand);
 	switch (activeCommand) {
 		case 0x0F: // bdosProxy.OpenFile
@@ -329,8 +327,7 @@ void NowindHost::executeCommand()
 			// (no response, will cause a timeout on the MSX side)
 			return;
 		}
-		byte reg_f = command.cmdData[6];
-		if (reg_f & 1) { // carry flag
+		if (command.getF() & Command::F_CARRY) { 
 			if (diskWriteInit(*disk)) nextState = STATE_DISKWRITE;
 		} else {
 			if (diskReadInit(*disk)) nextState = STATE_BLOCKREAD;
@@ -377,9 +374,9 @@ void NowindHost::apiCommand()
     command.extraData[0] = 0;
     dumpRegisters();
 
-    byte reg_a = command.cmdData[7];
-    byte reg_c = command.cmdData[0];
-    byte reg_b = command.cmdData[1];
+    byte reg_a = command.getA();
+    byte reg_c = command.getC();
+    byte reg_b = command.getB();
     switch (reg_c)
     {
         case API_NOWMAP:
@@ -411,7 +408,7 @@ void NowindHost::apiCommand()
 // todo: split into seporate 'API' class?
 void NowindHost::apiReceiveData(byte data)
 {
-    byte reg_b = command.cmdData[1];
+    byte reg_b = command.getB();
     
     command.extraData[recvCount] = data;
     ++recvCount;
@@ -421,8 +418,8 @@ void NowindHost::apiReceiveData(byte data)
     if (recvCount >= reg_b)
     {
         // all data received, execute command
-        byte reg_c = command.cmdData[0];
-        word reg_de = command.cmdData[2] + 256*command.cmdData[3];
+        byte reg_c = command.getC();
+        word reg_de = command.getDE();
         DBERR("\n");
 
         switch (reg_c)
@@ -547,9 +544,9 @@ bool NowindHost::diskWriteInit(SectorMedium& disk)
 	DBERR("NowindHost::diskWrite, startSector: %u  sectorAmount: %u\n", getStartSector(), getSectorAmount());
 	if (disk.isWriteProtected()) 
 	{
-		nwhSupport->sendHeader();
-		nwhSupport->send(1);
-		nwhSupport->send(0); // WRITEPROTECTED
+		response->sendHeader();
+		response->send(1);
+		response->send(0); // WRITEPROTECTED
 	}
 	else
 	{
@@ -575,8 +572,8 @@ void NowindHost::doDiskWrite1()
 			    DBERR("Error %i writing disk image!\n", result);
 			}
 		}
-		nwhSupport->sendHeader();
-		nwhSupport->send(255);
+		response->sendHeader();
+		response->send(255);
 		setState(STATE_SYNC1);
 		return;
 	}
@@ -593,11 +590,11 @@ void NowindHost::doDiskWrite1()
 
     DBERR(" address: 0x%04x, transferSize: 0x%04X \n", address, transferSize);
     
-	nwhSupport->sendHeader();
-	nwhSupport->send(0);          // data ahead!
-	nwhSupport->send16(address);
-	nwhSupport->send16(transferSize);
-	nwhSupport->send(0xaa);
+	response->sendHeader();
+	response->send(0);          // data ahead!
+	response->send16(address);
+	response->send16(transferSize);
+	response->send(0xaa);
 
 	// wait for data
 	setState(STATE_DISKWRITE);
@@ -620,13 +617,13 @@ void NowindHost::doDiskWrite2()
 		unsigned address = getCurrentAddress();
 		size_t bytesLeft = buffer.size() - transferred;
 		if ((address == 0x8000) && (bytesLeft > 0)) {
-			nwhSupport->sendHeader();
-			nwhSupport->send(254); // more data for page 2/3
+			response->sendHeader();
+			response->send(254); // more data for page 2/3
 	        DBERR(" more data for page 2/3\n");
 		}
 	} else {
 	    DBERR(" ERROR!!! This situation is still not handled correctly!\n");
-		nwhSupport->purge();
+		response->purge();
 	}
 
 	// continue the rest of the disk write
@@ -690,7 +687,7 @@ void NowindHost::msxReset()
 
 SectorMedium* NowindHost::getDisk()
 {
-	byte num = command.cmdData[7]; // reg_a
+	byte num = command.getA();
 	if (num >= drives.size()) {
 		DBERR("MSX requested non-existing drive, reg_a: 0x%02x (ignored)\n", num);
 		return 0;
@@ -703,27 +700,26 @@ void NowindHost::auxIn()
 {
 	char input;
 	DBERR("auxIn\n");
-	nwhSupport->sendHeader();
+	response->sendHeader();
 
 	dumpRegisters();
 	std::cin >> input;
 
-	nwhSupport->sendHeader();
-	nwhSupport->send(input);
+	response->sendHeader();
+	response->send(input);
     DBERR("auxIn returning 0x%02x\n", input);
 }
 
 void NowindHost::auxOut()
 {
-	DBERR("auxOut: %c\n", command.cmdData[7]);
+	DBERR("auxOut: %c\n", command.getA());
 	dumpRegisters();
-	printf("%c", command.cmdData[7]);
+	printf("%c", command.getA());
 }
 
 void NowindHost::dumpRegisters()
 {
-	//reg_[cbedlhfa] + cmd
-	DBERR("AF: 0x%04X, BC: 0x%04X, DE: 0x%04X, HL: 0x%04X, CMD: 0x%02X\n", command.cmdData[7] * 256 + command.cmdData[6], command.cmdData[1] * 256 + command.cmdData[0], command.cmdData[3] * 256 + command.cmdData[2], command.cmdData[5] * 256 + command.cmdData[4], command.cmdData[8]);
+	DBERR("AF: 0x%04X, BC: 0x%04X, DE: 0x%04X, HL: 0x%04X, CMD: 0x%02X\n", command.getAF(), command.getBC(), command.getDE(), command.getHL(), command.getCommand());
 }
 
 void NowindHost::DSKCHG()
@@ -734,28 +730,28 @@ void NowindHost::DSKCHG()
 		return;
 	}
 
-	nwhSupport->sendHeader();
-	byte num = command.cmdData[7]; // reg_a
+	response->sendHeader();
+	byte num = command.getA();
 	assert(num < drives.size());
 
 	if (drives[num]->diskChanged()) {
-		nwhSupport->send(255); // changed
+		response->send(255); // changed
 		// read first FAT sector (contains media descriptor)
 		byte sectorBuffer[512];
 		if (disk->readSectors(sectorBuffer, 1, 1)) {
 			// TODO read error
 			sectorBuffer[0] = 0;
 		}
-		nwhSupport->send(sectorBuffer[0]); // new mediadescriptor
+		response->send(sectorBuffer[0]); // new mediadescriptor
 	} else {
-		nwhSupport->send(0);   // not changed
-		nwhSupport->send(255); // dummy
+		response->send(0);   // not changed
+		response->send(255); // dummy
 	}
 }
 
 void NowindHost::GETDPB()
 {
-	byte num = command.cmdData[7]; // reg_a
+	byte num = command.getA();
 
 	DBERR("GETDPB driveNumber: %u\n", num);
 	SectorMedium* disk = getDisk();
@@ -835,31 +831,31 @@ void NowindHost::GETDPB()
 
 	// We dont know what sectorBuffer 0x1C-1F contains on MSX harddisk images 
 
-	nwhSupport->sendHeader();
+	response->sendHeader();
 
 	// send destination address
-	nwhSupport->send(command.cmdData[2]);	// reg_e
-	nwhSupport->send(command.cmdData[3]);	// reg_d
+	response->send(command.getE());
+	response->send(command.getD());
 
 	byte * sendBuffer = (byte *) &dpb;
 	for (int i=0;i<18;i++) {
 		DBERR("GETDPB offset [%d]: 0x%02X\n", i+1, sendBuffer[i]);
-		nwhSupport->send(sendBuffer[i]);
+		response->send(sendBuffer[i]);
 	}
 }
 
 // msx sends the amount of drives already installed in reg_a
 void NowindHost::DRIVES()
 {
-	byte reg_a = command.cmdData[7];
+	byte reg_a = command.getA();
 	// at least one drive (MSXDOS1 cannot handle 0 drives)
 	byte numberOfDrives = std::max<byte>(1, byte(drives.size()));
 
     driveOffset = reg_a;
-	nwhSupport->sendHeader();
-	nwhSupport->send(getEnablePhantomDrives() ? 0x02 : 0);
-	nwhSupport->send(reg_a | (getAllowOtherDiskroms() ? 0 : 0x80));
-	nwhSupport->send(numberOfDrives);
+	response->sendHeader();
+	response->send(getEnablePhantomDrives() ? 0x02 : 0);
+	response->send(reg_a | (getAllowOtherDiskroms() ? 0 : 0x80));
+	response->send(numberOfDrives);
 
 	for (unsigned i = 0; i < drives.size(); ++i) {
 		if (drives[i]->isRomdisk()) {
@@ -871,9 +867,9 @@ void NowindHost::DRIVES()
 
 void NowindHost::INIENV()
 {
-	nwhSupport->sendHeader();
+	response->sendHeader();
 	DBERR("INIENV (romdrv nr: %i) \n", romdisk);
-	nwhSupport->send(romdisk); // calculated in DRIVES()
+	response->send(romdisk); // calculated in DRIVES()
 }
 
 void NowindHost::setDateMSX()
@@ -881,24 +877,21 @@ void NowindHost::setDateMSX()
 	time_t td = time(NULL);
 	struct tm* tm = localtime(&td);
 
-	nwhSupport->sendHeader();
-	nwhSupport->send(tm->tm_mday);          // day
-	nwhSupport->send(tm->tm_mon + 1);       // month
-	nwhSupport->send16(tm->tm_year + 1900); // year
+	response->sendHeader();
+	response->send(tm->tm_mday);          // day
+	response->send(tm->tm_mon + 1);       // month
+	response->send16(tm->tm_year + 1900); // year
 }
 
-unsigned NowindHost::getSectorAmount() const
+unsigned int NowindHost::getSectorAmount() const
 {
-	byte reg_b = command.cmdData[1];
-	return reg_b;
+	return command.getB();
 }
 
-unsigned NowindHost::getStartSector() const
+unsigned int NowindHost::getStartSector() const
 {
-	byte reg_c = command.cmdData[0];
-	byte reg_e = command.cmdData[2];
-	byte reg_d = command.cmdData[3];
-	unsigned startSector = reg_e + (reg_d * 256);
+	byte reg_c = command.getC();
+	unsigned startSector = command.getDE();
 
 	if (reg_c < 0x80) {
 		// FAT16 read/write sector
@@ -907,17 +900,14 @@ unsigned NowindHost::getStartSector() const
 	return startSector;
 }
 
-unsigned NowindHost::getStartAddress() const
+unsigned int NowindHost::getStartAddress() const
 {
-	byte reg_l = command.cmdData[4];
-	byte reg_h = command.cmdData[5];
-	return reg_h * 256 + reg_l;
+	return command.getHL();
 }
 
-unsigned NowindHost::getCurrentAddress() const
+unsigned int NowindHost::getCurrentAddress() const
 {
-	unsigned startAddress = getStartAddress();
-	return startAddress + transferred;
+	return getStartAddress() + transferred;
 }
 
 // strips a string from outer double-quotes and anything outside them
@@ -940,7 +930,7 @@ static string stripquotes(const string& str)
 
 void NowindHost::callImage(const string& filename)
 {
-	byte num = command.cmdData[7]; // reg_a
+	byte num = command.getA();
 	if (num >= drives.size()) {
 		// invalid drive number
 		return;
@@ -952,16 +942,16 @@ void NowindHost::callImage(const string& filename)
 
 void NowindHost::getDosVersion()
 {
-	nwhSupport->sendHeader();
-	nwhSupport->send(enableMSXDOS2 ? 1:0);
+	response->sendHeader();
+	response->send(enableMSXDOS2 ? 1:0);
 }
 
 // the MSX asks whether the host has a command  
 // waiting for it to execute
 void NowindHost::commandRequested()
 {
-    char cmdType = command.cmdData[1]; // reg_b
-    char cmdArg = command.cmdData[0]; // reg_c
+    char cmdType = command.getB();
+    char cmdArg = command.getC();
 
     switch (cmdType)
     {
@@ -997,12 +987,12 @@ void NowindHost::commandRequestedAtStartup(byte reset)
         DBERR("MSX requests next command at startup\n");
     }
 
-    nwhSupport->sendHeader();
+    response->sendHeader();
 
     std::vector<byte> command;
     if (index >= startupRequestQueue.size())
     {
-        nwhSupport->send(0);   // no more commands 
+        response->send(0);   // no more commands 
         DBERR("No more startup commands.\n");
     }
     else
@@ -1012,7 +1002,7 @@ void NowindHost::commandRequestedAtStartup(byte reset)
 
         for (unsigned int i=0;i<command.size();i++)
         {
-            nwhSupport->send(command[i]);
+            response->send(command[i]);
         }
     }
 }
@@ -1021,10 +1011,10 @@ void NowindHost::commandRequestedAtStartup(byte reset)
 // and are them removed from the queue
 void NowindHost::commandRequestedAnytime()
 {
-    nwhSupport->sendHeader();
+    response->sendHeader();
     if (requestQueue.empty())
     {
-        nwhSupport->send(0);
+        response->send(0);
     }
     else
     {
@@ -1033,16 +1023,16 @@ void NowindHost::commandRequestedAnytime()
         requestQueue.pop_front();
 		if (requestQueue.empty())
 		{
-			nwhSupport->send(0);
+			response->send(0);
 		}
 		else
 		{
-			nwhSupport->send(1);
+			response->send(1);
 		}
 
         for (unsigned int i=0;i<command.size();i++)
 	    {
-            nwhSupport->send(command[i]);
+            response->send(command[i]);
 	    }
     }
 }

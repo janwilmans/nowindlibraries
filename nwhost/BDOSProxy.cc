@@ -151,7 +151,7 @@ bool BDOSProxy::FindFirst(const Command& command, Response& response)
 
 	bool found = false;
     DBERR("%s\n", __FUNCTION__);
-    word reg_hl = command.cmdData[4] + 256*command.cmdData[5];
+    word reg_hl = command.getHL();
     string filename = command.getFilenameFromExtraData();
     
 #ifdef WIN32
@@ -239,8 +239,8 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
 	}
 
 	bool found = false;
-    word reg_hl = command.cmdData[4] + 256*command.cmdData[5];
-    
+    word reg_hl = command.getHL();
+
 #ifdef WIN32
     struct _finddata_t data;
     long result = _findnext(findFirstHandle, &data); 
@@ -286,8 +286,8 @@ bool BDOSProxy::ReadRandomBlock(const Command& command, Response& response)
 
     DBERR("> BDOSProxy::ReadRandomBlock\n");
 
-    word reg_bc = command.cmdData[0] + 256*command.cmdData[1];
-    word reg_hl = command.cmdData[4] + 256*command.cmdData[5];
+    word reg_bc = command.getBC();
+    word reg_hl = command.getHL();
 
     std::vector<byte> buffer;
     int size = reg_hl;
