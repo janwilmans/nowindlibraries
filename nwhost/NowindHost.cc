@@ -179,7 +179,7 @@ void NowindHost::write(byte data, unsigned int time)
 		command.extraData[recvCount] = data;
 		if (++recvCount == 11) {
 		    setState(STATE_SYNC1);
-			device.open(command.cmdData, command.extraData);
+			device.open(command.cmdData, &command.extraData[0]);
 		}
 		break;
 	case STATE_IMAGE:
@@ -187,7 +187,7 @@ void NowindHost::write(byte data, unsigned int time)
 		command.extraData[recvCount] = data;
 		if ((data == 0) || (data == ':') ||
 		    (++recvCount == 40)) {
-			char* data = reinterpret_cast<char*>(command.extraData);
+			char* data = reinterpret_cast<char*>(&command.extraData[0]);
 			callImage(string(data, recvCount));
 			setState(STATE_SYNC1);
 		}
@@ -198,7 +198,7 @@ void NowindHost::write(byte data, unsigned int time)
 		if ((data == 0) || (++recvCount == (240 - 1))) {
 			dumpRegisters();
 			command.extraData[recvCount] = 0;
-			DBERR("DBG MSG: %s\n", reinterpret_cast<char*>(command.extraData));
+			DBERR("DBG MSG: %s\n", &command.extraData[0]);
 			setState(STATE_SYNC1);
 		}
 		break;
@@ -291,7 +291,7 @@ void NowindHost::executeCommand()
 	switch (activeCommand) {
 	case 0: assert(false); break; // these is no command '0', nor should there be.
 	case 0x0D: bdosProxy.DiskReset(command, *response); break;
-	case 0x0F: bdosProxy.OpenFile(command, *response); break;
+	case 0x0F: if (bdosProxy.OpenFile(command, *response)) { nextState = STATE_EXECUTE_COMMAND; } break;
 	case 0x10: bdosProxy.CloseFile(command, *response); break;
 	case 0x11: if (bdosProxy.FindFirst(command, *response)) { nextState = STATE_EXECUTE_COMMAND; } break;
 	case 0x12: if (bdosProxy.FindNext(command, *response)) { nextState = STATE_EXECUTE_COMMAND; } break;
@@ -426,7 +426,7 @@ void NowindHost::apiReceiveData(byte data)
         {
             case API_NOWMAP:
             {
-                string args = string(reinterpret_cast<char*>(command.extraData));
+                string args = string(reinterpret_cast<char*>(&command.extraData[0]));
                 string result = nowMap(args);
                 vector<byte> resultData;
                 resultData.assign(result.begin(), result.end());

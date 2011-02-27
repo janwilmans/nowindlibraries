@@ -16,6 +16,7 @@ using std::ios;
 
 Command::Command()
 {
+	extraData.resize(240 + 2);
 }
 
 void Command::initialize(NowindHostSupport* aSupport)

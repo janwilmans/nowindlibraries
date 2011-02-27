@@ -12,7 +12,9 @@
 #define ToUpper(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper)
 
 #ifdef WIN32
-#include <io.h>         // not portable to linux nor MacOS, TODO: fix!
+// not portable to linux nor MacOS, TODO: fix!
+// Boost.FileSystem could do this, it is a seporately compiled library (not header only)
+#include <io.h>         
 #endif
 
 namespace nwhost {
@@ -24,8 +26,6 @@ using std::ios;
 
 BDOSProxy::BDOSProxy()
 {
-	findFirstState = BDOSCMD_READY;
-	findNextState = BDOSCMD_READY;
 }
 
 void BDOSProxy::initialize(NowindHostSupport* aSupport)
@@ -116,28 +116,57 @@ void BDOSProxy::WriteRandomFileWithZeros(const Command& command, Response& respo
     command.reportCpuInfo();
 }
 
-void BDOSProxy::OpenFile(const Command& command, Response& response)
+bool BDOSProxy::OpenFile(const Command& command, Response& response)
 {
+	static BdosState findOpenFile = BDOSCMD_READY;
+
+	// this is true when the response is being sent
+	if (findOpenFile == BDOSCMD_EXECUTING)
+	{
+		blockRead.ack(command.data);
+		if (blockRead.isDone())
+		{
+			findOpenFile = BDOSCMD_READY;
+			return false;
+		}
+		return true;
+	}
+
+	bool found = false;
     string filename = command.getFilenameFromExtraData();
     DBERR(" nu hebben we een fcb: %s\n", filename.c_str());
     //bdosFiles.push_back( new fstream(imageName.c_str(), ios::binary | ios::in);
     bdosfile = new fstream(filename.c_str(), ios::binary | ios::in);
+	bdosfile->seekg(0, ios::end);
+	size_t filesize = bdosfile->tellg();
+	bdosfile->seekg(0, ios::beg);
+
     response.sendHeader();
+
+	vector<byte> buffer(command.extraData);
+	buffer[0x10] = filesize & 0xff;
+	buffer[0x11] = (filesize << 8) & 0xff;
+	buffer[0x12] = (filesize << 16) & 0xff;
+	buffer[0x13] = (filesize << 24) & 0xff;
     
     if (bdosfile->fail())
     {
-        response.send(0xff);
+		blockRead.cancelWithCode(0xff);
     }
     else
     {
-        response.send(0);
+		blockRead.init(command.getDE(), buffer.size(), buffer);
+		found = true;
     }
+	return found;
 }
 
 // returns true when the command is still executing.
 bool BDOSProxy::FindFirst(const Command& command, Response& response)
 {
-	// this is true when the FindFirst result is being sent
+	static BdosState findFirstState = BDOSCMD_READY;
+
+	// this is true when the FindFirst response is being sent
 	if (findFirstState == BDOSCMD_EXECUTING)
 	{
 		blockRead.ack(command.data);
@@ -226,6 +255,8 @@ void BDOSProxy::getVectorFromFileName(vector<byte>& buffer, string filename)
 
 bool BDOSProxy::FindNext(const Command& command, Response& response)
 {
+	static BdosState findNextState = BDOSCMD_READY;
+
 	// this is true when the FindNext result is being sent
 	if (findNextState == BDOSCMD_EXECUTING)
 	{
@@ -271,6 +302,7 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
 
 bool BDOSProxy::ReadRandomBlock(const Command& command, Response& response)
 {
+	static BdosState readRandomBlockState = BDOSCMD_READY;
 	// this is true when the FindNext result is being sent
 	if (readRandomBlockState == BDOSCMD_EXECUTING)
 	{
@@ -286,16 +318,17 @@ bool BDOSProxy::ReadRandomBlock(const Command& command, Response& response)
 
     DBERR("> BDOSProxy::ReadRandomBlock\n");
 
-    word reg_bc = command.getBC();
-    word reg_hl = command.getHL();
-
+    word amount = command.getHL();
     std::vector<byte> buffer;
-    int size = reg_hl;
+	size_t actuallyRead = 0;
     int offset = 0;
-    buffer.resize(size);
-    bdosfile->seekg(offset);
-    bdosfile->read((char*)&buffer[0], size);
-    size_t actuallyRead = bdosfile->gcount();
+	if (amount > 0)
+	{
+		buffer.resize(amount);
+		bdosfile->seekg(offset);
+		bdosfile->read((char*)&buffer[0], amount);
+		actuallyRead = bdosfile->gcount();
+	}
     
     if (actuallyRead == 0)
     {
@@ -304,13 +337,13 @@ bool BDOSProxy::ReadRandomBlock(const Command& command, Response& response)
     else
     {
         byte returnCode = BlockRead::BLOCKREAD_ERROR;
-        if (actuallyRead == reg_hl)
+        if (actuallyRead == amount)
         {
 			returnCode = BlockRead::BLOCKREAD_EXIT;
         }
 
-        DBERR(" >> reg_hl: %u, actuallyRead: %u\n", reg_hl, actuallyRead);
-        word dmaAddres = reg_bc;
+        DBERR(" >> reg_hl: %u, actuallyRead: %u\n", amount, actuallyRead);
+        word dmaAddres = command.getBC();
         blockRead.init(dmaAddres, actuallyRead, buffer, returnCode);
 		readRandomBlockState = BDOSCMD_EXECUTING;
     }
