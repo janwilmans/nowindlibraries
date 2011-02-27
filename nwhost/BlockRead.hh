@@ -7,7 +7,7 @@
 
 namespace nwhost {
 
-static const byte HARDCODED_READ_DATABLOCK_SIZE = 128;	// hardcoded in blockRead (common.asm)
+static const byte HARDCODED_READ_DATABLOCK_SIZE = 128;	// hardcoded in nowind-roms blockRead (common.asm)
 static const word TWOBANKLIMIT = 0x8000;
 
 class NowindHostSupport;

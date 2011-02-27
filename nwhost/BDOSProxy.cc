@@ -141,9 +141,9 @@ bool BDOSProxy::OpenFile(const Command& command, Response& response)
 	size_t filesize = bdosfile->tellg();
 	bdosfile->seekg(0, ios::beg);
 
-    response.sendHeader();
-
 	vector<byte> buffer(command.extraData);
+	buffer.resize(36);
+
 	buffer[0x10] = filesize & 0xff;
 	buffer[0x11] = (filesize << 8) & 0xff;
 	buffer[0x12] = (filesize << 16) & 0xff;
@@ -151,10 +151,11 @@ bool BDOSProxy::OpenFile(const Command& command, Response& response)
     
     if (bdosfile->fail())
     {
-		blockRead.cancelWithCode(0xff);
+		blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
     }
     else
     {
+		findOpenFile = BDOSCMD_EXECUTING;
 		blockRead.init(command.getDE(), buffer.size(), buffer);
 		found = true;
     }
@@ -188,17 +189,24 @@ bool BDOSProxy::FindFirst(const Command& command, Response& response)
     findFirstHandle = _findfirst(filename.c_str(), &data); 
     if (findFirstHandle == -1)
     {
-        blockRead.cancelWithCode(128);  // file not found
+        blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
 		DBERR("BDOSProxy::FindFirst <file not found>\n");
 		findFirstState = BDOSCMD_READY;
     }
     else
     {
+		size_t filesize = data.size;
         string filename(data.name);
         ToUpper(filename);
         vector<byte> buffer;
         getVectorFromFileName(buffer, filename);
-        
+		buffer.resize(36);
+
+		buffer[0x10] = filesize & 0xff;
+		buffer[0x11] = (filesize << 8) & 0xff;
+		buffer[0x12] = (filesize << 16) & 0xff;
+		buffer[0x13] = (filesize << 24) & 0xff;
+
         blockRead.init(reg_hl, buffer.size(), buffer);
         findFirstState = BDOSCMD_EXECUTING;
 		found = true;
@@ -277,16 +285,24 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
     long result = _findnext(findFirstHandle, &data); 
     if (result != 0)
     {
-        blockRead.cancelWithCode(128);
+        blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
 		DBERR("BDOSProxy::FindNext <file not fond>\n");
     }
     else
     {
+		size_t filesize = data.size;
         string filename(data.name);
         ToUpper(filename);
 
         vector<byte> buffer;
         getVectorFromFileName(buffer, filename);
+		buffer.resize(36);
+
+		buffer[0x10] = filesize & 0xff;
+		buffer[0x11] = (filesize << 8) & 0xff;
+		buffer[0x12] = (filesize << 16) & 0xff;
+		buffer[0x13] = (filesize << 24) & 0xff;
+
         blockRead.init(reg_hl, buffer.size(), buffer);
 		findNextState = BDOSCMD_EXECUTING;
 		found = true;

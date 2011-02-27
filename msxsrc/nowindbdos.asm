@@ -80,9 +80,24 @@ bdosOpenFile:
         ex de,hl                        ; send FCB to host
         ld bc,36
         ldir
+        
+        DEBUGMESSAGE "bdosOpenFile1"
 
         call blockRead
-        jp restorePage 0
+        jr c,.error			; connection lost
+        cp 128
+        jr z,.error
+        
+        ld a,0
+        ld l,a        
+        DEBUGMESSAGE "good"
+        jp restorePage0
+
+.error:        
+		ld a,255
+		ld l,a
+		DEBUGMESSAGE "failed"
+        jp restorePage0
 
 ;        call enableNowindPage0
 ;        call getHeaderInPage0
