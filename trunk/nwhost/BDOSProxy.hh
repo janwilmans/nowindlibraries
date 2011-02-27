@@ -21,7 +21,7 @@ public:
 	void initialize(NowindHostSupport* aSupport);
 
 	void DiskReset(const Command& command, Response& response);
-	void OpenFile(const Command& command, Response& response);
+	bool OpenFile(const Command& command, Response& response);
     void CloseFile(const Command& command, Response& response);
     bool FindFirst(const Command& command, Response& response);
     bool FindNext(const Command& command, Response& response);
@@ -48,10 +48,6 @@ public:
 private:
     NowindHostSupport* nwhSupport;
 	BlockRead blockRead;
-
-	BdosState findFirstState;
-	BdosState findNextState;
-	BdosState readRandomBlockState;
 
     long findFirstHandle;
     void getVectorFromFileName(std::vector<byte>& buffer, std::string filename);

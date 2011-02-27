@@ -38,8 +38,7 @@ public:
 	word getHL() const { return getL() + 256*getH(); }
 	word getAF() const { return getF() + 256*getA(); }
 
-	byte extraData[240 + 2]; // extra data for image/message/write
-
+	std::vector<byte> extraData;		// [240 + 2]; // extra data for image/message/write
 	std::string getFilenameFromExtraData() const;
 	void reportCpuInfo() const;
 private:
