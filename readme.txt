@@ -8,7 +8,7 @@ currently a proper unix makefile is missing, but a generated Makefile is present
 
 external dependencies:
 - libusb-dev
-- 
+- libftdi-devel   (sudo yum install libftdi-devel on Fedora, extract sources on windows)
 
 
 

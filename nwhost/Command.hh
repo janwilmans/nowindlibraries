@@ -4,6 +4,7 @@
 #include "NowindTypes.hh"
 #include <vector>
 #include <deque>
+#include <string>
 
 namespace nwhost {
 
