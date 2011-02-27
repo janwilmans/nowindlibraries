@@ -145,9 +145,9 @@ bool BDOSProxy::OpenFile(const Command& command, Response& response)
 	buffer.resize(36);
 
 	buffer[0x10] = filesize & 0xff;
-	buffer[0x11] = (filesize << 8) & 0xff;
-	buffer[0x12] = (filesize << 16) & 0xff;
-	buffer[0x13] = (filesize << 24) & 0xff;
+	buffer[0x11] = (filesize >> 8) & 0xff;
+	buffer[0x12] = (filesize >> 16) & 0xff;
+	buffer[0x13] = (filesize >> 24) & 0xff;
     
     if (bdosfile->fail())
     {
@@ -203,9 +203,9 @@ bool BDOSProxy::FindFirst(const Command& command, Response& response)
 		buffer.resize(36);
 
 		buffer[0x10] = filesize & 0xff;
-		buffer[0x11] = (filesize << 8) & 0xff;
-		buffer[0x12] = (filesize << 16) & 0xff;
-		buffer[0x13] = (filesize << 24) & 0xff;
+		buffer[0x11] = (filesize >> 8) & 0xff;
+		buffer[0x12] = (filesize >> 16) & 0xff;
+		buffer[0x13] = (filesize >> 24) & 0xff;
 
         blockRead.init(reg_hl, buffer.size(), buffer);
         findFirstState = BDOSCMD_EXECUTING;
@@ -299,9 +299,9 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
 		buffer.resize(36);
 
 		buffer[0x10] = filesize & 0xff;
-		buffer[0x11] = (filesize << 8) & 0xff;
-		buffer[0x12] = (filesize << 16) & 0xff;
-		buffer[0x13] = (filesize << 24) & 0xff;
+		buffer[0x11] = (filesize >> 8) & 0xff;
+		buffer[0x12] = (filesize >> 16) & 0xff;
+		buffer[0x13] = (filesize >> 24) & 0xff;
 
         blockRead.init(reg_hl, buffer.size(), buffer);
 		findNextState = BDOSCMD_EXECUTING;
