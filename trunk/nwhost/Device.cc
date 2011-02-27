@@ -20,6 +20,7 @@ Device::~Device()
 {
 }
 
+// TODO: Aaldert: omschrijven naar open(const Command& command, Response& response)
 void Device::open(const byte* cmdData, const byte* extraData)
 {
 	word fcbAddress = getFCB(cmdData);

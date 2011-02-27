@@ -76,19 +76,23 @@ bdosOpenFile:
         ld (hl),BDOS_OPENFILE
         pop de
 
+        ld a,d                          ; used by readBlock (TODO: moet anders!)
         ex de,hl                        ; send FCB to host
         ld bc,36
         ldir
 
-        call enableNowindPage0
-        call getHeaderInPage0
-        jr nc,.exit                     ; carry means is connection lost
-        ld a,255                        ; return 'file not found'
-.exit:
-        ; TODO: update FCB?
-        ld l,a
-        call restorePage0        
-        ret
+        call blockRead
+        jp restorePage 0
+
+;        call enableNowindPage0
+;        call getHeaderInPage0
+;        jr nc,.exit                     ; carry means is connection lost
+;        ld a,255                        ; return 'file not found'
+;.exit:
+;        ; TODO: update FCB?
+;        ld l,a
+;        call restorePage0        
+;        ret
        
 bdosCloseFile:
         DEBUGMESSAGE "bdosCloseFile"
