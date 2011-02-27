@@ -126,12 +126,15 @@ bdosFindFirst:
         ld (hl),BDOS_FINDFIRST
         
         pop de
+        push hl
         ex de,hl                        ; send FCB to host
         ld bc,36
         ldir
+        pop hl
 
 .findResult:
-        ; TODO: a laden met high trasnfer address?
+		ld a,h
+        ; TODO: a laden met high transfer address?
         call blockRead
         jr c,.error
 
