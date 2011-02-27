@@ -202,10 +202,10 @@ bool BDOSProxy::FindFirst(const Command& command, Response& response)
         getVectorFromFileName(buffer, filename);
 		buffer.resize(36);
 
-		buffer[0x10] = filesize & 0xff;
-		buffer[0x11] = (filesize >> 8) & 0xff;
-		buffer[0x12] = (filesize >> 16) & 0xff;
-		buffer[0x13] = (filesize >> 24) & 0xff;
+		buffer[0x1d] = filesize & 0xff;
+		buffer[0x1e] = (filesize >> 8) & 0xff;
+		buffer[0x1f] = (filesize >> 16) & 0xff;
+		buffer[0x20] = (filesize >> 24) & 0xff;
 
         blockRead.init(reg_hl, buffer.size(), buffer);
         findFirstState = BDOSCMD_EXECUTING;
@@ -278,7 +278,6 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
 	}
 
 	bool found = false;
-    word reg_hl = command.getHL();
 
 #ifdef WIN32
     struct _finddata_t data;
@@ -298,12 +297,13 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
         getVectorFromFileName(buffer, filename);
 		buffer.resize(36);
 
-		buffer[0x10] = filesize & 0xff;
-		buffer[0x11] = (filesize >> 8) & 0xff;
-		buffer[0x12] = (filesize >> 16) & 0xff;
-		buffer[0x13] = (filesize >> 24) & 0xff;
+		//todo: find out why this is offset +1 ? size should start at 0x0c (getVectorFromFileName returns prefixed 0 !?) 8+3 = 11, not 12
+		buffer[0x1d] = filesize & 0xff;
+		buffer[0x1e] = (filesize >> 8) & 0xff;
+		buffer[0x1f] = (filesize >> 16) & 0xff;
+		buffer[0x20] = (filesize >> 24) & 0xff;
 
-        blockRead.init(reg_hl, buffer.size(), buffer);
+        blockRead.init(command.getHL(), buffer.size(), buffer);
 		findNextState = BDOSCMD_EXECUTING;
 		found = true;
 		DBERR("file: %s size: %u\n", data.name, data.size);
