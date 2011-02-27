@@ -1,5 +1,5 @@
         
-        ;define BDOS_NOWIND
+        define BDOS_NOWIND
         
         ; enables messages that can only be viewed in emulation, 
         ; are harmless on real hardware but cause small delays
