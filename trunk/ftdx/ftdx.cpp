@@ -11,6 +11,10 @@
 #include "libgeneral.h"
 
 #ifdef WIN32
+    #define FTDI_BINARY_DRIVER
+#endif
+
+#ifdef FTDI_BINARY_DRIVER
     #include "ConFTD2XX.h"
 #else
     #include "ConFtdiSio.h"
@@ -53,7 +57,7 @@ ftdx::UsbStream* ftdx::newUsbStream(FtdiDriverType aDriverType)
 	UsbStream* lUsbStream = 0;
 	switch (aDriverType)
 	{
-#ifdef WIN32
+#ifdef FTDI_BINARY_DRIVER
 	case eDRIVER_FTD2XX:
 		lUsbStream = new ConFTD2XX();
 		break;

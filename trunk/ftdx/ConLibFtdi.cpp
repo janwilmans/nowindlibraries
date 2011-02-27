@@ -4,18 +4,18 @@
  * @brief libusb based FTDI communication 
  * @author Jan Wilmans <jw@dds.nl>  Copyright (C) 2009 Nowind
  *
- * this code contains linux specific code, but could very user friendly 
- * because the usb serial I/O (FTDISIO) driver is available in lot of distributions by default.
- *
  */
 
 #define FTDX_API_EXPORT
 #include "ConLibFtdi.h"
 #include <libgeneral.h>
 
-// libftdi v0.14 is from http://www.intra2net.com/de/produkte/opensource/ftdi/
-// this solution is portable to any platform that supports libusb 
-#include "ftdi.h"			// libftdi v0.14 in /libftdi
+// libftdi (v0.18 at the time of this writing) is available from http://www.intra2net.com/de/produkte/opensource/ftdi/
+// this solution is portable to any platform that supports libusb (because libftdi relies on libusb)
+// I've tested with windowsXP/7, Fedora and Ubuntu linux.
+// for linux targets, its enough to install the 'libftdi-devel' package
+// ie. $ sudo yum install libftdi-devel for Fedora targets
+#include "ftdi.h"
 
 using namespace general;
 using namespace ftdx;
