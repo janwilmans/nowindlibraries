@@ -7,6 +7,25 @@
 #include <deque>
 #include <string>
 
+#ifdef WIN32
+#define WIN_FILESYSTEM
+#endif
+
+#ifdef WIN_FILESYSTEM
+// not portable to linux nor MacOS, TODO: fix!
+// Boost.FileSystem could do this, it is a seporately compiled library (not header only)
+#include <io.h>  
+
+#else
+
+#define BOOST_FILESYSTEM_VERSION 3
+#include "boost/filesystem.hpp" 
+#include <iostream>
+using namespace boost::filesystem;
+
+#endif
+
+
 namespace nwhost {
 
 class NowindHostSupport;
@@ -51,8 +70,13 @@ private:
 
     long findFirstHandle;
     void getVectorFromFileName(std::vector<byte>& buffer, std::string filename);
-    std::vector<std::fstream* > bdosFiles;
+    std::vector<std::fstream*> bdosFiles;
     std::fstream* bdosfile;
+
+#ifndef WIN_FILESYSTEM
+	bool FindFileResponse(const Command& command, Response& response);
+	boost::filesystem::directory_iterator findFirstIterator;
+#endif
 
 };
 

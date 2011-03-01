@@ -1,3 +1,4 @@
+
 #include "BDOSProxy.hh"
 #include "Command.hh"
 #include "NowindHostSupport.hh"
@@ -10,12 +11,6 @@
 
 #define DBERR nwhSupport->debugMessage
 #define ToUpper(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper)
-
-#ifdef WIN32
-// not portable to linux nor MacOS, TODO: fix!
-// Boost.FileSystem could do this, it is a seporately compiled library (not header only)
-#include <io.h>         
-#endif
 
 namespace nwhost {
 
@@ -162,66 +157,6 @@ bool BDOSProxy::OpenFile(const Command& command, Response& response)
 	return found;
 }
 
-// returns true when the command is still executing.
-bool BDOSProxy::FindFirst(const Command& command, Response& response)
-{
-	static BdosState findFirstState = BDOSCMD_READY;
-
-	// this is true when the FindFirst response is being sent
-	if (findFirstState == BDOSCMD_EXECUTING)
-	{
-		blockRead.ack(command.data);
-		if (blockRead.isDone())
-		{
-			findFirstState = BDOSCMD_READY;
-			return false;
-		}
-		return true;
-	}
-
-	bool found = false;
-    DBERR("%s\n", __FUNCTION__);
-    word reg_hl = command.getHL();
-    string filename = command.getFilenameFromExtraData();
-    
-#ifdef WIN32
-    struct _finddata_t data;
-    findFirstHandle = _findfirst(filename.c_str(), &data); 
-    if (findFirstHandle == -1)
-    {
-        blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
-		DBERR("BDOSProxy::FindFirst <file not found>\n");
-		findFirstState = BDOSCMD_READY;
-    }
-    else
-    {
-		size_t filesize = data.size;
-        string filename(data.name);
-        ToUpper(filename);
-        vector<byte> buffer;
-        getVectorFromFileName(buffer, filename);
-		buffer.resize(36);
-
-		buffer[0x1d] = filesize & 0xff;
-		buffer[0x1e] = (filesize >> 8) & 0xff;
-		buffer[0x1f] = (filesize >> 16) & 0xff;
-		buffer[0x20] = (filesize >> 24) & 0xff;
-
-        blockRead.init(reg_hl, buffer.size(), buffer);
-        findFirstState = BDOSCMD_EXECUTING;
-		found = true;
-		DBERR("file: %s size: %u\n", data.name, data.size);
-    }
-    
-    
-#else
-    // linux not implemented
-    assert(false);
-#endif
-	return found;
-    
-}
-
 void BDOSProxy::getVectorFromFileName(vector<byte>& buffer, string filename)
 {
     buffer.resize(12);
@@ -261,6 +196,98 @@ void BDOSProxy::getVectorFromFileName(vector<byte>& buffer, string filename)
 
 }
 
+#ifndef WIN_FILESYSTEM
+
+bool BDOSProxy::FindFileResponse(const Command& command, Response& response)
+{
+	bool found = false;
+	boost::filesystem::directory_iterator noMoreFiles; // past the end
+	if (findFirstIterator != noMoreFiles)
+	{
+		path dirEntry = findFirstIterator->path().string();
+		std::string filename = dirEntry.filename().string();
+		std::string stem = dirEntry.filename().stem().string();
+		std::string ext = dirEntry.filename().extension().string();
+
+		// todo filter directories, and add masks *.*
+		boost::uintmax_t filesize = 0; // fs::file_size(dirEntry);
+		ToUpper(filename);
+		vector<byte> buffer;
+		getVectorFromFileName(buffer, filename);
+		buffer.resize(36);
+
+		buffer[0x1d] = filesize & 0xff;
+		buffer[0x1e] = (filesize >> 8) & 0xff;
+		buffer[0x1f] = (filesize >> 16) & 0xff;
+		buffer[0x20] = (filesize >> 24) & 0xff;
+
+		blockRead.init(command.getHL(), buffer.size(), buffer);
+		found = true;
+		DBERR("file: %s size: %u\n", filename.c_str(), filesize);
+	}
+	return found;
+}
+
+#endif 
+
+// returns true when the command is still executing.
+bool BDOSProxy::FindFirst(const Command& command, Response& response)
+{
+	static BdosState findFirstState = BDOSCMD_READY;
+
+	// this is true when the FindFirst response is being sent
+	if (findFirstState == BDOSCMD_EXECUTING)
+	{
+		blockRead.ack(command.data);
+		if (blockRead.isDone())
+		{
+			findFirstState = BDOSCMD_READY;
+			return false;
+		}
+		return true;
+	}
+
+	bool found = false;
+    DBERR("%s\n", __FUNCTION__);
+    string filename = command.getFilenameFromExtraData();
+    
+#ifdef WIN_FILESYSTEM
+    struct _finddata_t data;
+    findFirstHandle = _findfirst(filename.c_str(), &data); 
+    if (findFirstHandle == -1)
+    {
+        blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
+		DBERR("BDOSProxy::FindFirst <file not found>\n");
+		findFirstState = BDOSCMD_READY;
+    }
+    else
+    {
+		size_t filesize = data.size;
+        string filename(data.name);
+        ToUpper(filename);
+        vector<byte> buffer;
+        getVectorFromFileName(buffer, filename);
+		buffer.resize(36);
+
+		buffer[0x1d] = filesize & 0xff;
+		buffer[0x1e] = (filesize >> 8) & 0xff;
+		buffer[0x1f] = (filesize >> 16) & 0xff;
+		buffer[0x20] = (filesize >> 24) & 0xff;
+
+        blockRead.init(command.getHL(), buffer.size(), buffer);
+        findFirstState = BDOSCMD_EXECUTING;
+		found = true;
+		DBERR("file: %s size: %u\n", data.name, data.size);
+    }
+#else
+		const std::string targetPath = ".";
+		findFirstIterator = directory_iterator(targetPath);
+		found = FindFileResponse(command, response);
+		if (found) findFirstState = BDOSCMD_EXECUTING;
+#endif
+	return found;
+}
+
 bool BDOSProxy::FindNext(const Command& command, Response& response)
 {
 	static BdosState findNextState = BDOSCMD_READY;
@@ -279,7 +306,7 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
 
 	bool found = false;
 
-#ifdef WIN32
+#ifdef WIN_FILESYSTEM
     struct _finddata_t data;
     long result = _findnext(findFirstHandle, &data); 
     if (result != 0)
@@ -310,8 +337,10 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
     }
     
 #else
-    // linux not implemented
-    assert(false);
+		boost::filesystem::directory_iterator noMoreFiles; // past the end
+		++findFirstIterator;
+		found = FindFileResponse(command, response);
+		if (found) findNextState = BDOSCMD_EXECUTING;
 #endif
 	return found;
 }
