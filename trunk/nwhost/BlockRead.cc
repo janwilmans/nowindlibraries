@@ -192,6 +192,7 @@ void BlockRead::ack(byte tail)
     assert(dataBlockQueue.size() != 0);
     DataBlock* dataBlock = dataBlockQueue[0];
     //DBERR("ACK -> Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
+	DBERR("ACK: transferredData: %d / %d\n", transferredData, transferSize);
 
     if (dataBlock->header == tail)
     {
@@ -209,7 +210,7 @@ void BlockRead::ack(byte tail)
         static int errors = 0;
         errors++;
 
-        //DBERR("block: %u failed! (errors: %u, tail: 0x%02x)\n", dataBlock->number, errors, tail);
+        DBERR("block: %u failed! (errors: %u, tail: 0x%02x)\n", dataBlock->number, errors, tail);
 
 	    nwhSupport->sendHeader();
 	    if (dataBlock->fastTransfer)

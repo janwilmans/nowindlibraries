@@ -90,13 +90,14 @@ bdosOpenFile:
         
         ld a,0
         ld l,a        
-        DEBUGMESSAGE "good"
+        DEBUGMESSAGE "bdosOpen ok"
         jp restorePage0
+        
 
 .error:        
 		ld a,255
 		ld l,a
-		DEBUGMESSAGE "failed"
+		DEBUGMESSAGE "bdosOpen error"
         jp restorePage0
 
 ;        call enableNowindPage0
