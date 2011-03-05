@@ -40,11 +40,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(ProjectDir)..\general"
+				AdditionalIncludeDirectories="$(ProjectDir)..\general;$(ProjectDir)..\..\boost_144"
 				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -60,7 +60,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="general.lib"
-				AdditionalLibraryDirectories="$(TargetDir)"
+				AdditionalLibraryDirectories="$(TargetDir);$(ProjectDir)../../boost_144/lib"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
 			/>
@@ -112,9 +112,9 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="$(ProjectDir)..\general"
+				AdditionalIncludeDirectories="$(ProjectDir)..\general;$(ProjectDir)..\..\boost_144"
 				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_WARNINGS"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -131,7 +131,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="general.lib"
-				AdditionalLibraryDirectories="$(TargetDir)"
+				AdditionalLibraryDirectories="$(TargetDir);$(ProjectDir)../../boost_144/lib"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"

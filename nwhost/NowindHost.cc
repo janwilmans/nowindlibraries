@@ -259,6 +259,43 @@ void NowindHost::setState(State aState)
 		// no nothing
 		break;
 	}
+
+	switch (state)
+	{
+	case STATE_SYNC1:
+		DBERR(" # STATE_SYNC1\n"); break;
+	case STATE_SYNC2:
+		DBERR(" # STATE_SYNC2\n"); break;
+	case STATE_RECEIVE_COMMAND:
+		DBERR(" # STATE_RECEIVE_COMMAND\n"); break;
+	case STATE_RECEIVE_PARAMETERS:
+		DBERR(" # STATE_RECEIVE_PARAMETERS\n"); break;
+	case STATE_EXECUTE_COMMAND:
+		DBERR(" # STATE_EXECUTE_COMMAND\n"); break;
+	case STATE_DISKWRITE:
+		DBERR(" # STATE_DISKWRITE\n"); break;
+	case STATE_DEVOPEN:
+		DBERR(" # STATE_DEVOPEN\n"); break;
+	case STATE_IMAGE:
+		DBERR(" # STATE_IMAGE\n"); break;
+	case STATE_MESSAGE:
+		DBERR(" # STATE_MESSAGE\n"); break;
+	case STATE_BLOCKREAD:
+		DBERR(" # STATE_BLOCKREAD\n"); break;
+	case STATE_CPUINFO:
+		DBERR(" # STATE_CPUINFO\n"); break;
+	case STATE_RECEIVE_DATA:
+		DBERR(" # STATE_RECEIVE_DATA\n"); break;
+	case STATE_RECEIVE_STRING:
+		DBERR(" # STATE_RECEIVE_STRING\n"); break;
+	case STATE_BDOS_OPEN_FILE:
+		DBERR(" # STATE_BDOS_OPEN_FILE\n"); break;
+	case STATE_BDOS_FIND_FIRST:
+		DBERR(" # STATE_BDOS_FIND_FIRST\n"); break;
+	default:
+		DBERR(" # STATE_ unknown !\n"); break;
+		break;
+	}
 }
 
 void NowindHost::prepareCommand()

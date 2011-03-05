@@ -230,6 +230,8 @@ bool BDOSProxy::FindFileResponse(const Command& command, Response& response)
 
 #endif 
 
+// todo: load "thexder.bas" does not return to state_sync1!
+
 // returns true when the command is still executing.
 bool BDOSProxy::FindFirst(const Command& command, Response& response)
 {
