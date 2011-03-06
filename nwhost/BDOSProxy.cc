@@ -147,11 +147,12 @@ bool BDOSProxy::OpenFile(const Command& command, Response& response)
     if (bdosfile->fail())
     {
 		blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
+		findOpenFile = BDOSCMD_READY;
     }
     else
     {
-		findOpenFile = BDOSCMD_EXECUTING;
 		blockRead.init(command.getDE(), buffer.size(), buffer);
+		findOpenFile = BDOSCMD_EXECUTING;
 		found = true;
     }
 	return found;
@@ -209,8 +210,13 @@ bool BDOSProxy::FindFileResponse(const Command& command, Response& response)
 		std::string stem = dirEntry.filename().stem().string();
 		std::string ext = dirEntry.filename().extension().string();
 
-		// todo filter directories, and add masks *.*
-		boost::uintmax_t filesize = 0; // fs::file_size(dirEntry);
+		boost::uintmax_t filesize = 0;
+		if (!is_directory(dirEntry))
+		{
+			// todo filter directories, and add masks *.*
+			filesize = file_size(dirEntry);
+		}
+
 		ToUpper(filename);
 		vector<byte> buffer;
 		getVectorFromFileName(buffer, filename);
@@ -285,7 +291,15 @@ bool BDOSProxy::FindFirst(const Command& command, Response& response)
 		const std::string targetPath = ".";
 		findFirstIterator = directory_iterator(targetPath);
 		found = FindFileResponse(command, response);
-		if (found) findFirstState = BDOSCMD_EXECUTING;
+		if (found) 
+		{
+			findFirstState = BDOSCMD_EXECUTING;
+		}
+		else
+		{
+			blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
+			findFirstState = BDOSCMD_READY;
+		}
 #endif
 	return found;
 }
@@ -342,7 +356,15 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
 		boost::filesystem::directory_iterator noMoreFiles; // past the end
 		++findFirstIterator;
 		found = FindFileResponse(command, response);
-		if (found) findNextState = BDOSCMD_EXECUTING;
+		if (found) 
+		{
+			findNextState = BDOSCMD_EXECUTING;
+		}
+		else
+		{
+			blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
+			findNextState = BDOSCMD_READY;
+		}
 #endif
 	return found;
 }
@@ -353,7 +375,7 @@ bool BDOSProxy::ReadRandomBlock(const Command& command, Response& response)
 	// this is true when the FindNext result is being sent
 	if (readRandomBlockState == BDOSCMD_EXECUTING)
 	{
-		//DBERR("> BDOSProxy::ReadRandomBlock ACK\n");
+		DBERR("> BDOSProxy::ReadRandomBlock ACK\n");
 		blockRead.ack(command.data);
 		if (blockRead.isDone())
 		{
@@ -376,10 +398,14 @@ bool BDOSProxy::ReadRandomBlock(const Command& command, Response& response)
 		bdosfile->read((char*)&buffer[0], amount);
 		actuallyRead = bdosfile->gcount();
 	}
+	DBERR(" >> reg_hl: %u, actuallyRead: %u\n", amount, actuallyRead);
     
     if (actuallyRead == 0)
     {
+		DBERR(" * readRandomBlockState = BDOSCMD_READY\n");
         blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
+		readRandomBlockState = BDOSCMD_READY;
+		return false;
     }
     else
     {
@@ -388,8 +414,7 @@ bool BDOSProxy::ReadRandomBlock(const Command& command, Response& response)
         {
 			returnCode = BlockRead::BLOCKREAD_EXIT;
         }
-
-        DBERR(" >> reg_hl: %u, actuallyRead: %u\n", amount, actuallyRead);
+		DBERR(" * readRandomBlockState = BDOSCMD_EXECUTING\n");
         word dmaAddres = command.getBC();
         blockRead.init(dmaAddres, actuallyRead, buffer, returnCode);
 		readRandomBlockState = BDOSCMD_EXECUTING;
