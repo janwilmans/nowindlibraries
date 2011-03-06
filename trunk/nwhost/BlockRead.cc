@@ -35,7 +35,7 @@ void BlockRead::init(word aStartAddress, word aSize, const std::vector <byte >& 
     returnCode = aReturnCode;
 
     transferingToPage01 = (startAddress <= TWOBANKLIMIT);
-    transferredData = 0;
+    processedData = 0;
     done = false;
     
     // copy data to transfer
@@ -58,12 +58,12 @@ void BlockRead::blockRead(word startAddress, word size)
     {
         blockReadHelper(startAddress, size);
     }  
-    //DBERR("blockRead, transferred: 0x%04X\n", transferredData);
+    //DBERR("blockRead, processedData: 0x%04X\n", processedData);
 }
 
 void BlockRead::blockReadHelper(word startAddress, word size)
 {
-    DBERR("BlockRead::blockReadHelper, size: 0x%02x, transferred: 0x%02x\n", size, transferredData);
+    DBERR("BlockRead::blockReadHelper, size: 0x%02x, processedData: 0x%02x\n", size, processedData);
     
     // delete any blocks still in the dataBlockQueue (unacknowleged by msx, could be caused by timeouts)
     for(unsigned int i=0; i< dataBlockQueue.size(); i++)
@@ -73,7 +73,7 @@ void BlockRead::blockReadHelper(word startAddress, word size)
     dataBlockQueue.clear();    
     
     word address = startAddress;
-    unsigned int offset = transferredData;      //transferred is an offset within 'const vector <byte >& data'
+    unsigned int offset = processedData;      // an offset within 'const vector <byte >& data'
 
     if (size < HARDCODED_READ_DATABLOCK_SIZE)
     {   
@@ -85,7 +85,7 @@ void BlockRead::blockReadHelper(word startAddress, word size)
         nwhSupport->send16(startAddress);
         nwhSupport->send16(size);   // amount of bytes
         sendDataBlock(0);
-        transferredData += size;
+        processedData += size;
     }
     else
     {
@@ -113,7 +113,7 @@ void BlockRead::blockReadHelper(word startAddress, word size)
         {
             sendDataBlock(i);
         }
-        transferredData += actualTransferSize;        // store for use in blockReadContinue()        
+        processedData += actualTransferSize;        // store for use in blockReadContinue()        
    }
 }
 
@@ -156,8 +156,8 @@ void BlockRead::sendDataBlock(unsigned int blocknr)
 
 void BlockRead::blockReadContinue()
 {
-    unsigned address = startAddress + transferredData;
-    if (transferredData < transferSize)     // still bytes to be transferred?
+    unsigned address = startAddress + processedData;
+    if (processedData < transferSize)     // still bytes to be transferred?
     {
     /*
         DBERR("blockReadContinue, do more!\n");
@@ -168,7 +168,7 @@ void BlockRead::blockReadContinue()
             DBERR("transferingToPage01 = FALSE!\n");
         }
     */
-        if (transferingToPage01 && address >= TWOBANKLIMIT && transferredData > 0) // address >= 0x8000 and this is not the first transfer?
+        if (transferingToPage01 && address >= TWOBANKLIMIT && processedData > 0) // address >= 0x8000 and this is not the first transfer?
         {
                 //DBERR("send 3 -> continue at page 2/3\n");
                 // switch to page23-transfers
@@ -176,7 +176,7 @@ void BlockRead::blockReadContinue()
                 nwhSupport->send(BLOCKREAD_EXIT_MORE_DATE_AHEAD); 
                 transferingToPage01 = false;   
         }
-        blockRead(address, transferSize-transferredData);   // state is set to STATE_BLOCKREAD
+        blockRead(address, transferSize-processedData);   // state is set to STATE_BLOCKREAD
     }
     else
     {
@@ -192,15 +192,16 @@ void BlockRead::ack(byte tail)
     assert(dataBlockQueue.size() != 0);
     DataBlock* dataBlock = dataBlockQueue[0];
     //DBERR("ACK -> Datablock[%d]: header: 0x%02x, transferAddress: 0x%04x\n", dataBlock->number, dataBlock->header, dataBlock->transferAddress);
-	DBERR("ACK: transferredData: %d / %d\n", transferredData, transferSize);
 
     if (dataBlock->header == tail)
-    {
-        // block succesfully received
+    {		
+		// block succesfully received
         delete dataBlock;
         dataBlock = 0;
         dataBlockQueue.pop_front();
-        if (dataBlockQueue.size() == 0)
+
+		DBERR("ACK, tail matched, %d datablocks left\n", dataBlockQueue.size());
+		if (dataBlockQueue.size() == 0)
         {
             blockReadContinue();
         }
@@ -210,7 +211,7 @@ void BlockRead::ack(byte tail)
         static int errors = 0;
         errors++;
 
-        DBERR("block: %u failed! (errors: %u, tail: 0x%02x)\n", dataBlock->number, errors, tail);
+        DBERR("ACK, block %u failed! (errors: %u, tail: 0x%02x)\n", dataBlock->number, errors, tail);
 
 	    nwhSupport->sendHeader();
 	    if (dataBlock->fastTransfer)

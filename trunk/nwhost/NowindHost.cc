@@ -133,7 +133,12 @@ void NowindHost::write(byte data, unsigned int time)
 		response->purge();
 		setState(STATE_SYNC1);
 	}
-	DBERR("received: 0x%02x (in state: %d, activeCommand: %d (0x%02x)\n", data, state, activeCommand, activeCommand);
+	char c = data;
+	if (c < 32)
+	{
+	  c = '.';
+	}
+	DBERR("received: [%c] (0x%02x) in state: %d, activeCommand: %d (0x%02x)\n", c, data, state, activeCommand, activeCommand);
 	switch (state) {
 	case STATE_SYNC1:
 		timer1 = time;

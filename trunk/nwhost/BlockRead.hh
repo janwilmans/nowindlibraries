@@ -42,7 +42,7 @@ private:
 
 
 	word startAddress;
-	word transferredData;
+	word processedData;
 	word transferSize;
 
     bool transferingToPage01;
