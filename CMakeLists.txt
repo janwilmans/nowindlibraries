@@ -4,7 +4,7 @@ set(Boost_USE_STATIC_LIBS   ON)
 set(Boost_USE_MULTITHREADED ON)
 
 set(Boost_INCLUDEDIR /usr/include)
-find_package( Boost 1.46 REQUIRED)
+find_package( Boost REQUIRED)
 
 link_directories ( ${Boost_LIBRARY_DIRS} )
 include_directories ( ${Boost_INCLUDE_DIRS} )
