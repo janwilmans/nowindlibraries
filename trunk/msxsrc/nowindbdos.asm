@@ -29,6 +29,47 @@ BDOS_ABSOLUTESECTORWRITE        equ $30
 
 currentFilePosition2 := $        
         
+;        code ! $5445
+;        jp bdosConsoleInput             ; 0x01
+
+;        code ! $53a7
+;        jp bdosConsoleOutput            ; 0x02
+
+;        code ! $546e
+;        jp bdosAuxInput                 ; 0x03
+
+;        code ! $5474
+;        jp bdosAuxOutput                ; 0x04
+
+;        code ! $5465
+;        jp bdosPrinterOutput            ; 0x05
+
+;        code ! $5454
+;        jp bdosDirectConsoleIO          ; 0x06
+
+;        code ! $5462
+;        jp bdosDirectConsoleInput       ; 0x07
+
+;        code ! $544e
+;        jp bdosConsoleInputWithoutEcho  ; 0x08
+
+; TODO: check bdos 09h
+
+;        code ! $50e0
+;        jp bdosBufferedLineInput        ; 0x0a
+
+;        code ! $543c
+;        jp bdosConsoleStatus            ; 0x0b
+
+;        code ! $41ef
+;        jp bdosReturnVersionNumber      ; 0x0c
+
+        code ! $509f
+        jp bdosDiskReset                ; 0x0d
+
+;        code ! $50d5
+;        jp bdosSelectDisk               ; 0x0e
+
         code ! $4462
         jp bdosOpenFile                 ; 0x0f
 
@@ -44,17 +85,65 @@ currentFilePosition2 := $
         code ! $436c
         jp bdosDeleteFile               ; 0x13
 
+        code ! $4775
+        jp bdosSequentialRead           ; 0x14
+        
+        code ! $477d
+        jp bdosSequentialWrite          ; 0x15
+        
         code ! $461d
         jp bdosCreateFile               ; 0x16
         
         code ! $4392
         jp bdosRenameFile               ; 0x17
 
+;        code ! $504e
+;        jp bdosGetLoginVector           ; 0x18
+
+;        code ! $50c4
+;        jp bdosGetCurrentDrive          ; 0x19
+
+;        code ! $5058
+;        jp bdosSetDTA                   ; 0x1a
+
+;        code ! $505d
+;        jp bdosGetAllocationInfo        ; 0x1b
+
+        code ! $4788
+        jp bdosRandomRead               ; 0x21
+
+        code ! $4793
+        jp bdosRandomWrite              ; 0x22
+
+        code ! $501E
+        jp bdosGetFileSize              ; 0x23
+
+        code ! $50c8
+        jp bdosSetRandomRecord          ; 0x24
+        
         code ! $47be
         jp bdosRandomBlockWrite         ; 0x26
 
         code ! $47b2
         jp bdosRandomBlockRead          ; 0x27
+
+        code ! $47d1
+        jp bdosRandomBlockWriteZeroFill ; 0x28
+
+;        code ! $553c
+;        jp bdosGetDate                  ; 0x2a
+
+;        code ! $5552
+;        jp bdosSetDate                  ; 0x2b
+
+;        code ! $55db
+;        jp bdosGetTime                  ; 0x2c
+
+;        code ! $55e6
+;        jp bdosSetTime                  ; 0x2d
+
+;        code ! $55ff
+;        jp bdosSetResetVerifyFlag       ; 0x2e
 
         code ! $46ba
         jp bdosAbsoluteSectorRead       ; 0x2f
@@ -188,19 +277,19 @@ bdosRandomBlockWrite:
         
 bdosRandomBlockRead:
         DEBUGMESSAGE "bdosRandomBlockRead"
-        push hl
-        ld hl,(BDOS_DTA)
-        ld b,h
-        ld c,l
-        pop hl
 
+        push hl                         ; number of records
+        ld bc,(BDOS_DTA)
         call sendRegisters
         ld (hl),BDOS_RANDOMBLOCKREAD
 
         ld a,(BDOS_DTA + 1)
         call blockRead
         
-        ld hl, $4000
+        DEBUGMESSAGE "naBLKrd"
+        DEBUGDUMPREGISTERS
+        
+        pop hl
         jr c,.exit
 
         and a
@@ -212,7 +301,9 @@ bdosRandomBlockRead:
 
 .exit:
         ; TODO: update FCB?
+        ld hl,21
         ld a,1
+        DEBUGDUMPREGISTERS
         ret        
 
 
@@ -227,6 +318,20 @@ bdosAbsoluteSectorWrite:
         DEBUGMESSAGE "bdosAbsoluteSectorWrite"
         ld a,2  ; not ready (TODO: check!)
         ret
+
+bdosDiskReset:
+bdosSequentialRead:
+bdosSequentialWrite:
+bdosRandomRead:
+bdosRandomWrite:
+bdosGetFileSize:
+bdosSetRandomRecord:
+bdosRandomBlockWriteZeroFill:
+        DEBUGMESSAGE "ASSERTTTT"
+        DEBUGDUMPREGISTERS
+        di
+        halt
+        
         
 ; http://www.konamiman.com/msx/msx-e.html#msx2th
 ; http://www.angelfire.com/art2/unicorndreams/msx/RR-BASIC.html

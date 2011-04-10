@@ -129,6 +129,9 @@ bool BDOSProxy::OpenFile(const Command& command, Response& response)
 
 	bool found = false;
     string filename = command.getFilenameFromExtraData();
+    
+    // TODO: use findfirst here to support wildcards!
+    // TODO: maybe handle DOS device names (e.g. con, lpt, aux)
     DBERR(" nu hebben we een fcb: %s\n", filename.c_str());
     //bdosFiles.push_back( new fstream(imageName.c_str(), ios::binary | ios::in);
     bdosfile = new fstream(filename.c_str(), ios::binary | ios::in);
