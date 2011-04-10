@@ -232,7 +232,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assembly $(InputDir)$(InputName).rom"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						AdditionalDependencies="nowindbdos.asm"
 						Outputs="$(InputDir)$(InputName).rom"
 					/>
 				</FileConfiguration>

@@ -6,6 +6,7 @@
         ; recommened: turn off for releases
         define DEBUG      
         
+        
         ; enables messages for debugging can be logged even on real hardware 
         ; by sending them to the host over USB, causes somewhat larger delays
         ; but can be used to diagnose problems that are otherwise hard to debug        
