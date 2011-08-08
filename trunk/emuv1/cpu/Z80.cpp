@@ -401,6 +401,10 @@ void Z80::executeInstructions() {
 inline nw_byte Z80::readMem(nw_word address) {
 
     assert(address < 0x10000);
+    
+#ifdef ZEXALL
+    return readBlock[address >> 13][address&0x1FFF] & 0xff;
+#else
 /*
 
     if ((slotSelector->isIllegalAddress(address)) && (address!=0xffff)) {
@@ -447,6 +451,7 @@ TODO: voor alle pages, en geen foutmelding geven wanneer het slot niet expanded 
     }    
     
     return readBlock[address >> 13][address&0x1FFF] & 0xff;
+#endif
 }
 
 
@@ -816,7 +821,11 @@ void Z80::setupBdosEnv(const char* filename)
     // load file at 0x100
     ifstream romfile(filename, ios::binary);
     bool failed = romfile.fail();
-    assert(!failed);
+    if (failed) 
+    {   
+        DBERR("File '%s' not FOUND!!\n", filename);
+        exit(0);
+    }
 
     romfile.seekg(0, ios::end);
     Uint32 fileSize = romfile.tellg();

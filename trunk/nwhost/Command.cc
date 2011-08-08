@@ -89,5 +89,56 @@ void Command::reportCpuInfo() const
     */
 }
 
+void Command::reportFCB(const unsigned char* data) const
+{
+ 	string whole;
+	for (int i = 0; i < 37; ++i) {
+		char c = data[i];
+        whole += c;
+	}
+
+    byte drive = data[0];
+    string filename = whole.substr(1,11);
+    byte extent = data[12];
+    byte fileattr = data[13];
+    byte extentHigh = data[14];
+    byte recordCountInExtent = data[15];
+    word recordSize = 256 * recordCountInExtent + extentHigh;
+    unsigned int filesize = data[16] + (data[17] << 8) + (data[18] << 16) + (data[19] << 24);
+    byte date1 = data[20];
+    byte date2 = data[21];
+    byte time1 = data[22];
+    byte time2 = data[23];
+    byte deviceCode = data[24];
+    byte dirEntryNr = data[25];
+    word startCluster = data[26] + (data[27] << 8);
+    word curCluster = data[28] + (data[29] << 8);
+    word curRelCluster = data[30] + (data[31] << 8);
+    byte recordInExtent = data[32];
+    unsigned int randomAccessRecord = data[33] + (data[34] << 8) + (data[35] << 16);     
+    byte randonAccessRecordSmaller64 = data[36];
+            
+    DBERR("+0   Drive:      %u\n", drive);
+    DBERR("+1,8 Filename:   %s\n", filename.c_str());
+    DBERR("+12  extent:     %u\n", extent);
+    DBERR("+13  fileattr:   0x%02x\n", fileattr);
+    DBERR("+14  extentHigh: %u\n", extentHigh);
+    DBERR("+15  recordCountInExtent:   %u\n", recordCountInExtent);
+    DBERR("     recordSize: %u\n", recordSize);
+    DBERR("+16  filesize:   %u\n", filesize);
+    DBERR("+20  date1:      %u\n", date1);
+    DBERR("+21  date2:      %u\n", date2);
+    DBERR("+22  time1:      %u\n", time1);
+    DBERR("+23  time2:      %u\n", time2);
+    DBERR("+24  deviceCode: %u\n", deviceCode);
+    DBERR("+25  dirEntryNr: %u\n", dirEntryNr);
+    DBERR("+26,2  startCluster:   %u\n", startCluster);
+    DBERR("+28,2  curCluster:     %u\n", curCluster);
+    DBERR("+30,2  curRelCluster:  %u\n", curRelCluster);
+    DBERR("+32,2  recordInExtent: %u\n", recordInExtent);
+    DBERR("+33,3  randomAccessRecord:            %u\n", randomAccessRecord);
+    DBERR("+36,3  randonAccessRecordSmaller64:   %u\n", randonAccessRecordSmaller64);
+}
+
 
 } // namespace nwhost

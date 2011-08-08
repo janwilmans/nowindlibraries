@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
     Debug::Instance()->initialize();
 
 #ifdef WIN32
-    putenv("SDL_VIDEODRIVER=directx");
+    _putenv("SDL_VIDEODRIVER=directx");
 #endif    
 
 	list<string> media;
@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
 #endif // _MSC_VER 
 
 //    putenv("SDL_AUDIODRIVER=disk");
-    putenv("SDL_VIDEO_CENTERED=center");
+    _putenv("SDL_VIDEO_CENTERED=center");
 
 #ifndef CONSOLE_DEBUGGING_ON
 	if( SDL_Init(SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) <0 ) {

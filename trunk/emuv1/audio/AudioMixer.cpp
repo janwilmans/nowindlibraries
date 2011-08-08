@@ -5,9 +5,6 @@
 #include "AudioDevice.h"
 #include "cpu/Z80.h"
 
-//JAN: WTF ??
-//#define _ASSERT_H
-
 #include "Debug.h"
 
 using namespace std;

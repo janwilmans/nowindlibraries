@@ -33,8 +33,4 @@ void NowindHostSupportDebug::debugMessage(const char *cFormat, ...) const
     Util::vsnprintf(scratch, MAXMSG, cFormat, arg_list);
 	va_end (arg_list);
     nowindusb_debug(scratch);
-
-#ifdef WIN32
-	OutputDebugString(scratch);
-#endif
 }

@@ -41,6 +41,7 @@ public:
 	std::vector<byte> extraData;		// [240 + 2]; // extra data for image/message/write
 	std::string getFilenameFromExtraData() const;
 	void reportCpuInfo() const;
+	void reportFCB(const unsigned char* data) const;
 private:
     NowindHostSupport* nwhSupport;
 

@@ -167,7 +167,7 @@ bdosOpenFile:
 
         ld a,d                          ; used by readBlock (TODO: moet anders!)
         ex de,hl                        ; send FCB to host
-        ld bc,36
+        ld bc,37
         ldir
         
         DEBUGMESSAGE "bdosOpenFile1"
@@ -218,7 +218,7 @@ bdosFindFirst:
         pop de
         push hl
         ex de,hl                        ; send FCB to host
-        ld bc,36
+        ld bc,37
         ldir
         pop hl
 
@@ -278,20 +278,17 @@ bdosRandomBlockWrite:
 bdosRandomBlockRead:
         DEBUGMESSAGE "bdosRandomBlockRead"
 
-        push hl                         ; number of records
         ld bc,(BDOS_DTA)
         call sendRegisters
         ld (hl),BDOS_RANDOMBLOCKREAD
 
         ld a,(BDOS_DTA + 1)
         call blockRead
-        
+        jr c,.error
+            
         DEBUGMESSAGE "naBLKrd"
         DEBUGDUMPREGISTERS
         
-        pop hl
-        jr c,.exit
-
         and a
         jp m,.exit              ; end of file
         
@@ -301,10 +298,15 @@ bdosRandomBlockRead:
 
 .exit:
         ; TODO: update FCB?
-        ld hl,21
+        ld hl,0
         ld a,1
         DEBUGDUMPREGISTERS
         ret        
+
+.error: ld hl,0                 ; number of records read
+        ld a,1                  ; error
+        ret
+        
 
 
 bdosAbsoluteSectorRead:

@@ -53,8 +53,8 @@ public:
 	void WriteRandomFile(const Command& command, Response& response);
 	void GetFileSize(const Command& command, Response& response);
 	void SetRandomRecordField(const Command& command, Response& response);
-	void WriteRandomBlock(const Command& command, Response& response);
-	bool ReadRandomBlock(const Command& command, Response& response);
+	void RandomBlockWrite(const Command& command, Response& response);
+	bool RandomBlockRead(const Command& command, Response& response);
 	void WriteRandomFileWithZeros(const Command& command, Response& response);
 	void ReadLogicalSector(const Command& command, Response& response);
 	void WriteLogicalSector(const Command& command, Response& response);

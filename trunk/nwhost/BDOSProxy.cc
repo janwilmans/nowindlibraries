@@ -99,9 +99,9 @@ void BDOSProxy::SetRandomRecordField(const Command& command, Response& response)
     command.reportCpuInfo();
 }
 
-void BDOSProxy::WriteRandomBlock(const Command& command, Response& response)
+void BDOSProxy::RandomBlockWrite(const Command& command, Response& response)
 {
-    DBERR(" >> WriteRandomBlock\n");
+    DBERR(" >> RandomBlockWrite\n");
     command.reportCpuInfo();
 }
 
@@ -130,6 +130,8 @@ bool BDOSProxy::OpenFile(const Command& command, Response& response)
 	bool found = false;
     string filename = command.getFilenameFromExtraData();
     
+    command.reportFCB(&command.extraData[0]);
+    
     // TODO: use findfirst here to support wildcards!
     // TODO: maybe handle DOS device names (e.g. con, lpt, aux)
     DBERR(" nu hebben we een fcb: %s\n", filename.c_str());
@@ -140,12 +142,17 @@ bool BDOSProxy::OpenFile(const Command& command, Response& response)
 	bdosfile->seekg(0, ios::beg);
 
 	vector<byte> buffer(command.extraData);
-	buffer.resize(36);
+	buffer.resize(37);
 
+	buffer[0x0e] = 0;   // reset extent high byte
+	buffer[0x0f] = 1;
+	
 	buffer[0x10] = filesize & 0xff;
 	buffer[0x11] = (filesize >> 8) & 0xff;
 	buffer[0x12] = (filesize >> 16) & 0xff;
 	buffer[0x13] = (filesize >> 24) & 0xff;
+	
+	command.reportFCB(&buffer[0]);
     
     if (bdosfile->fail())
     {
@@ -372,23 +379,26 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
 	return found;
 }
 
-bool BDOSProxy::ReadRandomBlock(const Command& command, Response& response)
+bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
 {
-	static BdosState readRandomBlockState = BDOSCMD_READY;
-	// this is true when the FindNext result is being sent
-	if (readRandomBlockState == BDOSCMD_EXECUTING)
+	static BdosState RandomBlockReadState = BDOSCMD_READY;
+	
+	// this is true when the RandomBlockRead response (an FCB) is being sent
+	if (RandomBlockReadState == BDOSCMD_EXECUTING)
 	{
-		DBERR("> BDOSProxy::ReadRandomBlock ACK\n");
+		DBERR("> BDOSProxy::RandomBlockRead ACK\n");
 		blockRead.ack(command.data);
 		if (blockRead.isDone())
 		{
-			readRandomBlockState = BDOSCMD_READY;
+			RandomBlockReadState = BDOSCMD_READY;
 			return false;
 		}
 		return true;
 	}
+	
+	command.reportFCB(&command.extraData[0]);
 
-    DBERR("> BDOSProxy::ReadRandomBlock\n");
+    DBERR("> BDOSProxy::RandomBlockRead\n");
 
     word amount = command.getHL();
     std::vector<byte> buffer;
@@ -405,9 +415,9 @@ bool BDOSProxy::ReadRandomBlock(const Command& command, Response& response)
     
     if (actuallyRead == 0)
     {
-		DBERR(" * readRandomBlockState = BDOSCMD_READY\n");
+		DBERR(" * RandomBlockReadState = BDOSCMD_READY\n");
         blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
-		readRandomBlockState = BDOSCMD_READY;
+		RandomBlockReadState = BDOSCMD_READY;
 		return false;
     }
     else
@@ -417,23 +427,23 @@ bool BDOSProxy::ReadRandomBlock(const Command& command, Response& response)
         {
 			returnCode = BlockRead::BLOCKREAD_EXIT;
         }
-		DBERR(" * readRandomBlockState = BDOSCMD_EXECUTING\n");
+		DBERR(" * RandomBlockReadState = BDOSCMD_EXECUTING\n");
         word dmaAddres = command.getBC();
         blockRead.init(dmaAddres, actuallyRead, buffer, returnCode);
-		readRandomBlockState = BDOSCMD_EXECUTING;
+		RandomBlockReadState = BDOSCMD_EXECUTING;
     }
 	return true;
 }
 
 void BDOSProxy::ReadLogicalSector(const Command& command, Response& response)
 {
-    DBERR(" >> WriteRandomBlock\n");
+    DBERR(" >> RandomBlockWrite\n");
     command.reportCpuInfo();
 }
 
 void BDOSProxy::WriteLogicalSector(const Command& command, Response& response)
 {
-    DBERR(" >> WriteRandomBlock\n");
+    DBERR(" >> RandomBlockWrite\n");
     command.reportCpuInfo();
 }
 

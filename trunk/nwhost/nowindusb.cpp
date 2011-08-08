@@ -58,9 +58,12 @@ void nowindusb_debug(const char *msg)
         Util::snprintf(lTemp, MAXMSG, "[nwhost] %s", msg);
         mDebug_callback(lTemp);
     }
+    else
+    {
 #ifdef WIN32
 	OutputDebugStringA(lTemp);
 #endif
+    }    
 }
 
 // the DBERR macro uses this method to wrap vsprintf for convenience

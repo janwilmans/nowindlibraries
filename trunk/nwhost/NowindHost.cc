@@ -313,7 +313,7 @@ void NowindHost::prepareCommand()
 	switch (activeCommand) {
 		case 0x0F: // bdosProxy.OpenFile
 		case 0x11: // bdosProxy.FindFirst
-			parameterLength = 36;
+			parameterLength = 37;
 			setState(STATE_RECEIVE_PARAMETERS);
 			break;
 		default:
@@ -346,8 +346,8 @@ void NowindHost::executeCommand()
 	case 0x22: bdosProxy.WriteRandomFile(command, *response); break;
 	case 0x23: bdosProxy.GetFileSize(command, *response); break;
 	case 0x24: bdosProxy.SetRandomRecordField(command, *response); break;
-	case 0x26: bdosProxy.WriteRandomBlock(command, *response); break;
-	case 0x27: if (bdosProxy.ReadRandomBlock(command, *response)) { nextState = STATE_EXECUTE_COMMAND; } break;
+	case 0x26: bdosProxy.RandomBlockWrite(command, *response); break;
+	case 0x27: if (bdosProxy.RandomBlockRead(command, *response)) { nextState = STATE_EXECUTE_COMMAND; } break;
 	case 0x28: bdosProxy.WriteRandomFileWithZeros(command, *response); break;
 
 	//case 0x2A: GetDate(); break; // no implementation needed

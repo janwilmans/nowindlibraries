@@ -37,7 +37,7 @@
 #define MSXMUSIC_SOUND_ON
 #define MSXAUDIO_SOUND_OFF
 
-//#define ZEXALL_ON
+#define ZEXALL_OFF
 
 using namespace std;
 
@@ -317,8 +317,14 @@ void Emulator::start() {
 	// todo: execute one instruction before we really start, so emuTime will not be zero and
 	// we still won't need extra checks to prevent "division by zero"
 
+Debug::Instance()->INSTRUCTION_TRACING = true;
+
 #ifdef ZEXALL_ON
-    cpu->setupBdosEnv("cpu/zexall/zexall.com");
+    cpu->setupBdosEnv("zexall/zexdoc.com");
+    while(1)
+    {
+        cpu->executeInstructions();
+    }
 #endif
 
     SDL_PauseAudio(0);	// start audio
@@ -368,10 +374,10 @@ void Emulator::start() {
 #ifndef CONSOLE_DEBUGGING_ON
 			/* handle key/sdl events */
 			handle_key_and_sdl_events();
-#endif
 
             //DBERR("execute INT_RENDERSCREEN\n");
             vdp->renderScreen(cpu->nextInterrupt);
+#endif
 
 			/* check if we're not going to fast */
 			msTimeType lastestMs = OUR_SDL_GetTicks();
@@ -397,9 +403,8 @@ void Emulator::start() {
 				slicesReleased++;
 			}
 //			if (slicesReleased > 0) DBERR("[%u]", slicesReleased);
-			#endif        
-
 			reportCycles(cpu->emuTime, lastestMs);
+			#endif        
             
             if (autoPause) notPaused = false;           
             break;

@@ -8,20 +8,20 @@
 #include "memory/EmptyPage.h"
 #include "../nwhost/libnwhost.h"
 
+#ifdef WIN32
+    #include <windows.h>
+#endif
+
 using namespace std;
 
 #include "SDL_thread.h"
-
-void debugout(const char *msg)
-{
-    DBERR(msg);
-}
 
 NowindInterface::NowindInterface(string filename) {
     
     idString = "NowindInterface";
     
 	nwhost::initialize();
+	nowindusb_set_debug_callback(&debugout);
 
 	loadRom(filename);
 	deviceSize = 8;            /* in 8kb blocks */
@@ -169,5 +169,10 @@ void NowindInterface::activate(unsigned int theBlock) {
     
     // for debugging info on memoryDevice names
     slotSelector->setPage(theBlock >> 1, this);
+
 }
 
+void NowindInterface::debugout(const char *msg)
+{
+    DBERR(msg);   
+}

@@ -55,6 +55,14 @@ sendRegisters:
         ld (hl),d                       ; send register a
         ret
 
+receiveRegisters:
+        call enableNowindPage0
+        call getHeaderInPage0
+        ; todo implement routine that receives all registers (the ultimate safe short transfer, of just the registers)
+        ; use block<>ack mechanism [checkbyte] registers [checkbyte] like the readblock ack'ed transfer
+        
+        ret
+
 getHeaderInPage0:
         ;DEBUGMESSAGE "gH0"
         ld h,HIGH usbReadPage0
