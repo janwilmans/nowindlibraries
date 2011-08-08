@@ -20,10 +20,10 @@
 
 /* when ON enables logging of all calls and jumps to stderr */
 // at runtime Debug::Instance()->STACK_TRACING must be set to 'true' for logging to be enabled.
-#define STACKTRACK_ON
+#define STACKTRACK_OFF
 
 /* when ON enables logging of all executed instructions */
-#define INSTRUCTIONS_ON
+#define INSTRUCTIONS_OFF
 
 /* when ON enables logging of all IO (OUT) commands executed */
 #define OUT_INSTRUCTIONS_OFF
@@ -35,10 +35,10 @@
 #define FDCLOG_OFF
 
 /* when ON disables SDL's video and audio subsystems and all calls to them */
-#define CONSOLE_DEBUGGING_OFF
+#define CONSOLE_DEBUGGING_OFF 
 
 /* when ON disables invalid opcode checking, disassembler and some more things for best speed */
-#define FULL_SPEED_OFF
+#define FULL_SPEED_ON
 
 #if __GNUC__ == 4
 	#define likely(x)       __builtin_expect(!!(x), 1)

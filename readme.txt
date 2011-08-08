@@ -1,21 +1,29 @@
-this repository contails:
+this repository contains:
 
 - nowind libraries
 - the nwhostapp application
 - the NowindInterfaceHostGUI win32 front for the commandline nwhostapp application
 
-currently a proper unix makefile is missing, but a generated Makefile is present in nwhostapp/
-
 external dependencies:
 - libusb-dev
 - libftdi-devel   (sudo yum install libftdi-devel on Fedora, extract sources on windows)
+- boost >1.44
 
-boost:
+Example of compiling on Fedora 13:
+- make sure boost headers are in /usr/include/boost, see BOOST) below
+- export BOOST_ROOT=/usr
+- sudo yum -y install cmake
+- sudo yum -y install libftdi-devel
+- use 'cmake -G 'Unix Makefiles' to generate makefiles.
+- run 'make' 
+
+BOOST)
 extract: tar --bzip2 -xf /path/to/boost_1_46_0.tar.bz2
 install: 
 > sudo bash
 > ./bootstrap.sh --prefix=/usr
 > ./bjam install
+> ldconfig (will update the shared library search cache)
 
 now close and reopen the shell.
  
