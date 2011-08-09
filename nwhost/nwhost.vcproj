@@ -347,6 +347,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ReceiveRegisters.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\ReceiveRegisters.hh"
+				>
+			</File>
+			<File
 				RelativePath=".\Response.cc"
 				>
 			</File>
