@@ -382,19 +382,61 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
 bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
 {
 	static BdosState RandomBlockReadState = BDOSCMD_READY;
-	
+
+//#define ENABLE_RECEIVE_REGISTERS
+
+#ifdef ENABLE_RECEIVE_REGISTERS
 	// this is true when the RandomBlockRead response (an FCB) is being sent
 	if (RandomBlockReadState == BDOSCMD_EXECUTING)
 	{
 		DBERR("> BDOSProxy::RandomBlockRead ACK\n");
 		blockRead.ack(command.data);
+		
+		
+		// the block data is done, continue to execute 'ReceiveRegisters'
+		if (blockRead.isDone())
+		{
+			RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS;
+			receiveRegisters.clear();
+			receiveRegisters.setA(0);
+			receiveRegisters.setBC(0);
+			receiveRegisters.setDE(0);
+			receiveRegisters.setHL(0);
+			receiveRegisters.init();
+			return true;
 		if (blockRead.isDone())
 		{
 			RandomBlockReadState = BDOSCMD_READY;
 			return false;
 		}
-		return true;
+		return true; // true means the command is not done, so call me again when data arrives
 	}
+	else if (RandomBlockReadState == BDOSCMD_RECEIVE_REGISTERS)
+	{
+	    receiveRegisters.ack(command.data);
+	    if (receiveRegisters.isDone())
+	    {
+	        return false; // false means the command is done, so dont call me again.
+	    }
+	    return true;
+	}
+#else
+
+	if (RandomBlockReadState == BDOSCMD_EXECUTING)
+	{
+		DBERR("> BDOSProxy::RandomBlockRead ACK\n");
+		blockRead.ack(command.data);
+		
+		// the block data is done, continue to execute 'ReceiveRegisters'
+		if (blockRead.isDone())
+		{
+			RandomBlockReadState = BDOSCMD_READY;
+			return false;
+		}
+		return true; // true means the command is not done, so call me again when data arrives
+	}
+	
+#endif
 	
 	command.reportFCB(&command.extraData[0]);
 

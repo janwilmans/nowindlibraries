@@ -3,6 +3,7 @@
 
 #include "NowindTypes.hh"
 #include "BlockRead.hh"
+#include "ReceiveRegisters.hh"
 #include <vector>
 #include <deque>
 #include <string>
@@ -61,12 +62,14 @@ public:
 
 	enum BdosState {
 		BDOSCMD_EXECUTING,
+		BDOSCMD_RECEIVE_REGISTERS,
 		BDOSCMD_READY,
 	};
 
 private:
     NowindHostSupport* nwhSupport;
 	BlockRead blockRead;
+	ReceiveRegisters receiveRegisters;
 
     long findFirstHandle;
     void getVectorFromFileName(std::vector<byte>& buffer, std::string filename);
