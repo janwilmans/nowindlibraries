@@ -165,7 +165,7 @@ bdosOpenFile:
         ld (hl),BDOS_OPENFILE
         pop de
 
-        ld a,d                          ; used by readBlock (TODO: moet anders!)
+        ld a,d                          ; used by blockRead (TODO: moet anders!)
         ex de,hl                        ; send FCB to host
         ld bc,37
         ldir
@@ -298,6 +298,10 @@ bdosRandomBlockRead:
         DEBUGMESSAGE "naBLKrd"
 
         ld a,c 
+        
+        ; todo: FCB must be updated! (HL must be added to the random record field)
+        ; see: http://msxsyssrc.cvs.sourceforge.net/viewvc/msxsyssrc/disk100upd/disk.mac?revision=1.1&view=markup regel 1875
+        
         DEBUGDUMPREGISTERS
         ret        
 
