@@ -165,11 +165,11 @@ void NowindHost::write(byte data, unsigned int time)
 		assert(recvCount < parameterLength);
 		command.extraData[recvCount] = data;
 		if (++recvCount == parameterLength) {
-			setState(STATE_EXECUTE_COMMAND);
+			setState(STATE_EXECUTING_COMMAND);
 			executeCommand();
 		}
 		break;
-	case STATE_EXECUTE_COMMAND:
+	case STATE_EXECUTING_COMMAND:
 			executeCommand();
 		break;
 	case STATE_DISKWRITE:
@@ -275,8 +275,8 @@ void NowindHost::setState(State aState)
 		DBERR(" # STATE_RECEIVE_COMMAND\n"); break;
 	case STATE_RECEIVE_PARAMETERS:
 		DBERR(" # STATE_RECEIVE_PARAMETERS\n"); break;
-	case STATE_EXECUTE_COMMAND:
-		DBERR(" # STATE_EXECUTE_COMMAND\n"); break;
+	case STATE_EXECUTING_COMMAND:
+		DBERR(" # STATE_EXECUTING_COMMAND\n"); break;
 	case STATE_DISKWRITE:
 		DBERR(" # STATE_DISKWRITE\n"); break;
 	case STATE_DEVOPEN:
@@ -317,7 +317,7 @@ void NowindHost::prepareCommand()
 			setState(STATE_RECEIVE_PARAMETERS);
 			break;
 		default:
-			setState(STATE_EXECUTE_COMMAND);
+			setState(STATE_EXECUTING_COMMAND);
 			executeCommand();
 			break;
 	}
@@ -326,17 +326,17 @@ void NowindHost::prepareCommand()
 void NowindHost::executeCommand()
 {
 	assert(activeCommand != 0);
-	assert(state == STATE_EXECUTE_COMMAND);
+	assert(state == STATE_EXECUTING_COMMAND);
 
 	State nextState = STATE_SYNC1; // unless we set the state explictly, we return to STATE_SYNC1 after the command is executed.
 
 	switch (activeCommand) {
 	case 0: assert(false); break; // these is no command '0', nor should there be.
 	case 0x0D: bdosProxy.DiskReset(command, *response); break;
-	case 0x0F: if (bdosProxy.OpenFile(command, *response)) { nextState = STATE_EXECUTE_COMMAND; } break;
+	case 0x0F: if (bdosProxy.OpenFile(command, *response)) { nextState = STATE_EXECUTING_COMMAND; } break;
 	case 0x10: bdosProxy.CloseFile(command, *response); break;
-	case 0x11: if (bdosProxy.FindFirst(command, *response)) { nextState = STATE_EXECUTE_COMMAND; } break;
-	case 0x12: if (bdosProxy.FindNext(command, *response)) { nextState = STATE_EXECUTE_COMMAND; } break;
+	case 0x11: if (bdosProxy.FindFirst(command, *response)) { nextState = STATE_EXECUTING_COMMAND; } break;
+	case 0x12: if (bdosProxy.FindNext(command, *response)) { nextState = STATE_EXECUTING_COMMAND; } break;
 	case 0x13: bdosProxy.DeleteFile(command, *response); break;
 	case 0x14: bdosProxy.ReadSeq(command, *response); break;
 	case 0x15: bdosProxy.WriteSeq(command, *response); break;
@@ -347,7 +347,7 @@ void NowindHost::executeCommand()
 	case 0x23: bdosProxy.GetFileSize(command, *response); break;
 	case 0x24: bdosProxy.SetRandomRecordField(command, *response); break;
 	case 0x26: bdosProxy.RandomBlockWrite(command, *response); break;
-	case 0x27: if (bdosProxy.RandomBlockRead(command, *response)) { nextState = STATE_EXECUTE_COMMAND; } break;
+	case 0x27: if (bdosProxy.RandomBlockRead(command, *response)) { nextState = STATE_EXECUTING_COMMAND; } break;
 	case 0x28: bdosProxy.WriteRandomFileWithZeros(command, *response); break;
 
 	//case 0x2A: GetDate(); break; // no implementation needed

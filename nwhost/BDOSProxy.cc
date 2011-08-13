@@ -384,7 +384,7 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
 {
     static word recordsRequested = 0;
     static word recordsSend = 0;
-	static BdosState RandomBlockReadState = BDOSCMD_READY;
+	static BdosState RandomBlockReadState = BDOSCMD_READY;      //todo: figure out how to reset if timeout occurs in command
 	static bool endOfFileReached = false;
 
 #define ENABLE_RECEIVE_REGISTERS
@@ -424,6 +424,7 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
 	    receiveRegisters.ack(command.data);
 	    if (receiveRegisters.isDone())
 	    {
+	        RandomBlockReadState = BDOSCMD_READY;
 	        return false; // false means the command is done, so dont call me again.
 	    }
 	    return true;
@@ -464,8 +465,14 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
 		endOfFileReached = bdosfile->eof();
 		actuallyRead = bdosfile->gcount();
 		recordsSend = actuallyRead / recordSize;   
+        if ((actuallyRead % recordSize) != 0)
+        {
+            recordsSend++;
+        }
 	}
 	DBERR(" >> reg_hl: %u, records: %u (%u bytes)\n", recordsRequested, recordsSend, actuallyRead);
+	
+	//todo: partial records should be zero-padded!!
     
     if (actuallyRead == 0)
     {

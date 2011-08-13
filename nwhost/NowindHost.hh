@@ -78,7 +78,7 @@ public:
 		STATE_SYNC2,     // waiting for 05
 		STATE_RECEIVE_COMMAND,   // waiting for command (9 bytes)
 		STATE_RECEIVE_PARAMETERS,   // waiting for parameters (n bytes)
-		STATE_EXECUTE_COMMAND,
+		STATE_EXECUTING_COMMAND,
 		STATE_DISKWRITE, // waiting for AA<data>AA
 		STATE_DEVOPEN,   // waiting for filename (11 bytes)
 		STATE_IMAGE,     // waiting for filename
