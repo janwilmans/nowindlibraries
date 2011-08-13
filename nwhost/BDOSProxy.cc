@@ -381,9 +381,12 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
 
 bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
 {
+    static word recordsRequested = 0;
+    static word recordsSend = 0;
 	static BdosState RandomBlockReadState = BDOSCMD_READY;
+	static bool endOfFileReached = false;
 
-//#define ENABLE_RECEIVE_REGISTERS
+#define ENABLE_RECEIVE_REGISTERS
 
 #ifdef ENABLE_RECEIVE_REGISTERS
 	// this is true when the RandomBlockRead response (an FCB) is being sent
@@ -392,23 +395,27 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
 		DBERR("> BDOSProxy::RandomBlockRead ACK\n");
 		blockRead.ack(command.data);
 		
-		
 		// the block data is done, continue to execute 'ReceiveRegisters'
 		if (blockRead.isDone())
 		{
 			RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS;
 			receiveRegisters.clear();
 			receiveRegisters.setA(0);
-			receiveRegisters.setBC(0);
+			receiveRegisters.setF(0);
+			if (endOfFileReached)
+			{
+			    receiveRegisters.setBC(1);
+			}
+			else
+			{
+			    receiveRegisters.setBC(0);
+			}
+			
 			receiveRegisters.setDE(0);
-			receiveRegisters.setHL(0);
-			receiveRegisters.init();
+			receiveRegisters.setHL(recordsSend);
+			receiveRegisters.send();
 			return true;
-		if (blockRead.isDone())
-		{
-			RandomBlockReadState = BDOSCMD_READY;
-			return false;
-		}
+        }
 		return true; // true means the command is not done, so call me again when data arrives
 	}
 	else if (RandomBlockReadState == BDOSCMD_RECEIVE_REGISTERS)
@@ -442,18 +449,22 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
 
     DBERR("> BDOSProxy::RandomBlockRead\n");
 
-    word amount = command.getHL();
+    word recordSize = 128;  // assumption always 128 byte record size!?
+    recordsRequested = command.getHL();
     std::vector<byte> buffer;
 	size_t actuallyRead = 0;
     int offset = 0;
+    int amount = recordsRequested*recordSize; //todo: round up
 	if (amount > 0)
 	{
-		buffer.resize(amount);
+		buffer.resize(amount); 
 		bdosfile->seekg(offset);
 		bdosfile->read((char*)&buffer[0], amount);
+		endOfFileReached = bdosfile->eof();
 		actuallyRead = bdosfile->gcount();
+		recordsSend = actuallyRead / recordSize;   
 	}
-	DBERR(" >> reg_hl: %u, actuallyRead: %u\n", amount, actuallyRead);
+	DBERR(" >> reg_hl: %u, records: %u (%u bytes)\n", recordsRequested, recordsSend, actuallyRead);
     
     if (actuallyRead == 0)
     {

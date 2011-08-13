@@ -15,18 +15,19 @@ public:
 	virtual ~ReceiveRegisters();
 	void initialize(NowindHostSupport* aSupport);
 
-    void init();
+    void send();
     void ack(byte tail);
     bool isDone() const;
-    void sendData();
     
     void clear();
     void setA(byte data);
+    void setF(byte data);
     void setBC(word data);
     void setDE(word data);
     void setHL(word data);
         
 private:
+    void sendData();
 	word processedData;
 	word transferSize;
 	byte header;

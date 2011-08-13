@@ -237,7 +237,7 @@ bdosFindFirst:
 
 .error: 
         ld a,$ff
-        ld l,a  ; TODO: WEL NODIG? dOET BDOS HANDKER DIT NIET?
+        ld l,a                  ; CP/M compatibility feature
         ret
 
 bdosFindNext:
@@ -284,10 +284,21 @@ bdosRandomBlockRead:
 
         ld a,(BDOS_DTA + 1)
         call blockRead
+        ;jr c,.error
+        
+        ; get blockRead results
+        ; C = 1 if an error occured (mostly EOF), otherwise C = 0
+        ; HL = records received
+        push af
+        call receiveRegisters
+        pop af
+        
         jr c,.error
             
         DEBUGMESSAGE "naBLKrd"
         DEBUGDUMPREGISTERS
+        
+        ld a,c
         
         and a
         jp m,.exit              ; end of file
@@ -298,7 +309,6 @@ bdosRandomBlockRead:
 
 .exit:
         ; TODO: update FCB?
-        ld hl,0
         ld a,1
         DEBUGDUMPREGISTERS
         ret        
