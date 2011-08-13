@@ -106,6 +106,14 @@ receiveRegisters:
         pop af        
         ret
 
+; function: waits for a header (0xAF 0x05) to be received, 
+; in: none
+; out: A = first byte of data after the header
+;      H = high byte of usbReadPage0 address
+;      carry flag is set and A=2 if a timeout occurs
+; changed: BC, 
+; requirements: nowind must be enabled in page0
+
 getHeaderInPage0:
         ;DEBUGMESSAGE "gH0"
         ld h,HIGH usbReadPage0
@@ -119,14 +127,14 @@ getHeaderInPage0:
         or c
         jr nz,.loop
         DEBUGMESSAGE "GetHeader Timeout!"
-        ld a,2                          ; not ready
+        ld a,2                          ; not ready , todo: why is A set here? is that not DISKIO specific?
         scf
         ret
 
 .chk05: ld a,(hl)
         cp $05
         jr nz,.chkaf
-        ld a,(hl)
+        ld a,(hl)                       ; read the first data byte, todo: dont do this here, it is confusing.
         ret
 
         PHASE $ + $4000
@@ -230,11 +238,14 @@ receiveFCB:
         pop de
         ret
 
+; function: execute a routine specified by HL, nowind will be enabled in page0 before the call
+;           and switched back afterwards
 ; in:  hl = callback to execute
 ;      bc = arguments for callback
 ; out: bc = callback return data
-; changed: all
+; changed: all?
 ; requirements: stack available
+
 executeCommandNowindInPage0:
         ld de,.restorePage
         push de
@@ -249,6 +260,14 @@ executeCommandNowindInPage0:
         call restorePage0
         pop bc
         ret
+
+; function: execute a routine specified by HL, nowind will be enabled in page2 before the call
+;           and switched back afterwards
+; in:  hl = callback to execute
+;      bc = arguments for callback
+; out: bc = callback return data
+; changed: all?
+; requirements: stack available
 
 executeCommandNowindInPage2:
         ld de,.restorePage
@@ -286,10 +305,16 @@ executeCommandNowindInPage2:
         pop af
         ret
 
-blockRead:
-; Input     A   Transfer address (high byte)
-; TODO: aaldert output aanvullen!
+; function: read a block of data from the host. The host tells us what kind(s) of transfer(s) to do.
+;           a data block is automatically split up into multiple transfers by the host when page borders are crossed. 
+;           Also when the amount of bytes is odd, a different byte-for-byte transfer is done (which is slower, but rarely needed)
+;
+; in:  A = Transfer address (high byte)
+; out: carry = error / timeout occurred
+; changed: all?
+; requirements: stack available
 
+blockRead:
         rlca                            ; tranfer address < 0x8000 ?
         jr c,.page23
 
