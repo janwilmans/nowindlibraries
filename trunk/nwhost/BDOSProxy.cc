@@ -27,6 +27,7 @@ void BDOSProxy::initialize(NowindHostSupport* aSupport)
 {
     nwhSupport = aSupport;
 	blockRead.initialize(aSupport);
+	receiveRegisters.initialize(aSupport);
 }
 
 BDOSProxy::~BDOSProxy()
