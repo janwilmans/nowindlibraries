@@ -55,12 +55,53 @@ sendRegisters:
         ld (hl),d                       ; send register a
         ret
 
+; function: receive a value for AF, BC, DE and HL from the host.
+; in: none
+; out: A, BC, DE, HL, carry = timeout
+; changed: ix
+; requirements: stack available, page 0 will switched to the slot of page 1 and restored after communication.
+
 receiveRegisters:
+            
         call enableNowindPage0
-        call getHeaderInPage0
-        ; todo implement routine that receives all registers (the ultimate safe short transfer, of just the registers)
-        ; use block<>ack mechanism [checkbyte] registers [checkbyte] like the readblock ack'ed transfer
+.loop:        
+        call getHeaderInPage0       ; h = HIGH usbReadPage0
+        jp c, restorePage0          ; timeout (F is saved)
         
+        ld a,(hl)                   ; read dummy 0xff
+        ld e,(hl)                   ; header
+
+        ; incoming data order F A C B E D L H
+        ld c,(hl)
+        ld b,(hl)
+        push bc
+        ld c,(hl)
+        ld b,(hl)
+        push bc
+        ld c,(hl)
+        ld b,(hl)
+        push bc
+        ld c,(hl)
+        ld b,(hl)
+        push bc
+        
+        ld a,(hl)                   ; tail
+        cp e
+        jr z,.done
+        
+.retry:
+        pop bc        ; throw away data
+        pop bc        
+        pop bc        
+        pop bc     
+        jr  .loop   
+        
+.done:
+        call restorePage0
+        pop hl                  ; pop our return values
+        pop de
+        pop bc
+        pop af        
         ret
 
 getHeaderInPage0:
@@ -212,12 +253,12 @@ executeCommandNowindInPage2:
         push de
         push hl                         ; address callback
         push bc
-        call getSlotPage2               ; enable nowind in page 2
-        ld ixl,a
+        call getSlotPage2               ; get current slot of page2 
+        ld ixl,a                        ; store it
         call getSlotPage1
         ld ixh,a                        ; ixh = current nowind slot
         ld h,$80
-        call ENASLT
+        call ENASLT                     ; enable nowind in page 2
         jp .page2
 
         PHASE $ + $4000
@@ -230,7 +271,7 @@ executeCommandNowindInPage2:
 
 .restorePage:
         push af
-        ld a,ixh                        ; enable nowind in page 1
+        ld a,ixh                        ; restore nowind in page 1
         ld h,$40
         call ENASLT
         jp .page1

@@ -65,6 +65,12 @@ enableSlotPage0:
         ld (bc),a
         ret
 
+; function: restore the slot of page 0 to the slot in ixh
+; in: ixh
+; out: none
+; unchanged: af, d, hl
+; requirements: stack available
+
 restorePage0:
         push af
         ld a,ixh
@@ -74,6 +80,12 @@ restorePage0:
         ret
 
 ; These routines determine the current slot and subslot of a page.
+
+; function: get current slot and subslot of page 0
+; in: none
+; out: register A contains: E...SSMM where E = expanded, SS = subslot, MM = mainslot
+; changed: bc, hl
+; requirements: stack available
 
 getSlotPage0:
         ;DEBUGMESSAGE "getsltP0"
@@ -85,6 +97,12 @@ getSlotPage0:
         or c                    ; add mainSlot and expanded bit
         ret
                 
+; function: get current slot and subslot of page 1
+; in: none
+; out: register A contains: E...SSMM where E = expanded, SS = subslot, MM = mainslot
+; changed: bc, hl
+; requirements: stack available
+
 getSlotPage1:
 ;        DEBUGMESSAGE "getsltP1"
         in a,($a8)
@@ -93,7 +111,13 @@ getSlotPage1:
         call expanded
         and %00001100           ; keep subSlot
         or c                    ; add mainSlot and expanded bit
-        ret        
+        ret    
+
+; function: get current slot and subslot of page 2
+; in: none
+; out: register A contains: E...SSMM where E = expanded, SS = subslot, MM = mainslot
+; changed: bc, hl
+; requirements: stack available            
                 
 getSlotPage2:
 ;        DEBUGMESSAGE "getsltP2"

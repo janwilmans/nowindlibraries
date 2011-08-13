@@ -11,7 +11,7 @@ namespace nwhost {
 
 ReceiveRegisters::ReceiveRegisters()
 {
-    buffer.resize(7);
+    buffer.resize(8);
 }
 
 void ReceiveRegisters::initialize(NowindHostSupport* aSupport)
@@ -37,26 +37,36 @@ void ReceiveRegisters::setA(byte data)
 {
     buffer[0] = data;
 }
+
+void ReceiveRegisters::setF(byte data)
+{
+    if (data & 1)
+    {
+        DBERR("warning: Carry flag is used for timeouts and will not be send");
+    }
+    buffer[1] = data & 0xfe;
+}
+
 void ReceiveRegisters::setBC(word data)
 {
-    buffer[1] = data & 0xff;
-    buffer[2] = data >> 8;
+    buffer[2] = data & 0xff;
+    buffer[3] = data >> 8;
 }
 void ReceiveRegisters::setDE(word data)
 {
-    buffer[3] = data & 0xff;
-    buffer[4] = data >> 8;
+    buffer[4] = data & 0xff;
+    buffer[5] = data >> 8;
 }
 void ReceiveRegisters::setHL(word data)
 {
-    buffer[5] = data & 0xff;
-    buffer[6] = data >> 8;
+    buffer[6] = data & 0xff;
+    buffer[7] = data >> 8;
 }
 
-void ReceiveRegisters::init()
+void ReceiveRegisters::send()
 {
-    DBERR("ReceiveRegisters::init()");
-    transferSize = buffer.size();  // hardcoded to A+BC+DE+HL = 7 bytes (F used for return value carry == error)
+    DBERR("ReceiveRegisters::send()");
+    transferSize = buffer.size();  // hardcoded to AF+BC+DE+HL = 8 bytes
     done = false;
    
     bool byteInUse[256];    // 'byte in use' map
@@ -86,6 +96,7 @@ void ReceiveRegisters::sendData()
     DBERR("ReceiveRegisters::SendData\n");
     
     nwhSupport->sendHeader();
+    nwhSupport->send(0xff);     // dummy so it is never possible to mistake for a new command
     nwhSupport->send(header);   // data header
     for (unsigned int i=0; i<transferSize; i++)
     {
