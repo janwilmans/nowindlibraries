@@ -12,7 +12,7 @@ namespace nwhost {
 ReceiveRegisters::ReceiveRegisters()
 {
 	processedData = 0;
-	transferSize = 0;
+	transferSize = 8; // fixed size
 	header = 0;
 	errors = 0;
 	clear();
@@ -35,7 +35,7 @@ bool ReceiveRegisters::isDone() const
 void ReceiveRegisters::clear()
 {
     buffer.clear();
-    buffer.resize(8);
+    buffer.resize(transferSize);
 }
 
 void ReceiveRegisters::setA(byte data)
@@ -109,6 +109,7 @@ void ReceiveRegisters::sendData()
         nwhSupport->send(currentByte);
     }      
     nwhSupport->send(header);   // data tail
+    DBERR("header/tail: 0x%02X\n", header);
 }
 
 void ReceiveRegisters::ack(byte tail)

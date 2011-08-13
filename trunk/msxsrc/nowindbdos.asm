@@ -297,26 +297,13 @@ bdosRandomBlockRead:
             
         DEBUGMESSAGE "naBLKrd"
 
-        ld a,c   
-        and a
-        jp m,.exit              ; end of file
-        
-        xor a                   ; no error
-        ; TODO: update FCB?
-        DEBUGDUMPREGISTERS
-        ret
-
-.exit:
-        ; TODO: update FCB?
-        ld a,1
+        ld a,c 
         DEBUGDUMPREGISTERS
         ret        
 
 .error: ld hl,0                 ; number of records read
         ld a,1                  ; error
         ret
-        
-
 
 bdosAbsoluteSectorRead:
         DEBUGMESSAGE "bdosAbsoluteSectorRead"

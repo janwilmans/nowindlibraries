@@ -69,7 +69,7 @@ receiveRegisters:
         call getHeaderInPage0       ; h = HIGH usbReadPage0
         jp c, restorePage0          ; timeout (F is saved)
         
-        ld a,(hl)                   ; read dummy 0xff
+        ; dummy 0xff was already been read in A, by getHeaderInPage0
         ld e,(hl)                   ; header
 
         ; incoming data order F A C B E D L H
@@ -87,6 +87,7 @@ receiveRegisters:
         push bc
         
         ld a,(hl)                   ; tail
+        ld (usbWritePage1),a
         cp e
         jr z,.done
         
