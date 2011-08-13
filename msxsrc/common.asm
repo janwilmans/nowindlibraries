@@ -62,6 +62,7 @@ sendRegisters:
 ; requirements: stack available, page 0 will switched to the slot of page 1 and restored after communication.
 
 receiveRegisters:
+        DEBUGMESSAGE "receiveRegisters"
             
         call enableNowindPage0
 .loop:        
@@ -116,7 +117,7 @@ getHeaderInPage0:
         ld a,b
         or c
         jr nz,.loop
-        DEBUGMESSAGE "Timeout!"
+        DEBUGMESSAGE "GetHeader Timeout!"
         ld a,2                          ; not ready
         scf
         ret

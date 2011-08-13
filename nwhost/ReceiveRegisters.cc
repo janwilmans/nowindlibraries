@@ -11,7 +11,11 @@ namespace nwhost {
 
 ReceiveRegisters::ReceiveRegisters()
 {
-    buffer.resize(8);
+	processedData = 0;
+	transferSize = 0;
+	header = 0;
+	errors = 0;
+	clear();
 }
 
 void ReceiveRegisters::initialize(NowindHostSupport* aSupport)
@@ -31,6 +35,7 @@ bool ReceiveRegisters::isDone() const
 void ReceiveRegisters::clear()
 {
     buffer.clear();
+    buffer.resize(8);
 }
 
 void ReceiveRegisters::setA(byte data)
@@ -65,7 +70,7 @@ void ReceiveRegisters::setHL(word data)
 
 void ReceiveRegisters::send()
 {
-    DBERR("ReceiveRegisters::send()");
+    DBERR("ReceiveRegisters::send()\n");
     transferSize = buffer.size();  // hardcoded to AF+BC+DE+HL = 8 bytes
     done = false;
    

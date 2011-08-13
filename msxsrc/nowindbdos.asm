@@ -296,15 +296,14 @@ bdosRandomBlockRead:
         jr c,.error
             
         DEBUGMESSAGE "naBLKrd"
-        DEBUGDUMPREGISTERS
-        
-        ld a,c
-        
+
+        ld a,c   
         and a
         jp m,.exit              ; end of file
         
         xor a                   ; no error
         ; TODO: update FCB?
+        DEBUGDUMPREGISTERS
         ret
 
 .exit:
