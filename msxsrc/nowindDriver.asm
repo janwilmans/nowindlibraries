@@ -79,17 +79,22 @@ inienvCommand:
         ret
 
 
-DSKIO:
-; Input     F   Carry for set for write, reset for read
-;           A   Drive number
-;           B   Number of sectors to read/write
-;           C   Media descriptor
-;           DE  Logical sector number
-;           HL  Transfer address
-; Output    F   Carry set when not successful
-;           A   Error code
-;           B   Number of remaining sectors (TODO: check! even without error?)
+; function: DSKIO, transfers logical sectors from memory to disk (write) or from disk to memory (read)
+;
+; in:  f = carry for set for write, reset for read
+;      a = drive number
+;      b = number of sectors to read/write
+;      c = media descriptor
+;     de = logical sector number
+;     hl = transfer address
+;     
+; out: f = carry set when not successful
+;      a = error code
+;      b = number of remaining sectors (TODO: check! even without error?)
+;
+; remark: original DSKIO changes all registers including ix, iy but not the shadow registers.
 
+DSKIO:
         ;DEBUGMESSAGE "DSKIO"
         ;DEBUGDUMPREGISTERS
         ;USB_DBMSG "DSKIO"
@@ -103,22 +108,27 @@ DSKIO:
         ld (hl),C_DSKIO
         jp nc,blockRead
 
-        call blockWrite                 ; TODO: should be JP, no need to return (is this done to set reg_a to 0?)
-        DEBUGMESSAGE "exit_dskio_wrt"
+        call blockWrite         ; todo: value of A depends on blockWrite? change this.
         ret c
         xor a
         ret
         
+; function: DSKCHG, check whether the disk has been changed
+;
+; in:  a = drive number
+;      b = 0
+;      c = media descriptor (previous)
+;     hl = base address of DPB
+;     
+; out: a = error code
+;      b = -1, disk changed (DPB is updated)
+;      b = 0, unknown (DPB is updated)
+;      b = 1, disk unchanged
+;      f = carry set when not succesfull
+;
+; changed: c, de, hl, ix
+        
 DSKCHG:
-; Input     A   Drive number
-;           B   0
-;           C   Media descriptor (previous)
-;           HL  Base address of DPB
-; Output    B   1   Disk unchanged
-;               0   Unknown (DPB is updated)
-;               -1  Disk changed (DPB is updated)
-;           F   Carry set when not succesfull
-;           A   Error code
 
         ;DEBUGMESSAGE "DSKCHG"
         ;DEBUGDUMPREGISTERS
@@ -162,14 +172,19 @@ dskchgCommand:
         ld c,(hl)
         ret
 
-GETDPB:
-; Input     A   Drive number
-;           B   Media descriptor (first byte of FAT)
-;           C   Previous media descriptor (does not seem to be used in other drivers)
-;           HL  Base address of HL
-; Output    DPB for specified drive in [HL+1]..[HL+18]
+; function: GETDPB, get DPB for specified media descriptor
+;
+; in:  a = drive number
+;      b = media descriptor (first byte of FAT)
+;      c = previous media descriptor (does not seem to be used in other drivers)
+;     hl = base address of DPB
+;     
+; out: DPB for specified drive in [HL+1]..[HL+18]
+;
+; unchanged: iy
 
-        DEBUGMESSAGE "GETDPB"
+GETDPB:
+        ;DEBUGMESSAGE "GETDPB"
         ex de,hl
         inc de
         ld h,a                          ; store drive number 
@@ -195,7 +210,7 @@ GETDPB:
         ret
 
 .makeDPB:
-        DEBUGMESSAGE ".makeDPB"
+        ;DEBUGMESSAGE ".makeDPB"
         ld a,($f313)                    ; don't support mediadescriptor F0 under MSXDOS1       
         cp 1                            ; large clustersize causes much memory to be allocated (causing crash)
         ret c
@@ -215,6 +230,11 @@ getdpbCommand:
         ldir
         ret
 
+; function: CHOICE, ?
+;
+; in:  ?
+; out: ?
+; unchanged: ?
 
 CHOICE:
         ;DEBUGMESSAGE "CHOICE"
@@ -227,10 +247,22 @@ CHOICE:
         ret
         endif
 
+; function: DSKFMT, ?
+;
+; in:  ?
+; out: ?
+; unchanged: ?
+
 DSKFMT:
         ld a,16                         ; other error
         scf
         ret
+        
+; function: OEMSTA, ?
+;
+; in:  ?
+; out: ?
+; unchanged: ?
 
 OEMSTA:
         push hl

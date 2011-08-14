@@ -38,6 +38,11 @@ findStatementName:
         scf                             ; not found
         ret
 
+; function: send af, bc, de and hl registers to the host 
+; in: af, bc, de, hl
+; out: none
+; changed: a, h, de
+
 sendRegisters:
         push af
         ld a,h
@@ -57,22 +62,28 @@ sendRegisters:
 
 ; function: receive a value for AF, BC, DE and HL from the host.
 ; in: none
-; out: A, BC, DE, HL, carry = timeout
-; changed: ix
+; out: a, bc, de, hl, ix, iy, 
+;      all flags in f except bit 0 (carry is set on timeout)
 ; requirements: stack available, page 0 will switched to the slot of page 1 and restored after communication.
 
 receiveRegisters:
-        DEBUGMESSAGE "receiveRegisters"
+        ;DEBUGMESSAGE "receiveRegisters"
             
         call enableNowindPage0
 .loop:        
         call getHeaderInPage0       ; h = HIGH usbReadPage0
-        jp c, restorePage0          ; timeout (F is saved)
+        jp c, restorePage0          ; timeout, exit with carry (F is saved by restorePage0)
         
         ; dummy 0xff was already been read in A, by getHeaderInPage0
         ld e,(hl)                   ; header
 
-        ; incoming data order F A C B E D L H
+        ; incoming data order F A C B E D L H X I Y I
+        ld c,(hl)
+        ld b,(hl)
+        push bc
+        ld c,(hl)
+        ld b,(hl)
+        push bc
         ld c,(hl)
         ld b,(hl)
         push bc
@@ -96,11 +107,15 @@ receiveRegisters:
         pop bc        
         pop bc        
         pop bc     
+        pop bc        
+        pop bc     
         jr  .loop   
         
 .done:
         call restorePage0
-        pop hl                  ; pop our return values
+        pop iy              ; pop our return values
+        pop ix
+        pop hl                  
         pop de
         pop bc
         pop af        
@@ -261,12 +276,14 @@ executeCommandNowindInPage0:
         pop bc
         ret
 
-; function: execute a routine specified by HL, nowind will be enabled in page2 before the call
+; function: execute a routine specified by hl, nowind will be enabled in page2 before the call
 ;           and switched back afterwards
 ; in:  hl = callback to execute
 ;      bc = arguments for callback
 ; out: bc = callback return data
-; changed: all?
+; changed: af, de, hl, ix
+;
+; iy and shadow registers might be unchanged, but it depends on the implementation of ENASLT, its documentation says, changed: all registers.
 ; requirements: stack available
 
 executeCommandNowindInPage2:
@@ -464,9 +481,17 @@ slowTransfer:
         ld a,b
         ret
 
-blockWrite:
-; TODO: aaldert documenteren!
+; function: write a block of data to the host. This works like the blockRead function, the host tells us what kind(s) of transfer(s) to do.
+;           a data block is automatically split up into multiple transfer assignments by the host when page borders are crossed. 
+;           Unlike the blockRead function only one kind of transfer routine is used, blocks of <sequencenr> <d0> .. <dx> <sequencenr> are send
+;           The sequence numbers are generated and checked by the host.
+;
+; in:  A = Transfer address (high byte)
+; out: carry = error / timeout occurred
+; changed: all, see executeCommandNowindInPageX
+; requirements: stack available
 
+blockWrite:
         rlca
         jr c,.page23
 

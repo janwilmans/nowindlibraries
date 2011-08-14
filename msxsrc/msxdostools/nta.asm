@@ -43,8 +43,8 @@ Exit:
               RET
               
 HandleOption:
-; HL = Pointer to current pos in command line
-;  B = Characters remaining in cmd line
+; hl = Pointer to current pos in command line
+; b  = Characters remaining in cmd line
                 INC   HL
                 LD    A,(HL)
                 DEC   B

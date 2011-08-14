@@ -12,7 +12,7 @@ namespace nwhost {
 ReceiveRegisters::ReceiveRegisters()
 {
 	processedData = 0;
-	transferSize = 8; // fixed size
+	transferSize = 12; // fixed size
 	header = 0;
 	errors = 0;
 	clear();
@@ -57,15 +57,29 @@ void ReceiveRegisters::setBC(word data)
     buffer[2] = data & 0xff;
     buffer[3] = data >> 8;
 }
+
 void ReceiveRegisters::setDE(word data)
 {
     buffer[4] = data & 0xff;
     buffer[5] = data >> 8;
 }
+
 void ReceiveRegisters::setHL(word data)
 {
     buffer[6] = data & 0xff;
     buffer[7] = data >> 8;
+}
+
+void ReceiveRegisters::setIX(word data)
+{
+    buffer[8] = data & 0xff;
+    buffer[9] = data >> 8;
+}
+
+void ReceiveRegisters::setIY(word data)
+{
+    buffer[10] = data & 0xff;
+    buffer[11] = data >> 8;
 }
 
 void ReceiveRegisters::send()

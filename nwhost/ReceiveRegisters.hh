@@ -25,6 +25,8 @@ public:
     void setBC(word data);
     void setDE(word data);
     void setHL(word data);
+    void setIX(word data);
+    void setIY(word data);
         
 private:
     void sendData();

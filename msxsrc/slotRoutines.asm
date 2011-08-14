@@ -75,7 +75,6 @@ restorePage0:
         push af
         ld a,ixh
         call enableSlotPage0
-;        ei
         pop af
         ret
 
