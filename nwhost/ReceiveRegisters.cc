@@ -38,18 +38,18 @@ void ReceiveRegisters::clear()
     buffer.resize(transferSize);
 }
 
-void ReceiveRegisters::setA(byte data)
-{
-    buffer[0] = data;
-}
-
 void ReceiveRegisters::setF(byte data)
 {
     if (data & 1)
     {
         DBERR("warning: Carry flag is used for timeouts and will not be send");
     }
-    buffer[1] = data & 0xfe;
+    buffer[0] = data & 0xfe;
+}
+
+void ReceiveRegisters::setA(byte data)
+{
+    buffer[1] = data;
 }
 
 void ReceiveRegisters::setBC(word data)
@@ -84,7 +84,6 @@ void ReceiveRegisters::setIY(word data)
 
 void ReceiveRegisters::send()
 {
-    DBERR("ReceiveRegisters::send()\n");
     transferSize = buffer.size();  // hardcoded to AF+BC+DE+HL = 8 bytes
     done = false;
    
@@ -112,8 +111,6 @@ void ReceiveRegisters::send()
 
 void ReceiveRegisters::sendData()
 {
-    DBERR("ReceiveRegisters::SendData\n");
-    
     nwhSupport->sendHeader();
     nwhSupport->send(0xff);     // dummy so it is never possible to mistake for a new command
     nwhSupport->send(header);   // data header
@@ -123,21 +120,20 @@ void ReceiveRegisters::sendData()
         nwhSupport->send(currentByte);
     }      
     nwhSupport->send(header);   // data tail
-    DBERR("header/tail: 0x%02X\n", header);
 }
 
 void ReceiveRegisters::ack(byte tail)
 {
     if (header == tail)
     {		
-		DBERR("ACK, tail matched\n");
+		//DBERR("ReceiveRegisters::ack, tail matched\n");
 		done = true;
     }
     else
     {
         static int errors = 0;
         errors++;
-        DBERR("ACK, receiveRegisters failed! (errors: %u, tail: 0x%02x)\n", errors, tail);
+        DBERR("ReceiveRegisters::ack failed! (errors: %u, tail: 0x%02x)\n", errors, tail);
         sendData(); // resend
     }
 }

@@ -37,6 +37,9 @@ public:
 	word getDE() const { return getE() + 256*getD(); }
 	word getHL() const { return getL() + 256*getH(); }
 	word getAF() const { return getF() + 256*getA(); }
+	
+	word getFCBrecordSize() const { return extraData[14] + (extraData[15] << 8); }
+	int getRandomAccessRecord() const  { return extraData[33] + (extraData[34] << 8) + (extraData[35] << 16); }
 
 	std::vector<byte> extraData;		// [240 + 2]; // extra data for image/message/write
 	std::string getFilenameFromExtraData() const;

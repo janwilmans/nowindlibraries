@@ -119,6 +119,8 @@ receiveRegisters:
         pop de
         pop bc
         pop af        
+        scf             ; reset carry (normal exit)
+        ccf
         ret
 
 ; function: waits for a header (0xAF 0x05) to be received, 
@@ -370,9 +372,9 @@ blockRead01:
         DEPHASE
 
 blockRead23:
-        DEBUGMESSAGE "br23"
+        //DEBUGMESSAGE "br23"
         call getHeaderInPage0
-        DEBUGDUMPREGISTERS
+        //DEBUGDUMPREGISTERS
         ret c                           ; return on timeout
 
         cp 1
@@ -382,13 +384,13 @@ blockRead23:
         cp 2
         ret nz                          ; exit (return code 2-255, bit7 signals error)
         
-        DEBUGMESSAGE "slw23"
+        //DEBUGMESSAGE "slw23"
         call slowTransfer
         ld (usbWritePage1),a            ; return header
         jr blockRead23
 
 .fastTransfer:
-        DEBUGMESSAGE "fast23"
+        //DEBUGMESSAGE "fast23"
         call blockReadTranfer
         jr blockRead23
 
