@@ -159,7 +159,7 @@ nowindBDOS:
         jp $56d3
 
 bdosOpenFile:
-        DEBUGMESSAGE "bdosOpenFile"
+        ;DEBUGMESSAGE "bdosOpenFile"
         push de
         call sendRegisters
         ld (hl),BDOS_OPENFILE
@@ -170,8 +170,6 @@ bdosOpenFile:
         ld bc,37
         ldir
         
-        DEBUGMESSAGE "bdosOpenFile1"
-
         call blockRead
         jr c,.error			; connection lost
         cp 128
@@ -210,12 +208,13 @@ bdosCloseFile:
 
 bdosFindFirst:
         DEBUGMESSAGE "bdosFindFirst"
+        
         push de
         ld hl,(BDOS_DTA)
         call sendRegisters
         ld (hl),BDOS_FINDFIRST
-        
         pop de
+        
         push hl
         ex de,hl                        ; send FCB to host
         ld bc,37
@@ -287,31 +286,36 @@ bdosRandomBlockWrite:
 bdosRandomBlockRead:
         DEBUGMESSAGE "bdosRandomBlockRead"
 
-        ld bc,(BDOS_DTA)
+        push de
+        ld bc,(BDOS_DTA)                ; send DTA in bc
         call sendRegisters
         ld (hl),BDOS_RANDOMBLOCKREAD
+        pop de
+
+        ex de,hl                        ; send FCB to host
+        ld bc,37
+        ldir
 
         ld a,(BDOS_DTA + 1)
         call blockRead
-        ;jr c,.error
+        jr c,.error
         
-        push af
+        DEBUGMESSAGE "blockRead done!"
+        
         call receiveRegisters       ; get bdosRandomBlockRead results   
-        pop af
-        ; BC = 1 if an error occured (mostly EOF), otherwise BC = 0
+        jr c,.error
+        
+        DEBUGMESSAGE "receiveRegisters done!"
+
+        ; A = 1 if an error occured (mostly EOF), otherwise A = 0
         ; HL = records received
-        ; IX = address of open FCB
+        ; DE and IX = address of open FCB
                     
-        ld a,c 
-        DEBUGMESSAGE "ReceivedRegisters"
-        DEBUGDUMPREGISTERS
-
-        and a
-        ret z           ; error, no FCB update needed?
-
         ; FCB update, hl must be added to the random record field [FCB+0x21] [FCB+0x22] [FCB+0x23]
         ; see: http://msxsyssrc.cvs.sourceforge.net/viewvc/msxsyssrc/disk100upd/disk.mac?revision=1.1&view=markup line: 1875
 
+        push hl
+        push de
         ld e, (ix+$21)
         ld d, (ix+$22)
         add hl,de
@@ -319,10 +323,18 @@ bdosRandomBlockRead:
         ld (ix+$21), l
         ld (ix+$22), h
         ld (ix+$23), 0        
+        pop de
+        pop hl
 
         DEBUGMESSAGE "FCB updated"
         DEBUGDUMPREGISTERS
-        ret        
+        ret
+        
+.error: 
+        DEBUGMESSAGE "BDOS 0x27 error"
+        ld hl,0
+        ld a,1
+        ret
 
 bdosAbsoluteSectorRead:
         DEBUGMESSAGE "bdosAbsoluteSectorRead"

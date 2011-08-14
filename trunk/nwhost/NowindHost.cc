@@ -138,7 +138,7 @@ void NowindHost::write(byte data, unsigned int time)
 	{
 	  c = '.';
 	}
-	DBERR("received: [%c] (0x%02x) in state: %d, activeCommand: %d (0x%02x)\n", c, data, state, activeCommand, activeCommand);
+	//DBERR("received: [%c] (0x%02x) in state: %d, activeCommand: %d (0x%02x)\n", c, data, state, activeCommand, activeCommand);
 	switch (state) {
 	case STATE_SYNC1:
 		timer1 = time;
@@ -260,11 +260,25 @@ void NowindHost::setState(State aState)
 		recvCount = 0;
 		activeCommand = 0;
 		break;
+		
+	case STATE_SYNC2:
+	case STATE_EXECUTING_COMMAND:
+	case STATE_DISKWRITE:
+	case STATE_IMAGE:
+	case STATE_MESSAGE:
+	case STATE_BLOCKREAD:
+	case STATE_CPUINFO:
+	case STATE_RECEIVE_STRING:
+	case STATE_BDOS_OPEN_FILE:
+	case STATE_BDOS_FIND_FIRST:
+	    break;
 	default:
 		// no nothing
+	    DBERR(" # STATE unknown: %u!\n", aState); break;
 		break;
 	}
 
+    /*
 	switch (state)
 	{
 	case STATE_SYNC1:
@@ -301,6 +315,7 @@ void NowindHost::setState(State aState)
 		DBERR(" # STATE_ unknown !\n"); break;
 		break;
 	}
+	*/
 }
 
 void NowindHost::prepareCommand()
@@ -313,6 +328,7 @@ void NowindHost::prepareCommand()
 	switch (activeCommand) {
 		case 0x0F: // bdosProxy.OpenFile
 		case 0x11: // bdosProxy.FindFirst
+		case 0x27: // bdosProxy.RandomBlockRead
 			parameterLength = 37;
 			setState(STATE_RECEIVE_PARAMETERS);
 			break;

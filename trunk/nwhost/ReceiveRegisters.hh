@@ -20,8 +20,8 @@ public:
     bool isDone() const;
     
     void clear();
-    void setA(byte data);
     void setF(byte data);
+    void setA(byte data);
     void setBC(word data);
     void setDE(word data);
     void setHL(word data);
