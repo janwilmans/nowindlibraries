@@ -275,6 +275,15 @@ bdosRandomBlockWrite:
         ld a,255        ; write unsuccesful        
         ret
         
+; function: BDOS 0x27, Random Block Read 
+; in: de = pointer to opened FCB
+;     hl = number of records to read
+;
+; out: a = 1 if error (usually cause by end-of-file)
+;      a = 0 if no error
+;     hl = number of records actually read
+; changed: all? 
+        
 bdosRandomBlockRead:
         DEBUGMESSAGE "bdosRandomBlockRead"
 
@@ -286,28 +295,34 @@ bdosRandomBlockRead:
         call blockRead
         ;jr c,.error
         
-        ; get blockRead results
-        ; C = 1 if an error occured (mostly EOF), otherwise C = 0
-        ; HL = records received
         push af
-        call receiveRegisters
+        call receiveRegisters       ; get bdosRandomBlockRead results   
         pop af
-        
-        jr c,.error
-            
-        DEBUGMESSAGE "naBLKrd"
-
+        ; BC = 1 if an error occured (mostly EOF), otherwise BC = 0
+        ; HL = records received
+        ; IX = address of open FCB
+                    
         ld a,c 
-        
-        ; todo: FCB must be updated! (HL must be added to the random record field)
-        ; see: http://msxsyssrc.cvs.sourceforge.net/viewvc/msxsyssrc/disk100upd/disk.mac?revision=1.1&view=markup regel 1875
-        
+        DEBUGMESSAGE "ReceivedRegisters"
+        DEBUGDUMPREGISTERS
+
+        and a
+        ret z           ; error, no FCB update needed?
+
+        ; FCB update, hl must be added to the random record field [FCB+0x21] [FCB+0x22] [FCB+0x23]
+        ; see: http://msxsyssrc.cvs.sourceforge.net/viewvc/msxsyssrc/disk100upd/disk.mac?revision=1.1&view=markup line: 1875
+
+        ld e, (ix+$21)
+        ld d, (ix+$22)
+        add hl,de
+
+        ld (ix+$21), l
+        ld (ix+$22), h
+        ld (ix+$23), 0        
+
+        DEBUGMESSAGE "FCB updated"
         DEBUGDUMPREGISTERS
         ret        
-
-.error: ld hl,0                 ; number of records read
-        ld a,1                  ; error
-        ret
 
 bdosAbsoluteSectorRead:
         DEBUGMESSAGE "bdosAbsoluteSectorRead"
@@ -367,9 +382,6 @@ bdosRandomBlockWriteZeroFill:
 ;1CH-20H no function
 ;21H read random file                                                           (impl: transfer to dma address, random record in FCB <-- record for readout, A=0 when successful, otherwise 0xff
 ;22H write random file                                                  (impl: transfer 128 bytes from dma address, random record in FCB <-- record to be written to, A=0 when successful, otherwise 0xff
-
-; TODO: the list of command in the redbook says: 21H: write, 22H: read, check this.
-
 ;23H get file size                                                                      (impl: get file size, DE=unopened FCB, write filesize/128 to first 3 bytes of FCB's random record field
 ;24H set random record field                            (?? Current record position, calculated from the current block and record fields of specified FCB, is set in the random record field ??
 ;25H no function

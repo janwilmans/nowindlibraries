@@ -116,7 +116,7 @@ void Command::reportFCB(const unsigned char* data) const
     word curRelCluster = data[30] + (data[31] << 8);
     byte recordInExtent = data[32];
     unsigned int randomAccessRecord = data[33] + (data[34] << 8) + (data[35] << 16);     
-    byte randonAccessRecordSmaller64 = data[36];
+    byte randomAccessRecordSmaller64 = data[36];
             
     DBERR("+0   Drive:      %u\n", drive);
     DBERR("+1,8 Filename:   %s\n", filename.c_str());
@@ -137,7 +137,7 @@ void Command::reportFCB(const unsigned char* data) const
     DBERR("+30,2  curRelCluster:  %u\n", curRelCluster);
     DBERR("+32,2  recordInExtent: %u\n", recordInExtent);
     DBERR("+33,3  randomAccessRecord:            %u\n", randomAccessRecord);
-    DBERR("+36,3  randonAccessRecordSmaller64:   %u\n", randonAccessRecordSmaller64);
+    DBERR("+36,3  randomAccessRecordSmaller64:   %u\n", randomAccessRecordSmaller64);
 }
 
 
