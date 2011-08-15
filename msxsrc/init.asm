@@ -61,6 +61,7 @@ noNextCommand:
         call restorePage0
         DEBUGMESSAGE "End of startup cmds"
 
+        ld a,(IDBYTE_2D)                ; send MSX version to host
         call sendRegisters
         ld (hl),C_GETDOSVERSION
         call enableNowindPage0
@@ -68,13 +69,13 @@ noNextCommand:
 
         call restorePage0
         jp c,bootMSXDOS1                ; no reply (host not connected?)
-                                        
-        and a
-        jp nz,$47d6                     ; boot MSXDOS2
+                                        ; otherwise requested DOS version in A (1 = dos1, 2, = dos2)
+        cp 1
+        jp nz,$47d6                     ; address of ROMINIT in DOS2
 
 bootMSXDOS1:
         DEBUGMESSAGE "boot DOS1"
-        ld hl,$576f                     ; boot MSXDOS1
+        ld hl,$576f                     ; address of ROMINIT in DOS1
         push hl
         ld a,4
         jp switchBank

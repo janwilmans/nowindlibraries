@@ -1000,8 +1000,60 @@ void NowindHost::callImage(const string& filename)
 
 void NowindHost::getDosVersion()
 {
-	response->sendHeader();
-	response->send(enableMSXDOS2 ? 1:0);
+    // C_GETDOSVERSION reply
+    byte msxVersion = command.getA();   // MSX version number, 0=MSX1, 1=MSX2, 2=MSX2+, 3=MSX Turbo R
+
+    string msxString = "unknown MSX";
+
+    switch (msxVersion)
+    {
+        case 0:
+            msxString = "MSX1";
+            break;
+        case 1:
+            msxString = "MSX2";
+            break;
+        case 2:
+            msxString = "MSX2+";
+            break;
+        case 3:
+            msxString = "MSX Turbo R";
+            break;
+         default:
+            break;
+    }
+
+    DBERR("MSX IDBYTE_2D contains: %u (%s detected)\n", msxVersion, msxString.c_str());
+
+    if (msxVersion == 1 || msxVersion == 2)
+    {
+        if (enableMSXDOS2)
+        {
+            DBERR("DOS2 enabled as requested.\n");
+        }
+        else
+        {
+            DBERR("DOS1 enabled as requested.\n");
+        }
+	    response->sendHeader(); 
+	    response->send(enableMSXDOS2 ? 2:1);
+    }
+    else
+    {
+        if (enableMSXDOS2)
+        {   
+            if (msxVersion == 0)
+            {
+                DBERR("DOS2 disabled! (not available on %s)\n", msxString.c_str());
+            }
+            else
+            {
+                DBERR("DOS2 disabled! (not needed on MSX1)\n", msxString.c_str());
+            }
+        }    
+	    response->sendHeader(); 
+	    response->send(1);
+    }
 }
 
 // the MSX asks whether the host has a command  

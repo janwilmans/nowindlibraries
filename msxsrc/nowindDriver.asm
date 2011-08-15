@@ -7,10 +7,6 @@ SECLEN          equ 512                 ; sector size
 ; +6    not used
 ; +7    not used
 
-
-; if this is defined we tell DOS2.3 that we _are DOS2.3 also, so
-; it does not try to override our initilazations
-
 INIHRD:
         DEBUGMESSAGE "INIHRD"
         ld h,HIGH usbWritePage1
