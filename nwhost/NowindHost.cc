@@ -324,7 +324,7 @@ void NowindHost::prepareCommand()
 	assert(state == STATE_RECEIVE_COMMAND);
 
 	activeCommand = command.getCommand();
-	DBERR("prepareCommand: %d (0x%02x)\n", activeCommand, activeCommand);
+	//DBERR("prepareCommand: %d (0x%02x)\n", activeCommand, activeCommand);
 	switch (activeCommand) {
 		case 0x0F: // bdosProxy.OpenFile
 		case 0x11: // bdosProxy.FindFirst
@@ -1024,6 +1024,10 @@ void NowindHost::getDosVersion()
     }
 
     DBERR("MSX IDBYTE_2D contains: %u (%s detected)\n", msxVersion, msxString.c_str());
+    if (msxVersion == 3)
+    {
+        DBERR("Suggestion: Try using the -a option on MSX Turbo-R!\n");
+    }
 
     if (msxVersion == 1 || msxVersion == 2)
     {
@@ -1048,7 +1052,7 @@ void NowindHost::getDosVersion()
             }
             else
             {
-                DBERR("DOS2 disabled! (not needed on MSX1)\n", msxString.c_str());
+                DBERR("DOS2 disabled! (not needed on %s)\n", msxString.c_str());
             }
         }    
 	    response->sendHeader(); 

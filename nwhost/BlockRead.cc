@@ -29,7 +29,7 @@ bool BlockRead::isDone() const
 
 void BlockRead::init(word aStartAddress, word aSize, const std::vector <byte >& data, byte aReturnCode)
 {
-    DBERR("BlockRead::init(startAddress: 0x%04x, size: 0x%04x\n", aStartAddress, aSize);
+    //DBERR("BlockRead::init(startAddress: 0x%04x, size: 0x%04x\n", aStartAddress, aSize);
     startAddress = aStartAddress;
     transferSize = aSize;
     returnCode = aReturnCode;
@@ -46,7 +46,7 @@ void BlockRead::init(word aStartAddress, word aSize, const std::vector <byte >& 
 
 void BlockRead::blockRead(word startAddress, word size)
 {
-    DBERR("BlockRead::blockRead, startAddress: 0x%04X, size: 0x%04X\n", startAddress, size);
+    //DBERR("BlockRead::blockRead, startAddress: 0x%04X, size: 0x%04X\n", startAddress, size);
     
     if (startAddress < TWOBANKLIMIT)
     {
@@ -63,7 +63,7 @@ void BlockRead::blockRead(word startAddress, word size)
 
 void BlockRead::blockReadHelper(word startAddress, word size)
 {
-    DBERR("BlockRead::blockReadHelper, size: 0x%02x, processedData: 0x%02x\n", size, processedData);
+    //DBERR("BlockRead::blockReadHelper, size: 0x%02x, processedData: 0x%02x\n", size, processedData);
     
     // delete any blocks still in the dataBlockQueue (unacknowleged by msx, could be caused by timeouts)
     for(unsigned int i=0; i< dataBlockQueue.size(); i++)
@@ -210,8 +210,13 @@ void BlockRead::ack(byte tail)
     {
         static int errors = 0;
         errors++;
-
-        DBERR("BlockRead::ack, block %u failed! (errors: %u, tail: 0x%02x)\n", dataBlock->number, errors, tail);
+        
+        // at >3.56Mhz failing ack's are normal (part of the protocol) 
+        // letting some blocks fail and resend is still much faster then doing slower transfers.
+        // even at 3.56Mhz block may fail, but it should be sporadically, otherwise something is
+        // wrong or at least unusual (100% CPU load on the host side can cause that for example)
+        
+        //DBERR("BlockRead::ack, block %u failed! (errors: %u, tail: 0x%02x)\n", dataBlock->number, errors, tail);
 
 	    nwhSupport->sendHeader();
 	    if (dataBlock->fastTransfer)
