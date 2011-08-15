@@ -1,0 +1,95 @@
+[Config]
+Compilator.FileName=make.bat
+Compilator.DefaultDir=C:\MSX\nowindlibraries\msxsrc\
+Compilator.SaveAll=1
+Compilator.Capture=1
+Compilator.HideOutput=1
+Compilator.LogType=0
+Prog1=Sjasm4,"C:\MSX\nowind\msxsrc\sjasm4.exe" "%File%"§
+DefaultCPIndex=0
+LogtoEnd=1
+DontOpen=0
+AbsolutePath=0
+FileFormat=0
+ProjectFilesOnly=0
+[Project tree]
+nowind
+	+msxsrc
+		+msxdostools
+			msxdostools\nta.asm
+			msxdostools\nowmap.asm
+			msxdostools\nic.asm
+		-sjasm
+			sjasm\sjasm
+			sjasm\sjasm.exe
+			sjasm\sjasm.txt
+		openDiskrom\bdos.asm
+		common.asm
+		debug.asm
+		device.asm
+		dos_aux.asm
+		extendedBios.asm
+		flashWriter.asm
+		init.asm
+		labels.asm
+		nowind.asm
+		nowindbdos.asm
+		nowindDriver.asm
+		openDiskrom\openDiskrom.asm
+		romdisk.asm
+		rs232.asm
+		slotRoutines.asm
+		tracer.asm
+		msxdos23.asm
+[Open project files]
+0=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\cron_fetch.php
+1=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\fetch.inc
+2=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\melding.inc
+3=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\overzicht.inc
+4=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\monteur.inc
+5=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\includes\testpage.inc
+6=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\atag.inc
+7=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\witgoed.module
+8=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\includes\functions.php
+9=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\witgoed\monteur\overzichtmonteur.php
+10=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\witgoed\monteur\kiesbon.php
+11=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\witgoed\monteur\maakbon.php
+[Selected Project Files]
+Main=
+Selected=..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\witgoed\monteur\kiesbon.php
+[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\cron_fetch.php]
+TopLine=1
+Caret=1,14
+[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\fetch.inc]
+TopLine=1
+Caret=1,1
+[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\melding.inc]
+TopLine=119
+Caret=46,129
+[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\overzicht.inc]
+TopLine=27
+Caret=40,46
+[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\monteur.inc]
+TopLine=15
+Caret=36,40
+[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\includes\testpage.inc]
+TopLine=1
+Caret=11,11
+[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\atag.inc]
+TopLine=71
+Caret=25,86
+[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\witgoed.module]
+TopLine=55
+Caret=1,1
+[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\sites\all\modules\witgoed\includes\functions.php]
+TopLine=50
+Caret=8,86
+[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\witgoed\monteur\overzichtmonteur.php]
+TopLine=152
+Caret=30,184
+[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\witgoed\monteur\kiesbon.php]
+TopLine=1
+Caret=1,1
+[..\..\..\DOCUME~1\kwik\LOCALS~1\Temp\PSpad\witgoedreparaties.nl\httpdocs\witgoed\monteur\maakbon.php]
+TopLine=1
+Caret=50,17

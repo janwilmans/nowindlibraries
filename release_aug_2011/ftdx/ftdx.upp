@@ -1,0 +1,28 @@
+uses
+	general;
+
+library
+	ftd2xx;
+
+options
+	-I../general;
+
+file
+	ConFTD2XX.cpp,
+	ConFTD2XX.h,
+	ConFtdiSio.cpp,
+	ConFtdiSio.h,
+	ConLibFtdi.cpp,
+	ConLibFtdi.h,
+	ftdi.c,
+	ftdx.cpp,
+	ftdx.h,
+	ftdi.h,
+	FtdxExports.h,
+	libftdx.h,
+	UsbStream.h,
+	UsbStream.cpp;
+
+mainconfig
+	"" = "DLL";
+

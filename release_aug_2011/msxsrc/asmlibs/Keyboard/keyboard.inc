@@ -1,0 +1,15 @@
+; Key matrix
+
+
+; Keyboard Row 7
+KEY_ESC		EQU	4
+
+; Keyboard Row 8
+KEY_SPACE_BAR	EQU	0		
+KEY_HOME	EQU	1
+KEY_INS		EQU     2
+KEY_DEL		EQU	3
+KEY_LEFT	EQU	4
+KEY_UP		EQU	5
+KEY_DOWN	EQU	6
+KEY_RIGHT	EQU	7

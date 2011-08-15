@@ -1,0 +1,24 @@
+CC=g++ -Wall -W -Winline -fstack-check -DNO_TRACEALLOCATOR
+
+SDL_CFLAGS := $(shell sdl-config --cflags)
+SDL_LDFLAGS := $(shell sdl-config --libs) -lSDL_ttf 
+NW_LIB := -L../libnowind -lnowind
+
+SRC=./GUI.cpp ./cpu/Z80.cpp ./memory/Mapper.cpp ./memory/EmptyPage.cpp ./memory/MapperMsxDos2.cpp ./memory/NowindInterface.cpp ./memory/WD279X.cpp ./memory/RomBlock.cpp ./memory/MemoryDevice.cpp ./memory/MapperKonami4.cpp ./memory/MapperFMPAC.cpp ./memory/MapperKonami5.cpp ./memory/RamBlock.cpp ./video/V9938sprites.cpp ./video/V9938commands.cpp ./video/V9938.cpp ./video/V9938renderer.cpp ./DiskDrive.cpp ./audio/AudioDummy.cpp ./audio/PPISound.cpp ./audio/AY38910.cpp ./audio/SCC.cpp ./audio/AudioMixer.cpp ./audio/YM2413.cpp ./audio/AudioDevice.cpp ./audio/MSXAudio.cpp ./DiskInterface.cpp ./EmulatorTester.cpp ./cpu/Disassembler.cpp ./Emulator.cpp ./VirtualDrive.cpp ./Config.cpp ./Media.cpp ./maincons.cpp ./Debug.cpp ./osd/LogWatcher.cpp ./osd/MemoryMonitor.cpp ./osd/Command.cpp ./osd/OnScreenDisplay.cpp ./osd/Debugger.cpp ./devices/F4Device.cpp ./devices/RP5C01.cpp ./devices/I8255.cpp ./devices/SwitchedPorts.cpp ./devices/SlotSelector.cpp ./devices/DebugDevice.cpp ./devices/Kanji.cpp ./controls/Mouse.cpp ./controls/Keyboard.cpp ./controls/Joystick.cpp ./TraceAllocations.cpp ./TraceItem.cpp ./cpu/Profiler.cpp
+
+OBJS := $(SRC:.cpp=.o)
+
+all: nowind
+
+nowind: $(OBJS) ../libnowind/libnowind.a
+	$(CC) -g -o nowind $(OBJS) $(SDL_LDFLAGS) $(NW_LIB)
+
+%.o: %.cpp
+	$(CC) -g -o $@ -c $? -I. $(SDL_CFLAGS)
+
+.PHONY: clean
+clean: 
+	-@rm -v *.o *.log stderr.* stdout.*
+	-@rm -v `find . -name *.o`
+	@echo All directories were cleaned up.
+

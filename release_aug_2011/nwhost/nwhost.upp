@@ -1,0 +1,46 @@
+uses
+	general;
+
+options
+	-I../general;
+
+file
+	common.h,
+	libnwhost.h,
+	Image.cpp,
+	Image.h,
+	ImageHandler.cpp,
+	ImageHandler.h,
+	NowindHostDebug.cpp,
+	NowindHostDebug.h,
+	nwhost.cpp,
+	nwhost.h,
+	nowindusb.cpp,
+	nowindusb.h,
+	NwhostInternal.h,
+	NwhostExports.h,
+	PartitionInfo.cpp,
+	PartitionInfo.h,
+	"Shared Code" readonly separator,
+	NowindHost.cc,
+	SectorMedium.hh,
+	NowindHost.hh,
+	SectorMedium.hh,
+	NwhostInternal.h,
+	BlockRead.hh,
+	NowindHostSupport.hh,
+	DataBlock.hh,
+	Device.hh,
+	NowindTypes.hh,
+	NowindHost.hh,
+	Device.cc,
+	NowindHostSupportDebug.h,
+	BlockRead.cc,
+	NowindHostSupport.cc,
+	NowindHostSupportDebug.cpp,
+	DataBlock.cc,
+	DiskHandler.hh;
+
+mainconfig
+	"" = "DLL";
+
