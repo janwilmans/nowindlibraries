@@ -1026,7 +1026,10 @@ void NowindHost::getDosVersion()
     DBERR("MSX IDBYTE_2D contains: %u (%s detected)\n", msxVersion, msxString.c_str());
     if (msxVersion == 3)
     {
-        DBERR("Suggestion: Try using the -a option on MSX Turbo-R!\n");
+        if (!allowOtherDiskroms)
+        {
+            DBERR("Suggestion: Try using the -a option on MSX Turbo-R (enables internal ROMs to initialize)\n");
+        }
     }
 
     if (msxVersion == 1 || msxVersion == 2)
@@ -1052,6 +1055,18 @@ void NowindHost::getDosVersion()
             }
             else
             {
+                DBERR("DOS2 disabled! (not needed on %s)\n", msxString.c_str());
+            }
+        }
+        else
+        {
+            if (msxVersion == 0)
+            {
+                DBERR("DOS1 enabled as requested.\n");
+            }
+            else
+            {
+                // looks strange in code, but from the MSX Turbo-R user perspective, this message makes more sense.
                 DBERR("DOS2 disabled! (not needed on %s)\n", msxString.c_str());
             }
         }    

@@ -227,6 +227,11 @@ void AudioMixer::audioCallback(Uint8 *stream, int len) {
     }
 }
 
+unsigned int AudioMixer::getMaxBufferIndex()
+{
+    return (bufferDepth*audioBufferSize)-1;
+}        
+
 unsigned int * AudioMixer::getBuffer(unsigned int channels) {
            	       
         Uint32 * newBuffer = new Uint32[bufferDepth*audioBufferSize];

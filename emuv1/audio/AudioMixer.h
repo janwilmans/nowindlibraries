@@ -61,6 +61,7 @@ public:
         unsigned int *      getBuffer(unsigned int);    
         unsigned int        getBufferSize();
         unsigned int        getSampleRate();
+        unsigned int        getMaxBufferIndex();
 
 		static void Lock();
 		static void Unlock();

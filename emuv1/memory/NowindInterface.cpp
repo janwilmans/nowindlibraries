@@ -176,3 +176,10 @@ void NowindInterface::debugout(const char *msg)
 {
     DBERR(msg);   
 }
+
+void NowindInterface::setAttribute(int attr, bool value)
+{
+    nowindusb_attribute(nwhost::nw_attribute(attr), false);
+}
+
+

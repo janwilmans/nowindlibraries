@@ -14,9 +14,15 @@ initDiskBasic:
         ld (DEVICE),a
 .continue:        
         jp ORIGINAL_HOOK_RUNC
-        
-getHostDate:
-        DEBUGMESSAGE "getHostDate"
+
+; function: search for a clockchip and initialize it if present
+;           the host decides to use the msx' own clockchip date/time if present, or
+;           to set the host date/time.
+; in:  ?
+; out: zero flag set if present??
+; changed: af, bc
+initClockchip:
+        DEBUGMESSAGE "initClockchip"
         
         push af
         push bc
@@ -30,6 +36,7 @@ getHostDate:
         pop de
         pop bc 
         pop af
+        xor a
         ret
         
 
@@ -54,6 +61,21 @@ findStatementName:
         or (hl)
         jr nz,findStatementName
         scf                             ; not found
+        ret
+
+; function: send af, bc, de and hl registers to the host, but dont change any registers.
+;           mainly used for quick first implementations.
+; in: af, bc, de, hl
+; out: none
+; changed: none
+sendRegistersSafe:
+        push af    
+        push de
+        push hl
+        call sendRegisters
+        pop hl
+        pop de
+        pop af
         ret
 
 ; function: send af, bc, de and hl registers to the host 

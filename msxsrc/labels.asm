@@ -4,6 +4,8 @@
 ; BIOS
 CALSLT          equ $001c
 ENASLT          equ $0024
+CHPUT           equ $00A2
+
 IDBYTE_2D       equ $002d               ; MSX version number, 0=MSX1, 1=MSX2, 2=MSX2+, 3=MSX Turbo R
 INITXT          equ $006C
 SNSMAT          equ $0141

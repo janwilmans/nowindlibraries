@@ -94,7 +94,14 @@ void AY38910::writePort1(nw_byte value) {
 #endif
 
     float AYticks = ((float) Z80::Instance()->cpuFrequency) / audioSampleRate;
-    unsigned int samples = int((emuTime - lastSync) / AYticks);
+    
+    unsigned int timeSinceLastsync = emuTime - lastSync;
+    if (emuTime < lastSync)
+    {
+        timeSinceLastsync = emuTime + (0xffffffff-lastSync);
+    }
+    unsigned int samples = timeSinceLastsync / AYticks;
+    
     //DBERR("samples: %u\n", samples);
     updateBuffer(samples);	// update buffer until emuTime (now)
 	
@@ -301,13 +308,13 @@ void AY38910::updateBuffer(unsigned int requiredSamples) {
 
     unsigned samples = requiredSamples - samplesInBuffer;
 
- 	if (samples > 1000000) {
-		// this happened sometimes, not sure why but samples would actually become -1 (4294967294) and the emulator would
-		// hang trying to generate that many samples
-		DBERR("ERROR updateBuffer(%i)\n", (int) samples);
+ 	if (samples > AudioMixer::Instance()->getMaxBufferIndex()) {
+		// this happened sometimes, appearently when the emuTime wraps.
+		// the emulator either hangs trying to generate that many samples or crashes because memory is overwritten
+		DBERR("ERROR updateBuffer(%i samples) requested but audioBuffer size is \n", (int) samples);
 		return;
 	}
-	
+
 	for (unsigned int i=0;i<samples;i++) { 
 		audioBuffer[samplesInBuffer++] = makeWave();
     }
