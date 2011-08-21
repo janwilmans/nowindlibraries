@@ -33,9 +33,9 @@ Drives drives;
 static const unsigned MAX_MEDIA = 8;
 
 /* this library can be used in: 
- * - the portable usbhost (cmdline version)
+ * - the portable nwhostapp (cmdline version)
  * - libnowindapp
- * - usbhost wxpython GUI (todo: create this gui)
+ * - nwhostapp wxpython GUI 
  * - nowind MSX emulator
  * - other emulators like BlueMsx
  *

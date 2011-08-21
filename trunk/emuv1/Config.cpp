@@ -18,7 +18,7 @@ Config::Config() {
 		}
  
 		/* configuration defaults */
-		msxVersion = getIntValueOf("msxversion", 1);
+		msxVersion = getIntValueOf("msxversion", 2);
 
 }
 

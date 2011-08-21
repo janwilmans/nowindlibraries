@@ -68,10 +68,19 @@ noNextCommand:
         call getHeaderInPage0
 
         call restorePage0
-        jp c,bootMSXDOS1                ; no reply (host not connected?)
+        jp c,noHostReply                ; no reply (host not connected?)
                                         ; otherwise requested DOS version in A (1 = dos1, 2, = dos2)
         cp 1
         jp nz,$47d6                     ; address of ROMINIT in DOS2
+
+noHostReply:
+        ld a,(IDBYTE_2D)
+        or a
+        jr z, bootMSXDOS1           ; on MSX1 boot DOS1
+        cp 3
+        jr z, bootMSXDOS1           ; on MSX Turbo R disable DOS2 because it has its own DOS2.xx roms
+            
+        jp  $47d6                   ; address of ROMINIT in DOS2
 
 bootMSXDOS1:
         DEBUGMESSAGE "boot DOS1"

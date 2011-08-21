@@ -28,12 +28,19 @@ BDOS_ABSOLUTESECTORWRITE        equ $30
         PATCH $5d20, nowindBDOS              ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW (for logging only)     
 
 currentFilePosition2 := $        
+
+        code ! $408F
+        jp bdosInternalOutputToScreen    ; internal bdos subroutine that calls the CHPUT BIOS call
+        
+        code ! $40AB                    ; MSX BIOS call logging for call made by BDOS
+        jp bdosInternalCallBios
         
 ;        code ! $5445
 ;        jp bdosConsoleInput             ; 0x01
 
-;        code ! $53a7
-;        jp bdosConsoleOutput            ; 0x02
+;         code ! $53a7                   
+;         ld a,c                          ; needed because C_OUT is called internally
+;C_OUT:   jp bdosConsoleOutput            ; 0x02
 
 ;        code ! $546e
 ;        jp bdosAuxInput                 ; 0x03
@@ -53,7 +60,7 @@ currentFilePosition2 := $
 ;        code ! $544e
 ;        jp bdosConsoleInputWithoutEcho  ; 0x08
 
-; TODO: check bdos 09h
+; TODO: check bdos 09h          ; calls bdos 02h to output chars
 
 ;        code ! $50e0
 ;        jp bdosBufferedLineInput        ; 0x0a
@@ -156,7 +163,46 @@ currentFilePosition2 := $
 nowindBDOS:
         DEBUGMESSAGE "nwBDOS"
         DEBUGDUMPREGISTERS
-        jp $56d3
+        jp $56d3                        ; normal BDOS hook address
+
+bdosInternalCallBios:
+
+        DEBUGMESSAGE "bdosInternalCallBios"
+        DEBUGDUMPREGISTERS
+
+        ; code from original bdosInternalOutputToScreen implementation
+        push    iy
+        ld      iy,(EXPTBL-1+0)
+        call    CALSLT
+        ei
+        pop     iy
+        ret
+
+bdosInternalOutputToScreen:
+
+        DEBUGMESSAGE "bdosInternalOutputToScreen"
+        DEBUGDUMPREGISTERS
+
+        ; code from original bdosInternalOutputToScreen implementation
+        push    ix
+        ld      ix,CHPUT
+        call    $40AB                   ; CHPUT BIOS call
+        pop     ix
+        ret
+
+bdosConsoleOutput:
+        push af
+        push bc
+        push de
+        push hl
+        DEBUGMESSAGE "Console output"    
+        pop hl
+        pop de
+        pop bc
+        pop af
+        
+        call $F2AF  ; code from the original bdosConsoleOutput that was overwritten by the bdos patch
+        jp $53AB
 
 bdosOpenFile:
         ;DEBUGMESSAGE "bdosOpenFile"
