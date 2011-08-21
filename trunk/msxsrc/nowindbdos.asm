@@ -29,11 +29,11 @@ BDOS_ABSOLUTESECTORWRITE        equ $30
 
 currentFilePosition2 := $        
 
-        code ! $408F
-        jp bdosInternalOutputToScreen    ; internal bdos subroutine that calls the CHPUT BIOS call
+;        code ! $408F
+;        jp bdosInternalOutputToScreen    ; internal bdos subroutine that calls the CHPUT BIOS call
         
-        code ! $40AB                    ; MSX BIOS call logging for call made by BDOS
-        jp bdosInternalCallBios
+;        code ! $40AB                    ; MSX BIOS call logging for call made by BDOS
+;        jp bdosInternalCallBios
         
 ;        code ! $5445
 ;        jp bdosConsoleInput             ; 0x01
