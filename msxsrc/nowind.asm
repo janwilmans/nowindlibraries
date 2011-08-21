@@ -65,7 +65,7 @@
         PATCH $5797, OEMSTA
 
         PATCH $4093, mapper
-
+        
         code ! $4881
         db LOW initDiskBasic
         code ! $4884
@@ -105,7 +105,7 @@
         ; bank 3: 0x7E70 - 0x7FFF (400 bytes)
 
 ; insert MSXDOS1
-        page 2
+        page 2                          ; overwrite page2 with our patched DOS1 diskrom
         module MSXDOS1_MODULE
 
         define MSXDOSVER 1
@@ -133,8 +133,8 @@
         PATCH $5ae8, DEFDPB             ; different address in some roms
         PATCH $65af, OEMSTA
         PATCH $5809, initDiskBasic      ; HRUNC
-        PATCH $5b9a, getHostDate        ; get date from host when no clockchip found (different 5b95)
-
+        ;PATCH $5b9a, getHostDate        ; get date from host when no clockchip found (different 5b95)              ; does not appear to work?
+        ;PATCH $599c, initClockchip      ; intercept 'check for and initialize clockchip' normally 0x40B8 is called ; does not appear to work?
 
         code @ $7405
 
