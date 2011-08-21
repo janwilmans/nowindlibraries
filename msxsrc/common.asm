@@ -14,6 +14,24 @@ initDiskBasic:
         ld (DEVICE),a
 .continue:        
         jp ORIGINAL_HOOK_RUNC
+        
+getHostDate:
+        DEBUGMESSAGE "getHostDate"
+        
+        push af
+        push bc
+        push de
+        push hl
+        
+        call sendRegisters
+        ld (hl),C_GETDATE       
+
+        pop hl
+        pop de
+        pop bc 
+        pop af
+        ret
+        
 
 ; search call statement or device name
 findStatementName:

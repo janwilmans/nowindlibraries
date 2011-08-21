@@ -668,7 +668,7 @@ nw_byte Z80::readIo(nw_word port) {
 	case 0xaa: return ppi->readPortC(); break;
 	case 0xab: return ppi->readControlRegister(); break;
 	
-	case 0xb5: return realTimeClock->readPortB5(); break;
+	case 0xb5: if (Config::Instance()->msxVersion == 1) { return 0xff; } else { return realTimeClock->readPortB5(); } break;
 
     // msx-audio en moonsound 
 //    case 0xc0: return msxaudio->readStatus(); break;

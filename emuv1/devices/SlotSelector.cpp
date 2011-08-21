@@ -52,20 +52,19 @@ void SlotSelector::configure(unsigned int msxVersion) {
     }
     /* end of SlotSelector initialization */
 
-	if (msxVersion == 1) {
+	if (msxVersion == 1) { // see configuration defaults in emuv1/Config.cpp
 		/* load a MSX1 main-rom at SLOT 0, page 0 and 1 */
 		addMemoryDevice(new RomBlock("../roms/hx-10_basic-bios1.rom"),0,0,0x0000);
 
 		Z80::Instance()->mapper = new Mapper(4);
 		addMemoryDevice(Z80::Instance()->mapper,2,0,0x0000);
 
-        usbInterface = new NowindInterface("../msxsrc/nowindDos1.rom");
-//        usbInterface = new NowindInterface("../msxsrc/nowindDos2.rom");        
+        usbInterface = new NowindInterface("../msxsrc/nowind.rom");
         addMemoryDevice(usbInterface, 1, 0, 0x0000);
-//        usbInterface->insertDisk(0, "../disks/MSX20th.dsk");
-//        usbInterface->insertDisk(0, "../disks/dos2.dsk");        
-        usbInterface->insertDisk(0, "../disks/wb.dsk");
-//    addMemoryDevice(new MapperMsxDos2("../roms/MSXDOS22_msx1.ROM"),3,0,0x4000);
+        //usbInterface->insertDisk(0, "../disks/MSX20th.dsk");
+        usbInterface->insertDisk(0, "../disks/dos1.dsk");        
+        //usbInterface->insertDisk(0, "../disks/wb.dsk");
+        //addMemoryDevice(new MapperMsxDos2("../roms/MSXDOS22_msx1.ROM"),3,0,0x4000);
 	}
 	
 	if (msxVersion == 2) {

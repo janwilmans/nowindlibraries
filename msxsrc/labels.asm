@@ -51,7 +51,7 @@ C_CHOICE        equ $83
 C_DSKFMT        equ $84
 C_DRIVES        equ $85
 C_INIENV        equ $86
-C_SETDATE       equ $87
+C_GETDATE       equ $87
 C_DEVICEOPEN    equ $88
 C_DEVICECLOSE   equ $89
 C_DEVICERNDIO   equ $8a

@@ -133,7 +133,7 @@
         PATCH $5ae8, DEFDPB             ; different address in some roms
         PATCH $65af, OEMSTA
         PATCH $5809, initDiskBasic      ; HRUNC
-        ;PATCH $5b9a, getHostDate        ; get date from host when no clockchip found (different 5b95)
+        PATCH $5b9a, getHostDate        ; get date from host when no clockchip found (different 5b95)
 
 
         code @ $7405
