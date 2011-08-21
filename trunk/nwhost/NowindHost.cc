@@ -378,7 +378,7 @@ void NowindHost::executeCommand()
 	// http://map.grauw.nl/resources/dos2_functioncalls.php#_SETDTA
 	// http://map.grauw.nl/resources/dos2_environment.php
 
-	case 0x80: { // DSKIO
+	case C_DSKIO: { // DSKIO
 		SectorMedium* disk = getDisk();
 		if (!disk) {
 			// no such drive or no disk inserted
@@ -393,13 +393,13 @@ void NowindHost::executeCommand()
 		break;
 	}
 
-	case 0x81: DSKCHG(); break;
-	case 0x82: GETDPB(); break;
-	//case 0x83: CHOICE();
-	//case 0x84: DSKFMT();
-	case 0x85: DRIVES(); break;
-	case 0x86: INIENV(); break;
-	case 0x87: setDateMSX(); break;
+	case C_DSKCHG: DSKCHG(); break;
+	case C_GETDPB: GETDPB(); break;
+	//case C_CHOICE: CHOICE();
+	//case C_DSKFMT: DSKFMT();
+	case C_DRIVES: DRIVES(); break;
+	case C_INIENV: INIENV(); break;
+	case C_GETDATE: getDate(); break;
 
 	case 0x88: nextState = STATE_DEVOPEN; break;
 	case 0x89: device.close(command.cmdData); break;
@@ -930,7 +930,7 @@ void NowindHost::INIENV()
 	response->send(romdisk); // calculated in DRIVES()
 }
 
-void NowindHost::setDateMSX()
+void NowindHost::getDate()
 {
 	time_t td = time(NULL);
 	struct tm* tm = localtime(&td);

@@ -44,6 +44,33 @@ struct dpbType {
 	byte FATADR_H;
 };
 
+enum {
+    C_DSKIO       = 0x80,
+    C_DSKCHG      = 0x81,
+    C_GETDPB      = 0x82,
+    C_CHOICE      = 0x83,
+    C_DSKFMT      = 0x84,
+    C_DRIVES      = 0x85,
+    C_INIENV      = 0x86,
+    C_GETDATE     = 0x87,
+    C_DEVICEOPEN  = 0x88,
+    C_DEVICECLOSE = 0x89,
+    C_DEVICERNDIO = 0x8a,
+    C_DEVICEWRITE = 0x8b,
+    C_DEVICEREAD  = 0x8c,
+    C_DEVICEEOF   = 0x8d,
+    C_AUXIN       = 0x8e,
+    C_AUXOUT      = 0x8f,
+    C_MESSAGE     = 0x90,
+    C_CHANGEIMAGE  = 0x91,
+    C_GETDOSVERSION = 0x92,
+    C_CMDREQUEST  = 0x93,
+    C_BLOCKREAD   = 0x94,
+    C_BLOCKWRITE  = 0x95,
+    C_CPUINFO     = 0x96,
+    C_COMMAND     = 0x97
+};
+
 class NWHOST_API NowindHost
 {
 public:
@@ -122,7 +149,7 @@ private:
 	void GETDPB();
 	void CHOICE();
 	void INIENV();
-	void setDateMSX();
+	void getDate();
 
 	unsigned int getSectorAmount() const;
 	unsigned int  getStartSector() const;

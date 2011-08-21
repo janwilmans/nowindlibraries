@@ -145,14 +145,32 @@ bool BDOSProxy::OpenFile(const Command& command, Response& response)
 	vector<byte> buffer(command.extraData);
 	buffer.resize(37);
 
+    // http://www.konamiman.com/msx/msx2th/th-3.txt
+    // "opening" a file
+
 	buffer[0x0e] = 0;   // reset extent high byte
-	buffer[0x0f] = 1;
+    buffer[0x0f] = filesize / 128; // CP/M record count
 	
 	buffer[0x10] = filesize & 0xff;
 	buffer[0x11] = (filesize >> 8) & 0xff;
 	buffer[0x12] = (filesize >> 16) & 0xff;
 	buffer[0x13] = (filesize >> 24) & 0xff;
+
+	buffer[0x18] = 0; 
+	buffer[0x19] = 0; 
+	buffer[0x1a] = 0; 
+	buffer[0x1b] = 0; 
+	buffer[0x1c] = 0; 
+	buffer[0x1d] = 0; 
+	buffer[0x1e] = 0; 
+	buffer[0x1f] = 0; 
 	
+	buffer[0x20] = 0; 
+	buffer[0x21] = 0; 
+	buffer[0x22] = 0; 
+	buffer[0x23] = 0; 
+
+
 	//command.reportFCB(&buffer[0]);
     
     if (bdosfile->fail())
