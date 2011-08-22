@@ -29,11 +29,11 @@ BDOS_ABSOLUTESECTORWRITE        equ $30
 
 currentFilePosition2 := $        
 
-;        code ! $408F
-;        jp bdosInternalOutputToScreen    ; internal bdos subroutine that calls the CHPUT BIOS call
+        code ! $408F
+        jp bdosInternalOutputToScreen    ; internal bdos subroutine that calls the CHPUT BIOS call
         
-;        code ! $40AB                    ; MSX BIOS call logging for call made by BDOS
-;        jp bdosInternalCallBios
+        ;code ! $40AB                    ; MSX BIOS call logging for call made by BDOS
+        ;jp bdosInternalCallBios
         
 ;        code ! $5445
 ;        jp bdosConsoleInput             ; 0x01
@@ -168,7 +168,6 @@ nowindBDOS:
 bdosInternalCallBios:
 
         DEBUGMESSAGE "bdosInternalCallBios"
-        DEBUGDUMPREGISTERS
 
         ; code from original bdosInternalOutputToScreen implementation
         push    iy
@@ -180,8 +179,16 @@ bdosInternalCallBios:
 
 bdosInternalOutputToScreen:
 
-        DEBUGMESSAGE "bdosInternalOutputToScreen"
-        DEBUGDUMPREGISTERS
+        ;DEBUGMESSAGE "bdosInternalOutputToScreen"
+        ;DEBUGDUMPREGISTERS
+        push af
+        push de
+        push hl
+        call sendRegisters
+        ld (hl),C_STDOUT
+        pop hl
+        pop de
+        pop af
 
         ; code from original bdosInternalOutputToScreen implementation
         push    ix
@@ -286,7 +293,7 @@ bdosFindFirst:
         ret
 
 bdosFindNext:
-        DEBUGMESSAGE "bdosFindNext"
+        //DEBUGMESSAGE "bdosFindNext"
         ld hl,(BDOS_DTA)
         call sendRegisters
         ld (hl),BDOS_FINDNEXT

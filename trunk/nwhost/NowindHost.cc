@@ -401,29 +401,54 @@ void NowindHost::executeCommand()
 	case C_INIENV: INIENV(); break;
 	case C_GETDATE: getDate(); break;
 
-	case 0x88: nextState = STATE_DEVOPEN; break;
-	case 0x89: device.close(command.cmdData); break;
-	//case 0x8A: deviceRandomIO(fcb);
-	case 0x8B: device.write(command.cmdData); break;
-	case 0x8C: device.read(command.cmdData);  break;
-	//case 0x8D: deviceEof(fcb);
-	case 0x8E: auxIn(); break;
-	case 0x8F: auxOut(); break;
-	case 0x90: receiveExtraData(); nextState = STATE_MESSAGE; break;
-	case 0x91: receiveExtraData(); nextState = STATE_IMAGE; break;
-    case 0x92: getDosVersion(); break;
-	case 0x93: commandRequested(); break;
+	case C_DEVICEOPEN: nextState = STATE_DEVOPEN; break;
+	case C_DEVICECLOSE: device.close(command.cmdData); break;
+	//case C_DEVICERNDIO: deviceRandomIO(fcb);
+	case C_DEVICEWRITE: device.write(command.cmdData); break;
+	case C_DEVICEREAD: device.read(command.cmdData);  break;
+	//case C_DEVICEEOF: deviceEof(fcb);
+	case C_AUXIN: auxIn(); break;
+	case C_AUXOUT: auxOut(); break;
+	case C_MESSAGE: receiveExtraData(); nextState = STATE_MESSAGE; break;
+	case C_CHANGEIMAGE: receiveExtraData(); nextState = STATE_IMAGE; break;
+    case C_GETDOSVERSION: getDosVersion(); break;
+	case C_CMDREQUEST: commandRequested(); break;
 	//case 0xFF: vramDump();
-	case 0x94: blockReadCmd(); break;
-    case 0x95: blockWriteCmd(); break;
-    case 0x96: receiveExtraData(); nextState = STATE_CPUINFO; break;
-    case 0x97: apiCommand();  break;
+	case C_BLOCKREAD: blockReadCmd(); break;
+    case C_BLOCKWRITE: blockWriteCmd(); break;
+    case C_CPUINFO: receiveExtraData(); nextState = STATE_CPUINFO; break;
+    case C_COMMAND: apiCommand();  break;
+    case C_STDOUT: stdOutCatch();  nextState = STATE_SYNC1; break;
+    
 	default:
 		DBERR("Unknown command! (0x%02x)\n", activeCommand);
 		nextState = STATE_SYNC1;
 		break;
 	}
 	setState(nextState);
+}
+
+void NowindHost::stdOutCatch()
+{
+    static std::string buffer = "";
+    byte reg_a = command.getA();
+
+    //DBERR("stdOutCatch host side char: 0x%02X\n", reg_a);
+
+    if (reg_a == 0x0d || reg_a == 0x0a || reg_a == 0 || reg_a == '$')
+    {   
+        if (buffer.length() > 0)
+        {
+            DBERR("MSX says> %s\n", buffer.c_str());
+            buffer = "";
+        }
+    }
+    else
+    {
+        //DBERR("stdOutCatch host side char: 0x%02X\n", reg_a);
+        buffer.append(1, reg_a);
+    }
+    
 }
 
 void NowindHost::apiCommand()
