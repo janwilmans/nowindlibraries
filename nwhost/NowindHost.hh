@@ -44,6 +44,8 @@ struct dpbType {
 	byte FATADR_H;
 };
 
+// although this enum is used in only one place
+// it allows easy searching/matching between host and rom code.
 enum {
     C_DSKIO       = 0x80,
     C_DSKCHG      = 0x81,
@@ -68,7 +70,8 @@ enum {
     C_BLOCKREAD   = 0x94,
     C_BLOCKWRITE  = 0x95,
     C_CPUINFO     = 0x96,
-    C_COMMAND     = 0x97
+    C_COMMAND     = 0x97,
+    C_STDOUT      = 0x98
 };
 
 class NWHOST_API NowindHost
@@ -150,6 +153,8 @@ private:
 	void CHOICE();
 	void INIENV();
 	void getDate();
+	
+	void stdOutCatch();
 
 	unsigned int getSectorAmount() const;
 	unsigned int  getStartSector() const;

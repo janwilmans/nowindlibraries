@@ -135,6 +135,7 @@
         PATCH $5809, initDiskBasic      ; HRUNC
         ;PATCH $5b9a, getHostDate        ; get date from host when no clockchip found (different 5b95)              ; does not appear to work?
         ;PATCH $599c, initClockchip      ; intercept 'check for and initialize clockchip' normally 0x40B8 is called ; does not appear to work?
+        ;PATCH $5b9a, initClockchip      ; intercept 'check for and initialize clockchip' normally 0x40B8 is called ; does not appear to work?
 
         code @ $7405
 

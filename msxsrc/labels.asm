@@ -70,6 +70,7 @@ C_BLOCKREAD     equ $94
 C_BLOCKWRITE    equ $95
 C_CPUINFO       equ $96
 C_COMMAND       equ $97
+C_STDOUT        equ $98
 
 API_NOWMAP      equ 0
 

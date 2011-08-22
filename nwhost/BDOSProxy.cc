@@ -357,7 +357,7 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
     if (result != 0)
     {
         blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
-		DBERR("BDOSProxy::FindNext <file not fond>\n");
+		//DBERR("BDOSProxy::FindNext <file not fond>\n");
     }
     else
     {
@@ -378,7 +378,7 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
         blockRead.init(command.getHL(), buffer.size(), buffer);
 		findNextState = BDOSCMD_EXECUTING;
 		found = true;
-		DBERR("file: %s size: %u\n", data.name, data.size);
+		//DBERR("file: %s size: %u\n", data.name, data.size);
     }
     
 #else
