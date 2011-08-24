@@ -82,8 +82,7 @@ bootMSXDOS2:
         jp  $47d6                   ; address of ROMINIT in DOS2
 
 gotHostReply:                                        
-        DEBUGDUMPREGISTERS
-        cp 1
+        cp 1                        ; A=1 means DOS1, A=2 means DOS2
         jr nz,bootMSXDOS2
 
 bootMSXDOS1:
