@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="msxsrc"
 	ProjectGUID="{38CF369E-8463-4C57-9101-7A6211D45184}"
 	RootNamespace="msxsrc"
@@ -133,6 +133,14 @@
 				RelativePath=".\extendedBios.asm"
 				>
 				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
 					>
@@ -145,12 +153,24 @@
 				RelativePath=".\flash01.asm"
 				>
 				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Assemble $(InputDir)$(InputName).bin"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						AdditionalDependencies="flashWriter.asm"
+						Outputs="$(InputDir)$(InputName).bin"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assemble $(InputDir)$(InputName).bin"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						AdditionalDependencies="flashWriter.asm"
 						Outputs="$(InputDir)$(InputName).bin"
 					/>
 				</FileConfiguration>
@@ -158,6 +178,14 @@
 			<File
 				RelativePath=".\flashWriter.asm"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
@@ -170,6 +198,14 @@
 			<File
 				RelativePath=".\init.asm"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
@@ -203,12 +239,22 @@
 				RelativePath=".\msxdos23.asm"
 				>
 				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Assemble $(InputDir)$(InputName).out"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						Outputs="$(InputDir)$(InputName).out"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assemble $(InputDir)$(InputName).out"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
 						Outputs="$(InputDir)$(InputName).out"
 					/>
 				</FileConfiguration>
@@ -221,9 +267,10 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Assembly using sjasm"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
-						Outputs="$(OutDir)nowind.rom"
+						Description="Assemble $(InputDir)$(InputName).rom"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						AdditionalDependencies="nowindbdos.asm debug.asm init.asm labels.asm tracer.asm"
+						Outputs="always_build_foo"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -231,16 +278,32 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Assembly $(InputDir)$(InputName).rom"
+						Description="Assemble $(InputDir)$(InputName).rom"
 						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
-						AdditionalDependencies="nowindbdos.asm"
-						Outputs="$(InputDir)$(InputName).rom"
+						AdditionalDependencies="nowindbdos.asm debug.asm init.asm labels.asm tracer.asm"
+						Outputs="always_build_foo"
 					/>
 				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\nowindbdos.asm"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\nowindDriver.asm"
@@ -305,6 +368,22 @@
 			<File
 				RelativePath=".\tracer.asm"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\vram.asm"

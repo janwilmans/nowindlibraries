@@ -129,7 +129,7 @@ void SlotSelector::configure(unsigned int msxVersion) {
     enum nw_attribute { attr_none = 0, enable_phantom_drives, allow_other_diskroms, enable_dos2 };
     //usbInterface->setAttribute(enable_dos2, true);
     
-    addMemoryDevice(usbInterface, 2, 0, 0); 
+    addMemoryDevice(usbInterface, 2, 0, 0x0000); 
 
     usbInterface->insertDisk(0, "../disks/wb.dsk");
 //  usbInterface->insertDisk(0, "../disks/test.dsk");
