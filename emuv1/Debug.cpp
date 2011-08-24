@@ -272,6 +272,19 @@ void Debug::debug_wrap_sprintf(const char *cFormat, ...)
 	VSPRINTF(scratch, MAXMSG, cFormat, arg_list);
 	va_end (arg_list);
 
+	// ex. DBERR("CMD_INSTR_ON"); would enable instruction logging
+	if (0 != strstr(scratch, "CMD_INSTR_ON"))
+	{
+	
+	    Debug::Instance()->STACK_TRACING = true;
+	    Debug::Instance()->INSTRUCTION_TRACING = true;
+	}
+	if (0 != strstr(scratch, "CMD_INSTR_OFF"))
+	{
+	    Debug::Instance()->STACK_TRACING = false;
+	    Debug::Instance()->INSTRUCTION_TRACING = false;
+	}
+
 	//LogWatcher::Instance()->addLogLine(scratch);
 
 #ifdef LOG_TO_ERRFILE

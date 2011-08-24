@@ -964,7 +964,7 @@ int
 
     fprintf(stdout,"Usage: %s File [a[8]][j][b#][s#][e#|l#][f#]...\n",ArgS[0]);
     fprintf(stdout,"      ... [o][r][c[@][#]][u[@]][n][0][k][t[@]][xFile][w][d][i][gHeader]\n\n");
-    fprintf(stdout,"Ex. gremlin foo.bin a b0x4000\n\n");
+    fprintf(stdout,"Ex. gremlin foo.bin o a b0x4000\n\n");
     fprintf(stdout,"a = prints  Addresses (with 4 digits  j = prints offsets  of relative Jumps \n");
     fprintf(stdout,"    by default or with \"8\").              instead of addresses.             \n");
     fprintf(stdout,"s = Start address # (default=Base).   b = sets Base address # (default=0).  \n");

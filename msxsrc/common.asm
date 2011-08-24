@@ -39,6 +39,12 @@ initClockchip:
         xor a
         ret
         
+;       YF248   equ     0F248H                  ; current day (1..31)
+;115	YF249   equ     0F249H                  ; current month (1..12)
+;116	YF24A   equ     0F24AH                  ; current year (offset to 1980)
+;117	YF24C   equ     0F24CH                  ; current days since 1-1-1980
+;118	YF24E   equ     0F24EH                  ; current day of week (0=sunday)        
+        
 
 ; search call statement or device name
 findStatementName:
@@ -372,7 +378,8 @@ executeCommandNowindInPage2:
 ; out: carry = error / timeout occurred
 ; changed: all?
 ; requirements: stack available
-
+; todo: refactor 'blockRead' so the host detemines what kind of transfer to do (loose the requirement for A as input )
+;       just do a blockRead01 always and have the host switch to > 0x8000 when needed.
 blockRead:
         rlca                            ; tranfer address < 0x8000 ?
         jr c,.page23
