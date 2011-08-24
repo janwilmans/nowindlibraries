@@ -367,7 +367,7 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
 
         vector<byte> buffer;
         getVectorFromFileName(buffer, filename);
-		buffer.resize(36);
+		buffer.resize(37);
 
 		//todo: find out why this is offset +1 ? size should start at 0x0c (getVectorFromFileName returns prefixed 0 !?) 8+3 = 11, not 12
 		buffer[0x1d] = filesize & 0xff;
@@ -452,6 +452,14 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
     recordSize = command.getFCBrecordSize();
     word offset = recordSize*command.getRandomAccessRecord();
 
+    /*
+    string file = command.getFilenameFromExtraData();
+    if (file.find("SOURCE.TXT") != string::npos)
+    {
+        DBERR("CMD_INSTR_ON");
+    }
+    */
+    
     DBERR("> FCB address: 0x%04X, offset: %u, recordsRequested: %u, recordSize: %u\n", fcbAddress, offset, recordsRequested, recordSize);
 
     std::vector<byte> buffer;

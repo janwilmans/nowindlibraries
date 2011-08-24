@@ -317,7 +317,7 @@ void Emulator::start() {
 	// todo: execute one instruction before we really start, so emuTime will not be zero and
 	// we still won't need extra checks to prevent "division by zero"
 
-Debug::Instance()->INSTRUCTION_TRACING = true;
+//Debug::Instance()->INSTRUCTION_TRACING = true;
 
 #ifdef ZEXALL_ON
     cpu->setupBdosEnv("zexall/zexdoc.com");

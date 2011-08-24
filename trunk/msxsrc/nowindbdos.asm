@@ -29,8 +29,8 @@ BDOS_ABSOLUTESECTORWRITE        equ $30
 
 currentFilePosition2 := $        
 
-        code ! $408F
-        jp bdosInternalOutputToScreen    ; internal bdos subroutine that calls the CHPUT BIOS call
+        ;code ! $408F
+        ;jp bdosInternalOutputToScreen    ; internal bdos subroutine that calls the CHPUT BIOS call
         
         ;code ! $40AB                    ; MSX BIOS call logging for call made by BDOS
         ;jp bdosInternalCallBios
@@ -40,7 +40,7 @@ currentFilePosition2 := $
 
 ;         code ! $53a7                   
 ;         ld a,c                          ; needed because C_OUT is called internally
-;C_OUT:   jp bdosConsoleOutput            ; 0x02
+;C_OUT:   jp bdosConsoleOutput            ; 0x02, no need to patch this, because it uses 'bdosInternalOutputToScreen' which is already patched
 
 ;        code ! $546e
 ;        jp bdosAuxInput                 ; 0x03
@@ -138,13 +138,13 @@ currentFilePosition2 := $
         jp bdosRandomBlockWriteZeroFill ; 0x28
 
 ;        code ! $553c
-;        jp bdosGetDate                  ; 0x2a
+;        jp bdosGetDate                  ; 0x2a   ; todo: implement, on msx1 the date is stored in RAM? 
 
 ;        code ! $5552
 ;        jp bdosSetDate                  ; 0x2b
 
 ;        code ! $55db
-;        jp bdosGetTime                  ; 0x2c
+;        jp bdosGetTime                  ; 0x2c  ; todo: find out what this does on clockchipless MSX
 
 ;        code ! $55e6
 ;        jp bdosSetTime                  ; 0x2d
@@ -169,7 +169,7 @@ bdosInternalCallBios:
 
         DEBUGMESSAGE "bdosInternalCallBios"
 
-        ; code from original bdosInternalOutputToScreen implementation
+        ; code from original bdosInternalCallBios implementation
         push    iy
         ld      iy,(EXPTBL-1+0)
         call    CALSLT
@@ -353,7 +353,12 @@ bdosRandomBlockRead:
         call blockRead
         jr c,.error
         
-        DEBUGMESSAGE "blockRead done!"
+        DEBUGMESSAGE "data blockRead done!"
+        
+        
+        
+        
+        ; todo: receive updated FCB here with second blockread
         
         call receiveRegisters       ; get bdosRandomBlockRead results   
         jr c,.error
@@ -366,7 +371,7 @@ bdosRandomBlockRead:
                     
         ; FCB update, hl must be added to the random record field [FCB+0x21] [FCB+0x22] [FCB+0x23]
         ; see: http://msxsyssrc.cvs.sourceforge.net/viewvc/msxsyssrc/disk100upd/disk.mac?revision=1.1&view=markup line: 1875
-
+        
         push hl
         push de
         ld e, (ix+$21)
