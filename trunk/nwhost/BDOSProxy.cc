@@ -367,9 +367,10 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
 
         vector<byte> buffer;
         getVectorFromFileName(buffer, filename);
-		buffer.resize(37);
+		buffer.resize(64);  
 
 		//todo: find out why this is offset +1 ? size should start at 0x0c (getVectorFromFileName returns prefixed 0 !?) 8+3 = 11, not 12
+		// not a clue why this works AT ALL, FindNext is supposed to return a 64 byte FileInfoBlock (do not confuse with FCB) 
 		buffer[0x1d] = filesize & 0xff;
 		buffer[0x1e] = (filesize >> 8) & 0xff;
 		buffer[0x1f] = (filesize >> 16) & 0xff;
