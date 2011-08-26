@@ -1,0 +1,11 @@
+#summary Nowind Libraries
+#labels Phase-Implementation
+
+= Introduction =
+
+Nowind Interface software is the main user of the 'Nowind Libraries'.
+
+
+= Details =
+
+We will try to create regular stable release labels from now on (aug. 2011). Use the head source code at your own risk (will not damage anything, but might not work as expected.)
