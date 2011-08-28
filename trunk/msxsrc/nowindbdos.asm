@@ -398,13 +398,11 @@ bdosRandomBlockRead:
         ld a,1
         ret
 
-; function: BDOS 0x14, Sequential Read 
+; function: BDOS 0x14, Sequential Read, reads the next 128 bytes.
 ; in: de = pointer to opened FCB
-;     hl = number of records to read
 ;
 ; out: a = 1 if error (usually cause by end-of-file)
 ;      a = 0 if no error
-;     hl = number of records actually read
         
 bdosSequentialRead:
         DEBUGMESSAGE "bdosSequentialRead"
@@ -412,10 +410,11 @@ bdosSequentialRead:
         xor  a                          ; 0 means no CP/M, non-zero means CP/M compatible BDOS call, 
         ld   ($F306),a                  ; for CP/M  ld l,a and ld h,b is done after return of the BDOS function.   
 
-        push de
+        push de                         ; read just 1 record of 128 bytes        
         pop ix
         ld (ix+$0e), 128       
-        ld (ix+$0f), 0       
+        ld (ix+$0f), 0  
+        ld hl,1                 
 
         push de
         ld bc,(BDOS_DTA)                ; send DTA in bc
