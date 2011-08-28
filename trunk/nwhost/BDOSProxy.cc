@@ -148,8 +148,8 @@ bool BDOSProxy::OpenFile(const Command& command, Response& response)
     // http://www.konamiman.com/msx/msx2th/th-3.txt
     // "opening" a file
 
-	buffer[0x0e] = 0;   // reset extent high byte
-    buffer[0x0f] = filesize / 128; // CP/M record count
+	buffer[0x0e] = 0;   // set default record size to 512 (tested) // should we test for CP/M and set 128 is some cases, not sure.
+    buffer[0x0f] = 2;   
 	
 	buffer[0x10] = filesize & 0xff;
 	buffer[0x11] = (filesize >> 8) & 0xff;
@@ -453,13 +453,11 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
     recordSize = command.getFCBrecordSize();
     word offset = recordSize*command.getRandomAccessRecord();
 
-    /*
     string file = command.getFilenameFromExtraData();
     if (file.find("SOURCE.TXT") != string::npos)
     {
-        DBERR("CMD_INSTR_ON");
+        //DBERR("CMD_INSTR_ON");
     }
-    */
     
     DBERR("> FCB address: 0x%04X, offset: %u, recordsRequested: %u, recordSize: %u\n", fcbAddress, offset, recordsRequested, recordSize);
 
@@ -481,9 +479,9 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
         }
         
         // add zero padding to partial record
+        DBERR("padding: %u\n", paddingBytes);
         for (int i=0; i<paddingBytes; ++i)
         {
-            DBERR("padd address: 0x%04x\n", actuallyRead+i);
             buffer[actuallyRead+i] = 0;
         }
 	}
@@ -492,7 +490,7 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
     if (actuallyRead == 0)
     {
         DBERR("actuallyRead == 0, cancel tranfer\n");
-        // requesting more data where the EOF is reached is legal, 
+        // requesting more data after EOF is reached is legal, 
         // but we dont have anything to transfer, so let the blockRead exit.
         blockRead.cancelWithCode(BlockRead::BLOCKREAD_EXIT);
         
@@ -512,7 +510,7 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
     }
     else
     {
-		DBERR(" * RandomBlockReadState = BDOSCMD_EXECUTING\n");
+        DBERR(" * RandomBlockReadState = BDOSCMD_EXECUTING, send back %u bytes\n", recordsToSend*recordSize);
         dmaAddress = command.getBC();
         blockRead.init(dmaAddress, recordsToSend*recordSize, buffer);
 		RandomBlockReadState = BDOSCMD_EXECUTING;

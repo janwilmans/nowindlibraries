@@ -14,10 +14,16 @@ INIHRD:
         ld (hl),$ff
         ret
 
-; TODO:input/output 
+
+; function: DRIVES, returns the number of connected drives (for this diskrom)
+;
+; in:  none
+; out: l = number of drives
+;
+; remark: registers A, BC and DE should be preserved!
 DRIVES:
         DEBUGMESSAGE "DRIVES"
-        push af                         ; A, BC and DE should be preserved!
+        push af
         push bc
         push de
         ld a,(DEVICE)
@@ -75,7 +81,7 @@ inienvCommand:
         ret
 
 
-; function: DSKIO, transfers logical sectors from memory to disk (write) or from disk to memory (read)
+; function: DSKIO ($4010), transfers logical sectors from memory to disk (write) or from disk to memory (read)
 ;
 ; in:  f = carry for set for write, reset for read
 ;      a = drive number
@@ -85,7 +91,13 @@ inienvCommand:
 ;     hl = transfer address
 ;     
 ; out: f = carry set when not successful
-;      a = error code
+;      a = 0, write protected
+;      a = 2, not ready
+;      a = 4, data (CRC) error
+;	   a = 6, seek error
+;	   a = 8, record not found
+;      a = 10, write fault
+;      a = 12, other error
 ;      b = number of remaining sectors (TODO: check! even without error?)
 ;
 ; remark: original DSKIO changes all registers including ix, iy but not the shadow registers.
@@ -109,18 +121,18 @@ DSKIO:
         xor a
         ret
         
-; function: DSKCHG, check whether the disk has been changed
+; function: DSKCHG ($4013), check whether the disk has been changed
 ;
-; in:  a = drive number
+; in:  a = drive number (0=A:, etc.)
 ;      b = 0
 ;      c = media descriptor (previous)
 ;     hl = base address of DPB
 ;     
-; out: a = error code
+; out: a = error code, like DSKIO
 ;      b = -1, disk changed (DPB is updated)
 ;      b = 0, unknown (DPB is updated)
 ;      b = 1, disk unchanged
-;      f = carry set when not succesfull
+;      f = carry set when not succesful
 ;
 ; changed: c, de, hl, ix
         
@@ -168,7 +180,7 @@ dskchgCommand:
         ld c,(hl)
         ret
 
-; function: GETDPB, get DPB for specified media descriptor
+; function: GETDPB ($4016), get DPB for specified media descriptor
 ;
 ; in:  a = drive number
 ;      b = media descriptor (first byte of FAT)
@@ -226,10 +238,11 @@ getdpbCommand:
         ldir
         ret
 
-; function: CHOICE, ?
+; function: CHOICE ($4019)
 ;
-; in:  ?
-; out: ?
+; in:  none
+; out: HL = Address of zero terminated character string with the text with choices for a DSKFMT
+;      If there is no choice (only 1 format supported) return [HL]=0
 ; unchanged: ?
 
 CHOICE:
@@ -243,11 +256,26 @@ CHOICE:
         ret
         endif
 
-; function: DSKFMT, ?
+; function: DSKFMT, Format disk
+;    format a disk and writes a MSX boot sector at sector 0, clears all FATs.
+;    (media descriptor at first byte, 0FFh at second/third byte and rest zero)
+;    and clears the directory (filling it with zeros)
 ;
-; in:  ?
-; out: ?
-; unchanged: ?
+; in:  a = choice specified by user (1-9). See CHOICE
+;      d = drive number (0=A:)
+;     hl = begin address of work area
+;     bc = length of work area
+; out: f = carry set when not succesful 
+;      a = error code, if not succesful
+;      a = 0, write protected
+;      a = 2, not ready
+;      a = 4, data (CRC) error
+;      a = 6, seek error
+;      a = 8, record not found
+;      a = 10, write fault
+;      a = 12, bad parameter
+;      a = 14, insufficient memory
+;      a = 16, other errors
 
 DSKFMT:
         ld a,16                         ; other error
