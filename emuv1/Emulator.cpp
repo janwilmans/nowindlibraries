@@ -481,7 +481,7 @@ void Emulator::handle_key_and_sdl_events() {
                     if (data != NULL) 
                     { 
 			   		 	Emulator::Instance()->clipboardStream = string(data);
-                        DBERR("data pasted: %s\n", data);
+                        //DBERR("data pasted: %s\n", data);
                         GlobalUnlock(clipboardHandle); 
                     } else {
                         DBERR("failed to obtain clipboard lock, no data pasted.\n");

@@ -22,8 +22,9 @@ BDOS_ABSOLUTESECTORREAD         equ $2f
 BDOS_ABSOLUTESECTORWRITE        equ $30
 
 
-; Only patching the BDOS hook ($f37d) and its jumptable will not work as some routines are called directly.
-; For example, COMMAND.COM assumes these routines are at fixed places in the diskrom.
+; patching the BDOS hook ($f37d) or its jumptable will not work as some routines are called directly internally by the BDOS itself.
+; For example, H.BINL (load binary) assumes these routines are at fixed places in the diskrom. Also some programs may assume the 
+; addresses are fixed and call them directly.
         
         PATCH $5d20, nowindBDOS              ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW (for logging only)     
 
@@ -132,19 +133,22 @@ currentFilePosition2 := $
         jp bdosRandomBlockWrite         ; 0x26
 
         code ! $47b2
-        jp bdosRandomBlockRead          ; 0x27
+        call bdosRandomBlockRead          ; 0x27
+        ret
 
         code ! $47d1
         jp bdosRandomBlockWriteZeroFill ; 0x28
 
 ;        code ! $553c
 ;        jp bdosGetDate                  ; 0x2a   ; todo: implement, on msx1 the date is stored in RAM? 
+; Leest de datum en zet deze in de Z80-registers. A : dag van de week, D : dag, E : maand, HL: jaar
 
 ;        code ! $5552
 ;        jp bdosSetDate                  ; 0x2b
 
 ;        code ! $55db
 ;        jp bdosGetTime                  ; 0x2c  ; todo: find out what this does on clockchipless MSX
+; Leest de tijd en zet deze in de Z80-registers. E : honderdsten van seconden, D : seconden, L : minuten, H : Uren
 
 ;        code ! $55e6
 ;        jp bdosSetTime                  ; 0x2d
@@ -334,10 +338,12 @@ bdosRandomBlockWrite:
 ; out: a = 1 if error (usually cause by end-of-file)
 ;      a = 0 if no error
 ;     hl = number of records actually read
-; changed: all? 
         
 bdosRandomBlockRead:
         DEBUGMESSAGE "bdosRandomBlockRead"
+
+        xor  a                          ; 0 means no CP/M, non-zero means CP/M compatible BDOS call, 
+        ld   ($F306),a                  ; for CP/M  ld l,a and ld h,b is done after return of the BDOS function.   
 
         push de
         ld bc,(BDOS_DTA)                ; send DTA in bc
@@ -354,9 +360,6 @@ bdosRandomBlockRead:
         jr c,.error
         
         DEBUGMESSAGE "data blockRead done!"
-        
-        
-        
         
         ; todo: receive updated FCB here with second blockread
         
@@ -386,10 +389,79 @@ bdosRandomBlockRead:
 
         DEBUGMESSAGE "FCB updated"
         DEBUGDUMPREGISTERS
+        ;DEBUGMESSAGE "CMD_INSTR_ON"
         ret
         
 .error: 
         DEBUGMESSAGE "BDOS 0x27 error"
+        ld hl,0
+        ld a,1
+        ret
+
+; function: BDOS 0x14, Sequential Read 
+; in: de = pointer to opened FCB
+;     hl = number of records to read
+;
+; out: a = 1 if error (usually cause by end-of-file)
+;      a = 0 if no error
+;     hl = number of records actually read
+        
+bdosSequentialRead:
+        DEBUGMESSAGE "bdosSequentialRead"
+
+        xor  a                          ; 0 means no CP/M, non-zero means CP/M compatible BDOS call, 
+        ld   ($F306),a                  ; for CP/M  ld l,a and ld h,b is done after return of the BDOS function.   
+
+        push de
+        pop ix
+        ld (ix+$0e), 128       
+        ld (ix+$0f), 0       
+
+        push de
+        ld bc,(BDOS_DTA)                ; send DTA in bc
+        call sendRegisters
+        ld (hl),BDOS_RANDOMBLOCKREAD
+        pop de
+
+        ex de,hl                        ; send FCB to host
+        ld bc,37
+        ldir
+
+        ld a,(BDOS_DTA + 1)
+        call blockRead
+        jr c,.error
+        
+        DEBUGMESSAGE "data blockRead done!"
+        
+        ; todo: receive updated FCB here with second blockread
+        
+        call receiveRegisters       ; get bdosRandomBlockRead results   
+        jr c,.error
+        
+        DEBUGMESSAGE "receiveRegisters done!"
+
+        ; A = 1 if an error occured (mostly EOF), otherwise A = 0
+        ; HL = records received
+        ; DE and IX = address of open FCB
+                    
+        ; FCB update, hl must be added to the random record field [FCB+0x21] [FCB+0x22] [FCB+0x23]
+        ; see: http://msxsyssrc.cvs.sourceforge.net/viewvc/msxsyssrc/disk100upd/disk.mac?revision=1.1&view=markup line: 1875
+        
+        push hl
+        push de
+        ld e, (ix+$21)
+        ld d, (ix+$22)
+        add hl,de
+
+        ld (ix+$21), l
+        ld (ix+$22), h
+        ld (ix+$23), 0        
+        pop de
+        pop hl
+        ret
+        
+.error: 
+        DEBUGMESSAGE "BDOS 0x14 error"
         ld hl,0
         ld a,1
         ret
@@ -406,8 +478,9 @@ bdosAbsoluteSectorWrite:
         ld a,2  ; not ready (TODO: check!)
         ret
 
+
+
 bdosDiskReset:
-bdosSequentialRead:
 bdosSequentialWrite:
 bdosRandomRead:
 bdosRandomWrite:
