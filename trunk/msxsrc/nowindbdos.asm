@@ -324,6 +324,12 @@ bdosRenameFile:
         ld a,255        ; rename unsuccessful
         ret
 
+; function: BDOS 0x26, Random Block Write
+; in: de = pointer to opened FCB
+;     hl = number of records to write
+;
+; out: a = 1 if error 
+;      a = 0 if no error
 bdosRandomBlockWrite:     
         DEBUGMESSAGE "bdosRandomBlockWrite"
         call sendRegisters
