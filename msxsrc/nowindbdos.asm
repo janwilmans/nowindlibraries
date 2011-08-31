@@ -405,65 +405,14 @@ bdosRandomBlockRead:
 ;      a = 0 if no error
         
 bdosSequentialRead:
+
         DEBUGMESSAGE "bdosSequentialRead"
-
-        xor  a                          ; 0 means no CP/M, non-zero means CP/M compatible BDOS call, 
-        ld   ($F306),a                  ; for CP/M  ld l,a and ld h,b is done after return of the BDOS function.   
-
         push de                         ; read just 1 record of 128 bytes        
         pop ix
-        ld (ix+$0e), 128       
+        ld (ix+$0e), 128
         ld (ix+$0f), 0  
-        ld hl,1                 
-
-        push de
-        ld bc,(BDOS_DTA)                ; send DTA in bc
-        call sendRegisters
-        ld (hl),BDOS_RANDOMBLOCKREAD
-        pop de
-
-        ex de,hl                        ; send FCB to host
-        ld bc,37
-        ldir
-
-        ld a,(BDOS_DTA + 1)
-        call blockRead
-        jr c,.error
-        
-        DEBUGMESSAGE "data blockRead done!"
-        
-        ; todo: receive updated FCB here with second blockread
-        
-        call receiveRegisters       ; get bdosRandomBlockRead results   
-        jr c,.error
-        
-        DEBUGMESSAGE "receiveRegisters done!"
-
-        ; A = 1 if an error occured (mostly EOF), otherwise A = 0
-        ; HL = records received
-        ; DE and IX = address of open FCB
-                    
-        ; FCB update, hl must be added to the random record field [FCB+0x21] [FCB+0x22] [FCB+0x23]
-        ; see: http://msxsyssrc.cvs.sourceforge.net/viewvc/msxsyssrc/disk100upd/disk.mac?revision=1.1&view=markup line: 1875
-        
-        push hl
-        push de
-        ld e, (ix+$21)
-        ld d, (ix+$22)
-        add hl,de
-
-        ld (ix+$21), l
-        ld (ix+$22), h
-        ld (ix+$23), 0        
-        pop de
-        pop hl
-        ret
-        
-.error: 
-        DEBUGMESSAGE "BDOS 0x14 error"
-        ld hl,0
-        ld a,1
-        ret
+        ld hl,1  
+        jp bdosRandomBlockRead    
 
 bdosAbsoluteSectorRead:
         DEBUGMESSAGE "bdosAbsoluteSectorRead"
