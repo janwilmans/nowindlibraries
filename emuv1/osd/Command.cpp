@@ -41,6 +41,9 @@ Command::Command() {
     command["print"] = COMMAND_PRINT;
     command["?"] = COMMAND_PRINT;
     command["dis"] = COMMAND_DISASM;
+    command["debug"] = COMMAND_DEBUG;
+    command["disk"] = COMMAND_CHANGE_DISK;
+    
 	DBERR("Command constructor...finished\n");
 }
 
@@ -233,7 +236,8 @@ void Command::interpretCommand() {
         break;
     case COMMAND_DISASM:
         {
-            char address[10];
+            // TODO: check addresses > 0xffff !!!!
+            char address[50];
             nw_word addr = string2Word(part[1]);
             for (int i=0;i<20;i++) {
                 
@@ -246,48 +250,24 @@ void Command::interpretCommand() {
             }
         }
         break;
+/*
+    case COMMAND_DEBUG:
+        {
+    		commandMode = DEBUGMODE;
+            OnScreenDisplay::Instance()->setTextBuffer();
+        }
+        break;
+*/
+    case COMMAND_CHANGE_DISK:
+        {
+		    DiskInterface::Instance()->insertDisk(0, part[1]);  // TODO: does not work for Nowind drive!
+        }
+        break;
     default:
         if (commandLine != "") addLine("Unknown command...");
     }
     
     if (error) addLine("Invalid argument(s)...");
-
-/*
-	} else if (commandLine.substr(0,5) == "disk " ) {
-		string diskname = commandLine.substr(5);
-		DiskInterface::Instance()->insertDisk(0, diskname);
-	} else if (commandLine.substr(0,5) == "dis $" ) {
-        nw_word dis_addr = hexStringToInt(commandLine.substr(5));
-        
-        OnScreenDisplay::Instance()->osdMessage("Disasm: $" + wordToHexstring(dis_addr));
-        
-        // TODO: 
-        // - out ($98),a        ; write to vram
-        // - out ($99),a        ; write vdp data
-        // - out ($99),a        ; write to vdp register XX
-        
-        for (int i=0;i<8;i++) {
-            nw_word oc_part1 = Z80::Instance()->readMem16Public(dis_addr);
-            nw_word oc_part2 = Z80::Instance()->readMem16Public(dis_addr+2);
-
-            nw_word dis_start = dis_addr;  
-            string pc_str = wordToHexstring(dis_addr);
-            string opcode_str = Disassembler::Instance()->disAsm(&dis_addr,oc_part1,oc_part2,true);
-
-            string print_str = pc_str + ": ";
-            while(print_str.length() < 7) print_str = print_str + " ";
-
-            string bytes_str = wordsToHexstring(dis_addr - dis_start, oc_part1, oc_part2);
-            print_str += bytes_str + " " + opcode_str;
-            
-            OnScreenDisplay::Instance()->osdMessage(print_str);
-        }
-	} else if (commandLine.substr(0,5) == "debug" ) {
-		commandMode = DEBUGMODE;
-        OnScreenDisplay::Instance()->setTextBuffer();
-		
-    }
-*/
 }
 
 nw_word Command::string2Word(string str) {

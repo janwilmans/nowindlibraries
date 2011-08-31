@@ -20,6 +20,8 @@ enum {
     COMMAND_MON,
     COMMAND_PRINT,
     COMMAND_DISASM,
+    COMMAND_DEBUG,  // TODO: not working!
+    COMMAND_CHANGE_DISK,
 };
 
 typedef std::map<std::string, int> commandMap;
