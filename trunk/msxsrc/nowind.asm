@@ -2,7 +2,7 @@
         ; enabled bdos patches, this is an experimental new mode
         ; which allows direct access to the host harddisk through patch BDOS calls 
         ; this is potentially much faster and eliminates the need for disk-images.
-        define BDOS_NOWIND
+        ;define BDOS_NOWIND
         
         ; enables messages that can only be viewed in emulation, 
         ; are harmless on real hardware but cause small delays

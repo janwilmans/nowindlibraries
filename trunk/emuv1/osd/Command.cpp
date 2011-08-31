@@ -40,7 +40,7 @@ Command::Command() {
     command["mon"] = COMMAND_MON;
     command["print"] = COMMAND_PRINT;
     command["?"] = COMMAND_PRINT;
-    
+    command["dis"] = COMMAND_DISASM;
 	DBERR("Command constructor...finished\n");
 }
 
@@ -230,7 +230,22 @@ void Command::interpretCommand() {
             sprintf(tmp, "dec:%i hex:%04x char(&255):%c", value, value, value & 255);
             addLine(tmp);
         }
-        break;    
+        break;
+    case COMMAND_DISASM:
+        {
+            char address[10];
+            nw_word addr = string2Word(part[1]);
+            for (int i=0;i<20;i++) {
+                
+                nw_word oc_part1 = Z80::Instance()->readMem16Public(addr);
+                nw_word oc_part2 = Z80::Instance()->readMem16Public(addr+2);
+
+                string opcode_str = Disassembler::Instance()->disAsm(&addr, oc_part1, oc_part2, true);
+                sprintf(address, "0x%04x: ", addr);
+                addLine(address + opcode_str);
+            }
+        }
+        break;
     default:
         if (commandLine != "") addLine("Unknown command...");
     }
@@ -276,19 +291,22 @@ void Command::interpretCommand() {
 }
 
 nw_word Command::string2Word(string str) {
-    
-    int len = str.length();
-    if (str[0] == '$') return hex2Word(str.substr(1));
-    if (str[len-1] == 'h') return hex2Word(str.substr(0, len-1));
-
+       
     nw_word word = 0;
-    nw_word power = 1;
-    for (int i=0;i<len;i++) {
-        
-        nw_word value = str[len-i-1] - 48;
-        if (value > 9) return 0xffff;
-        word += value * power;
-        power *= 10;
+    int len = str.length();
+    if (len > 0)
+    {
+        if (str[0] == '$') return hex2Word(str.substr(1));
+        if (str[len-1] == 'h') return hex2Word(str.substr(0, len-1));
+ 
+        nw_word power = 1;
+        for (int i=0;i<len;i++) {
+           
+            nw_word value = str[len-i-1] - 48;
+            if (value > 9) return 0xffff;
+            word += value * power;
+            power *= 10;
+        }
     }
     return word;    
 }

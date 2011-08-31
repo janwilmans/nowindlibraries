@@ -69,23 +69,34 @@ char * Disassembler::disAsm(nw_word pc, nw_word w1, nw_word w2) {
 
 	char *sstr;
 	char buf[20], buf1[10];
-	nw_byte nb1 = 0;
-	nw_byte nb2 = 0;
+	nw_byte nb1, nb2, displacement;
 	size = 1;
 
-	switch (w1&0xFF) {
+    nw_byte opcode = w1 & 0xff;
+
+	switch (opcode) {
 	case 0xCB: size++; strcpy(mstr, &mnemonicCB[w1>>8][0]); nb1=w2&0xFF; nb2=w2>>8; break;
 	case 0xED: size++; strcpy(mstr, &mnemonicED[w1>>8][0]); nb1=w2&0xFF; nb2=w2>>8; break;
 	case 0xDD:
 	case 0xFD:
 		size++;
-		switch(w1>>8) {
-		case 0xCB: nb1=w2&0xFF; strcpy(mstr, &mnemonicCB[w2>>8][0]); break;
-		case 0xED: nb1=w2&0xFF; strcpy(mstr, &mnemonicED[w2>>8][0]); break;
-		default: strcpy(mstr, &mnemonic[w1>>8][0]); nb1=w2&0xFF; nb2=w2>>8; break;
+		opcode = w1 >> 8;
+		displacement = w2 & 0xff;
+		nb1 = w2 & 0xff;
+		switch(opcode) {
+		case 0x36: nb1 = w2 >> 8; strcpy(mstr, &mnemonic[0x36][0]); break;  // because opcode followed by displacement byte first
+		case 0xCB: strcpy(mstr, &mnemonicCB[w2>>8][0]); break;
+		case 0xED: strcpy(mstr, &mnemonicED[w2>>8][0]); break;
+		default: 
+		    strcpy(mstr, &mnemonic[opcode][0]);
+		    nb2=w2>>8;
+		    break;
 		}
 		break;
-	default: strcpy(mstr, &mnemonic[w1&0xFF][0]); nb1=w1>>8; nb2=w2&0xFF;
+	default: 
+	    strcpy(mstr, &mnemonic[opcode][0]);
+	    nb1=w1>>8;
+	    nb2=w2&0xFF;
 	}
 	sstr = strstr(mstr, "NN");
 	if (sstr!=NULL) {
@@ -130,12 +141,12 @@ char * Disassembler::disAsm(nw_word pc, nw_word w1, nw_word w2) {
 		strcpy(buf, sstr+1);
 		switch (w1&0xFF) {
 		case 0xDD:
-			sprintf(buf1, "ix+%02X", nb1);
+			sprintf(buf1, "ix+%02X", displacement);
 			strcpy(sstr, buf1);
 			size++;
 			break;
 		case 0xFD:
-			sprintf(buf1, "iy+%02X", nb1);
+			sprintf(buf1, "iy+%02X", displacement);
 			strcpy(sstr, buf1);
 			size++;
 			break;
@@ -269,13 +280,13 @@ void Disassembler::logRegisterColored(nw_word firstReg, nw_word secordReg) {
 	if ((firstReg >> 8) == (secordReg >> 8)) {
 		(*logfile) << string(byte1);
 	} else {
-		(*logfile) << "<font color=\"red\">" << string(byte1) << "</font>";
+		(*logfile) << "<font color='red'>" << string(byte1) << "</font>";
 	}
 
 	if ((firstReg & 255) == (secordReg & 255)) {
 		(*logfile) << string(byte2);
 	} else {
-		(*logfile) << "<font color=\"red\">" << string(byte2) << "</font>";
+		(*logfile) << "<font color='red'>" << string(byte2) << "</font>";
 	}
 
 }
@@ -283,85 +294,8 @@ void Disassembler::logRegisterColored(nw_word firstReg, nw_word secordReg) {
 string Disassembler::disAsm(nw_word *pc_pnt, nw_word w1, nw_word w2, bool hotinfo) {
 
     nw_word pc = *pc_pnt;
-	char *sstr;
-	char buf[20], buf1[10];
-	nw_byte nb1 = 0;
-	nw_byte nb2 = 0;
-	size = 1;
-	char mstr[40];
+    string retstr = string(disAsm(pc, w1, w2));
 
-	switch (w1&0xFF) {
-	case 0xCB: size++; strcpy(mstr, &mnemonicCB[w1>>8][0]); nb1=w2&0xFF; nb2=w2>>8; break;
-	case 0xED: size++; strcpy(mstr, &mnemonicED[w1>>8][0]); nb1=w2&0xFF; nb2=w2>>8; break;
-	case 0xDD:
-	case 0xFD:
-		size++;
-		switch(w1>>8) {
-		case 0xCB: nb1=w2&0xFF; strcpy(mstr, &mnemonicCB[w2>>8][0]); break;
-		case 0xED: nb1=w2&0xFF; strcpy(mstr, &mnemonicED[w2>>8][0]); break;
-		default: strcpy(mstr, &mnemonic[w1>>8][0]); nb1=w2&0xFF; nb2=w2>>8; break;
-		}
-		break;
-	default: strcpy(mstr, &mnemonic[w1&0xFF][0]); nb1=w1>>8; nb2=w2&0xFF;
-	}
-	sstr = strstr(mstr, "NN");
-	if (sstr!=NULL) {
-		sprintf(buf, "%02X", nb1);            // prefix $ !
-		memcpy(sstr, buf, 2);
-		size++;
-	}
-	sstr = strstr(mstr, "MMMM");
-	if (sstr!=NULL) {
-		sprintf(buf, "%04X", (nb2<<8)+nb1);
-		memcpy(sstr, buf, 4);
-		size+=2;
-	}
-	sstr = strstr(mstr, "EEEE");
-	if (sstr!=NULL) {
-		sprintf(buf, "%04X", pc+(signed char)nb1+2);
-		memcpy(sstr, buf, 4);
-		size++;
-	}
-	sstr = strstr(mstr, "Y");
-	if (sstr!=NULL) {
-		strcpy(buf, sstr+1);
-		switch (w1&0xFF) {
-		case 0xDD: strcpy(sstr, "ix"); break;
-		case 0xFD: strcpy(sstr, "iy"); break;
-		default: strcpy(sstr, "hl");
-		}
-		strcat(mstr, buf);
-	}
-	sstr = strstr(mstr, "R");
-	if (sstr!=NULL) {
-		strcpy(buf, sstr+1);
-		switch (w1&0xFF) {
-		case 0xDD: strcpy(sstr, "ix"); break;
-		case 0xFD: strcpy(sstr, "iy"); break;
-		default: strcpy(sstr, "hl");break;
-		}
-		strcat(mstr, buf);
-	}
-	sstr = strstr(mstr, "X");
-	if (sstr!=NULL) {
-		strcpy(buf, sstr+1);
-		switch (w1&0xFF) {
-		case 0xDD:
-			sprintf(buf1, "ix+%02X", nb1);
-			strcpy(sstr, buf1);
-			size++;
-			break;
-		case 0xFD:
-			sprintf(buf1, "iy+%02X", nb1);
-			strcpy(sstr, buf1);
-			size++;
-			break;
-		default: strcpy(sstr, "hl");break;
-		}
-		strcat(mstr, buf);
-	}
-	
-	string retstr = string(mstr);
     while(retstr.length() < 10) retstr = retstr + " ";
 
     string curr_pc = symbolnames[pc];
