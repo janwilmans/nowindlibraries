@@ -160,9 +160,6 @@ private:
 	unsigned int  getStartSector() const;
 	unsigned int  getStartAddress() const;
 	unsigned int  getCurrentAddress() const;
-    
-    void blockReadCmd();
-    void blockWriteCmd();
 
 	bool diskReadInit(SectorMedium& disk);
 	bool diskWriteInit(SectorMedium& disk);

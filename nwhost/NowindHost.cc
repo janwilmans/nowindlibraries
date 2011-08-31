@@ -172,7 +172,7 @@ void NowindHost::write(byte data, unsigned int time)
 	case STATE_EXECUTING_COMMAND:
 			executeCommand();
 		break;
-	case STATE_DISKWRITE:
+	case STATE_DISKWRITE:   // todo: move write-code from doDiskWrite1 / doDiskWrite2 into BlockWrite class 
 		assert(recvCount < (transferSize + 2));
 		command.extraData[recvCount] = data;
 		if (++recvCount == (transferSize + 2)) {
@@ -414,8 +414,6 @@ void NowindHost::executeCommand()
     case C_GETDOSVERSION: getDosVersion(); break;
 	case C_CMDREQUEST: commandRequested(); break;
 	//case 0xFF: vramDump();
-	case C_BLOCKREAD: blockReadCmd(); break;
-    case C_BLOCKWRITE: blockWriteCmd(); break;
     case C_CPUINFO: receiveExtraData(); nextState = STATE_CPUINFO; break;
     case C_COMMAND: apiCommand();  break;
     case C_STDOUT: stdOutCatch();  nextState = STATE_SYNC1; break;
@@ -711,28 +709,6 @@ void NowindHost::doDiskWrite2()
 
 	// continue the rest of the disk write
 	doDiskWrite1();
-}
-
-// dummy command (reads first 16Kb of disk as test)
-void NowindHost::blockReadCmd()
-{
-    DBERR("blockReadCmd\n");
-/*
-    SectorMedium* disk = drives[0]->getSectorMedium();
-    
-    vector<byte> data(16*1024);
-	if (disk->readSectors(&data[0], 0, 32)) {
-		DBERR("readSectors error reading sector 0-31\n");
-	}
-	
-    blockRead.init(0x8000, 0x4000, data);
-    state = STATE_BLOCKREAD;	
-*/
-}
-
-void NowindHost::blockWriteCmd()
-{
-    DBERR("blockWriteCmd\n");
 }
 
 void NowindHost::debugMessage(const char *, ...) const
