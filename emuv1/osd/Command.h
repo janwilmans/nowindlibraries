@@ -19,6 +19,7 @@ enum {
     COMMAND_ALPHA,
     COMMAND_MON,
     COMMAND_PRINT,
+    COMMAND_DISASM,
 };
 
 typedef std::map<std::string, int> commandMap;
