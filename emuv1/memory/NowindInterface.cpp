@@ -182,4 +182,7 @@ void NowindInterface::setAttribute(int attr, bool value)
     nowindusb_attribute(nwhost::nw_attribute(attr), false);
 }
 
-
+void NowindInterface::setRomDisk(nw_byte driveNumber)
+{
+    nowindusb_set_romdisk(driveNumber);
+}

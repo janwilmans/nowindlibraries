@@ -110,6 +110,8 @@ currentFilePosition := $
 ; BANKSWITCHING macro
         macro BANKSWITCHING bankNumber
 
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
+
 bankInit := $
         ld hl,nowindInit
         push hl
@@ -140,31 +142,12 @@ bankswitchEnd := $
         endmacro                        
 
 
-; ROMHEADER macro
-        macro ROMHEADER bankNumber
-
-        MSXROMHEADER
-        ds $8000-(bankswitchEnd - bankInit)-$, $ff
-        
-        BANKSWITCHING bankNumber
-        
-        endmacro
-
 ; ROMDISK macro
         macro INCLUDE_ROMDISK_360KB dskimage
         
-bankNumber := 5
+bankNumber := 8
 offset := 0
-
-        repeat 3
-
-; 3 empty banks with rom headers
-        MSXROMHEADER
-        ds $8000-(bankswitchEnd - bankInit)-$, $ff
-        BANKSWITCHING bankNumber        
-bankNumber := bankNumber + 1        
-        endrepeat
-        
+       
 ; 22 banks with sector data
         repeat 22
         
@@ -173,7 +156,6 @@ bankNumber := bankNumber + 1
         incbin dskimage, offset+512, 16384-512
         ds $8000-(bankswitchEnd - bankInit)-$, $ff
         BANKSWITCHING bankNumber
-        
 bankNumber := bankNumber + 1
 offset := offset + 16384        
         

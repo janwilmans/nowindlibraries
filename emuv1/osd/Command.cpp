@@ -15,6 +15,7 @@
 #include "DiskInterface.h"
 #include "video/V9938.h"
 #include "Debug.h"
+#include "Media.h"
 
 using namespace std;
 
@@ -260,7 +261,7 @@ void Command::interpretCommand() {
 */
     case COMMAND_CHANGE_DISK:
         {
-		    DiskInterface::Instance()->insertDisk(0, part[1]);  // TODO: does not work for Nowind drive!
+		    Media::Instance()->insertMedia(part[1], 0);
         }
         break;
     default:
