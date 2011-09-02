@@ -27,6 +27,7 @@ public:
             virtual void activate(unsigned int block);
             virtual ~NowindInterface();
             void setAttribute(int attr, bool value);
+            void setRomDisk(nw_byte driveNumber);
             
             static void debugout(const char *msg);
 };

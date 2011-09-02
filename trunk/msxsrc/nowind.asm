@@ -30,9 +30,14 @@
         include "debug.asm"
 
         defpage 0, $4000, $4000         ; MSXDOS2 bank 0
-        defpage 1, $4000, 3 * $4000     ; MSXDOS2 bank 1..3
-        defpage 2, $4000, $4000         ; MSXDOS1
-        defpage 3, $4000, (512-80)*1024 ; empty
+        defpage 1, $4000, $4000         ; MSXDOS2 bank 1
+        defpage 2, $4000, $4000         ; MSXDOS2 bank 2
+        defpage 3, $4000, $4000         ; MSXDOS2 bank 3
+        defpage 4, $4000, $4000         ; MSXDOS1
+        defpage 5, $4000, $4000         ; Nowind functions
+        defpage 6, $4000, $4000         ; empty
+        defpage 7, $4000, $4000         ; empty
+        defpage 8, $4000, 24*$4000      ; reserved (can be used for rom disk)
         
         ; insert MSXDOS2
 
@@ -84,18 +89,22 @@
         include "dos_aux.asm"
         include "device.asm"
 
-        ds $8000-(bankswitchEnd - bankInit)-$, $ff
         BANKSWITCHING 0
 
         page 1
-        incbin "..\roms\MSXDOS22.ROM", $4000, 3 * $4000
-
-;        PATCH $4002, bankInit
+        incbin "..\roms\MSXDOS22.ROM", $4000, $4000
+        ; PATCH $4002, bankInit
         PATCH $4093, mapper
-;        PATCH $8002, bankInit
-        PATCH $8093, mapper
-;        PATCH $C002, bankInit
-        PATCH $C093, mapper
+
+        page 2
+        incbin "..\roms\MSXDOS22.ROM", $8000, $4000
+        ; PATCH $4002, bankInit
+        PATCH $4093, mapper
+        
+        page 3
+        incbin "..\roms\MSXDOS22.ROM", $c000, $4000
+        ; PATCH $4002, bankInit
+        PATCH $4093, mapper
 
 ; TODO: bank switch routines!
 
@@ -105,7 +114,7 @@
         ; bank 3: 0x7E70 - 0x7FFF (400 bytes)
 
 ; insert MSXDOS1
-        page 2                          ; overwrite page2 with our patched DOS1 diskrom
+        page 4                          ; overwrite page2 with our patched DOS1 diskrom
         module MSXDOS1_MODULE
 
         define MSXDOSVER 1
@@ -151,10 +160,21 @@
         include "nowindbdos.asm"
         endif
 
-        ds $8000-(bankswitchEnd - bankInit)-$, $ff
         BANKSWITCHING 4
 
-        page 3         
+        page 5
+        MSXROMHEADER
+        BANKSWITCHING 5
+        
+        page 6
+        MSXROMHEADER
+        BANKSWITCHING 6
+
+        page 7
+        MSXROMHEADER
+        BANKSWITCHING 7
+        
+        page 8        
         module REMAINING_ROM_MODULE
                        
         ; create rom-headers required for Nowind Interface v1

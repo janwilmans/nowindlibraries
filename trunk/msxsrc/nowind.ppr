@@ -3,9 +3,10 @@ Compilator.FileName=make.bat
 Compilator.DefaultDir=C:\MSX\nowindlibraries\msxsrc\
 Compilator.SaveAll=1
 Compilator.Capture=1
+Compilator.ParsLog=%F(%L)%E             ;Clipper
 Compilator.HideOutput=1
 Compilator.LogType=0
-Prog1=Sjasm4,"C:\MSX\nowind\msxsrc\sjasm4.exe" "%File%"§
+Prog1=Sjasm4,"C:\MSX\nowind\Release\sjasm.exe" "%File%"§
 DefaultCPIndex=0
 LogtoEnd=1
 DontOpen=0
@@ -43,25 +44,33 @@ nowind
 		msxdos23.asm
 [Open project files]
 0=init.asm
-1=romdisk.asm
-2=slotRoutines.asm
-3=nowind.asm
-4=common.asm
+1=slotRoutines.asm
+2=common.asm
+3=nowindbdos.asm
+4=make.bat
+5=nowind.asm
+6=labels.asm
 [Selected Project Files]
 Main=
 Selected=nowind.asm
 [init.asm]
 TopLine=5
 Caret=13,55
-[romdisk.asm]
-TopLine=1
-Caret=1,1
 [slotRoutines.asm]
 TopLine=35
 Caret=1,1
+[common.asm]
+TopLine=603
+Caret=1,1
+[nowindbdos.asm]
+TopLine=1
+Caret=1,434
+[make.bat]
+TopLine=1
+Caret=23,2
 [nowind.asm]
 TopLine=1
 Caret=10,5
-[common.asm]
-TopLine=207
-Caret=1,1
+[labels.asm]
+TopLine=155
+Caret=51,113

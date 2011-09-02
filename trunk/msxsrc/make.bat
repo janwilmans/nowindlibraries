@@ -1,3 +1,4 @@
-@sjasm4beta\sjasm nowind.asm
-@sjasm4beta\sjasm msxdos23.asm
-@sjasm4beta\sjasm msxdostools\nowmap.asm
+pushd %~dp0
+..\Release\sjasm %~dp0nowind.asm
+..\Release\sjasm msxdos23.asm
+..\Release\sjasm msxdostools\nowmap.asm

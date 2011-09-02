@@ -446,6 +446,8 @@ bdosRandomBlockWriteZeroFill:
         di
         halt
         
+
+        ds 128
         
 ; http://www.konamiman.com/msx/msx-e.html#msx2th
 ; http://www.angelfire.com/art2/unicorndreams/msx/RR-BASIC.html
