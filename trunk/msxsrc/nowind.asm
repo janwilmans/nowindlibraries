@@ -29,15 +29,18 @@
         include "labels.asm"
         include "debug.asm"
 
-        defpage 0, $4000, $4000         ; MSXDOS2 bank 0
-        defpage 1, $4000, $4000         ; MSXDOS2 bank 1
-        defpage 2, $4000, $4000         ; MSXDOS2 bank 2
-        defpage 3, $4000, $4000         ; MSXDOS2 bank 3
-        defpage 4, $4000, $4000         ; MSXDOS1
-        defpage 5, $4000, $4000         ; Nowind functions
-        defpage 6, $4000, $4000         ; empty
-        defpage 7, $4000, $4000         ; empty
-        defpage 8, $4000, 24*$4000      ; reserved (can be used for rom disk)
+        ; bank 0..3     MSXDOS2
+        ; bank 4        MSXDOS1 
+        ; bank 5        Nowind functions
+        ; bank 6..7     empty
+        ; bank 8..31    reserved
+
+pageNumber := 0
+        repeat 32
+        defpage pageNumber, $4000, $4000
+pageNumber := pageNumber + 1        
+        endrepeat
+
         
         ; insert MSXDOS2
 
@@ -93,18 +96,21 @@
 
         page 1
         incbin "..\roms\MSXDOS22.ROM", $4000, $4000
-        ; PATCH $4002, bankInit
-        PATCH $4093, mapper
+        PATCH $4002, bankInit 
+        PATCH $4093, mapper        
+        BANKSWITCHING 1
 
         page 2
         incbin "..\roms\MSXDOS22.ROM", $8000, $4000
-        ; PATCH $4002, bankInit
-        PATCH $4093, mapper
+        PATCH $4002, bankInit 
+        PATCH $4093, mapper        
+        BANKSWITCHING 2
         
         page 3
         incbin "..\roms\MSXDOS22.ROM", $c000, $4000
-        ; PATCH $4002, bankInit
-        PATCH $4093, mapper
+        PATCH $4002, bankInit 
+        PATCH $4093, mapper        
+        BANKSWITCHING 3
 
 ; TODO: bank switch routines!
 
@@ -185,4 +191,5 @@
 ;bankNumber := bankNumber + 1
 ;        endrepeat
 
-        INCLUDE_ROMDISK_360KB "..\disks\dos2.dsk"
+;        INCLUDE_ROMDISK_360KB "..\disks\dos2.dsk"
+        INCLUDE_ROMDISK_360KB_2 "..\disks\dos2.dsk"

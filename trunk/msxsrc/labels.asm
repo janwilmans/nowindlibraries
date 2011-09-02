@@ -110,8 +110,8 @@ currentFilePosition := $
 ; BANKSWITCHING macro
         macro BANKSWITCHING bankNumber
 
-        ds $8000-(bankswitchEnd - bankInit)-$, $ff
-
+        code ! $8000-(bankswitchEnd - bankInit)
+        
 bankInit := $
         ld hl,nowindInit
         push hl
@@ -138,11 +138,19 @@ jumpIX := $
 
 bankswitchEnd := $
 
-
         endmacro                        
 
+        
+; MSXROMHEADER
+        macro MSXROMHEADER
+        org $4000       ; TODO!
+        db "AB"
+        dw bankInit
+        ds 12,0
+        endmacro
 
-; ROMDISK macro
+; INCLUDE_ROMDISK_360KB
+
         macro INCLUDE_ROMDISK_360KB dskimage
         
 bankNumber := 8
@@ -150,42 +158,32 @@ offset := 0
        
 ; 22 banks with sector data
         repeat 22
-        
-        MSXROMHEADER        
+        page bankNumber
+        MSXROMHEADER
         ds $4100 - $, $ff
         incbin dskimage, offset+512, 16384-512
-        ds $8000-(bankswitchEnd - bankInit)-$, $ff
         BANKSWITCHING bankNumber
-bankNumber := bankNumber + 1
-offset := offset + 16384        
-        
-        endrepeat
+offset := offset + $4000
+bankNumber := bankNumber + 1        
+        endrepeat     
 
-; 1 bank with remaining 8192 bytes       
+; 1 bank with remaining 8192 bytes
+        page bankNumber
         MSXROMHEADER
         ds $4100 - $, $ff
         incbin dskimage, offset, 8192
-        ds $8000-(bankswitchEnd - bankInit)-$, $ff
-        BANKSWITCHING bankNumber        
-bankNumber := bankNumber + 1
+        BANKSWITCHING bankNumber
+bankNumber := bankNumber + 1        
 
 ; 1 bank with sectors 00, 32, 64, ...
-        MSXROMHEADER        
-offset := 0
+        page bankNumber
+        MSXROMHEADER
         ds $4100 - $, $ff
+offset := 0
         repeat 23
         incbin dskimage, offset, 512
-offset := offset + 16384
+offset := offset + $4000
         endrepeat
-        ds $8000-(bankswitchEnd - bankInit)-$, $ff
         BANKSWITCHING bankNumber        
-        
-        endmacro
-        
-; MSXROMHEADER
-        macro MSXROMHEADER
-        org $4000
-        db "AB"
-        dw bankInit
-        ds 12,0
-        endmacro
+
+        endmacro 
