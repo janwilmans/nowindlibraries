@@ -191,5 +191,4 @@ pageNumber := pageNumber + 1
 ;bankNumber := bankNumber + 1
 ;        endrepeat
 
-;        INCLUDE_ROMDISK_360KB "..\disks\dos2.dsk"
-        INCLUDE_ROMDISK_360KB_2 "..\disks\dos2.dsk"
+        INCLUDE_ROMDISK_360KB "..\disks\dos2.dsk"

@@ -69,8 +69,8 @@ Caret=1,434
 TopLine=1
 Caret=23,2
 [nowind.asm]
-TopLine=17
-Caret=1,37
+TopLine=59
+Caret=9,84
 [labels.asm]
 TopLine=146
 Caret=24,152
