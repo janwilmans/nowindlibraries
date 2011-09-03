@@ -81,9 +81,6 @@ pageNumber := pageNumber + 1
 
         code @ $72f0
 
-        include "init.asm"
-        include "flashWriter.asm"  ; todo: move to flash bank 5?
-
         include "common.asm"
         include "extendedBios.asm"
         include "slotRoutines.asm"
@@ -112,12 +109,12 @@ pageNumber := pageNumber + 1
         PATCH $4093, mapper        
         BANKSWITCHING 3
 
-; TODO: bank switch routines!
-
         ; areas not used in MSXDOS22.ROM
         ; bank 1: 0x5CA0 - 0x7FFF (9056 bytes)
         ; bank 2: 0x7F30 - 0x7FFF (208 bytes)
         ; bank 3: 0x7E70 - 0x7FFF (400 bytes)
+
+        ENDMODULE MSXDOS2_MODULE
 
 ; insert MSXDOS1
         page 4                          ; overwrite page2 with our patched DOS1 diskrom
@@ -167,10 +164,18 @@ pageNumber := pageNumber + 1
         endif
 
         BANKSWITCHING 4
-
+        
+        ENDMODULE MSXDOS1_MODULE
+        
         page 5
+        module NOWIND_MODULE
         MSXROMHEADER
+        include "init.asm"
+        include "flashWriter.asm"
+        include "slotRoutines.asm"
+        include "common.asm"
         BANKSWITCHING 5
+        ENDMODULE NOWIND_MODULE        
         
         page 6
         MSXROMHEADER
@@ -183,12 +188,4 @@ pageNumber := pageNumber + 1
         page 8        
         module REMAINING_ROM_MODULE
                        
-        ; create rom-headers required for Nowind Interface v1
-
-;bankNumber := 5
-;        repeat 27
-;        ROMHEADER bankNumber
-;bankNumber := bankNumber + 1
-;        endrepeat
-
         INCLUDE_ROMDISK_360KB "..\disks\dos2.dsk"

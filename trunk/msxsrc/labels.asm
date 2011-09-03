@@ -110,12 +110,12 @@ currentFilePosition := $
 ; BANKSWITCHING macro
         macro BANKSWITCHING bankNumber
 
-        code ! $8000-(bankswitchEnd - bankInit)
+        code ! $7fa0
         
 bankInit := $
         ld hl,nowindInit
         push hl
-        xor a
+        ld a,5          ; bank 5 contains init routine  
         jr switchBank        
 
 copyFromBank := $ 
@@ -135,8 +135,6 @@ switchBank := $
 
 jumpIX := $
         jp (ix)
-
-bankswitchEnd := $
 
         endmacro                        
 
