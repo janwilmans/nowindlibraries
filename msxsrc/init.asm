@@ -15,12 +15,12 @@
         ld ix,SDFSCR                    ; restore screen mode from clockchip (on MSX2 and higher)
         call nz,EXTROM
 
-        call PRINTTEXT
-        db "Nowind Interface v4.2"
-        ifdef DEBUG
-        db " [beta]"
-        endif
-        db 0
+;        call PRINTTEXT
+;        db "Nowind Interface v4.2"
+;        ifdef DEBUG
+;        db " [beta]"
+;        endif
+;        db 0
 
         call enableNowindPage0          ; clear hostToMSXFifo by reading 4Kb of random data
         ld bc,4096
@@ -79,7 +79,10 @@ noNextCommand:
                                     ; otherwise requested DOS version in A (1 = dos1, 2, = dos2)
 bootMSXDOS2:            
         DEBUGMESSAGE "Booting DOS2"            
-        jp  $47d6                   ; address of ROMINIT in DOS2
+        ld hl,$47d6                 ; address of ROMINIT in DOS2
+        push hl
+        xor a
+        jp switchBank   ; TODO: waarom werkt dit niet!
 
 gotHostReply:                                        
         cp 1                        ; A=1 means DOS1, A=2 means DOS2
@@ -92,6 +95,35 @@ bootMSXDOS1:
         ld a,4
         jp switchBank
 
+flashWriter:
+        DEBUGMESSAGE "flashWriter"
+        ld a,3
+        call SNSMAT
+        and 8
+        ret nz              ; 'f' pressed?
+        
+        xor a
+        call CHGMOD         ; screen 0
+
+        ld a,8
+        ld ($f3ea),a        ; red background
+        xor a               ; screen 0 (width unchanged)        
+        call CHGCLR
+
+        call PRINTTEXT
+        db 10,13,"Nowind Flash Writer v2.1",10,13," "
+        ds 33,"."
+        db 13," ",0
+
+        call getSlotPage1
+        call enableSlotPage0
+
+        ld hl,waitForFlashCommand
+        ld de,flasherStart
+        push de
+        ld bc,flasherEnd - flasherStart
+        ldir
+        ret     ; jump to the address push'ed from 'de'
 
         
 

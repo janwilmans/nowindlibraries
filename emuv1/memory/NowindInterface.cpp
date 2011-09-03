@@ -179,7 +179,7 @@ void NowindInterface::debugout(const char *msg)
 
 void NowindInterface::setAttribute(int attr, bool value)
 {
-    nowindusb_attribute(nwhost::nw_attribute(attr), false);
+    nowindusb_attribute(nwhost::nw_attribute(attr), value);
 }
 
 void NowindInterface::setRomDisk(nw_byte driveNumber)
