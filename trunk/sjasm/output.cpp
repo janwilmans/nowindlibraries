@@ -473,7 +473,9 @@ void Output::sort() {
     if (!_page[i] || i>(int)_page.size() || !_page[i]->addpart(*ip))
       if (pass>2) { 
         ip->_rout->geterrlin();
-        error("Part does not fit",labtab.getname(ip->_rout->getlabelindex())); labsnok=1;
+        string msg;
+        msg = "Part does not fit in page " + tostr(_page[i]->getpagenr());
+        error(msg,labtab.getname(ip->_rout->getlabelindex())); labsnok=1;
       }
     ++ip;
   }

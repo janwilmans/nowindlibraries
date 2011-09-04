@@ -108,6 +108,7 @@ public:
   void dump(StringList&);
   void save(WriteFile &file);
   void saveoverlay(WriteFile &file);
+  int getpagenr() { return _pagenr; }
 private:
 //  struct _Pool { 
 //    _Pool (int n_data,int n_adres) : _data(n_data), _adres(n_adres) {}

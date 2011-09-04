@@ -24,6 +24,10 @@
 
 */
 
+// Update history:
+// Jan, 2000: formatted error messages so vs2008 can parse them.
+// Jan, 4 Sept 2011: added pagenr to 'Part does not fit' error.
+
 #include "sjasm.h"
 
 Options options;
@@ -124,6 +128,7 @@ int main(int argc, char *argv[]) {
 
   if (argc==1) {
     cout << "Copyright 2009 Sjoerd Mastijn\n";
+    cout << "Updated 2011 Jan wilmans\n";
     cout << "\nUsage:\nsjasm [-options] sourcefile [targetfile [parameters]]\n";
     cout << "\nOption flags as follows:\n";
 //    cout << "  -l        Label table in listing\n";
