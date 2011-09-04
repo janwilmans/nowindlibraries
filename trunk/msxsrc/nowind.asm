@@ -114,7 +114,7 @@ pageNumber := pageNumber + 1
         ; bank 2: 0x7F30 - 0x7FFF (208 bytes)
         ; bank 3: 0x7E70 - 0x7FFF (400 bytes)
 
-        ENDMODULE MSXDOS2_MODULE
+        endmodule MSXDOS2_MODULE
 
 ; insert MSXDOS1
         page 4                          ; overwrite page2 with our patched DOS1 diskrom
@@ -165,7 +165,7 @@ pageNumber := pageNumber + 1
 
         BANKSWITCHING 4
         
-        ENDMODULE MSXDOS1_MODULE
+        endmodule MSXDOS1_MODULE
         
         page 5
         module NOWIND_MODULE
@@ -175,17 +175,20 @@ pageNumber := pageNumber + 1
         include "slotRoutines.asm"
         include "common.asm"
         BANKSWITCHING 5
-        ENDMODULE NOWIND_MODULE        
+        endmodule NOWIND_MODULE        
         
         page 6
+        code @ $4000
         MSXROMHEADER
         BANKSWITCHING 6
 
         page 7
+        code @ $4000
         MSXROMHEADER
         BANKSWITCHING 7
         
-        page 8        
         module REMAINING_ROM_MODULE
                        
         INCLUDE_ROMDISK_360KB "..\disks\dos2.dsk"
+    
+        endmodule REMAINING_ROM_MODULE
