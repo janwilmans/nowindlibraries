@@ -82,8 +82,8 @@ bootMSXDOS2:
         ld hl,$47d6                 ; address of ROMINIT in DOS2
         push hl
         xor a
-        jp switchBank   ; TODO: waarom werkt dit niet!
-
+        jp switchBank
+        
 gotHostReply:                                        
         cp 1                        ; A=1 means DOS1, A=2 means DOS2
         jr nz,bootMSXDOS2

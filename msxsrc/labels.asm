@@ -110,12 +110,15 @@ currentFilePosition := $
 ; BANKSWITCHING macro
         macro BANKSWITCHING bankNumber
 
-        code ! $7fa0
+        ;code ! $7fa0
+        ;code ! $7fe4
+        code ! $8000-(.end-.start)
         
+.start:
 bankInit := $
         ld hl,nowindInit
         push hl
-        ld a,5          ; bank 5 contains init routine  
+        ld a,5                          ; bank 5 contains init routine  
         jr switchBank        
 
 copyFromBank := $ 
@@ -127,21 +130,21 @@ callInBank := $
         ld h,bankNumber                 ; store current bank
         ex (sp),hl
         ld (mapper),a                   ; enable new bank
-        call jumpIX
+        call .jumpIX
         pop af
+
 switchBank := $
         ld (mapper),a                   ; restore bank
         ret
 
-jumpIX := $
+.jumpIX:
         jp (ix)
-
+.end:
         endmacro                        
 
         
 ; MSXROMHEADER
         macro MSXROMHEADER
-        org $4000       ; TODO!
         db "AB"
         dw bankInit
         ds 12,0
@@ -157,6 +160,7 @@ offset := 0
 ; 22 banks with sector data
         repeat 22
         page bankNumber
+        code @ $4000
         MSXROMHEADER
         ds $4100 - $, $ff
         incbin dskimage, offset+512, 16384-512
