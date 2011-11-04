@@ -6,6 +6,17 @@
         call flashWriter
         call installTracer
 
+CHK_6:              
+        LD    HL,$FBE5        ; 6 ?       
+        BIT   6,(HL)                      
+        JR    NZ,nowindInit                    
+        XOR   A                           
+        LD    ($FFE8),A         ; switch to 60hz                   
+        OUT   ($99),A                     
+        LD    A,$89                       
+        OUT   ($99),A                     
+nowindInit:
+
         DEBUGMESSAGE "nowindInit"
         ld a,(IDBYTE_2D)
         or a
@@ -107,13 +118,14 @@ flashWriter:
 
         ld a,8
         ld ($f3ea),a        ; red background
+        
         xor a               ; screen 0 (width unchanged)        
         call CHGCLR
 
-        call PRINTTEXT
-        db 10,13,"Nowind Flash Writer v2.1",10,13," "
-        ds 33,"."
-        db 13," ",0
+;        call PRINTTEXT
+;        db 10,13,"Nowind Flash Writer v2.1",10,13," "
+;        ds 33,"."
+;        db 13," ",0
 
         call getSlotPage1
         call enableSlotPage0

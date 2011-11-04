@@ -675,7 +675,7 @@ void NowindHost::doDiskWrite1()
 	response->send(0);          // data ahead!
 	response->send16(address);
 	response->send16(transferSize);
-	response->send(0xaa);
+	response->send(0xaa);           // block sequence nr
 
 	// wait for data
 	setState(STATE_DISKWRITE);
@@ -691,6 +691,9 @@ void NowindHost::doDiskWrite2()
 
 	byte seq1 = command.extraData[0];
 	byte seq2 = command.extraData[transferSize + 1];
+
+    // not a perfect check, but 0xaf and 0x05 are avoided.
+    // when seq1 != seq2, we're sure something went wrong.
 	if ((seq1 == 0xaa) && (seq2 == 0xaa)) {
 		// good block received
 		transferred += transferSize;
