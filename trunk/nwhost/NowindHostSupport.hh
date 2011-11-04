@@ -29,6 +29,7 @@ public:
 	void sendHeader();
 	void purge();
 
+    //todo: Remove response from NowindHostSupport, and add Reponse to BlockRead, WriteRead etc..
 	Response* getresponse() { return &response; }
 private:
 	Response response;

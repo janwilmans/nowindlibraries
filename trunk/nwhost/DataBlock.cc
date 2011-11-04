@@ -2,6 +2,25 @@
 
 namespace nwhost {
 
+// used by BlockWrite
+DataBlock::DataBlock(unsigned int aNumber, unsigned int aOffset, word aTransferAddress, word aSize)
+{
+    number = aNumber;
+    offset = aOffset; 
+    size = aSize;
+    transferAddress = aTransferAddress;
+}
+
+void DataBlock::copyData(std::vector<byte>& destinationData)
+{
+    for (unsigned int i=0; i<data.size();i++)
+    {
+        destinationData[i+offset] = data[i];
+    }
+    data.clear();
+}
+
+// used by BlockRead
 DataBlock::DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData, unsigned int offset, word aTransferAddress, word aSize)
 {
     number = aNumber;

@@ -164,7 +164,6 @@ pageNumber := pageNumber + 1
         endif
 
         BANKSWITCHING 4
-        
         endmodule MSXDOS1_MODULE
         
         page 5

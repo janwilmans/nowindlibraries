@@ -132,6 +132,7 @@ void SlotSelector::configure(unsigned int msxVersion) {
     
     addMemoryDevice(usbInterface, 2, 0, 0x0000); 
 
+    //usbInterface->insertDisk(0, "../disks/aleste21.dsk");
     usbInterface->insertDisk(0, "../disks/wb.dsk");
 //  usbInterface->insertDisk(0, "../disks/test.dsk");
 //  usbInterface->insertDisk(0, "../disks/hd5mbDOS2.dsk");

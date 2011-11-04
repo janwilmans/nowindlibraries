@@ -38,7 +38,7 @@ namespace NowindInterfaceHostGUI
     private void btnInsert_Click(object sender, EventArgs e)
     {
       OpenFileDialog openFileDialog = new OpenFileDialog();
-      openFileDialog.InitialDirectory = "c:\\" ;
+      openFileDialog.InitialDirectory = "d:\\msx" ;
       openFileDialog.Filter = "disk images (*.dsk)|*.dsk|All files (*.*)|*.*" ;
       openFileDialog.FilterIndex = 2;
       openFileDialog.RestoreDirectory = true;

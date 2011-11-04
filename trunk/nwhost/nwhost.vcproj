@@ -283,6 +283,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BlockWrite.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\BlockWrite.hh"
+				>
+			</File>
+			<File
 				RelativePath=".\Command.cc"
 				>
 			</File>

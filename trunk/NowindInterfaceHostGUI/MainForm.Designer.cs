@@ -55,7 +55,7 @@
         this.panelTop.Location = new System.Drawing.Point(0, 0);
         this.panelTop.Margin = new System.Windows.Forms.Padding(0);
         this.panelTop.Name = "panelTop";
-        this.panelTop.Size = new System.Drawing.Size(922, 171);
+        this.panelTop.Size = new System.Drawing.Size(914, 171);
         this.panelTop.TabIndex = 3;
         // 
         // chkboxDebug
@@ -75,7 +75,7 @@
         this.listBox1.FormattingEnabled = true;
         this.listBox1.Location = new System.Drawing.Point(0, 171);
         this.listBox1.Name = "listBox1";
-        this.listBox1.Size = new System.Drawing.Size(922, 238);
+        this.listBox1.Size = new System.Drawing.Size(914, 238);
         this.listBox1.TabIndex = 4;
         // 
         // MainForm
@@ -84,7 +84,7 @@
         this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
         this.BackColor = System.Drawing.SystemColors.ControlLight;
-        this.ClientSize = new System.Drawing.Size(922, 410);
+        this.ClientSize = new System.Drawing.Size(914, 410);
         this.Controls.Add(this.listBox1);
         this.Controls.Add(this.panelTop);
         this.MaximumSize = new System.Drawing.Size(930, 1000);
