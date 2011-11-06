@@ -32,15 +32,19 @@
 320 'some calculating is needed to get the right positions for all widths
 330 LOCATE 0,0,0:'remove cursor
 340 IF (SW>40) THEN YW=80 ELSE YW=40
-350 YO=CINT((YW+1-SW)/2)
-360 B$="":FOR A=0 TO 12:B$=B$+CHR$(VPEEK((Y*YW)+X+A+YO)):NEXT
-370 LOCATE 0,2,0:PRINTUSING "[&]";B$
-380 ON ERROR GOTO 430
-390 RUN B$
-400 'return from error
-410 ON ERROR GOTO:'remove handler
-420 GOTO 160
-430 'load error
-440 LOCATE 15,2:PRINT">> Load error!!":BEEP
-450 RESUME 400
+350 SM=PEEK(&HFCAF):'screen mode
+360 IF (SM=0) THEN SB=PEEK(&HF3B3)+256*PEEK(&HF3B4):GOTO 380
+370 IF (SM=1) THEN SB=PEEK(&HF3BD)+256*PEEK(&HF3BE):YW=32
+380 ' sb = screen base address
+390 YO=CINT((YW+1-SW)/2):'y-offset for width < 40 or < 80
+400 B$="":FOR A=0 TO 12:B$=B$+CHR$(VPEEK((Y*YW)+X+A+SB+YO)):NEXT
+410 LOCATE 0,2,0:PRINTUSING "[&]";B$
+420 ON ERROR GOTO 470
+430 RUN B$
+440 'return from error
+450 ON ERROR GOTO:'remove handler
+460 GOTO 160
+470 'load error
+480 LOCATE 15,2:PRINT">> Load error!!":BEEP
+490 RESUME 440
 
