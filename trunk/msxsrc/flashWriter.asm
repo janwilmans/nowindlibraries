@@ -82,8 +82,8 @@ enableFlashMainslot:
 		out ($98),a         ; print 1/2	
 		ret        
     
-; 'autoselect' is flashrom feature, has nothing to do with 'selectSlot'
-; the 'autoselect' feature can be used to identify the type of flashrom
+; 'autoselect' is a flashrom feature and has nothing to do with 'selectSlot'
+; the 'autoselect' feature is used to identify the type of flashrom
 autoselectMode:
         ld a,$90
         call writeCommandSequence
