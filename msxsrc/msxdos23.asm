@@ -25,9 +25,9 @@ MAPPER23        equ $6000
         jp DSKFMT
         db 0,0,0                        ; no DRVOFF
 
-        PATCH $4828, noCHGCPU_bank0
-        PATCH $5196, noCHGCPU_bank0
-        PATCH $51b2, noCHGCPU_bank0        
+        PATCH $4828, noCHGCPU_bank0     ; todo: document why this is patched
+        PATCH $5196, noCHGCPU_bank0     ; will this not cause the turbo-r to remain in r800 mode
+        PATCH $51b2, noCHGCPU_bank0     ; even if a dos1 bootsector is detected? (this would make many games malfunction!)
 
         PATCH $47d7, INIHRD
         PATCH $489b, MYSIZE     ; *

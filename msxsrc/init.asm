@@ -7,13 +7,14 @@
         call installTracer
 
 CHK_6:              
-        LD    HL,$FBE5        ; 6 ?       
+        LD    HL,$FBE5          ; '6' pressed ?       
         BIT   6,(HL)                      
         JR    NZ,nowindInit                    
-        XOR   A                           
-        LD    ($FFE8),A         ; switch to 60hz                   
+        LD    A,($FFE8)         ; read the default frequency
+        XOR   2                 ; change it (switch 50 <=> 60hz)
+        LD    ($FFE8),A                            
         OUT   ($99),A                     
-        LD    A,$89                       
+        LD    A,$80+9
         OUT   ($99),A                     
 nowindInit:
 
@@ -119,7 +120,7 @@ flashWriter:
         ld a,8
         ld ($f3ea),a        ; red background
         
-        xor a               ; screen 0 (width unchanged)        
+        xor a               ; clear screen / activate background color (width unchanged)        
         call CHGCLR
 
 ;        call PRINTTEXT

@@ -1,5 +1,8 @@
 ; flashWriter.asm
 ; Flashes and erases the AMD29F040/M29F032-D
+
+; assumptions:
+; mainrom must available in page 0 when flasherStart is called
             
 ; this label is before the _PHASE_ so it's address refers to the actual rom location
 ; not the 'copied' $c000 location            
@@ -8,12 +11,20 @@ waitForFlashCommand:
         PHASE $c000  
 
 flasherStart:     
-
         di
         
         in a,($aa)
         and $f0
         out ($aa),a     ; select keyboard row 0 
+        
+        ld a,(IDBYTE_2D)
+        cp 3                ; MSX Turbo-R?
+        jr nz,no_r800
+        
+        ld a,$80            ; A = LED 0 0 0 0 0 x x 
+                            ;      \ 1 = LED off, 0 = LED on, 0 0 = Z80 (ROM) mode
+        call CHGCPU         ; switch to z80 mode for flashing 
+no_r800:        
         
 .loop
         in a,($a9)
