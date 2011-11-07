@@ -1,7 +1,7 @@
 ; labels.asm doesn't generate any code 
 ; it provides names for several memory addresses and some macros
 
-; BIOS
+; BIOS addresses in mainrom
 CALSLT          equ $001c
 ENASLT          equ $0024
 CHPUT           equ $00A2
@@ -13,6 +13,7 @@ CHGMOD          equ $005f
 CHGCLR          equ $0062
 EXTROM          equ $015f
 SDFSCR          equ $0185               ; restore screen parameters from clockchip (in SUBROM)
+CHGCPU          equ $0180
 
 ; variables 
 LASTDRV         equ $f33f               ; stores CTRL-key status during boot

@@ -41,3 +41,6 @@ http://computeremuzone.com/ficha.php?id=856&l=en&sec=msx
 - 16kb -> start address in 4010?
 
 
+notes:
+
+locate 0,0,0:'disabling the cursor speeds 'list' up!

@@ -1032,7 +1032,7 @@ void NowindHost::getDosVersion()
     {
         if (!allowOtherDiskroms)
         {
-            DBERR("Suggestion: Try using the -a option on MSX Turbo-R (enables internal ROMs to initialize)\n");
+            DBERR("Suggestion: Try using the -a option on MSX Turbo-R (allows internal ROMs to initialize)\n");
         }
     }
 
