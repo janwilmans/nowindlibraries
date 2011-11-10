@@ -127,16 +127,16 @@ void SlotSelector::configure(unsigned int msxVersion) {
     usbInterface = new NowindInterface("../msxsrc/nowind.rom");
     
     enum nw_attribute { attr_none = 0, enable_phantom_drives, allow_other_diskroms, enable_dos2 };
-    usbInterface->setAttribute(enable_dos2, true);
+    usbInterface->setAttribute(enable_dos2, false);
     usbInterface->setRomDisk(1);
     
     addMemoryDevice(usbInterface, 2, 0, 0x0000); 
 
     //usbInterface->insertDisk(0, "../disks/aleste21.dsk");
-    usbInterface->insertDisk(0, "../disks/wb.dsk");
+//    usbInterface->insertDisk(0, "../disks/wb.dsk");
 //  usbInterface->insertDisk(0, "../disks/test.dsk");
 //  usbInterface->insertDisk(0, "../disks/hd5mbDOS2.dsk");
-//  usbInterface->insertDisk(0, "../disks/dos1.dsk");
+  usbInterface->insertDisk(0, "../disks/dos1.dsk");
 //	usbInterface->insertDisk(0, "../disks/dos2.dsk");
 
 	//usbInterface->insertDisk(0, "../disks/adnukes.dsk");
