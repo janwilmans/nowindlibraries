@@ -70,7 +70,8 @@ unsigned char xBuffer[RXTX_BUFFER_SIZE];
 unsigned char yBuffer[RXTX_BUFFER_SIZE];
 char * cBuffer = (char *) &xBuffer[0];
 
-enum LOWLEVEL_COMMANDS {
+// commands FLASHROM understands, ERASESECTOR is only for the new flash type?
+enum LOWLEVEL_FLASH_COMMANDS {
     CMD_VERIFY = 0xA2,
     CMD_WRITE = 0xA3,
     CMD_ERASE = 0xA4,
