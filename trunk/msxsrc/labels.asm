@@ -110,9 +110,7 @@ currentFilePosition := $
 
 ; BANKSWITCHING macro
         macro BANKSWITCHING bankNumber
-
-        ;code ! $7fa0
-        ;code ! $7fe4
+        
         code ! $8000-(.end-.start)
         
 .start:
