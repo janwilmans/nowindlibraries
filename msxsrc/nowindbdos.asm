@@ -218,7 +218,7 @@ bdosConsoleOutput:
         jp $53AB
 
 bdosOpenFile:
-        ;DEBUGMESSAGE "bdosOpenFile"
+        DEBUGMESSAGE "bdosOpenFile"
         ld a,1                          ; since bdosOpenFile is a CP/M compatible BDOS call, we must set this.
         ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
 
@@ -238,7 +238,7 @@ bdosOpenFile:
         jr z,.error
         
         ld a,0
-        DEBUGMESSAGE "bdosOpen ok"
+        ;DEBUGMESSAGE "bdosOpen ok"
         jp restorePage0
         
 .error:        
@@ -327,30 +327,28 @@ bdosDeleteFile:
 ;      a = 0 if successful
         
 bdosCreateFile:
-        DEBUGMESSAGE "bdosCreateFile"
-        ld a,1                          ; since bdosCreateFile is a CP/M compatible BDOS call, we must set this.
-        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
+        ;DEBUGMESSAGE "bdosCreateFile"
+        ;ld a,1                          ; since bdosCreateFile is a CP/M compatible BDOS call, we must set this.
+        ;ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
         
-        push de
-        ld hl,(BDOS_DTA)
-        call sendRegisters
-        ld (hl),BDOS_CREATEFILE
-        pop de
+        ;push de
+        ;ld hl,(BDOS_DTA)
+        ;call sendRegisters
+        ;ld (hl),BDOS_CREATEFILE
+        ;pop de
+
+        ;ex de,hl                        ; send FCB to host
+        ;ld bc,37
+        ;ldir
         
-        push hl
-        ex de,hl                        ; send FCB to host
-        ld bc,37
-        ldir
-        pop hl          ; todo: ld h,HIGH usbWritePage1 instead??     
+        ;ld a,(BDOS_DTA + 1)
+        ;call blockRead
+        ;jr c,.error
         
-        ld a,(BDOS_DTA + 1)
-        call blockRead
-        jr c,.error
+        ;call receiveRegisters           ; get bdosCreateFile results   
+        ;jr c,.error
         
-        call receiveRegisters       ; get bdosCreateFile results   
-        jr c,.error
-        
-        DEBUGMESSAGE "receiveRegisters done!"
+        ;DEBUGMESSAGE "receiveRegisters done!"
         
 .error:        
         ld a,255        ; create unsuccessful
