@@ -34,14 +34,13 @@
         ; bank 5        Nowind functions
         ; bank 6..7     empty
         ; bank 8..31    reserved
-
+       
 pageNumber := 0
         repeat 32
         defpage pageNumber, $4000, $4000
 pageNumber := pageNumber + 1        
         endrepeat
-
-        
+         
         ; insert MSXDOS2
 
         page 0
@@ -162,6 +161,9 @@ pageNumber := pageNumber + 1
         ifdef BDOS_NOWIND
         include "nowindbdos.asm"
         endif
+
+        code ! $                    ; workaround for sjasm bug
+        nop
 
         BANKSWITCHING 4
         endmodule MSXDOS1_MODULE

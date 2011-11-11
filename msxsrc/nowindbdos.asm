@@ -327,7 +327,7 @@ bdosDeleteFile:
 ;      a = 0 if successful
         
 bdosCreateFile:
-        ;DEBUGMESSAGE "bdosCreateFile"
+        DEBUGMESSAGE "bdosCreateFile"
         ;ld a,1                          ; since bdosCreateFile is a CP/M compatible BDOS call, we must set this.
         ;ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
         
@@ -501,9 +501,24 @@ bdosRandomBlockWriteZeroFill:
         DEBUGDUMPREGISTERS
         di
         halt
-        
 
-        ds 128
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0
+    ;db 0,0,0,0,0,0,0,0    
+    ;        ds 128
         
 ; http://www.konamiman.com/msx/msx-e.html#msx2th
 ; http://www.angelfire.com/art2/unicorndreams/msx/RR-BASIC.html

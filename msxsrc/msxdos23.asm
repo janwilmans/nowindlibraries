@@ -1,3 +1,7 @@
+; This is msxdos2.3 from the Turbo-R patch to work in emulation
+; to research its behaviour. It is not used for the real hardware nowind rom.
+;
+
 MYSIZE          equ 8
 SECLEN          equ 512
 MAPPER23        equ $6000
