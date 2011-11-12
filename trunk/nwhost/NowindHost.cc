@@ -16,6 +16,8 @@
 #define NWHOST_API_EXPORT
 #include "NowindHost.hh"
 
+#define USE_OLD_DISKWRITE
+
 // splits a string into parts separated by delimeters (returns a vector of substrings)
 std::vector<std::string> split(const std::string& s, const std::string& delim, const bool keep_empty = true) {
     std::vector<std::string> result;
@@ -138,10 +140,10 @@ void NowindHost::write(byte data, unsigned int time)
 	{
 	  c = '.';
 	}
+	//DBERR("received: [%c] (0x%02x) @ time: %d ms\n", c, data, time);
 	//DBERR("received: [%c] (0x%02x) in state: %d, activeCommand: %d (0x%02x)\n", c, data, state, activeCommand, activeCommand);
 	switch (state) {
 	case STATE_SYNC1:
-		timer1 = time;
 		if (data == 0xAF) setState(STATE_SYNC2);
 		break;
 	case STATE_SYNC2:
@@ -172,6 +174,7 @@ void NowindHost::write(byte data, unsigned int time)
 	case STATE_EXECUTING_COMMAND:
 			executeCommand();
 		break;
+#ifdef USE_OLD_DISKWRITE
 	case STATE_DISKWRITE:   // todo: move write-code from doDiskWrite1 / doDiskWrite2 into BlockWrite class 
 		assert(recvCount < (transferSize + 2));
 		command.extraData[recvCount] = data;
@@ -179,6 +182,7 @@ void NowindHost::write(byte data, unsigned int time)
 			doDiskWrite2();
 		}
 		break;
+#endif //USE_OLD_DISKWRITE
 	case STATE_DEVOPEN:
 		assert(recvCount < 11);
 		command.extraData[recvCount] = data;
@@ -212,10 +216,33 @@ void NowindHost::write(byte data, unsigned int time)
 		blockRead.ack(data);     
 		if (blockRead.isDone())
 		{
+            readEndTime = time;
+            unsigned int bytesWritten = blockRead.getTransferSize();
+            unsigned int duration = readEndTime - readStartTime;
+            if (duration > 0)
+            {
+                double speed = ((1000.0*bytesWritten) / duration)/1024;
+                DBERR("READ SPEED: %u bytes in %u ms -> %0.2f kB/s\n", bytesWritten, duration, speed);
+            }
+            else
+            {
+                DBERR("READ SPEED: %u bytes in %u ms -> very fast?!\n", bytesWritten, duration);
+            }
+		    setState(STATE_SYNC1);
+		}
+		break;
+#ifndef USE_OLD_DISKWRITE
+	case STATE_BLOCKWRITE:
+		// in STATE_BLOCKWRITE we receive blocks with sequencenr's and request blocks again if the sequencenrs do not match
+        // a block-request is x bytes in length, there can be multiple (up to 26?) 'outstanding' requests in the FT245R buffer.
+		blockRead.ack(data);     
+		if (blockRead.isDone())
+		{
             //DBERR("Blockread duration: %u\n", time-timer1);
 		    setState(STATE_SYNC1);
 		}
 		break;
+#endif // USE_OLD_DISKWRITE
 	case STATE_CPUINFO:
 	{
 	    unsigned int databytes = 11;
@@ -231,15 +258,6 @@ void NowindHost::write(byte data, unsigned int time)
     case STATE_RECEIVE_DATA:
         apiReceiveData(data);
         break;
-/*
-    case STATE_BDOS_FIND_FIRST:
-		command.extraData[recvCount] = data;
-		if (++recvCount == 36) {
-		    state = STATE_SYNC1;
-		    if (bdosProxy.FindFirst(command, *response)) state = STATE_BLOCKREAD;
-		}
-        break;
-*/
 	default:
 		assert(false);
 	}
@@ -386,7 +404,11 @@ void NowindHost::executeCommand()
 			return;
 		}
 		if (command.getF() & Command::F_CARRY) { 
-			if (diskWriteInit(*disk)) nextState = STATE_DISKWRITE;
+#ifdef USE_OLD_DISKWRITE            
+			if (diskWriteInit_old(*disk)) nextState = STATE_DISKWRITE;
+#else
+			if (diskWriteInit(*disk)) nextState = STATE_BLOCKWRITE;
+#endif
 		} else {
 			if (diskReadInit(*disk)) nextState = STATE_BLOCKREAD;
 		}
@@ -604,6 +626,7 @@ void NowindHost::receiveExtraData()
 
 bool NowindHost::diskReadInit(SectorMedium& disk)
 {
+    readStartTime = command.time;
 	bool result = false;
 	unsigned sectorAmount = getSectorAmount();
 	buffer.resize(sectorAmount * 512);
@@ -621,8 +644,31 @@ bool NowindHost::diskReadInit(SectorMedium& disk)
 
 bool NowindHost::diskWriteInit(SectorMedium& disk)
 {
+    writeStartTime = command.time;
 	bool result = false;
-	DBERR("NowindHost::diskWrite, startSector: %u  sectorAmount: %u\n", getStartSector(), getSectorAmount());
+	DBERR("NowindHost::diskWriteNew, startSector: %u  sectorAmount: %u\n", getStartSector(), getSectorAmount());
+	if (disk.isWriteProtected()) 
+	{
+		response->sendHeader();
+		response->send(1);
+		response->send(0); // WRITEPROTECTED
+	}
+	else
+	{
+		unsigned sectorAmount = std::min(128u, getSectorAmount());
+		buffer.resize(sectorAmount * 512);
+		transferred = 0;
+		doDiskWrite1();
+		result = true;
+	}
+	return result;
+}
+
+bool NowindHost::diskWriteInit_old(SectorMedium& disk)
+{
+    writeStartTime = command.time;
+	bool result = false;
+	DBERR("NowindHost::diskWriteOld, startSector: %u  sectorAmount: %u\n", getStartSector(), getSectorAmount());
 	if (disk.isWriteProtected()) 
 	{
 		response->sendHeader();
@@ -642,9 +688,23 @@ bool NowindHost::diskWriteInit(SectorMedium& disk)
 
 void NowindHost::doDiskWrite1()
 {
+    writeEndTime = command.time;
 	unsigned bytesLeft = unsigned(buffer.size()) - transferred;
 	if (bytesLeft == 0) {
 		// All data transferred!
+
+        unsigned int bytesWritten = buffer.size();
+        unsigned int duration = writeEndTime - writeStartTime;
+        if (duration > 0)
+        {
+            double speed = ((1000.0*bytesWritten) / duration)/1024;
+            DBERR("WRITE SPEED: %u bytes in %u ms -> %0.2f kB/s\n", bytesWritten, duration, speed);
+        }
+        else
+        {
+            DBERR("WRITE SPEED: %u bytes in %u ms -> very fast?!\n", bytesWritten, duration);
+        }
+
 		unsigned sectorAmount = unsigned(buffer.size()) / 512;
 		unsigned startSector = getStartSector();
 		if (SectorMedium* disk = getDisk()) {
