@@ -91,8 +91,8 @@ public:
 	byte peek() const;
 
 	// Write one byte of command-data to the host   (msx -> pc)
-	// Time parameter is in milliseconds. Emulators can pass emulation
-	// time, usbhost can pass real time.
+	// Time parameter is in milliseconds. Emulators pass emulation time
+	// nwhostapp passed real time.
 	void write(byte value, unsigned int time);
 
 	void setAllowOtherDiskroms(bool allow);
@@ -163,6 +163,7 @@ private:
 
 	bool diskReadInit(SectorMedium& disk);
 	bool diskWriteInit(SectorMedium& disk);
+	bool diskWriteInit_old(SectorMedium& disk);
 	void doDiskWrite1();
 	void doDiskWrite2();
 
@@ -203,8 +204,11 @@ private:
 	unsigned int parameterLength;
 	unsigned int activeCommand;
 
-    unsigned int timer1;
-    unsigned int timer2;
+    /* temp */
+    unsigned int writeStartTime;
+    unsigned int writeEndTime;
+    unsigned int readStartTime;
+    unsigned int readEndTime;
     
 protected:
     NowindHostSupport* nwhSupport;          // pointer to the NowindHostSupport instance that is actually used (can be subclassed to provide implemenation specific debug-support)

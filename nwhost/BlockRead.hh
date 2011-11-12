@@ -29,6 +29,7 @@ public:
     void blockReadAck(byte tail);
     bool isDone() const;
     void cancelWithCode(byte);
+    word getTransferSize() { return transferSize; }
 
 	enum {
 		BLOCKREAD_EXIT_MORE_DATE_AHEAD,
