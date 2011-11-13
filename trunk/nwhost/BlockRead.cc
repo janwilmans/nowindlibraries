@@ -65,7 +65,7 @@ void BlockRead::blockReadHelper(word startAddress, word size)
 {
     //DBERR("BlockRead::blockReadHelper, size: 0x%02x, processedData: 0x%02x\n", size, processedData);
     
-    // delete any blocks still in the dataBlockQueue (unacknowleged by msx, could be caused by timeouts)
+    // delete any blocks still in the dataBlockQueue (unacknowleged by msx, could be caused by timeout or disconnect)
     for(unsigned int i=0; i< dataBlockQueue.size(); i++)
     {        
         delete dataBlockQueue[i];
@@ -156,7 +156,7 @@ void BlockRead::sendDataBlock(unsigned int blocknr)
 
 void BlockRead::blockReadContinue()
 {
-    unsigned address = startAddress + processedData;
+    unsigned int address = startAddress + processedData;
     if (processedData < transferSize)     // still bytes to be transferred?
     {
     /*

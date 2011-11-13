@@ -10,6 +10,7 @@
 #include "NwhostExports.h"
 #include "DataBlock.hh"
 #include "BlockRead.hh"
+#include "BlockWrite.hh"
 #include "Command.hh"
 #include "BDOSProxy.hh"
 #include "Device.hh"
@@ -102,6 +103,18 @@ public:
 	bool getEnablePhantomDrives() const;
 	void setEnableMSXDOS2(bool enable);
 
+    // commands that need to execute more then one command should get their own state here
+    // and maintain an internal state to know what command is being executed.
+
+    // 1) having STATE_BLOCKREAD and STATE_BLOCKWRITE at this level is an exception 
+    // their are re-usabled states for commands that do just 1 transfer.
+    // it might be cleaner to add STATE_DSKIOREAD and STATE_DSKIOWRITE (and other commands that use these state) 
+    // at some point and remove STATE_BLOCKREAD and STATE_BLOCKWRITE entirely.
+
+    // 2) Every command should probably have its own class, so it can be re-initialized, and the existance of
+    // the instance of the class is state by itself. [notice: think about how this will effect compatibility with
+    // openMSX/serialization, every command call should have serialization]
+
 	// public for serialization
 	enum State {
 		STATE_SYNC1,     // waiting for AF
@@ -109,14 +122,15 @@ public:
 		STATE_RECEIVE_COMMAND,   // waiting for command (9 bytes)
 		STATE_RECEIVE_PARAMETERS,   // waiting for parameters (n bytes)
 		STATE_EXECUTING_COMMAND,
-		STATE_DISKWRITE, // waiting for AA<data>AA
+		STATE_DISKWRITE, // waiting for AA<data>AA (depricate once STATE_BLOCKWRITE is completed )
 		STATE_DEVOPEN,   // waiting for filename (11 bytes)
 		STATE_IMAGE,     // waiting for filename
-		STATE_MESSAGE,   // waiting for null-terminated message
-		STATE_BLOCKREAD, // in block-transfer
+		STATE_MESSAGE,   // waiting for null-terminated message (for debugging)
+		STATE_BLOCKREAD, // in blockread-transfer
+		STATE_BLOCKWRITE, // in blockwrite-transfer
 		STATE_CPUINFO,   // receiving slot/stack info
-		STATE_RECEIVE_DATA,    // receive data for API command
-		STATE_RECEIVE_STRING,  // receive string for API command
+		STATE_RECEIVE_DATA,    // receive data for API command     (depricate once STATE_BLOCKWRITE is completed)
+		STATE_RECEIVE_STRING,  // receive string for API command   (depricate once STATE_BLOCKWRITE is completed)
 		STATE_BDOS_OPEN_FILE,  // receive FCB
 		STATE_BDOS_FIND_FIRST, // receive FCB
 	};
@@ -196,6 +210,7 @@ private:
     bool transferingToPage01;   // used to known in which state the MSX is during block-tranfers
     
     BlockRead blockRead;
+    BlockWrite blockWrite;
 	BDOSProxy bdosProxy;
 	Command command;
 	Response* response;

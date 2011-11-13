@@ -49,7 +49,7 @@ private:
     bool transferingToPage01;
     NowindHostSupport* nwhSupport;
     std::vector<byte> buffer;                   // work buffer for current tranfer
-	std::deque< DataBlock* > dataBlockQueue;    // currently send blocks that are waiting to be acknowledged
+	std::deque< DataBlock* > dataBlockQueue;    // contains transmitted blocks that are waiting to be acknowledged
 	bool done;
 	byte returnCode;
     

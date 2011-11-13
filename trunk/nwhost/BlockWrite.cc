@@ -6,7 +6,9 @@
 #include <cassert>
 
 #define DBERR nwhSupport->debugMessage
-static const unsigned BLOCKSIZE = 240;
+
+// the BLOCKWRITE_SIZE is not hardcoded in ROM, the host requests the exact amount the msx should send.
+static const unsigned BLOCKWRITE_SIZE = 240;    
 
 namespace nwhost {
 
@@ -15,6 +17,15 @@ namespace nwhost {
 
 BlockWrite::BlockWrite()
 {
+}
+
+void BlockWrite::copyData(std::vector<byte>& destinationData)
+{
+    for (unsigned int i=0; i<buffer.size();i++)
+    {
+        destinationData[i] = buffer[i];
+    }
+    buffer.clear();
 }
 
 void BlockWrite::initialize(NowindHostSupport* aSupport)
@@ -37,89 +48,125 @@ void BlockWrite::init(word aStartAddress, word aSize, std::vector<byte>* data, b
     startAddress = aStartAddress;
     transferSize = aSize;
     bytesLeft = aSize;
-    returnCode = aReturnCode;
+    defaultReturnCode = aReturnCode;
     blockSequenceNr = 0;
+    receiveIndex = 0;
 
+    SequenceNrQueue.clear();
+    buffer.clear();
+    buffer.resize(aSize);
     transferingToPage01 = (startAddress <= TWOBANKLIMIT);
     processedData = 0;
     done = false;
     
-    buffer.clear();
     receiveBuffer = data;
     receiveBuffer->clear();
-    blockWrite(startAddress, transferSize);
+    continueWithNextBlock();
 }
 
-void BlockWrite::blockWrite(word startAddress, word size)
+// todo:
+// - add all blocks to receive from msx to a queue
+// - send several 9-byte requests for data 
+// - receive blocks of 240+2 bytes, check the markers, request again
+
+void BlockWrite::continueWithNextBlock()
 {
-    //DBERR("BlockWrite::blockWrite, startAddress: 0x%04X, size: 0x%04X\n", startAddress, size);
-    
-    if (startAddress < TWOBANKLIMIT)
+    if (bytesLeft == 0)
     {
-        word endAddress = std::min(TWOBANKLIMIT, startAddress + size);
-        word transferSize = endAddress - startAddress;
-        blockWriteHelper(startAddress, transferSize);
+        //DBERR("BlockWrite::continueWithNextBlock, DONE!\n");
+
+        nwhSupport->sendHeader();
+        nwhSupport->send(defaultReturnCode);
+        done = true;
+        return;
+    }
+
+    //DBERR("BlockWrite::continueWithNextBlock, startAddress: 0x%04X, size: 0x%04X\n", startAddress, bytesLeft);
+
+    unsigned int startAddr = startAddress + processedData;
+
+    // make sure the transfer does not cross the TWOBANKLIMIT
+    if (startAddr < TWOBANKLIMIT)
+    {
+        word endAddress = std::min(TWOBANKLIMIT, startAddr + bytesLeft);
+        word transferSize = endAddress - startAddr;
+        requestBlock(startAddr, transferSize);
     }
     else
     {
-        blockWriteHelper(startAddress, size);
+        requestBlock(startAddr, bytesLeft);
     }  
-    //DBERR("blockWrite, processedData: 0x%04X\n", processedData);
 }
 
-void BlockWrite::blockWriteHelper(word startAddress, word size)
+void BlockWrite::requestBlock(word startAddress, word size)
 {
-    //DBERR("BlockWrite::blockWriteHelper, size: 0x%02x, processedData: 0x%02x\n", size, processedData);
-    
-	
-	transferSize = std::min(bytesLeft, BLOCKSIZE);
-	unsigned endAddress = startAddress + size;
+	currentBlockSize = std::min(size, BLOCKWRITE_SIZE);
+	unsigned int endAddress = startAddress + size;
 
-    DBERR(" address: 0x%04x, transferSize: 0x%04X \n", startAddress, size);
+    //DBERR("BlockWrite::requestBlock, address: 0x%04x, transferSize: 0x%04X \n", startAddress, currentBlockSize);
     
     // request the next block of data (consists of 3+1+2+2+1 = 9 bytes)
 	nwhSupport->sendHeader();
-	nwhSupport->send(0);          // data ahead!
+	nwhSupport->send(0);                // transfer not done
 	nwhSupport->send16(startAddress);
-	nwhSupport->send16(size);
-	nwhSupport->send(0xaa);       // use blockSequenceNr
+	nwhSupport->send16(currentBlockSize);
+	nwhSupport->send(blockSequenceNr);
     
+    //DBERR("BlockWrite: SequenceNrQueue: %u\n", blockSequenceNr);
+    SequenceNrQueue.push_back(blockSequenceNr);
     blockSequenceNr = (blockSequenceNr+1) & 255;
 
     //todo: write speed can be optimized by requesting multiple blocks at once, 
     // special care should taken to ensure the msx-receive buffer is does not overflow.
     // for example by making sure there are never more then 256/9 = 28 blocks out-standing.
-
 }
 
 void BlockWrite::receiveData(byte data)
 {
-    switch (receiveIndex)
+    //DBERR("BlockWrite::receiveData, receiveIndex: %u, currentBlockSize: %u\n", receiveIndex, currentBlockSize);
+
+    if (receiveIndex == 0)
     {
-    case 0:
         sequenceNrHeader = data;
-        break;
-    case BLOCKSIZE:
-        sequenceNrTail = data;
-        break;
-    default:
-        buffer[receiveIndex] = data;
-        break;
-    }
-
-    receiveIndex++;
-    if (receiveIndex = 242) // block done.
-    {
-        if (sequenceNrHeader == receiveIndex)
+        receiveIndex++;
+        if (SequenceNrQueue.front() != sequenceNrHeader)
         {
-            // block ok
-            for (int i=0;i < BLOCKSIZE;i++)
-            {
-                (*receiveBuffer)[i] = buffer[i+1];
-            }
-
+            // sequenceNrHeader if not the sequenceNr
+            // todo: maybe implement a retry mechanism
+            // abort entire transfer, for now
+            DBERR("BlockWrite::receiveData, sequenceNrHeader: 0x%02X != 0x%02X\n", sequenceNrHeader, SequenceNrQueue.front());
+            cancelWithCode(BLOCKWRITE_ERROR);
         }
-        
+        else
+        {
+            //DBERR("BlockWrite::receiveData, BLOCKSTART [0x%02X]\n", data);
+        }
+    } 
+    else if (receiveIndex <= currentBlockSize)
+    {
+        //DBERR("BlockWrite::receiveData, %u: 0x%02X, bytesLeft: %u\n", processedData, data, bytesLeft);
+        buffer[processedData] = data;
+        receiveIndex++;
+        processedData++;
+        bytesLeft--;
+    }
+    else
+    {
+        sequenceNrTail = data;
+        if (sequenceNrHeader == sequenceNrTail)
+        {
+            //DBERR("BlockWrite::receiveData, BLOCKEND [0x%02X] block OK\n", data);
+            SequenceNrQueue.pop_front();
+            continueWithNextBlock();
+            receiveIndex = 0;
+        }
+        else
+        {
+            DBERR("BlockWrite::receiveData, sequenceNrTail: 0x%02X != 0x%02X\n", sequenceNrTail, sequenceNrHeader);
+
+            DBERR("BlockWrite::receiveData, block ERROR!\n");
+            cancelWithCode(BLOCKWRITE_ERROR);
+        }
     }
 }
 
