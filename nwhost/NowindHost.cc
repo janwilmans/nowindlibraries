@@ -93,6 +93,7 @@ void NowindHost::initialize()
 	response = nwhSupport->getresponse();
 
     blockRead.initialize(nwhSupport);
+    blockWrite.initialize(nwhSupport);
     bdosProxy.initialize(nwhSupport);
     command.initialize(nwhSupport);
     device.initialize(nwhSupport);
@@ -211,7 +212,10 @@ void NowindHost::write(byte data, unsigned int time)
 			setState(STATE_SYNC1);
 		}
 		break;
-	case STATE_BLOCKREAD:
+
+    // should this be an internal state of a DSKIO_READ command? see BDOSProxy::RandomBlockRead style
+    // also, move DiskDriver commands DSKIO_READ / DSKIO_WRITE / into a separate class. 
+	case STATE_BLOCKREAD: 
 		// in STATE_BLOCKREAD we receive ack's from the send blocks and continue to send new blocks    
 		blockRead.ack(data);     
 		if (blockRead.isDone())
@@ -231,18 +235,41 @@ void NowindHost::write(byte data, unsigned int time)
 		    setState(STATE_SYNC1);
 		}
 		break;
-#ifndef USE_OLD_DISKWRITE
-	case STATE_BLOCKWRITE:
+	case STATE_BLOCKWRITE: // not used yet, completely untested
 		// in STATE_BLOCKWRITE we receive blocks with sequencenr's and request blocks again if the sequencenrs do not match
         // a block-request is x bytes in length, there can be multiple (up to 26?) 'outstanding' requests in the FT245R buffer.
-		blockRead.ack(data);     
-		if (blockRead.isDone())
+		blockWrite.receiveData(data);     
+		if (blockWrite.isDone())
 		{
-            //DBERR("Blockread duration: %u\n", time-timer1);
+            //DBERR("STATE_BLOCKWRITE done!\n");
+
+            writeEndTime = time;
+            unsigned int bytesWritten = blockWrite.getTransferSize();
+            unsigned int duration = writeEndTime - writeStartTime;
+            if (duration > 0)
+            {
+                double speed = ((1000.0*bytesWritten) / duration)/1024;
+                DBERR("WRITE SPEED: %u bytes in %u ms -> %0.2f kB/s\n", bytesWritten, duration, speed);
+            }
+            else
+            {
+                DBERR("WRITE SPEED: %u bytes in %u ms -> very fast?!\n", bytesWritten, duration);
+            }
+
+            /*
+	    	unsigned sectorAmount = unsigned(buffer.size()) / 512;
+		    unsigned startSector = getStartSector();
+		    if (SectorMedium* disk = getDisk()) {
+			    int result = disk->writeSectors(&buffer[0], startSector, sectorAmount);
+			    if (0 != result) {
+			        DBERR("Error %i writing disk image!\n", result);
+			    }
+		    }
+            */
+	
 		    setState(STATE_SYNC1);
 		}
 		break;
-#endif // USE_OLD_DISKWRITE
 	case STATE_CPUINFO:
 	{
 	    unsigned int databytes = 11;
@@ -285,6 +312,7 @@ void NowindHost::setState(State aState)
 	case STATE_IMAGE:
 	case STATE_MESSAGE:
 	case STATE_BLOCKREAD:
+	case STATE_BLOCKWRITE:
 	case STATE_CPUINFO:
 	case STATE_RECEIVE_STRING:
 	case STATE_BDOS_OPEN_FILE:
@@ -319,6 +347,8 @@ void NowindHost::setState(State aState)
 		DBERR(" # STATE_MESSAGE\n"); break;
 	case STATE_BLOCKREAD:
 		DBERR(" # STATE_BLOCKREAD\n"); break;
+	case STATE_BLOCKWRITE:
+		DBERR(" # STATE_BLOCKWRITE\n"); break;
 	case STATE_CPUINFO:
 		DBERR(" # STATE_CPUINFO\n"); break;
 	case STATE_RECEIVE_DATA:
@@ -336,6 +366,8 @@ void NowindHost::setState(State aState)
 	*/
 }
 
+// prepare will switch to STATE_RECEIVE_PARAMETERS is needed for the command,
+// otherwise, it will set STATE_EXECUTING_COMMAND immediately.
 void NowindHost::prepareCommand()
 {
 	assert(activeCommand == 0);			// prepare should only be called when no command is active yet
@@ -396,7 +428,7 @@ void NowindHost::executeCommand()
 	// http://map.grauw.nl/resources/dos2_functioncalls.php#_SETDTA
 	// http://map.grauw.nl/resources/dos2_environment.php
 
-	case C_DSKIO: { // DSKIO
+	case C_DSKIO: { // DSKIO  //todo: move into function, with internal state
 		SectorMedium* disk = getDisk();
 		if (!disk) {
 			// no such drive or no disk inserted
@@ -642,11 +674,17 @@ bool NowindHost::diskReadInit(SectorMedium& disk)
 	return result;
 }
 
+// returns true if the disk is writable and the blockWrite transfer initialized 
 bool NowindHost::diskWriteInit(SectorMedium& disk)
 {
     writeStartTime = command.time;
 	bool result = false;
-	DBERR("NowindHost::diskWriteNew, startSector: %u  sectorAmount: %u\n", getStartSector(), getSectorAmount());
+	unsigned sectorAmount = getSectorAmount();
+	buffer.resize(sectorAmount * 512);
+	unsigned startSector = getStartSector();
+    unsigned address = getStartAddress();
+
+	DBERR("NowindHost::diskWriteNew, startSector: %u  sectorAmount: %u, address: 0x%04x\n", startSector, sectorAmount, address);
 	if (disk.isWriteProtected()) 
 	{
 		response->sendHeader();
@@ -655,10 +693,10 @@ bool NowindHost::diskWriteInit(SectorMedium& disk)
 	}
 	else
 	{
-		unsigned sectorAmount = std::min(128u, getSectorAmount());
-		buffer.resize(sectorAmount * 512);
+		unsigned sectorAmount = std::min(128u, getSectorAmount()); 
+		buffer.resize(sectorAmount * 512);  //todo: move hardcoded sectorSize (512) into Image class
 		transferred = 0;
-		doDiskWrite1();
+        blockWrite.init(address, sectorAmount * 512, &buffer, BlockWrite::BLOCKWRITE_END);
 		result = true;
 	}
 	return result;

@@ -12,8 +12,6 @@ public:
     DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData, unsigned int offset, word aTransferAddress, word aSize);
     DataBlock(unsigned int aNumber, unsigned int offset, word aTransferAddress, word aSize);
     ~DataBlock();
-
-    void copyData(std::vector<byte>& destinationData);
   
     word number;
     byte header;
