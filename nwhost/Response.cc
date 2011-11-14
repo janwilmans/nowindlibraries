@@ -52,6 +52,11 @@ byte Response::read()
 	return result;
 }
 
+size_t Response::getSize()
+{
+    return size();
+}
+
 bool Response::isDataAvailable() const
 {
 	return !empty();

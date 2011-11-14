@@ -18,6 +18,7 @@ public:
     void purge();
     void sendHeader();
     
+    size_t getSize();
     byte peek() const;
     byte read();
     bool isDataAvailable() const;
