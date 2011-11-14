@@ -125,7 +125,9 @@ byte NowindHost::peek() const
 
 byte NowindHost::read()
 {
-	return response->read();  // msx <- pc
+    byte value = response->read();
+    //DBERR("Respond: 0x%02x, %u bytes left\n", value, response->getSize());
+	return value;  // msx <- pc
 }
 
 bool NowindHost::isDataAvailable() const
@@ -151,8 +153,7 @@ void NowindHost::write(byte data, unsigned int time)
 	{
 	  c = '.';
 	}
-	//DBERR("received: [%c] (0x%02x) @ time: %d ms\n", c, data, time);
-	//DBERR("received: [%c] (0x%02x) in state: %d, activeCommand: %d (0x%02x)\n", c, data, state, activeCommand, activeCommand);
+	//DBERR("received: [%c] (0x%02x) @ time: %d ms, in state: %d, activeCommand: %d (0x%02x)\n", c, data, time, state, activeCommand, activeCommand);
 	switch (state) {
 	case STATE_SYNC1:
 		if (data == 0xAF) setState(STATE_SYNC2);
