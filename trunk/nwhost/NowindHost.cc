@@ -11,6 +11,16 @@
 #include <iostream>
 #include <vector>
 
+/*
+Coding Guidelines for NwHost project 
+
+- prefix member variables with 'm' and start with a Capital, ie. mMemberVariable
+- use any name for arguments, local variables etc. but use camelCase not C unix_style
+- start Classnames with a Capital, method names withoutCapital()
+- use ? : syntax only if it makes the code easier to read
+
+*/
+
 #define ToUpper(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper)
 
 #define NWHOST_API_EXPORT
@@ -696,7 +706,7 @@ bool NowindHost::diskWriteInit(SectorMedium& disk)
 		unsigned sectorAmount = std::min(128u, getSectorAmount()); 
 		buffer.resize(sectorAmount * 512);  //todo: move hardcoded sectorSize (512) into Image class
 		transferred = 0;
-        blockWrite.init(address, sectorAmount * 512, &buffer, BlockWrite::BLOCKWRITE_END);
+        blockWrite.init(writeStartTime, address, sectorAmount * 512, &buffer, BlockWrite::BLOCKWRITE_END);
 		result = true;
 	}
 	return result;
