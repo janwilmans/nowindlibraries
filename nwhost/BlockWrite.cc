@@ -1,6 +1,6 @@
 
 #include "BlockWrite.hh"
-#include "DataBlock.hh"
+#include "DataBlockWrite.hh"
 #include "NowindHostSupport.hh"
 
 #include <cassert>
@@ -19,13 +19,13 @@ BlockWrite::BlockWrite()
 {
 }
 
-void BlockWrite::copyData(std::vector<byte>& destinationData)
+void BlockWrite::copyData(std::vector<byte>& aDestinationData)
 {
-    for (unsigned int i=0; i<buffer.size();i++)
+    for (unsigned int i=0; i< mBuffer.size();i++)
     {
-        destinationData[i] = buffer[i];
+        aDestinationData[i] = mBuffer[i];
     }
-    buffer.clear();
+    mBuffer.clear();
 }
 
 void BlockWrite::initialize(NowindHostSupport* aSupport)
@@ -39,28 +39,30 @@ BlockWrite::~BlockWrite()
 
 bool BlockWrite::isDone() const
 {
-    return done;
+    return mDone;
 }
 
-void BlockWrite::init(word aStartAddress, word aSize, std::vector<byte>* data, byte aReturnCode)
+void BlockWrite::init(unsigned int mMsTime, word aStartAddress, word aSize, std::vector<byte>* aReceiveBuffer, byte aReturnCode)
 {
-    //DBERR("BlockWrite::init(startAddress: 0x%04x, size: 0x%04x\n", aStartAddress, aSize);
-    startAddress = aStartAddress;
-    transferSize = aSize;
-    bytesLeft = aSize;
-    defaultReturnCode = aReturnCode;
-    blockSequenceNr = 0;
-    receiveIndex = 0;
+    DBERR("BlockWrite::init(startAddress: 0x%04x, size: 0x%04x\n", aStartAddress, aSize);
+    mTransferingToPage23 = false;
+    mBlockSequenceNr = 0;
+    mReceiveIndex = 0;
+    mReceivedData = 0;
+    mRequestedData = 0;
+    mDone = false;
+    mDataBlockQueue.clear();
 
-    SequenceNrQueue.clear();
-    buffer.clear();
-    buffer.resize(aSize);
-    transferingToPage01 = (startAddress <= TWOBANKLIMIT);
-    processedData = 0;
-    done = false;
+    mBeginTime = mMsTime;
+    mStartAddress = aStartAddress;
+    mTransferSize = aSize;
+    mDefaultReturnCode = aReturnCode;
+
+    mBuffer.clear();
+    mBuffer.resize(aSize);
     
-    receiveBuffer = data;
-    receiveBuffer->clear();
+    mReceiveBuffer = aReceiveBuffer;
+    mReceiveBuffer->clear();
     continueWithNextBlock();
 }
 
@@ -71,50 +73,66 @@ void BlockWrite::init(word aStartAddress, word aSize, std::vector<byte>* data, b
 
 void BlockWrite::continueWithNextBlock()
 {
-    if (bytesLeft == 0)
+    if (getBytesLeft() == 0)
     {
         //DBERR("BlockWrite::continueWithNextBlock, DONE!\n");
 
         nwhSupport->sendHeader();
-        nwhSupport->send(defaultReturnCode);
-        done = true;
+        nwhSupport->send(mDefaultReturnCode);
+        mDone = true;
         return;
     }
 
-    //DBERR("BlockWrite::continueWithNextBlock, startAddress: 0x%04X, size: 0x%04X\n", startAddress, bytesLeft);
-
-    unsigned int startAddr = startAddress + processedData;
+    unsigned int startAddr = mStartAddress + mRequestedData;
+    DBERR("BlockWrite::continueWithNextBlock, startAddress: 0x%04X, size: 0x%04X\n", startAddr, getBytesLeft());
 
     // make sure the transfer does not cross the TWOBANKLIMIT
     if (startAddr < TWOBANKLIMIT)
     {
-        word endAddress = std::min(TWOBANKLIMIT, startAddr + bytesLeft);
+        word endAddress = std::min(TWOBANKLIMIT-1, startAddr + getBytesLeft());
         word transferSize = endAddress - startAddr;
-        requestBlock(startAddr, transferSize);
+        requestBlock(startAddr, mTransferSize);
     }
     else
     {
-        requestBlock(startAddr, bytesLeft);
+        requestBlock(startAddr, getBytesLeft());
     }  
 }
 
-void BlockWrite::requestBlock(word startAddress, word size)
+void BlockWrite::requestBlock(word aStartAddress, word aSize)
 {
-	currentBlockSize = std::min(size, BLOCKWRITE_SIZE);
-	unsigned int endAddress = startAddress + size;
+	word lBlockSize = std::min(aSize, BLOCKWRITE_SIZE);
+	unsigned int endAddress = aStartAddress + aSize;
 
-    //DBERR("BlockWrite::requestBlock, address: 0x%04x, transferSize: 0x%04X \n", startAddress, currentBlockSize);
+    DBERR("BlockWrite::requestBlock, address: 0x%04x, transferSize: 0x%04X \n", aStartAddress, lBlockSize);
     
+    if (aStartAddress >= TWOBANKLIMIT && mTransferingToPage23 == false && mDataBlockQueue.size() > 0)
+    {
+        DBERR("BlockWrite::requestBlock, delaying page23 block until all page01 blocks are done.\n");
+        return;
+    }
+
+    if (aStartAddress >= TWOBANKLIMIT && mTransferingToPage23 == false)
+    {
+        // switch to page23 tranfer mode
+		nwhSupport->sendHeader();
+		nwhSupport->send(BLOCKWRITE_PAGE23_DATA);
+        mTransferingToPage23 = true;
+    }
+
     // request the next block of data (consists of 3+1+2+2+1 = 9 bytes)
 	nwhSupport->sendHeader();
 	nwhSupport->send(0);                // transfer not done
-	nwhSupport->send16(startAddress);
-	nwhSupport->send16(currentBlockSize);
-	nwhSupport->send(blockSequenceNr);
+	nwhSupport->send16(aStartAddress);
+	nwhSupport->send16(lBlockSize);
+	nwhSupport->send(mBlockSequenceNr);
     
-    //DBERR("BlockWrite: SequenceNrQueue: %u\n", blockSequenceNr);
-    SequenceNrQueue.push_back(blockSequenceNr);
-    blockSequenceNr = (blockSequenceNr+1) & 255;
+    DataBlockWrite* lData = new DataBlockWrite(mBlockSequenceNr, mRequestedData, aStartAddress, lBlockSize);
+
+    DBERR("DataBlockWrite: mBlockSequenceNr: %u, aStartAddress: 0x%04X, lBlockSize: %u\n", mBlockSequenceNr, aStartAddress, lBlockSize);
+    mDataBlockQueue.push_back(lData);
+    mBlockSequenceNr = (mBlockSequenceNr+1) & 255;
+    mRequestedData += lBlockSize;
 
     //todo: write speed can be optimized by requesting multiple blocks at once, 
     // special care should taken to ensure the msx-receive buffer is does not overflow.
@@ -123,46 +141,47 @@ void BlockWrite::requestBlock(word startAddress, word size)
 
 void BlockWrite::receiveData(byte data)
 {
-    //DBERR("BlockWrite::receiveData, receiveIndex: %u, currentBlockSize: %u\n", receiveIndex, currentBlockSize);
+    // the datablock we expect to receive next
+    DataBlockWrite* lData = mDataBlockQueue.front();
 
-    if (receiveIndex == 0)
+    DBERR("BlockWrite::receiveData, receiveIndex: %u, currentBlockSize: %u\n", lData->getSequenceNr(), lData->getSize());
+
+    if (mReceiveIndex == 0)
     {
-        sequenceNrHeader = data;
-        receiveIndex++;
-        if (SequenceNrQueue.front() != sequenceNrHeader)
+        if (lData->getSequenceNr() != data)
         {
-            // sequenceNrHeader if not the sequenceNr
-            // todo: maybe implement a retry mechanism
-            // abort entire transfer, for now
-            DBERR("BlockWrite::receiveData, sequenceNrHeader: 0x%02X != 0x%02X\n", sequenceNrHeader, SequenceNrQueue.front());
+            // sequenceNrHeader is not the correct sequenceNr
+            // todo: maybe implement a retry mechanism,
+            // abort entire transfer for now
+            DBERR("BlockWrite::receiveData, sequenceNrHeader: 0x%02X != 0x%02X\n", data, lData->getSequenceNr());
             cancelWithCode(BLOCKWRITE_ERROR);
         }
         else
         {
             //DBERR("BlockWrite::receiveData, BLOCKSTART [0x%02X]\n", data);
         }
+        mReceiveIndex++;
     } 
-    else if (receiveIndex <= currentBlockSize)
+    else if (mReceiveIndex <= lData->getSize())
     {
-        //DBERR("BlockWrite::receiveData, %u: 0x%02X, bytesLeft: %u\n", processedData, data, bytesLeft);
-        buffer[processedData] = data;
-        receiveIndex++;
-        processedData++;
-        bytesLeft--;
+        DBERR("BlockWrite::receiveData, %u: 0x%02X, bytesLeft: %u\n", mReceivedData, data, getBytesLeft());
+        mBuffer[mReceivedData] = data;
+        mReceiveIndex++;
+        mReceivedData++;
     }
     else
     {
-        sequenceNrTail = data;
-        if (sequenceNrHeader == sequenceNrTail)
+        if (lData->getSequenceNr() != data)
         {
-            //DBERR("BlockWrite::receiveData, BLOCKEND [0x%02X] block OK\n", data);
-            SequenceNrQueue.pop_front();
+            DBERR("BlockWrite::receiveData, BLOCKEND [0x%02X] block OK\n", data);
+            delete lData;
+            mDataBlockQueue.pop_front();
+            mReceiveIndex = 0;
             continueWithNextBlock();
-            receiveIndex = 0;
         }
         else
         {
-            DBERR("BlockWrite::receiveData, sequenceNrTail: 0x%02X != 0x%02X\n", sequenceNrTail, sequenceNrHeader);
+            DBERR("BlockWrite::receiveData, sequenceNrTail: 0x%02X != 0x%02X\n", data, lData->getSequenceNr());
 
             DBERR("BlockWrite::receiveData, block ERROR!\n");
             cancelWithCode(BLOCKWRITE_ERROR);
@@ -174,7 +193,7 @@ void BlockWrite::cancelWithCode(byte returnCode)
 {
     nwhSupport->sendHeader();
     nwhSupport->send(returnCode);
-    done = true;
+    mDone = true;
 }
 
 } // namespace nwhost

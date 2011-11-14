@@ -307,6 +307,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DataBlockWrite.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\DataBlockWrite.hh"
+				>
+			</File>
+			<File
 				RelativePath=".\Device.cc"
 				>
 			</File>
