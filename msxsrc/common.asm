@@ -471,7 +471,7 @@ blockReadTranfer:
         jr z,invalidHeader
 
 .good:
-        repeat 64                       ; blocks of 128 bytes hardcoded (NowindHost.cpp)
+        repeat 64                       ; blocks of 128 bytes, this should match HARDCODED_READ_DATABLOCK_SIZE, NowindHost.cpp
         ld d,(hl)
         ld e,(hl)
         push de
@@ -548,6 +548,7 @@ blockWrite:
         call executeCommandNowindInPage2
         ret c                           ; return error (error code in a)
         ret pe                          ; host returns 0xfe when data for page 2/3 is available
+                                        ; todo: using ret pe, relying on 0xfe makes returning other error codes in A impossible?
         ;DEBUGMESSAGE "doorgaan!"
 
 .page23:
@@ -556,7 +557,7 @@ blockWrite:
         ;DEBUGMESSAGE "back"
         ret c                           ; return error (error code in a)
         xor a                           ; some software (wb?) requires that a is zero, because they do not check the carry
-        ret
+        ret                             ; todo: why is the zero not implemented for blockWrite01 above?
 
         PHASE $ + $4000
 
