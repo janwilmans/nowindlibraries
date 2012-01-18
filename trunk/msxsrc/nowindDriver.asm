@@ -17,7 +17,7 @@ INIHRD:
 
 ; function: DRIVES, returns the number of connected drives (for this diskrom)
 ;
-; in:  none
+; in:  none (Z flag set if CTRL is pressed??)
 ; out: l = number of drives
 ;
 ; remark: registers A, BC and DE should be preserved!

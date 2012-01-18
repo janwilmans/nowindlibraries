@@ -161,10 +161,7 @@ pageNumber := pageNumber + 1
         ifdef BDOS_NOWIND
         include "nowindbdos.asm"
         endif
-
-        code ! $                    ; workaround for sjasm bug
-        nop
-
+    
         BANKSWITCHING 4
         endmodule MSXDOS1_MODULE
         
