@@ -24,15 +24,15 @@ nowindInit:
         push af
         call z,INITXT                   ; SCREEN 0 (MSX1)
         pop af
-        ld ix,SDFSCR                    ; restore screen mode from clockchip (on MSX2 and higher)
+        ld ix,SDFSCR                    ; restore screen mode from clockchip on MSX2 and higher
         call nz,EXTROM
 
-;        call PRINTTEXT
-;        db "Nowind Interface v4.2"
-;        ifdef DEBUG
-;        db " [beta]"
-;        endif
-;        db 0
+        call PrintText
+        db "Nowind Interface v4.2"
+        ifdef DEBUG
+        db " [beta]"
+        endif
+        db 0
 
         call enableNowindPage0          ; clear hostToMSXFifo by reading 4Kb of random data
         ld bc,4096
@@ -123,10 +123,10 @@ flashWriter:
         xor a               ; clear screen / activate background color (width unchanged)        
         call CHGCLR
 
-;        call PRINTTEXT
-;        db 10,13,"Nowind Flash Writer v2.1",10,13," "
-;        ds 33,"."
-;        db 13," ",0
+        call PrintText
+        db 10,13,"Nowind Flash Writer v2.1",10,13," "
+        ds 33,"."
+        db 13," ",0
 
         call getSlotPage1
         call enableSlotPage0
@@ -138,5 +138,16 @@ flashWriter:
         ldir
         ret     ; jump to the address push'ed from 'de'
 
+PrintText:
+        pop hl      ; get string pointer
+.loop:  ld a,(hl)
+        or a
+        jr z,.exit
+        call CHPUT
+        inc hl
+        jr .loop
+.exit:
+        inc hl        
+        push hl     ; set return address
+        ret
         
-
