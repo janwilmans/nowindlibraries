@@ -158,7 +158,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assemble $(InputDir)$(InputName).bin"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
 						AdditionalDependencies="flashWriter.asm"
 						Outputs="$(InputDir)$(InputName).bin"
 					/>
@@ -169,7 +169,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assemble $(InputDir)$(InputName).bin"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
 						AdditionalDependencies="flashWriter.asm"
 						Outputs="$(InputDir)$(InputName).bin"
 					/>
@@ -244,7 +244,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assemble $(InputDir)$(InputName).out"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
 						Outputs="$(InputDir)$(InputName).out"
 					/>
 				</FileConfiguration>
@@ -254,7 +254,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assemble $(InputDir)$(InputName).out"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
 						Outputs="$(InputDir)$(InputName).out"
 					/>
 				</FileConfiguration>
@@ -268,7 +268,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assemble $(InputDir)$(InputName).rom"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
 						AdditionalDependencies="nowindbdos.asm debug.asm init.asm labels.asm tracer.asm"
 						Outputs="always_build_foo"
 					/>
@@ -279,7 +279,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Assemble $(InputDir)$(InputName).rom"
-						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)"
+						CommandLine="$(SolutionDir)Release\sjasm.exe $(InputPath)&#x0D;&#x0A;"
 						AdditionalDependencies="nowindbdos.asm debug.asm init.asm labels.asm tracer.asm"
 						Outputs="always_build_foo"
 					/>

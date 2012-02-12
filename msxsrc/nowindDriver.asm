@@ -1,3 +1,9 @@
+; TODO: holding 'INS' should disable the interface completely (this is also what Sunrise IDE interface does)
+; this is used to boot not using nowind, without having to remove the cartridge. (also usefull if flashing fails?)
+;
+; holding 'TAB' should prevent boot from nowind, even if a disk is present. This is usefull for copying disks when 
+; the 'source' is nowind, and the disk normally boots from sector (so cannot be stopped).
+
 MYSIZE          equ 8                   ; size of work area (not used, some programs write here to stop drives spinning)
 SECLEN          equ 512                 ; sector size
 
