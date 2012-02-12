@@ -234,7 +234,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
         xBuffer[3] = CMD_ERASE;
 
         mUsbStream->write(xBuffer, 4, &uiBytesWritten);
-        Util::debug("Waiting for chip-erase to complete...");
+        Util::debug("Waiting for chip-erase to complete, this can take several minutes...");
         waitForAck();
 	    Util::debug("\nErase Done!\n");
     }
@@ -518,19 +518,11 @@ void NwhostService::testModeDev()
 
 void NwhostService::testMode(string aArgument)
 {
-	unsigned char testString[2000];
-    Util::snprintf((char *) testString, sizeof(testString), "HELLO MSX 123456");
-
 	if (aArgument.compare("dev") == 0)
 	{
 		testModeDev();
 		return;
 	}
-
-	testString[12] = 0x01;
-	testString[13] = 0xFF;
-	testString[14] = 0xAA;
-	testString[15] = 0x55;
 
     startDriver();
 	mUsbStream->openBlocking();
@@ -556,10 +548,21 @@ void NwhostService::testMode(string aArgument)
 			lBuffer[received] = 0;
 			Util::debug("received: %s\n", lBuffer);
 		}
-	}
-	else
+	} else if (aArgument.compare("write") == 0)
 	{
-		Util::debug("Running in TESTMODE, sending 'HELLO MSX 12' 01 FF AA 55 repeatedly\n", testString);
+      	unsigned char testString[200];
+        Util::snprintf((char *) testString, sizeof(testString),   "HELLO!MSX!121212hello!msx!343434");
+	    testString[12] = 0x01;
+	    testString[13] = 0xFF;
+	    testString[14] = 0xAA;
+	    testString[15] = 0x55;
+
+        testString[28] = 0x01;
+	    testString[29] = 0xFF;
+	    testString[30] = 0xAA;
+	    testString[31] = 0x55;
+
+        Util::debug("Running in TESTMODE, sending 'HELLO!MSX!12' 01 FF AA 55 'hello!msx!12' 01 FF AA 55 repeatedly\n");
         unsigned long uiBytesToWrite = strlen((char*)testString);
 		unsigned long uiBytesWritten = 0;
 		for (;;) {
@@ -570,6 +573,140 @@ void NwhostService::testMode(string aArgument)
             else 
             {
     			Util::debug("SEND: %d/%d, %s (failing to write is normal in testmode)\n", uiBytesWritten, uiBytesToWrite, testString);
+            }
+		}
+	} else if (aArgument.compare("interval") == 0)
+	{                                              
+      	unsigned char testString[200];
+        Util::snprintf((char *) testString, sizeof(testString), " ");
+		Util::debug("Running in TESTMODE, sending 1 space every 3 seconds repeatedly\n");
+        unsigned long uiBytesToWrite = strlen((char*) testString);
+		unsigned long uiBytesWritten = 0;
+		for (;;) {
+			mUsbStream->write((unsigned char *) testString, uiBytesToWrite, &uiBytesWritten);
+            if (uiBytesWritten == uiBytesToWrite) {
+    			Util::debug("SEND: %d/%d, %s\n", uiBytesWritten, uiBytesToWrite, testString);
+            }
+            else 
+            {
+    			Util::debug("SEND: %d/%d, %s (failing to write is normal in testmode)\n", uiBytesWritten, uiBytesToWrite, testString);
+            }
+            Util::sleep(3000);
+		}
+	} else if (aArgument.compare("hspace") == 0)
+	{            
+		Util::debug("Running in TESTMODE, sending 0xAF 0x05 and spaces repeatedly\n");
+
+        unsigned long uiBytesWritten = 0;
+      	unsigned char testString[200];
+        testString[0] = 0xff;
+        testString[1] = 0xaf;
+        testString[2] = 0x05;
+        testString[3] = 0;
+        mUsbStream->write((unsigned char *) testString, 3, &uiBytesWritten);
+
+        Util::snprintf((char *) testString, sizeof(testString), "1234");
+        unsigned long uiBytesToWrite = strlen((char*) testString);
+		
+		for (;;) {
+			mUsbStream->write((unsigned char *) testString, uiBytesToWrite, &uiBytesWritten);
+            if (uiBytesWritten == uiBytesToWrite) {
+    			Util::debug("SEND: %d/%d, %s\n", uiBytesWritten, uiBytesToWrite, testString);
+            }
+            else 
+            {
+    			Util::debug("SEND: %d/%d, %s (failing to write is normal in testmode)\n", uiBytesWritten, uiBytesToWrite, testString);
+            }
+            //Util::sleep(1000);
+		}
+	} else if (aArgument.compare("mix") == 0)
+	{                                              
+      	unsigned char testString[200];
+        int i=0;
+        for (;i<64;i++)
+        {
+            testString[i] = 0x40+i;
+        }
+        testString[i] = 0;
+
+		Util::debug("Running in TESTMODE, sending 0x30 to 0x60 repeatedly\n");
+        unsigned long uiBytesToWrite = strlen((char*) testString);
+		unsigned long uiBytesWritten = 0;
+		for (;;) {
+			mUsbStream->write((unsigned char *) testString, uiBytesToWrite, &uiBytesWritten);
+            if (uiBytesWritten == uiBytesToWrite) {
+    			Util::debug("SEND: %d/%d, %s\n", uiBytesWritten, uiBytesToWrite, testString);
+            }
+            else 
+            {
+    			Util::debug("SEND: %d/%d, %s (failing to write is normal in testmode)\n", uiBytesWritten, uiBytesToWrite, testString);
+            }
+		}
+	} else if (aArgument.compare("mix2") == 0)
+	{                                              
+      	unsigned char testString[200];
+        Util::snprintf((char *) testString, sizeof(testString), " !");
+
+		Util::debug("Running in TESTMODE, sending 0x20 0x21 repeatedly\n");
+        unsigned long uiBytesToWrite = strlen((char*) testString);
+		unsigned long uiBytesWritten = 0;
+		for (;;) {
+			mUsbStream->write((unsigned char *) testString, uiBytesToWrite, &uiBytesWritten);
+            if (uiBytesWritten == uiBytesToWrite) {
+    			Util::debug("SEND: %d/%d, %s\n", uiBytesWritten, uiBytesToWrite, testString);
+            }
+            else 
+            {
+    			Util::debug("SEND: %d/%d, %s (failing to write is normal in testmode)\n", uiBytesWritten, uiBytesToWrite, testString);
+            }
+		}
+	} else if (aArgument.compare("mix3") == 0)
+	{                                              
+      	unsigned char testString20[20];
+      	unsigned char testString21[20];
+        Util::snprintf((char *) testString20, sizeof(testString20), " ");
+        Util::snprintf((char *) testString21, sizeof(testString21), " !");
+        testString20[0] = 0xff;
+        testString21[0] = 0xff;
+
+		Util::debug("Running in TESTMODE, sending 0x20 0x21 repeatedly\n");
+        unsigned long uiBytesToWrite = strlen((char*) testString20);
+		unsigned long uiBytesWritten = 0;
+		for (;;) {
+			mUsbStream->write((unsigned char *) testString20, uiBytesToWrite, &uiBytesWritten);
+            if (uiBytesWritten == uiBytesToWrite) {
+    			Util::debug("SEND: %d/%d, %s\n", uiBytesWritten, uiBytesToWrite, testString20);
+            }
+            else 
+            {
+    			Util::debug("SEND: %d/%d, %s (failing to write is normal in testmode)\n", uiBytesWritten, uiBytesToWrite, testString20);
+            }
+			mUsbStream->write((unsigned char *) testString21, uiBytesToWrite, &uiBytesWritten);
+            if (uiBytesWritten == uiBytesToWrite) {
+    			Util::debug("SEND: %d/%d, %s\n", uiBytesWritten, uiBytesToWrite, testString21);
+            }
+            else 
+            {
+    			Util::debug("SEND: %d/%d, %s (failing to write is normal in testmode)\n", uiBytesWritten, uiBytesToWrite, testString21);
+            }
+		}
+	}
+	else
+	{
+	    unsigned char spaceString[200];
+        Util::snprintf((char *) spaceString, sizeof(spaceString),  "                                ");
+
+		Util::debug("Running in TESTMODE, sending spaces (ASCII 32) repeatedly\n");
+        unsigned long uiBytesToWrite = strlen((char*)spaceString);
+		unsigned long uiBytesWritten = 0;
+		for (;;) {
+			mUsbStream->write((unsigned char *) spaceString, uiBytesToWrite, &uiBytesWritten);
+            if (uiBytesWritten == uiBytesToWrite) {
+    			Util::debug("SEND: %d/%d, %s\n", uiBytesWritten, uiBytesToWrite, spaceString);
+            }
+            else 
+            {
+    			Util::debug("SEND: %d/%d, %s (failing to write is normal in testmode)\n", uiBytesWritten, uiBytesToWrite, spaceString);
             }
 		}
 	}
