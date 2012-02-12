@@ -2,7 +2,7 @@
 
   Sjasm Z80 Assembler version 0.42
 
-  Copyright 2009 Sjoerd Mastijn
+  Copyright 2011 Sjoerd Mastijn
 
   This software is provided 'as-is', without any express or implied warranty.
   In no event will the authors be held liable for any damages arising from the
@@ -400,8 +400,8 @@ void Output::sort() {
 
   for (i=1; i!=_page.size(); ++i) {
     int j=i-1;
-    while (!_page[j] && j) --j;
-    if (_page[i]) _page[i]->setorg(_page[j]->getorg()+_page[j]->getsize());
+    while (j && !_page[j]) --j;
+    if (_page[i] && _page[j]) _page[i]->setorg(_page[j]->getorg()+_page[j]->getsize());
   }
 
   for (i=0; i!=_rout.size(); ++i)
@@ -434,17 +434,18 @@ void Output::sort() {
     IntList page;
     if (ip->_alignmode==BYTEADR && ip->_len>256 && pass>2) {
       ip->_rout->geterrlin();
-      error("Maximum part size exceeded",labtab.getname(ip->_rout->getlabelindex())); labsnok=1;
+      error("Maximum part size (256) exceeded",labtab.getname(ip->_rout->getlabelindex())); labsnok=1;
     }
     ip->_rout->getpages(page);
+    bool ok=false;
     size_t n;
     for (n=0; n!=page.size(); ++n) {
       i=page[n];
-      if (i>=(int)_page.size()) { n=p.size(); break; }
+      if (i>=(int)_page.size()) break;
       if (!_page[i]) continue;
-      if (_page[i]->addpart(*ip)) break;
+      if (_page[i]->addpart(*ip)) { ok=true; break; }
       if (ip->_multipage) {
-        if (i+1>=(int)_page.size()) { n=p.size(); break; }
+        if (i+1>=(int)_page.size()) break;
         if (!_page[i+1]) continue;
         int ad=align(_page[i]->gethighestad(),ip->_align,ip->_len,ip->_alignmode);
         int psize=_page[i]->getsize()+_page[i]->getorg()-ad;
@@ -453,13 +454,30 @@ void Output::sort() {
         if (size<=_page[i+1]->getfreestartspace()) {
           _page[i]->addlastpart(*ip,ad,psize);
           _page[i+1]->addfirstpart(*ip,psize,size);
+          ok=true;
           break;
         }
       }
     }
-    if (n==p.size() && pass>2) { 
+    if (!ok && pass>2) { 
       ip->_rout->geterrlin();
-      error("Part does not fit",labtab.getname(ip->_rout->getlabelindex())); labsnok=1;
+      listopt._filename=ip->_rout->getsourcefile();
+      string es="Part",name=labtab.getname(ip->_rout->getlabelindex());
+      if (!name.empty()) es+=" '"+name+"'";
+      es+=" does not fit in page";
+      if (page.size()>1) {
+        es+="s ";
+        for (size_t n=0; n!=page.size(); ++n) {
+          if (n) es+=", ";
+          es+=tostr(page[n]);
+        }
+      } else {
+        es+=" "+tostr(page[0]);
+      }
+      error(es);
+//      error("Part does not fit",labtab.getname(ip->_rout->getlabelindex()));
+      labsnok=1;
+      listopt._filename.clear();
     }
     ++ip;
   }
@@ -473,9 +491,7 @@ void Output::sort() {
     if (!_page[i] || i>(int)_page.size() || !_page[i]->addpart(*ip))
       if (pass>2) { 
         ip->_rout->geterrlin();
-        string msg;
-        msg = "Part does not fit in page " + tostr(_page[i]->getpagenr());
-        error(msg,labtab.getname(ip->_rout->getlabelindex())); labsnok=1;
+        error("Part does not fit",labtab.getname(ip->_rout->getlabelindex())); labsnok=1;
       }
     ++ip;
   }
@@ -520,6 +536,22 @@ void Output::save() {
 //}
 
 void Output::reset() {
+  //cout << "!!!" << pass << endl;
+  //unsigned int pl=0,g=0;
+  //if (pass>4) {
+  //  for (vector<Rout*>::iterator ip=_rout.begin(); ip!=_rout.end(); ++ip) {
+  //    if (pl<_routlen.size() && _routlen[pl]!=(*ip)->getsize()) {
+  //      cout << labtab.getname((*ip)->getlabelindex()) << "    " << _routlen[pl] << "    " << (*ip)->getsize() << endl;
+  //      ++g;
+  //    }
+  //    ++pl;
+  //  }
+  //  if (g) cin >> g;
+  //}
+  //_routlen.clear();
+  //for (vector<Rout*>::iterator ip=_rout.begin(); ip!=_rout.end(); ++ip) _routlen.push_back((*ip)->getsize());
+
+
   for(int i=0; i!=_rout.size(); ++i) if (_rout[i]) _rout[i]->reset();
   for(int i=0; i!=_page.size(); ++i) if (_page[i]) _page[i]->reset();
   _rn=0; _outp=0;

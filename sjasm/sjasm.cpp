@@ -2,7 +2,7 @@
 
   Sjasm Z80 Assembler version 0.42
 
-  Copyright 2009 Sjoerd Mastijn
+  Copyright 2011 Sjoerd Mastijn
 
   This software is provided 'as-is', without any express or implied warranty.
   In no event will the authors be held liable for any damages arising from the
@@ -24,15 +24,11 @@
 
 */
 
-// Update history:
-// Jan, 2000: formatted error messages so vs2008 can parse them.
-// Jan, 4 Sept 2011: added pagenr to 'Part does not fit' error.
-
 #include "sjasm.h"
 
 Options options;
 
-string version="0.42b8";
+string version="0.42c";
 
 string starttime,startdate,sourcefilename,destfilename,listfilename,expfilename,symfilename;
 int listcurlin,adres,page,pass,labsnok,mapadr,synerr,again,labelnotfound,macronummer=0,unieknummer=0,curlin,lablin;
@@ -123,12 +119,15 @@ int main(int argc, char *argv[]) {
 #ifdef _DEBUG
   cout << "Sjasm v" << version << " [" << __DATE__ " " << __TIME__ << "]\n";
 #else
+#ifdef _METARM
   cout << "Sjasm v" << version << " - www.xl2s.tk\n";
+#else
+  cout << "Sjasm Z80 Assembler v" << version << " - www.xl2s.tk\n";
+#endif
 #endif
 
   if (argc==1) {
-    cout << "Copyright 2009 Sjoerd Mastijn\n";
-    cout << "Updated 2011 Jan wilmans\n";
+    cout << "Copyright 2011 Sjoerd Mastijn\n";
     cout << "\nUsage:\nsjasm [-options] sourcefile [targetfile [parameters]]\n";
     cout << "\nOption flags as follows:\n";
 //    cout << "  -l        Label table in listing\n";

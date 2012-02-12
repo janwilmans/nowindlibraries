@@ -2,7 +2,7 @@
 
   Sjasm Z80 Assembler version 0.42
 
-  Copyright 2009 Sjoerd Mastijn
+  Copyright 2011 Sjoerd Mastijn
 
   This software is provided 'as-is', without any express or implied warranty.
   In no event will the authors be held liable for any damages arising from the
@@ -36,7 +36,7 @@ class Rout {
 public:
   Rout() : _adres(adres), _pooladres(adres),_page(page), _minadres(adres), _align(1), _overlay(false),
     _lastused(0), _adrmode(ANYADRES), _forgetmode(NEVERFORGET), _forget(false), _labelindex(0), _byteadr(false),
-    _curlin(curlin),_listcurlin(listcurlin),_maxadres(0), _multipage(false) {
+    _curlin(curlin),_listcurlin(listcurlin),_sourcefile(listopt._filename), _maxadres(0), _multipage(false) {
       routlabel=this; _pages.clear(); _pages.push_back(page); _data.clear(); _pool.clear();
   }
   void emit(const Data &e) { _data.push(e); }
@@ -55,7 +55,10 @@ public:
   int getlabelindex() { return _labelindex; }
   void setlabelindex(int index) { _labelindex=index; }
   void geterrlin() { curlin=_curlin; listcurlin=_listcurlin; } // :(
+  string &getsourcefile() { return _sourcefile; }
   IntList &getpool() { return _pool; }
+
+//  unsigned int getsize() { return _data.size(); } //##
 private:
   int _adres, _page, _lastused,_pooladres,_multipage;
   bool _forget,_overlay, _byteadr;
@@ -66,6 +69,7 @@ private:
   Data _data;
   IntList _pool;
   int _labelindex,_curlin,_listcurlin;
+  string _sourcefile;
 };
 
 class Part {
@@ -108,7 +112,6 @@ public:
   void dump(StringList&);
   void save(WriteFile &file);
   void saveoverlay(WriteFile &file);
-  int getpagenr() { return _pagenr; }
 private:
 //  struct _Pool { 
 //    _Pool (int n_data,int n_adres) : _data(n_data), _adres(n_adres) {}
@@ -150,6 +153,8 @@ private:
   vector<Rout*> _rout;
   int _rn, _org;
   Rout *_outp;
+
+//  vector<unsigned int> _routlen;  //##
 };
 
 void resetoutput();
