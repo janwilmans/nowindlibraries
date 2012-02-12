@@ -175,7 +175,7 @@ void BlockWrite::receiveData(byte data)
             // sequenceNrHeader is not the correct sequenceNr
             // todo: maybe implement a retry mechanism,
             // abort entire transfer for now
-            //DBERR("BlockWrite::receiveData, sequenceNrHeader: 0x%02X != 0x%02X\n", data, lData->getSequenceNr());
+            //DBERR("BLOCKWRITE_ERROR BlockWrite::receiveData, sequenceNrHeader: 0x%02X != 0x%02X\n", data, lData->getSequenceNr());
             cancelWithCode(BLOCKWRITE_ERROR);
         }
         mReceiveIndex++;
