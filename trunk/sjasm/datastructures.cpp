@@ -2,7 +2,7 @@
 
   Sjasm Z80 Assembler version 0.42
 
-  Copyright 2009 Sjoerd Mastijn
+  Copyright 2011 Sjoerd Mastijn
 
   This software is provided 'as-is', without any express or implied warranty.
   In no event will the authors be held liable for any damages arising from the
@@ -517,7 +517,7 @@ int MacroTable::emit(string &line, RawSource *rs, bool fun) {
   if (listopt._list) listopt._list=im->_list;
   RawSource *body=new RawSource(im->_body);
   listopt._macrofilename=im->_filename;
-  listopt._macroname="macro "+name;
+  listopt._macroname="macro '"+name+"'";
   listopt._macrocurlin=im->_line;
 
   if (fun) {

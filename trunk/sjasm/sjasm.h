@@ -2,7 +2,7 @@
 
   Sjasm Z80 Assembler version 0.42
 
-  Copyright 2009 Sjoerd Mastijn
+  Copyright 2011 Sjoerd Mastijn
 
   This software is provided 'as-is', without any express or implied warranty.
   In no event will the authors be held liable for any damages arising from the
@@ -26,7 +26,7 @@
 
 // sjasm.h
 
-#define VERSION "004208"
+#define VERSION "004230"
 //#define METARM
 
 #ifdef WIN32
@@ -69,7 +69,7 @@
 
 using namespace std;
 
-const int BIGVALUE=2147483647; // :(
+const int BIGVALUE=2147483647; // :p
 
 struct Options {
   Options() : listloops(false), listmacros(true), onlybp(false), useldradr(true), usemovlsl(true), allpages(false),
@@ -105,11 +105,11 @@ extern StructTable structtab;
 extern NumLabelTable numlabtab;
 
 #include "fileio.h"
-#include "output.h"
 #include "reader.h"
 #include "datadir.h"
 #include "preprocessor.h"
 #include "source.h"
+#include "output.h"
 #include "rawsource.h"
 #include "expressions.h"
 #include "directives.h"

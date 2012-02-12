@@ -2,7 +2,7 @@
 
   Sjasm Z80 Assembler version 0.42
 
-  Copyright 2009 Sjoerd Mastijn
+  Copyright 2011 Sjoerd Mastijn
 
   This software is provided 'as-is', without any express or implied warranty.
   In no event will the authors be held liable for any damages arising from the
@@ -38,23 +38,32 @@ void error(int line, int listline, string e, string a, int i) {
   lasterror=listline;
   string msg;
 
-  if (!listopt._macroname.empty()) {
-    msg="from "+listopt._macroname;
-    if (listopt._macrofilename!=listopt._filename) msg+=" in "+listopt._macrofilename;
-    if (listopt._macrocurlin) msg+=" line "+tostr(listopt._macrocurlin);
-    errtab.add(listline,msg,i);
-  }
+  //if (!listopt._macroname.empty()) {
+  //  msg="from "+listopt._macroname;
+  //  if (listopt._macrofilename!=listopt._filename) msg+=" in "+listopt._macrofilename;
+  //  if (listopt._macrocurlin) msg+=" line "+tostr(listopt._macrocurlin);
+  //  errtab.add(listline,msg,i);
+  //}
+
+  //if (line) msg=listopt._filename+" line "+tostr(line)+": "+e; else msg=e;
+  //if (!a.empty()) msg+=": "+a;
+  //if (errtab.add(listline,msg,i)) ++errors;
 
   if (line) msg=listopt._filename+"("+tostr(line)+") : "+e; else msg=e;
   if (!a.empty()) msg+=": "+a;
   if (errtab.add(listline,msg,i)) ++errors;
 
+  if (!listopt._macroname.empty()) {
+    msg="\t"+listopt._macrofilename+"("+tostr(listopt._macrocurlin)+") : see "+listopt._macroname;
+    errtab.add(listline,msg,i);
+  }
+
   if (i==ERRFATAL || i==ERRINTERNAL) {
-#ifdef _DEBUG
+//#ifdef _DEBUG
     cout << msg << endl;
     cout << "FATAL ERROR - PRESS ENTER" << endl;
     cin.get();
-#endif
+//#endif
     exit(1);
   }
 }
