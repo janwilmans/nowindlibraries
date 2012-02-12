@@ -101,9 +101,9 @@ emuTimeType Emulator::getNextCPUInterruptTime() {
 
 void Emulator::scheduleVDPInterrupt(bool enable, emuTimeType interruptTime) {
     
-//        DBERR("  Emulator::scheduleVDPInterrupt, enable: " << enable << " op " << interruptTime << endl);
-//        DBERR("  Emulator::cpuInterrupt: " << cpuInterrupt << endl);
-
+        DBERR("  Emulator::scheduleVDPInterrupt, enable: %i op %u\n", enable, interruptTime);
+        DBERR("  Emulator::cpuInterrupt: %u\n");
+        
         VDPInterruptEnable = enable;
     	newVDPInterruptTime = interruptTime;
 		scheduleNextInterrupt();
@@ -154,10 +154,27 @@ void Emulator::setCPUInterrupt(bool enable) {
       
 }
 
+unsigned long long OUR_SDL_GetTicks()
+{
+    unsigned long long offset = starttime;
+    offset *= 1000;
+    offset /= Z80::Instance()->cpuFrequency;
+
+    return SDL_GetTicks()+offset;
+}
+
 inline void Emulator::scheduleNextInterrupt() {
 
-    // this fails when the emutime wraps because the signed datatypes (int offset)
-    // will become HUGE and the interrupt will not occur
+    // Is is important to use signed types here, and compare offsets, not absolute times.
+    // this way when emutime wraps, the comparisons are still valid.
+
+    static unsigned int lastEmutime = 0;
+    if (lastEmutime > cpu->emuTime)
+    {
+        unsigned long lTicks = OUR_SDL_GetTicks() & 0xffffffff;
+        DBERR("Emutime WRAPPPED at %i ms (%i min).", lTicks, lTicks / 60000);        
+    }
+    lastEmutime = cpu->emuTime;
 
 	cpu->nextInterrupt = newRenderScreenInterruptTime;
 	interruptType = INT_RENDERSCREEN;
@@ -280,15 +297,6 @@ void Emulator::initialize() {
 void Emulator::reset() {
 	cpu->reset();
     vdp->reset();       // zet de lastNormalInterruptTime op emuTime
-}
-
-unsigned long long OUR_SDL_GetTicks()
-{
-    unsigned long long offset = starttime;
-    offset *= 1000;
-    offset /= Z80::Instance()->cpuFrequency;
-
-    return SDL_GetTicks()+offset;
 }
 
 ofstream ofs("timereport.txt"); 
@@ -536,19 +544,19 @@ void Emulator::handle_key_and_sdl_events() {
         case SDL_MOUSEMOTION:
             if (mouseDragging) {
                 GUI::Instance()->updateSelection(event.motion.x,event.motion.y);
-                DBERR("SDL_MOUSEMOTION\n");
+                //DBERR("SDL_MOUSEMOTION\n");
             }
             break;
         case SDL_MOUSEBUTTONDOWN:
             GUI::Instance()->startSelection(event.motion.x,event.motion.y);
             mouseDragging = true;
-            DBERR("SDL_MOUSEBUTTONDOWN\n");
+            //DBERR("SDL_MOUSEBUTTONDOWN\n");
             break;
         case SDL_MOUSEBUTTONUP:
             {
             GUI::Instance()->endSelection(event.motion.x,event.motion.y);
             mouseDragging = false;
-            DBERR("SDL_MOUSEBUTTONUP\n");      
+            //DBERR("SDL_MOUSEBUTTONUP\n");      
             break;
         }
 

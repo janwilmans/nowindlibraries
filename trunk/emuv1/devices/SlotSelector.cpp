@@ -74,23 +74,31 @@ void SlotSelector::configure(unsigned int msxVersion) {
         slotExpanded[2] = true;
 		slotExpanded[3] = true;
 		RomBlock *mainRom = new RomBlock("../roms/MSX2.ROM");
+		//RomBlock *mainRom = new RomBlock("../roms/GR8_P1.ROM");
         addMemoryDevice(mainRom, 0, 0, 0x0000);
 
-		RomBlock *subRom = new RomBlock("../roms/MSX2EXT.ROM");
+        RomBlock *subRom = new RomBlock("../roms/MSX2EXT.ROM");
+		//RomBlock *subRom = new RomBlock("../roms/GR8_P2.rom");
 		addMemoryDevice(subRom, 3, 0, 0x0000);            // MSX2 sub-rom 3-1, address 0x000
-		
+
+		//RomBlock *kanjiRom = new RomBlock("../roms/GR8_MSXKANJI.ROM");
+		//addMemoryDevice(kanjiRom, 3, 0, 0x4000);
+
+        //subRom->patch(0x438f, 0x36); // GR8BIT only, dont detect vdp
+        //subRom->patch(0x4390, 0x01); //
+
 //        mainRom->patch(0x0180, 0xc9);   // TURBO-R CHGCPU
 //        mainRom->patch(0x0183, 0xaf);   // TURBO-R CHGCPU (xor a)
 //        mainRom->patch(0x0184, 0xc9);   // TURBO-R CHGCPU (ret)
         
 		// NO start-up logo, patch should be applied to SUB-ROM 
-		subRom->patch(0x2a0e,0);
-		subRom->patch(0x2a0f,0);
-		subRom->patch(0x2a10,0);
+		//subRom->patch(0x2a0e,0);
+		//subRom->patch(0x2a0f,0);
+		//subRom->patch(0x2a10,0);
 		
 		// NO boot-delay, patch should be applied to SUB-ROM 
-		subRom->patch(0x041d,0x18);
-		subRom->patch(0x041e,2);
+		//subRom->patch(0x041d,0x18);
+		//subRom->patch(0x041e,2);
 		
 		Z80::Instance()->mapper = new Mapper(64);
 		addMemoryDevice(Z80::Instance()->mapper,3,2,0x0000);
@@ -133,11 +141,12 @@ void SlotSelector::configure(unsigned int msxVersion) {
     addMemoryDevice(usbInterface, 2, 0, 0x0000); 
 
     //usbInterface->insertDisk(0, "../disks/aleste21.dsk");
-//    usbInterface->insertDisk(0, "../disks/wb.dsk");
+    usbInterface->insertDisk(0, "../disks/wb.dsk");
 //  usbInterface->insertDisk(0, "../disks/test.dsk");
 //  usbInterface->insertDisk(0, "../disks/hd5mbDOS2.dsk");
-  usbInterface->insertDisk(0, "../disks/dos1.dsk");
+//  usbInterface->insertDisk(0, "../disks/dos1.dsk");
 //	usbInterface->insertDisk(0, "../disks/dos2.dsk");
+    //usbInterface->insertDisk(0, "../disks/empty.dsk");
 
 	//usbInterface->insertDisk(0, "../disks/adnukes.dsk");
 

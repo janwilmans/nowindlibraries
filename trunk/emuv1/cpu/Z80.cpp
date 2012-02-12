@@ -385,7 +385,9 @@ void Z80::executeInstructions() {
     			dumpCpuInfo();
     		}
     #endif
-    } while(emuTime < nextInterrupt);      // end of while-not-next-interrupt
+    } while(int(nextInterrupt - emuTime) > 0);      // end of while-not-next-interrupt
+    // be sure to always use a subtraction and convert to signed datatype, 
+    // otherwise negative outcome will be >0x7fffffff, so > 0
 }
 
 /*! \brief reads an 8 bit value from memory
