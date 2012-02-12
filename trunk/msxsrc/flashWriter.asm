@@ -34,6 +34,8 @@ no_r800:
         bit 2,a
         ld b,2
         jr z,.switchSlot            ; '2' pressed?
+        bit 3,a
+        jr z,testmode               ; '3' pressed?
         
         ld h,HIGH usbReadPage0
         ld a,(hl)                   ; header $BB ?
@@ -53,7 +55,7 @@ no_r800:
         cp $a2
         jp z,verifyFlash
         cp $a3
-        jr z,writeFlash
+        jp z,writeFlash
         cp $a4
         jr z,chipErase
         cp $a5
@@ -66,8 +68,6 @@ no_r800:
      
 ; in: b = main slot to enable for page 0 and 1   
 enableFlashMainslot: 
-
-        
         ld a,(currectSlot)
         cp b
         ret z               ; do nothing if already selected
@@ -91,7 +91,20 @@ enableFlashMainslot:
 		ld a,48
 		add b
 		out ($98),a         ; print 1/2	
-		ret        
+		ret  
+		
+testmode:
+		ld a,"T"
+		out ($98),a         ; print 1/2	
+
+        ld h,HIGH usbReadPage0
+.lp2:   ld b,255
+.loop   ld a,(hl)                   ; read
+        djnz .loop
+        in a,($aa)
+        xor 64
+        out ($aa),a
+        jr .lp2
     
 ; 'autoselect' is a flashrom feature and has nothing to do with 'selectSlot'
 ; the 'autoselect' feature is used to identify the type of flashrom
