@@ -101,8 +101,8 @@ emuTimeType Emulator::getNextCPUInterruptTime() {
 
 void Emulator::scheduleVDPInterrupt(bool enable, emuTimeType interruptTime) {
     
-        DBERR("  Emulator::scheduleVDPInterrupt, enable: %i op %u\n", enable, interruptTime);
-        DBERR("  Emulator::cpuInterrupt: %u\n");
+        //DBERR("  Emulator::scheduleVDPInterrupt, enable: %i op %u\n", enable, interruptTime);
+        //DBERR("  Emulator::cpuInterrupt: %u\n");
         
         VDPInterruptEnable = enable;
     	newVDPInterruptTime = interruptTime;
@@ -403,6 +403,10 @@ void Emulator::start() {
 			/* release time-slices until the average is back in range 
 			 * on very fast machines this can be 100s of slices
 			 */
+
+            // todo: this will not work after emutime wraps! 'passedTime' will not be ok.
+            // also, at startup and when the emutime wraps, the emulator will temporarily at full speed?
+            // re-think this.
 			while(cpu->emuTime > (statesPerMilliSecond * passedTime)) {
 				SDL_Delay(1);
 
