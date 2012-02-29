@@ -62,7 +62,7 @@ void SlotSelector::configure(unsigned int msxVersion) {
         usbInterface = new NowindInterface("../msxsrc/nowind.rom");
         addMemoryDevice(usbInterface, 1, 0, 0x0000);
         //usbInterface->insertDisk(0, "../disks/MSX20th.dsk");
-        usbInterface->insertDisk(0, "../disks/dos1.dsk");        
+        //usbInterface->insertDisk(0, "../disks/dos1.dsk");        
         //usbInterface->insertDisk(0, "../disks/wb.dsk");
         //addMemoryDevice(new MapperMsxDos2("../roms/MSXDOS22_msx1.ROM"),3,0,0x4000);
 	}
@@ -141,11 +141,11 @@ void SlotSelector::configure(unsigned int msxVersion) {
     addMemoryDevice(usbInterface, 2, 0, 0x0000); 
 
     //usbInterface->insertDisk(0, "../disks/aleste21.dsk");
-    usbInterface->insertDisk(0, "../disks/wb.dsk");
+    //usbInterface->insertDisk(0, "../disks/wb.dsk");
 //  usbInterface->insertDisk(0, "../disks/test.dsk");
 //  usbInterface->insertDisk(0, "../disks/hd5mbDOS2.dsk");
 //  usbInterface->insertDisk(0, "../disks/dos1.dsk");
-//	usbInterface->insertDisk(0, "../disks/dos2.dsk");
+	usbInterface->insertDisk(0, "../disks/dos2.dsk");
     //usbInterface->insertDisk(0, "../disks/empty.dsk");
 
 	//usbInterface->insertDisk(0, "../disks/adnukes.dsk");
