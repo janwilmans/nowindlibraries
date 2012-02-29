@@ -89,7 +89,7 @@ void NowindInterface::write(nw_word address, nw_byte value) {
 	case 0x6000:
 	case 0xa000:
 
-        // snelle hack om nowind_sunrise te ondersteunen (mapper reageert alleen op oneven adressen)
+        // support nowind v2 (sunrise) its mapper responds only to odd addresses
         if ((address & 1) == 0) {
             DBERR("Nowind write that does nothing: %u (at addr: 0x%04x)\n", value, address);
             break;

@@ -100,7 +100,7 @@ void AY38910::writePort1(nw_byte value) {
     {
         timeSinceLastsync = emuTime + (0xffffffff-lastSync);
     }
-    unsigned int samples = timeSinceLastsync / AYticks;
+    unsigned int samples = unsigned int(timeSinceLastsync / AYticks);
     
     //DBERR("samples: %u\n", samples);
     updateBuffer(samples);	// update buffer until emuTime (now)

@@ -168,7 +168,7 @@ inline void Emulator::scheduleNextInterrupt() {
     // Is is important to use signed types here, and compare offsets, not absolute times.
     // this way when emutime wraps, the comparisons are still valid.
 
-    static unsigned int lastEmutime = 0;
+    static emuTimeType lastEmutime = 0;
     if (lastEmutime > cpu->emuTime)
     {
         unsigned long lTicks = OUR_SDL_GetTicks() & 0xffffffff;
@@ -178,10 +178,10 @@ inline void Emulator::scheduleNextInterrupt() {
 
 	cpu->nextInterrupt = newRenderScreenInterruptTime;
 	interruptType = INT_RENDERSCREEN;
-	int offset = newRenderScreenInterruptTime - cpu->emuTime;
+	int offset = int(newRenderScreenInterruptTime - cpu->emuTime);
 	
     if (cpuInterrupt && VDPInterruptEnable) {
-	    int newOffset = newVDPInterruptTime - cpu->emuTime;
+	    int newOffset = int(newVDPInterruptTime - cpu->emuTime);
 		if (newOffset < offset) {
 			cpu->nextInterrupt = newVDPInterruptTime;
 			offset = newOffset;
@@ -191,7 +191,7 @@ inline void Emulator::scheduleNextInterrupt() {
     }
 
     if (screenChangeInterruptEnable) {
-		int newOffset = newScreenChangeInterruptTime - cpu->emuTime;
+		int newOffset = int(newScreenChangeInterruptTime - cpu->emuTime);
 		if (newOffset < offset) {
 			cpu->nextInterrupt = newScreenChangeInterruptTime;
 			offset = newOffset;
@@ -200,7 +200,7 @@ inline void Emulator::scheduleNextInterrupt() {
     }
 
     if (debuggerInterruptEnable) {
-		int newOffset = newDebuggerInterruptTime - cpu->emuTime;
+		int newOffset = int(newDebuggerInterruptTime - cpu->emuTime);
 		if (newOffset < offset) {
 			cpu->nextInterrupt = newDebuggerInterruptTime;
 			offset = newOffset;
@@ -209,7 +209,7 @@ inline void Emulator::scheduleNextInterrupt() {
     }
     
     if (msxAudioInterruptEnable) {
-		int newOffset = newMsxAudioInterruptTime - cpu->emuTime;
+		int newOffset = int(newMsxAudioInterruptTime - cpu->emuTime);
 		if (newOffset < offset) {
 			cpu->nextInterrupt = newMsxAudioInterruptTime;
 			offset = newOffset;
@@ -218,7 +218,7 @@ inline void Emulator::scheduleNextInterrupt() {
 		}
     }
 
-	int newOffset = newAudioInterruptTime - cpu->emuTime;
+	int newOffset = int(newAudioInterruptTime - cpu->emuTime);
 	if (newOffset < offset) {
 		cpu->nextInterrupt = newAudioInterruptTime;
 		offset = newOffset;
@@ -386,37 +386,8 @@ void Emulator::start() {
             //DBERR("execute INT_RENDERSCREEN\n");
             vdp->renderScreen(cpu->nextInterrupt);
 #endif
-
 			/* check if we're not going to fast */
-			msTimeType lastestMs = OUR_SDL_GetTicks();
-			msTimeType passedTime = (lastestMs-startTime);
-
-            //DBERR("lastestMs: %u\n", lastestMs);
-            //DBERR("passedTime: %u\n", passedTime);
-	
-			#ifndef ZEXALL_ON
-
-			int slicesReleased = 0;
-			
-			reportCycles(cpu->emuTime, lastestMs);
-	
-			/* release time-slices until the average is back in range 
-			 * on very fast machines this can be 100s of slices
-			 */
-
-            // todo: this will not work after emutime wraps! 'passedTime' will not be ok.
-            // also, at startup and when the emutime wraps, the emulator will temporarily at full speed?
-            // re-think this.
-			while(cpu->emuTime > (statesPerMilliSecond * passedTime)) {
-				SDL_Delay(1);
-
-                lastestMs = OUR_SDL_GetTicks();
-				passedTime = (lastestMs-startTime);
-				slicesReleased++;
-			}
-//			if (slicesReleased > 0) DBERR("[%u]", slicesReleased);
-			reportCycles(cpu->emuTime, lastestMs);
-			#endif        
+            speedCheck();
             
             if (autoPause) notPaused = false;           
             break;
@@ -447,6 +418,64 @@ void Emulator::start() {
 
 	/* classes Z80, VDP, AY38910 etc... will die on their own, they're singletons ;) */
 	SDL_Quit();
+}
+
+/* release time-slices until the average is back in range 
+ * on very fast machines this can be 100s of slices
+ */
+void Emulator::speedCheck()
+{
+	msTimeType lastestMs = OUR_SDL_GetTicks();
+	msTimeType passedTime = (lastestMs-startTime);
+
+    //DBERR("lastestMs: %u\n", lastestMs);
+    //DBERR("passedTime: %u\n", passedTime);
+
+#ifndef ZEXALL_ON
+
+	int slicesReleased = 0;
+	reportCycles(cpu->emuTime, lastestMs);  // log time+emutime for analysis
+
+    /*
+    Comparisons against emuTimeType are always done using a subtraction and conversion to int (signed type)
+    This solves the problem where emuTimeType wraps.
+
+    todo: after emutime wraps 'passedTime' will not be ok!
+    also, at startup and when the emutime wraps, the emulator will temporarily at full speed?
+    re-think this.
+
+    2^64 == 18446744073709551616  
+
+    z80 @ 3.57Mhz == 3579545 cycles/second
+
+    == 12886362000 cycles / hour
+    == 112884531120000 cycles / year
+
+    18446744073709551616 / 112884531120000 = 163412.50559919543754047706939707
+    so: emuTimeType will wraps after 163.412 years
+
+    a workaround has been implemented:
+    - emuTimeType is now a 'unsigned long long' and will not wrap any time soon (~163.412 years)
+
+    there are two problems with this solution:
+    - when cpu is loaded 100%, and emulator is not given cpu executions time, real time passes 
+      and the emulator seems to be running behind _a lot_, so it will run at full speed until it catches up.
+      notice: i know of no way to detect this, I dont think there is a good solution for this, but a workaround, 
+      might be to let the emulator run at max. 101% (or something) so the 'catching up is not noticable by the user.
+    - when the emulator is paused, no instructions are executed, but real time passes, this will also
+      cause the emulator to run at full speed until it catches up.
+    */
+
+	while(cpu->emuTime > (statesPerMilliSecond * passedTime)) {
+		SDL_Delay(1);
+
+        lastestMs = OUR_SDL_GetTicks();
+		passedTime = (lastestMs-startTime);
+		slicesReleased++;
+	}
+//			if (slicesReleased > 0) DBERR("[%u]", slicesReleased);
+	reportCycles(cpu->emuTime, lastestMs);
+	#endif      
 }
 
 void Emulator::handle_key_and_sdl_events() {
