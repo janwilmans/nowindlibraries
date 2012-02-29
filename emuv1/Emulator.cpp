@@ -425,16 +425,11 @@ void Emulator::start() {
  */
 void Emulator::speedCheck()
 {
-	msTimeType lastestMs = OUR_SDL_GetTicks();
-	msTimeType passedTime = (lastestMs-startTime);
-
-    //DBERR("lastestMs: %u\n", lastestMs);
-    //DBERR("passedTime: %u\n", passedTime);
 
 #ifndef ZEXALL_ON
-
 	int slicesReleased = 0;
-	reportCycles(cpu->emuTime, lastestMs);  // log time+emutime for analysis
+    msTimeType passedTime = OUR_SDL_GetTicks();
+	reportCycles(cpu->emuTime, passedTime);  // log time+emutime for analysis
 
     /*
     Comparisons against emuTimeType are always done using a subtraction and conversion to int (signed type)
@@ -466,15 +461,14 @@ void Emulator::speedCheck()
       cause the emulator to run at full speed until it catches up.
     */
 
+    
 	while(cpu->emuTime > (statesPerMilliSecond * passedTime)) {
 		SDL_Delay(1);
-
-        lastestMs = OUR_SDL_GetTicks();
-		passedTime = (lastestMs-startTime);
+		passedTime = OUR_SDL_GetTicks();
 		slicesReleased++;
 	}
 //			if (slicesReleased > 0) DBERR("[%u]", slicesReleased);
-	reportCycles(cpu->emuTime, lastestMs);
+	reportCycles(cpu->emuTime, passedTime);
 	#endif      
 }
 
