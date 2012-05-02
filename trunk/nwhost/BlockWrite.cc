@@ -156,8 +156,9 @@ void BlockWrite::requestBlock(word aStartAddress, word aSize)
     mBlockSequenceNr = (mBlockSequenceNr+1) & 255;
     mRequestedData += lBlockSize;
 
-    //todo: write speed can be optimized by requesting multiple blocks at once, 
-    // special care should taken to ensure the msx-receive buffer is does not overflow.
+    //todo: maybe write speed can be optimized by requesting multiple blocks at once, 
+    // special care should taken to ensure the msx-receive buffer is does not overflow
+    // and that our garantees are still met?? I think this is not reliable!
     // for example by making sure there are never more then 256/9 = 28 blocks out-standing.
 }
 

@@ -13,6 +13,7 @@
 namespace general
 {
     GEN_API void initialize();
+    GEN_API void beep(unsigned long freq, unsigned long duration);
 }
 
 #endif // GENERAL_H
