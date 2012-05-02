@@ -1,3 +1,5 @@
+#include "libgeneral.h"
+
 #include "DiskHandler.hh"
 #include "SectorMedium.hh"
 #include "Image.h"
@@ -704,7 +706,7 @@ bool NowindHost::diskWriteInit(SectorMedium& disk)
 	}
 	else
 	{
-		unsigned sectorAmount = std::min(128u, getSectorAmount()); 
+		unsigned sectorAmount = (std::min)(128u, getSectorAmount()); 
 		buffer.resize(sectorAmount * 512);  //todo: move hardcoded sectorSize (512) into Image class
 		transferred = 0;
         blockWrite.init(writeStartTime, address, sectorAmount * 512, &buffer, BlockWrite::BLOCKWRITE_END);
@@ -726,7 +728,7 @@ bool NowindHost::diskWriteInit_old(SectorMedium& disk)
 	}
 	else
 	{
-		unsigned sectorAmount = std::min(128u, getSectorAmount());
+		unsigned sectorAmount = (std::min)(128u, getSectorAmount());
 		buffer.resize(sectorAmount * 512);
 		transferred = 0;
 		doDiskWrite1();
@@ -769,7 +771,7 @@ void NowindHost::doDiskWrite1()
 	}
 
 	static const unsigned BLOCKSIZE = 240;
-	transferSize = std::min(bytesLeft, BLOCKSIZE);
+	transferSize = (std::min)(bytesLeft, BLOCKSIZE);
 
 	unsigned address = getCurrentAddress();
 	unsigned endAddress = address + transferSize;

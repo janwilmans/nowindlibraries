@@ -452,22 +452,25 @@ void Emulator::speedCheck()
     a workaround has been implemented:
     - emuTimeType is now a 'unsigned long long' and will not wrap any time soon (~163.412 years)
 
-    there are two problems with this solution:
+    there are two problems still to be solved:
     - when cpu is loaded 100%, and emulator is not given cpu executions time, real time passes 
       and the emulator seems to be running behind _a lot_, so it will run at full speed until it catches up.
       notice: i know of no way to detect this, I dont think there is a good solution for this, but a workaround, 
-      might be to let the emulator run at max. 101% (or something) so the 'catching up is not noticable by the user.
+      might be to let the emulator run at max. 101% (or something) so the 'catching up' is not noticable by the user.
+      we should also consider what happens when fail to provide an audiobuffer in time.
+      ideally, the emulator should stop producing sound and resume when enough time has passed to fill a buffer again?
+      (so we still hear a 'hickup' but sound is Ok again afterwards)
     - when the emulator is paused, no instructions are executed, but real time passes, this will also
-      cause the emulator to run at full speed until it catches up.
+      cause the emulator to run at full speed until it catches up. This situation is very simular to the cputime-starvarion
+      scenario.
     */
-
-    
+   
 	while(cpu->emuTime > (statesPerMilliSecond * passedTime)) {
 		SDL_Delay(1);
 		passedTime = OUR_SDL_GetTicks();
 		slicesReleased++;
 	}
-//			if (slicesReleased > 0) DBERR("[%u]", slicesReleased);
+//	if (slicesReleased > 0) DBERR("[%u]", slicesReleased);
 	reportCycles(cpu->emuTime, passedTime);
 	#endif      
 }

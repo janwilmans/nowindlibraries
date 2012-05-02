@@ -1,4 +1,5 @@
 
+#include "libgeneral.h"
 #include "BlockRead.hh"
 #include "DataBlock.hh"
 #include "NowindHostSupport.hh"
@@ -50,7 +51,8 @@ void BlockRead::blockRead(word startAddress, word size)
     
     if (startAddress < TWOBANKLIMIT)
     {
-        word endAddress = std::min(TWOBANKLIMIT, startAddress + size);
+        // notice the () around std::min, this is to prevent conflicts with min/max defines (if any, like in windows.h)
+        word endAddress = (std::min)(TWOBANKLIMIT, startAddress + size);
         word transferSize = endAddress - startAddress;
         blockReadHelper(startAddress, transferSize);
     }
@@ -208,7 +210,7 @@ void BlockRead::ack(byte tail)
         dataBlock = 0;
         dataBlockQueue.pop_front();
 
-		DBERR("BlockRead::ack, tail matched, %d datablocks left\n", dataBlockQueue.size());
+		//DBERR("BlockRead::ack, tail matched, %d datablocks left\n", dataBlockQueue.size());
 		if (dataBlockQueue.size() == 0)
         {
             blockReadContinue();
@@ -225,6 +227,9 @@ void BlockRead::ack(byte tail)
         // wrong or at least unusual (100% CPU load on the host side can cause that for example)
         
         DBERR("BlockRead::ack, block %u failed! (errors: %u, tail: 0x%02x, but received: 0x%02x)\n", dataBlock->number, errors, dataBlock->header, tail);
+#ifdef WIN32
+        general::beep(1750, 50);
+#endif
 
 	    nwhSupport->sendHeader();
 	    if (dataBlock->fastTransfer)

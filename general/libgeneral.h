@@ -9,7 +9,6 @@
 #define LIBGENERAL_H
 
 #include "general.h"
-#include "platform.h"
 #include "Util.h"
 
 #endif

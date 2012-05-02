@@ -443,7 +443,8 @@ blockRead23:
 
 ; used by blockRead01 and blockRead23
 ; Input:    HL = usb read address (either usbReadPage0 or usbReadPage2)
-
+; Routine: 'blockReadTranfer'
+; todo: we should re-think this so 'deadlocks' cannot occur, using a timeout or retry mechnism
 invalidHeader:
         ; TODO timeout
         DEBUGMESSAGE "invalidHeader"

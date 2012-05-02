@@ -21,6 +21,17 @@ void general::initialize()
     Util::_startTicks();
 }
 
+#ifdef WIN32
+
+#include "windows.h"
+
+void general::beep(unsigned long freq, unsigned long duration)
+{
+    Beep(freq, duration);
+}
+
+#endif 
+
 /*
 
 Todo:
