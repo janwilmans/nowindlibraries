@@ -11,6 +11,7 @@
 
 #include "ConFtdiSio.h"
 #include <fcntl.h> 	// for open() and O_RDRW
+#include <unistd.h>	
 
 // POSIX portable methods to control tty devices
 #include <termios.h>
