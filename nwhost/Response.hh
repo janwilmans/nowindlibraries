@@ -3,6 +3,7 @@
 
 #include "NowindTypes.hh"
 #include <deque>
+#include <cstring>
 
 namespace nwhost {
 
