@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
-set(BOOST_USE_STATIC_LIBS   ON)
-set(BOOST_USE_MULTITHREADED ON)
+#set(BOOST_USE_STATIC_LIBS   ON)
+#set(BOOST_USE_MULTITHREADED ON)
 
-set(BOOST_INCLUDEDIR /usr/include)
-find_package( Boost REQUIRED)
+find_package(Boost COMPONENTS system filesystem REQUIRED)
 
-link_directories ( ${BOOST_LIBRARY_DIRS} )
-include_directories ( ${BOOST_INCLUDE_DIRS} )
+include_directories ( ${Boost_INCLUDE_DIRS} )
+link_directories ( ${Boost_LIBRARY_DIRS} )
+
+MESSAGE("find_package Boost: ${Boost_INCLUDE_DIRS} <end> ")
+MESSAGE("find_package Boost: ${Boost_LIBRARY_DIRS} <end> ")
 
 PROJECT(nowindlibraries)
 

@@ -20,4 +20,18 @@ Example of compiling on Fedora 13:
 - use 'cmake -G 'Unix Makefiles' to generate makefiles.
 - run 'make' 
 
+Or for Ubuntu 12:
+- sudo apt-get ftdi*
+- sudo apt-get g++
+- sudo apt-get install boost-filesystem*-dev
 
+- use 'cmake -G 'Unix Makefiles' to generate makefiles.
+- run 'make' 
+
+problems compiling ? Post on msx.org or mail directly to me (janwilmans@gmail.com)
+using cmake is an attempt to make cross-compiling easier, but so far it seems to break a lot
+on new linux distros, so feel free to contact me, mention these thinks:
+- linux distribution
+- the output of cmake, and 'make' and 'make -d' (the latter includes debug info)
+- check for locate *boost*.a* if no .a files are present, you need to install boost-system, and boost-filesystem not 'just'
+  the header-only part of boost. Also check: locate libftdi.a it should also be found
