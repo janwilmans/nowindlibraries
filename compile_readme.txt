@@ -20,13 +20,18 @@ Example of compiling on Fedora 13:
 - use 'cmake -G 'Unix Makefiles' to generate makefiles.
 - run 'make' 
 
-Or for Ubuntu 12:
-- sudo apt-get ftdi*
-- sudo apt-get g++
-- sudo apt-get install boost-filesystem*-dev
+Or for Debian 64 or Ubuntu 12:
 
+- sudo apt-get update
+- sudo apt-get libftdi-dev
+- sudo apt-get cmake
+- sudo apt-get subversion
+- sudo apt-get gcc
+- sudo apt-get g++
+- sudo apt-get libboost-filesystem*
 - use 'cmake -G 'Unix Makefiles' to generate makefiles.
 - run 'make' 
+
 
 problems compiling ? Post on msx.org or mail directly to me (janwilmans@gmail.com)
 using cmake is an attempt to make cross-compiling easier, but so far it seems to break a lot
