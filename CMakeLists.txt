@@ -1,7 +1,6 @@
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
-
-# important: declare the project before anything else
 PROJECT(nowindlibraries)
+# important: declare the project before anything else
+cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
 #set(BOOST_USE_STATIC_LIBS   ON)
 #set(BOOST_USE_MULTITHREADED ON)
