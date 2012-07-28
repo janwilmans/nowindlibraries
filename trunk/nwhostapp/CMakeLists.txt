@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.6)
 PROJECT(nwhostapp)
+cmake_minimum_required(VERSION 2.6)
 
 INCLUDE_DIRECTORIES(../general)
 INCLUDE_DIRECTORIES(../nwhost)
