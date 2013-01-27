@@ -28,7 +28,7 @@ nowindInit:
         call nz,EXTROM
 
         call PrintText
-        db "Nowind Interface v4.2"
+        db "Nowind Interface v4.3"
         ifdef DEBUG
         db " [beta]"
         endif
