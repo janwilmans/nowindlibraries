@@ -9,7 +9,11 @@
 #include <fstream>
 #include <assert.h>
 #include <string.h>
-#include <unistd.h>
+#ifdef WIN32
+	#include <io.h>
+#else
+	#include <unistd.h>
+#endif
 
 /*
  * If an "error while loading shared libraries: libX11.so.6" occurs at runtime
