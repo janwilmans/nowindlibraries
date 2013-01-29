@@ -46,7 +46,7 @@ For MacOSX (Leopard):
 
 For MacOSX (Mountain Lion), 
 
-Actually, just like on Leopard, except if you want to create 32bit binaries to
+Actually, just like on Leopard, except if you want to create universal binaries to
 run on both 32-bit and 64-bit systems, then use: (notice the +universal)
 
 - install Xcode
@@ -56,7 +56,7 @@ run on both 32-bit and 64-bit systems, then use: (notice the +universal)
 - sudo port install cmake
 - sudo port install libftdi +universal
 - sudo port install boost +universal
-- use 'cmake -G 'Unix Makefiles' -DCMAKE_OSX_ARCHITECTURES=i386 to generate makefiles.
+- use cmake -G "Unix Makefiles" -DCMAKE_OSX_ARCHITECTURES="i386;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.5
 - run 'make' 
 
 problems compiling or using the nowind? Post on msx.org or mail directly to me (janwilmans@gmail.com)
