@@ -82,6 +82,11 @@ bool ConFTD2XX::open()
 		if (mTimeoutSet) {
 			FT_SetTimeouts(mHandle, mRxTimeout, mTxTimeout);
 		}
+
+		// FT_SetLatencyTimer = 1 on a (bad?) USB3.0 controller can cause high CPU load.
+		// todo: expose this value to the user, it can be a balance between speed and cpu load.
+		// on the other hand, why is this timeout occuring? if our commands are not long enough to 
+		// trigger a USB packet, we should zero them out so there are send immediately.
 	
 		/* set the buffer-flush-timeout */
 		FT_STATUS lStatus = FT_SetLatencyTimer(mHandle, 1);		// lowest meaningfull value is 1 (2 is slower)
@@ -97,7 +102,6 @@ bool ConFTD2XX::open()
 		lStatus = initFtdi(mHandle);		// create auto-reset event
 		mUsbStreamOpen = true;
 	}
-    
     return connected;
 }
 
@@ -163,14 +167,15 @@ int ConFTD2XX::readBlocking(unsigned char * aBuffer, unsigned long aMaxBytesToRe
 	DWORD lRxBytes = 0;
 	for (;;)
 	{
-		waitForData();		
+		waitForData();
 		// waitForData result doesn't matter, whether a timeout occurred or there really
-		// is data, we need to check if the device is still present.
+		// is data, we need to check if the device is still present and also how much data we have.
 
 		FT_STATUS ftStatus = FT_GetQueueStatus(mHandle, &lRxBytes);
-		if (ftStatus != FT_OK) return 0;
-		if (lRxBytes == 0) continue;
+		if (ftStatus != FT_OK) return 0;	// connection problem
+		if (lRxBytes == 0) continue;		// no data
 
+		// we do not want FT_Read to block, so make sure we read no more then available
 		unsigned int lReadBytes = aMaxBytesToRead;
 		if (lRxBytes < aMaxBytesToRead) lReadBytes = lRxBytes;
 
@@ -182,6 +187,7 @@ int ConFTD2XX::readBlocking(unsigned char * aBuffer, unsigned long aMaxBytesToRe
 	}
 	return lRxBytes;
 }
+
 
 void ConFTD2XX::write(unsigned char * aBuffer, unsigned long aBytesToWrite, unsigned long * aBytesWritten)
 {
@@ -206,7 +212,7 @@ HANDLE hEvent = 0;
 FT_STATUS ConFTD2XX::initFtdi(FT_HANDLE ftHandle)
 {
 	hEvent = CreateEventA(0, false, false, "");		// create auto-reset event
-	DWORD EventMask = FT_EVENT_RXCHAR | FT_EVENT_MODEM_STATUS;    // TODO: do we need FT_EVENT_MODEM_STATUS ???
+	DWORD EventMask = FT_EVENT_RXCHAR;
 	return FT_SetEventNotification(ftHandle, EventMask, hEvent);
 }
 
