@@ -1,0 +1,186 @@
+# Project: nowindcons
+# Makefile created by Dev-C++ 4.9.9.2
+
+CPP  = g++.exe -D__DEBUG__
+CC   = gcc.exe -D__DEBUG__
+WINDRES = windres.exe
+RES  = 
+OBJ  = Config.o Debug.o Emulator.o GUI.o maincons.o Media.o EmulatorTester.o audio/AudioDevice.o audio/AudioDummy.o audio/AudioMixer.o audio/AY38910.o audio/SCC.o audio/YM2413.o video/V9938.o video/V9938commands.o video/V9938renderer.o video/V9938sprites.o cpu/Z80.o memory/RamBlock.o memory/RomBlock.o memory/Mapper.o memory/NowindInterface.o memory/MapperKonami5.o devices/Kanji.o devices/RP5C01.o devices/SlotSelector.o devices/SwitchedPorts.o memory/MemoryDevice.o devices/DebugDevice.o memory/MapperFMPAC.o DiskDrive.o VirtualDrive.o devices/F4Device.o devices/I8255.o controls/Keyboard.o controls/Joystick.o controls/Mouse.o memory/MapperKonami4.o audio/PPISound.o DiskInterface.o memory/MapperMsxDos2.o memory/EmptyPage.o memory/WD279X.o TraceAllocations.o osd/Command.o osd/OnScreenDisplay.o osd/Debugger.o osd/MemoryMonitor.o osd/LogWatcher.o audio/MSXAudio.o TraceItem.o cpu/Profiler.o cpu/Disassembler.o $(RES)
+LINKOBJ  = Config.o Debug.o Emulator.o GUI.o maincons.o Media.o EmulatorTester.o audio/AudioDevice.o audio/AudioDummy.o audio/AudioMixer.o audio/AY38910.o audio/SCC.o audio/YM2413.o video/V9938.o video/V9938commands.o video/V9938renderer.o video/V9938sprites.o cpu/Z80.o memory/RamBlock.o memory/RomBlock.o memory/Mapper.o memory/NowindInterface.o memory/MapperKonami5.o devices/Kanji.o devices/RP5C01.o devices/SlotSelector.o devices/SwitchedPorts.o memory/MemoryDevice.o devices/DebugDevice.o memory/MapperFMPAC.o DiskDrive.o VirtualDrive.o devices/F4Device.o devices/I8255.o controls/Keyboard.o controls/Joystick.o controls/Mouse.o memory/MapperKonami4.o audio/PPISound.o DiskInterface.o memory/MapperMsxDos2.o memory/EmptyPage.o memory/WD279X.o TraceAllocations.o osd/Command.o osd/OnScreenDisplay.o osd/Debugger.o osd/MemoryMonitor.o osd/LogWatcher.o audio/MSXAudio.o TraceItem.o cpu/Profiler.o cpu/Disassembler.o $(RES)
+LIBS =  -L"C:/Dev-Cpp/lib" -L"C:/MSX/nowind/emuv1" -L"C:/Dev-Cpp/nowind/emuv1" -L"D:/project/nowind/emuv1" -L"D:/project/nowind/libnowind" -lmingw32 -lSDLmain -lSDL -lSDL_ttf -lSDL_Image -lnowindusb  -g3 -fmessage-length=0 -march=pentium 
+INCS =  -I"C:/Dev-Cpp/include"  -I"C:/MSX/nowind/emuv1" 
+CXXINCS =  -I"C:/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"C:/Dev-Cpp/include/c++/3.4.2/backward"  -I"C:/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"C:/Dev-Cpp/include/c++/3.4.2"  -I"C:/Dev-Cpp/include"  -I"C:/MSX/nowind/emuv1" 
+BIN  = nowindcons.exe
+CXXFLAGS = $(CXXINCS) -Wall -W   -g3 -fmessage-length=0 -march=pentium
+CFLAGS = $(INCS) -Wall -W   -g3 -fmessage-length=0 -march=pentium
+RM = rm -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before nowindcons.exe all-after
+
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o "nowindcons.exe" $(LIBS)
+
+Config.o: Config.cpp
+	$(CPP) -c Config.cpp -o Config.o $(CXXFLAGS)
+
+Debug.o: Debug.cpp
+	$(CPP) -c Debug.cpp -o Debug.o $(CXXFLAGS)
+
+Emulator.o: Emulator.cpp
+	$(CPP) -c Emulator.cpp -o Emulator.o $(CXXFLAGS)
+
+GUI.o: GUI.cpp
+	$(CPP) -c GUI.cpp -o GUI.o $(CXXFLAGS)
+
+maincons.o: maincons.cpp
+	$(CPP) -c maincons.cpp -o maincons.o $(CXXFLAGS)
+
+Media.o: Media.cpp
+	$(CPP) -c Media.cpp -o Media.o $(CXXFLAGS)
+
+EmulatorTester.o: EmulatorTester.cpp
+	$(CPP) -c EmulatorTester.cpp -o EmulatorTester.o $(CXXFLAGS)
+
+audio/AudioDevice.o: audio/AudioDevice.cpp
+	$(CPP) -c audio/AudioDevice.cpp -o audio/AudioDevice.o $(CXXFLAGS)
+
+audio/AudioDummy.o: audio/AudioDummy.cpp
+	$(CPP) -c audio/AudioDummy.cpp -o audio/AudioDummy.o $(CXXFLAGS)
+
+audio/AudioMixer.o: audio/AudioMixer.cpp
+	$(CPP) -c audio/AudioMixer.cpp -o audio/AudioMixer.o $(CXXFLAGS)
+
+audio/AY38910.o: audio/AY38910.cpp
+	$(CPP) -c audio/AY38910.cpp -o audio/AY38910.o $(CXXFLAGS)
+
+audio/SCC.o: audio/SCC.cpp
+	$(CPP) -c audio/SCC.cpp -o audio/SCC.o $(CXXFLAGS)
+
+audio/YM2413.o: audio/YM2413.cpp
+	$(CPP) -c audio/YM2413.cpp -o audio/YM2413.o $(CXXFLAGS)
+
+video/V9938.o: video/V9938.cpp
+	$(CPP) -c video/V9938.cpp -o video/V9938.o $(CXXFLAGS)
+
+video/V9938commands.o: video/V9938commands.cpp
+	$(CPP) -c video/V9938commands.cpp -o video/V9938commands.o $(CXXFLAGS)
+
+video/V9938renderer.o: video/V9938renderer.cpp
+	$(CPP) -c video/V9938renderer.cpp -o video/V9938renderer.o $(CXXFLAGS)
+
+video/V9938sprites.o: video/V9938sprites.cpp
+	$(CPP) -c video/V9938sprites.cpp -o video/V9938sprites.o $(CXXFLAGS)
+
+cpu/Z80.o: cpu/Z80.cpp
+	$(CPP) -c cpu/Z80.cpp -o cpu/Z80.o $(CXXFLAGS)
+
+memory/RamBlock.o: memory/RamBlock.cpp
+	$(CPP) -c memory/RamBlock.cpp -o memory/RamBlock.o $(CXXFLAGS)
+
+memory/RomBlock.o: memory/RomBlock.cpp
+	$(CPP) -c memory/RomBlock.cpp -o memory/RomBlock.o $(CXXFLAGS)
+
+memory/Mapper.o: memory/Mapper.cpp
+	$(CPP) -c memory/Mapper.cpp -o memory/Mapper.o $(CXXFLAGS)
+
+memory/NowindInterface.o: memory/NowindInterface.cpp
+	$(CPP) -c memory/NowindInterface.cpp -o memory/NowindInterface.o $(CXXFLAGS)
+
+memory/MapperKonami5.o: memory/MapperKonami5.cpp
+	$(CPP) -c memory/MapperKonami5.cpp -o memory/MapperKonami5.o $(CXXFLAGS)
+
+devices/Kanji.o: devices/Kanji.cpp
+	$(CPP) -c devices/Kanji.cpp -o devices/Kanji.o $(CXXFLAGS)
+
+devices/RP5C01.o: devices/RP5C01.cpp
+	$(CPP) -c devices/RP5C01.cpp -o devices/RP5C01.o $(CXXFLAGS)
+
+devices/SlotSelector.o: devices/SlotSelector.cpp
+	$(CPP) -c devices/SlotSelector.cpp -o devices/SlotSelector.o $(CXXFLAGS)
+
+devices/SwitchedPorts.o: devices/SwitchedPorts.cpp
+	$(CPP) -c devices/SwitchedPorts.cpp -o devices/SwitchedPorts.o $(CXXFLAGS)
+
+memory/MemoryDevice.o: memory/MemoryDevice.cpp
+	$(CPP) -c memory/MemoryDevice.cpp -o memory/MemoryDevice.o $(CXXFLAGS)
+
+devices/DebugDevice.o: devices/DebugDevice.cpp
+	$(CPP) -c devices/DebugDevice.cpp -o devices/DebugDevice.o $(CXXFLAGS)
+
+memory/MapperFMPAC.o: memory/MapperFMPAC.cpp
+	$(CPP) -c memory/MapperFMPAC.cpp -o memory/MapperFMPAC.o $(CXXFLAGS)
+
+DiskDrive.o: DiskDrive.cpp
+	$(CPP) -c DiskDrive.cpp -o DiskDrive.o $(CXXFLAGS)
+
+VirtualDrive.o: VirtualDrive.cpp
+	$(CPP) -c VirtualDrive.cpp -o VirtualDrive.o $(CXXFLAGS)
+
+devices/F4Device.o: devices/F4Device.cpp
+	$(CPP) -c devices/F4Device.cpp -o devices/F4Device.o $(CXXFLAGS)
+
+devices/I8255.o: devices/I8255.cpp
+	$(CPP) -c devices/I8255.cpp -o devices/I8255.o $(CXXFLAGS)
+
+controls/Keyboard.o: controls/Keyboard.cpp
+	$(CPP) -c controls/Keyboard.cpp -o controls/Keyboard.o $(CXXFLAGS)
+
+controls/Joystick.o: controls/Joystick.cpp
+	$(CPP) -c controls/Joystick.cpp -o controls/Joystick.o $(CXXFLAGS)
+
+controls/Mouse.o: controls/Mouse.cpp
+	$(CPP) -c controls/Mouse.cpp -o controls/Mouse.o $(CXXFLAGS)
+
+memory/MapperKonami4.o: memory/MapperKonami4.cpp
+	$(CPP) -c memory/MapperKonami4.cpp -o memory/MapperKonami4.o $(CXXFLAGS)
+
+audio/PPISound.o: audio/PPISound.cpp
+	$(CPP) -c audio/PPISound.cpp -o audio/PPISound.o $(CXXFLAGS)
+
+DiskInterface.o: DiskInterface.cpp
+	$(CPP) -c DiskInterface.cpp -o DiskInterface.o $(CXXFLAGS)
+
+memory/MapperMsxDos2.o: memory/MapperMsxDos2.cpp
+	$(CPP) -c memory/MapperMsxDos2.cpp -o memory/MapperMsxDos2.o $(CXXFLAGS)
+
+memory/EmptyPage.o: memory/EmptyPage.cpp
+	$(CPP) -c memory/EmptyPage.cpp -o memory/EmptyPage.o $(CXXFLAGS)
+
+memory/WD279X.o: memory/WD279X.cpp
+	$(CPP) -c memory/WD279X.cpp -o memory/WD279X.o $(CXXFLAGS)
+
+TraceAllocations.o: TraceAllocations.cpp
+	$(CPP) -c TraceAllocations.cpp -o TraceAllocations.o $(CXXFLAGS)
+
+osd/Command.o: osd/Command.cpp
+	$(CPP) -c osd/Command.cpp -o osd/Command.o $(CXXFLAGS)
+
+osd/OnScreenDisplay.o: osd/OnScreenDisplay.cpp
+	$(CPP) -c osd/OnScreenDisplay.cpp -o osd/OnScreenDisplay.o $(CXXFLAGS)
+
+osd/Debugger.o: osd/Debugger.cpp
+	$(CPP) -c osd/Debugger.cpp -o osd/Debugger.o $(CXXFLAGS)
+
+osd/MemoryMonitor.o: osd/MemoryMonitor.cpp
+	$(CPP) -c osd/MemoryMonitor.cpp -o osd/MemoryMonitor.o $(CXXFLAGS)
+
+osd/LogWatcher.o: osd/LogWatcher.cpp
+	$(CPP) -c osd/LogWatcher.cpp -o osd/LogWatcher.o $(CXXFLAGS)
+
+audio/MSXAudio.o: audio/MSXAudio.cpp
+	$(CPP) -c audio/MSXAudio.cpp -o audio/MSXAudio.o $(CXXFLAGS)
+
+TraceItem.o: TraceItem.cpp
+	$(CPP) -c TraceItem.cpp -o TraceItem.o $(CXXFLAGS)
+
+cpu/Profiler.o: cpu/Profiler.cpp
+	$(CPP) -c cpu/Profiler.cpp -o cpu/Profiler.o $(CXXFLAGS)
+
+cpu/Disassembler.o: cpu/Disassembler.cpp
+	$(CPP) -c cpu/Disassembler.cpp -o cpu/Disassembler.o $(CXXFLAGS)

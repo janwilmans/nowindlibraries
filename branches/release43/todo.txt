@@ -1,0 +1,46 @@
+ 
+nowind:
+
+- request reset of msx on disk-access (start different disk on next disk access)
+- strange timing issues on 64bit windows7? flashing with -g is irregular and fails sometimes
+  (check for retries?)
+
+- disable R800 for flashing!!
+- find out what goes wrong with r800-flashing
+
+- make user protocol to read/write memory (meminterface)
+- download code at boot (re-use meminterface)
+
+- 50/60hz switch in rom (done, hold '6'), also cmd line
+
+- autoexec loader for .bas / .ldr files switch to .bin (zodat je de inhoud van een *.lzh op een disk of in een dir kunt gooien., usae files
+
+
+emulator:
+- solve F11 = dual screen (vdp not properly reset?)
+
+general:
+writing "nowind_flasher.dsk" using external disk driver on usb
+causes run "autoexec.bas" to yield "direct statement in file"
+
+
+Done:
+
+
+- shift should not disable nowind rom (maybe use esc, BackSpace, or cursor-down?), not needed, -a switch handles this
+- make nowind_flasher work from non-default drive (try b: when flash01.bin is not found) 
+
+games:
+
+- ohshit! -> disk
+- quarth -> disk
+
+http://computeremuzone.com/ficha.php?id=856&l=en&sec=msx
+
+- 16kb -> start address in 4010?
+- 16kb -> start address in 4010?
+
+
+notes:
+
+locate 0,0,0:'disabling the cursor speeds 'list' up!

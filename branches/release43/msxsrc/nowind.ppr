@@ -1,0 +1,84 @@
+[Config]
+Compilator.FileName=make.bat
+Compilator.DefaultDir=C:\MSX\nowindlibraries\msxsrc\
+Compilator.SaveAll=1
+Compilator.Capture=1
+Compilator.ParsLog=%F(%L)%E             ;Clipper
+Compilator.HideOutput=1
+Compilator.LogType=0
+Prog1=Sjasm4,"C:\MSX\nowind\Release\sjasm.exe" "%File%"§
+DefaultCPIndex=0
+LogtoEnd=1
+DontOpen=0
+AbsolutePath=0
+FileFormat=0
+ProjectFilesOnly=0
+[Project tree]
+nowind
+	+msxsrc
+		+msxdostools
+			msxdostools\nta.asm
+			msxdostools\nowmap.asm
+			msxdostools\nic.asm
+		-sjasm
+			sjasm\sjasm
+			sjasm\sjasm.exe
+			sjasm\sjasm.txt
+		openDiskrom\bdos.asm
+		common.asm
+		debug.asm
+		device.asm
+		dos_aux.asm
+		extendedBios.asm
+		flashWriter.asm
+		init.asm
+		labels.asm
+		nowind.asm
+		nowindbdos.asm
+		nowindDriver.asm
+		openDiskrom\openDiskrom.asm
+		romdisk.asm
+		rs232.asm
+		slotRoutines.asm
+		tracer.asm
+		msxdos23.asm
+[Open project files]
+0=init.asm
+1=slotRoutines.asm
+2=common.asm
+3=nowindbdos.asm
+4=make.bat
+5=nowind.asm
+6=labels.asm
+7=tracer.asm
+8=nowindDriver.asm
+[Selected Project Files]
+Main=
+Selected=nowind.asm
+[init.asm]
+TopLine=61
+Caret=16,83
+[slotRoutines.asm]
+TopLine=35
+Caret=1,1
+[common.asm]
+TopLine=565
+Caret=1,616
+[nowindbdos.asm]
+TopLine=384
+Caret=1,434
+[make.bat]
+TopLine=1
+Caret=23,2
+[nowind.asm]
+TopLine=80
+Caret=1,110
+[labels.asm]
+TopLine=90
+Caret=15,113
+[tracer.asm]
+TopLine=1
+Caret=1,1
+[nowindDriver.asm]
+TopLine=1
+Caret=20,14

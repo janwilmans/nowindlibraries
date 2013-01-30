@@ -1,0 +1,26 @@
+uses
+	nowind;
+
+library
+	boost_python,
+	python2.5,
+	boost_thread;
+
+options
+	-I/usr/include/python2.5,
+	-I../nowind,
+	-I../general,
+	-I../nwhost,
+	-I../ftdx;
+
+link
+	-L/usr/lib;
+
+file
+	PyNwhostService.h,
+	PyNwhostService.cpp,
+	boost_python_wrapper.cpp;
+
+mainconfig
+	"" = "DLL";
+

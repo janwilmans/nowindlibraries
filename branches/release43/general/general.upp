@@ -1,0 +1,14 @@
+file
+	GeneralExports.h,
+	guidelines.h,
+	general.cpp,
+	general.h,
+	libgeneral.h,
+	Util.cpp,
+	Util.h,
+	BasicType.h,
+	BaseType.cpp;
+
+mainconfig
+	"" = "DLL";
+

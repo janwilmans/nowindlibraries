@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>GFX9k lib</title>
+  <link rel="stylesheet" href="style.css" type="text/css">
+  <link rel="shortcut icon" href="favicon.ico">
+
+</head>
+
+<body>
+  <div id="title">
+    <img src="pics/gfx9klogo.png" alt="logo">
+  </div>
+
+  <div id="contents">
+    <h1>Gfx9000 lib version 0.60</h1>
+    
+    <p>
+    The GFX9000 library provides a basic sets of routines that are very useful for 
+    people who'd like to develop their own GFX9000 programs. 
+
+    <p>
+    Available functions in current version:
+
+<pre>
+
+----------------------------------------------------------------------------;
+; General Functions overview                                                ;
+;---------------------------------------------------------------------------;
+G9k.Reset    	    ; Reset and initialize the Gfx9000
+G9k.SetScreenMode   ; Set screen mode
+G9k.SetVramWrite    ; Set vram write address
+G9k.SetVramRead     ; Set vram read address
+G9k.Detect          ; Detect presence of the Gfx9000
+G9k.DisplayEnable   ; Enable display
+G9k.DisplayDisable  ; Disable display
+G9k.SpritesEnable   ; Enable sprites/mouse cursor
+G9k.SpritesDisable  ; Disable sprites/mouse cursor
+G9k.WritePalette    ; Write palette data to the Gfx9000
+G9k.ReadPalette     ; Read palette data from the Gfx9000
+G9k.SetAdjust       ; Adjust Gfx9000 display 
+G9k.SetBackDropColor; Set backdrop color
+G9k.SetScrollX      ; Set scroll X Layer A
+G9k.SetScrollY      ; Set scroll Y Layer A
+G9k.SetScrollXB	    ; Set scroll X Layer B
+G9k.SetScrollYB     ; Set scroll Y Layer B
+G9k.SetScrollMode   ; Set scroll mode
+G9k.Close           ; Closes a G9B or VFF file
+
+;----------------------------------------------------------------------------;
+; Blitter Function overview                                                  ;
+;----------------------------------------------------------------------------;
+G9k.DrawFilledBox     ; Draw filled box
+G9k.DrawBox           ; Draw box
+G9k.DrawLine	      ; Draw line (simple)
+G9k.SetupCopyRamToXY  ; Setup parameters for Ram to XY copy
+G9k.CopyRamToXY       ; Copy data from Ram to XY
+G9k.SetupCopyXYToRam  ; Setup parameters for XY to Ram copy
+G9k.CopyXYToRam       ; Copy data from XY to Ram
+G9k.CopyXYToXY        ; Copy XY to XY
+G9k.CopyXYToRegisterXY; Copy XY(struct) to XY (registers)
+G9k.CopyVramToXY      ; Copy Linear vram address to XY
+G9k.CopyXYToVram      ; Copy XY to Linear vram address
+G9k.SetCmdWriteMask   ; Set blitter command write mask
+G9k.SetCmdColor       ; Set blitter command color
+G9k.SetCmdBackColor   ; Set command back ground color
+G9k.CopyRamToVram     ; Copy data from ram to Linear vram address
+;----------------------------------------------------------------------------;
+; Font Function overview                                                     ;
+;----------------------------------------------------------------------------;
+G9k.OpenVff           ; Open a VFF file
+G9k.LoadFont	      ; Loads a VFF(V9990 font format) file from disk
+G9k.SetFont           ; Set a font as default
+G9k.PrintString       ; Print a zero terminated string 
+
+;----------------------------------------------------------------------------;
+; Gfx9000 bitmap functions                                                   ;
+;----------------------------------------------------------------------------;
+G9k.OpenG9B            ; Open a G9B file
+G9k.ReadG9B            ; Read data from disk to Gfx9000 VRAM X,Y
+G9k.ReadG9BLinear      ; Read data from disk to Gfx9000 Linear VRAM Address
+		
+;----------------------------------------------------------------------------;
+; Gfx9000 pattern functions                                                  ;
+;----------------------------------------------------------------------------;
+G9k.SetPatternData     ; Set pattern data
+G9k.PatternData        ; Get partern data
+G9k.SetPattern         ; Set pattern
+G9k.GetPattern         ; Get pattern
+		
+;----------------------------------------------------------------------------;
+; Macro overview    	                                                     ;
+;----------------------------------------------------------------------------;
+; G9kCmdWait            - Wait for Blitter command completion
+; G9kWriteReg           - Write Gfx9000 register
+; G9kReadReg            - Read Gfx9000 register
+; G9kWaitVsync          - Wait for Vertical Sync
+
+</pre>
+
+    <p>
+    The GFX9k Lib must be assembled with <a href="http://www.xl2s.tk/" target="_new">sjasm</a>.
+    However it can be used with another assembler or C compiler by means of an export file. 
+    <p>
+    With this GFX9k Lib comes a new graphics format: <b>G9B</b> (<a href="g9b.html">read specs</a>). 
+    <p>
+    The <a href="download/g9klib060.zip">g9klib package</a> contains
+    2 MSX tools and 1 PC tool. You can use <b>V9BMP</b> and <b>G9Bview</b> for the MSX and <b>BMP2G9B</b> 
+    for the PC (MS-WINDOWS). G9B files can be created with V9BMP and BMP2G9B. 
+    V9MP doesn't support compression. 
+    BMP2G9B can also be used to compress non-compressed G9B files.
+ <h2>Downloads</h2>  
+    <p>The zip file contains the sources and a few example programs.
+
+    <p>Download <a href="download/g9klib060.zip">GFX9k library v0.60</a>
+    
+    <p>Download <a href="download/g9bdemo.zip">g9bdemo.zip</a>. It contains a few example G9B files.
+    <p>Download <a href="download/vff.zip">vff.zip</a>, contains 117 VFF fonts for use with the GFX9k Library.
+    
+  </div>
+
+
+</body>
+</html>

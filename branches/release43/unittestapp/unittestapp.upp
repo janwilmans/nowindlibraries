@@ -1,0 +1,12 @@
+uses
+	general;
+
+options
+	-I../general;
+
+file
+	unittestapp.cpp;
+
+mainconfig
+	"" = "CONSOLE";
+
