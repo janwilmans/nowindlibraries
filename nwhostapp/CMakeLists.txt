@@ -19,6 +19,8 @@ ADD_EXECUTABLE(nwhostapp MACOSX_BUNDLE mainUsbHost.cpp HostApp.cpp getopt.c geto
 
 target_link_libraries(nwhostapp nowind nwhost ftdx nwgeneral ${FTDI} ${Boost_LIBRARIES})
 
+IF(APPLE)
+
 #--------------------------------------------------------------------------------
 # Now the installation stuff below
 #--------------------------------------------------------------------------------
@@ -48,7 +50,6 @@ INSTALL(FILES ${FTDI} DESTINATION ${library_dest_dir} COMPONENT Runtime)
 file(GLOB_RECURSE LIBS
       ${CMAKE_INSTALL_PREFIX}/${library_dest_dir}/*) 
 
-IF(APPLE)
 # directories to look for dependencies
 SET(DIRS ${Boost_LIBRARY_DIRS})
 
