@@ -61,7 +61,7 @@ void V9938::reset() {
 	shiftedAddressLines = false;
 
  	for (int i=0;i<16;i++) statusReg[i] = 0xff;
-	statusReg[1] = 0; 		// 4 voor V9958 (bit1-5: 0=V9938/MSX2, 2=V9958/MSX2+ and Turbo R, 1=V9948?!)
+	statusReg[1] = 0; 		// 4 voor V9958
 	statusReg[2] = 128;     // CE = ready, TR = 1 (ready)
 	for (int i=0;i<64;i++) vdpReg[i] = 0;
 	
@@ -134,7 +134,7 @@ nw_byte V9938::readStatusRegister() {
 	port1DataLatched = false;
 	switch (vdpReg[15]) {
 	case 0:
- 		//DBERR("read S#0\n");
+// 		DBERR("read S#0\n");
 		value = statusReg[0];
 				
         if (nextNormalInterrupt <= emuTime) {
@@ -146,7 +146,7 @@ nw_byte V9938::readStatusRegister() {
 		break;
 
 	case 1:
- 		//DBERR("read S#1\n");
+// 		DBERR("read S#1\n");
   		value = statusReg[1];
         if (nextLineInterrupt <= emuTime) {
  		    value |= 1;
@@ -397,7 +397,7 @@ void V9938::writeRegister(nw_byte r, nw_byte value) {
     case 26:
     case 27:
     	vdpReg[r] = value & registerMask[r];
-        DBERR("MSX 2+ VDP register written (not implemented) 0x%02x <= 0x%02x\n", r, value);	
+        DBERR("MSX 2+ vdpregisters geschreven!\n");	
 	break;
 		
 	// command registers

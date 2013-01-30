@@ -1,17 +1,15 @@
-PROJECT(nowindlibraries)
-# important: declare the project before anything else
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
-#set(BOOST_USE_STATIC_LIBS   ON)
-#set(BOOST_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_LIBS   ON)
+set(Boost_USE_MULTITHREADED ON)
 
-find_package(Boost COMPONENTS system filesystem REQUIRED)
+set(Boost_INCLUDEDIR /usr/include)
+find_package( Boost REQUIRED)
 
-include_directories ( ${Boost_INCLUDE_DIRS} )
 link_directories ( ${Boost_LIBRARY_DIRS} )
+include_directories ( ${Boost_INCLUDE_DIRS} )
 
-MESSAGE("find_package Boost: ${Boost_INCLUDE_DIRS} <end> ")
-MESSAGE("find_package Boost: ${Boost_LIBRARY_DIRS} <end> ")
+PROJECT(nowindlibraries)
 
 add_subdirectory(general)
 add_subdirectory(nwhost)

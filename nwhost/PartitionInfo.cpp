@@ -21,4 +21,3 @@ PartitionInfo::~PartitionInfo() {
 
 }
 
-// todo: why does the nwhost known anything about partitions? A: see nowmap functions

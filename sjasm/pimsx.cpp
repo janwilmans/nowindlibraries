@@ -2,7 +2,7 @@
 
   Sjasm Z80 Assembler version 0.42
 
-  Copyright 2011 Sjoerd Mastijn
+  Copyright 2009 Sjoerd Mastijn
 
   This software is provided 'as-is', without any express or implied warranty.
   In no event will the authors be held liable for any damages arising from the
@@ -339,19 +339,6 @@ int getJumpOperands2(string &s, Op &x, Op &y) {
   if (!getjumpoperand(s,y)) getOperand(s,y);
   return 2;
 }
-void NegateCondition(Z80Reg &x) {
-  switch (x) {
-    case Z80_C: x=Z80_NC; break;
-    case Z80_M: x=Z80_P; break;
-    case Z80_NC: x=Z80_C; break;
-    case Z80_NZ: x=Z80_Z; break;
-    case Z80_P: x=Z80_M; break;
-    case Z80_PE: x=Z80_PO; break;
-    case Z80_PO: x=Z80_PE; break;
-    case Z80_Z: x=Z80_NZ; break;
-    default: error("Cannot negate condition");
-  }
-}
 
 void preinc(Data &e, Op x) {
   switch (x.reg) {
@@ -525,13 +512,10 @@ void pmBIT(string line,Data &e) {
 void pmCALL(string line,Data &e) {
   int c=0;
   Op x,y;
-  bool negcond=false;
-  if (sbcneed(line,'!')) negcond=true;
   if (getJumpOperands2(line,x,y)==1) { y=x; x.reg=Z80_DUMMY; }
   switch (y.reg) {
   case Z80mnn: if (y.ind>1) { error("Indirection not allowed"); break; }
   case Z80_nn:
-    if (negcond) NegateCondition(x.reg);
     switch (x.reg) {
     case Z80_C: c=0xdc; break;
     case Z80_M: c=0xfc; break;
@@ -825,7 +809,7 @@ void pmJP(string line,Data &e) {
   int val,c=0,cr=0;
   Op x,y;
   string p;
-  bool opt=options.optimizejumps,negcond=false;
+  bool opt=options.optimizejumps;
   while (!line.empty() && line[0]=='.') {
     line.erase(0,1); p=getinstructionpart(line);
     if (p=="") opt=true;
@@ -833,7 +817,6 @@ void pmJP(string line,Data &e) {
     else if (p=="no") opt=false;
     else error("Unknown instruction","jp."+p);
   }
-  if (sbcneed(line,'!')) negcond=true;
   if (getJumpOperands2(line,x,y)==1) { y=x; x.reg=Z80_DUMMY; }
   switch (y.reg) {
   case Z80_HL: case Z80mHL: 
@@ -847,7 +830,6 @@ void pmJP(string line,Data &e) {
     break;
   case Z80mnn: if (y.ind>1) { error("Indirection not allowed"); break; }
   case Z80_nn:
-    if (negcond) NegateCondition(x.reg);
     switch (x.reg) {
     case Z80_C: c=0xda; cr=0x38; break;
     case Z80_M: c=0xfa; break;
@@ -883,7 +865,7 @@ void pmJR(string line,Data &e) {
   int val,c=0,ca=0;
   Op x,y;
   string p;
-  bool opt=options.optimizejumps,negcond=false;
+  bool opt=options.optimizejumps;
   while (!line.empty() && line[0]=='.') {
     line.erase(0,1); p=getinstructionpart(line);
     if (p=="") opt=true;
@@ -891,12 +873,10 @@ void pmJR(string line,Data &e) {
     else if (p=="no") opt=false;
     else error("Unknown instruction","jr."+p);
   }
-  if (sbcneed(line,'!')) negcond=true;
   if (getJumpOperands2(line,x,y)==1) { y=x; x.reg=Z80_DUMMY; }
   switch (y.reg) {
   case Z80mnn: if (y.ind>1) { error("Indirection not allowed"); break; }
   case Z80_nn:
-    if (negcond) NegateCondition(x.reg);
     switch (x.reg) {
     case Z80_C: c=0x38; ca=0xda; break;
     case Z80_NC: c=0x30; ca=0xd2; break;

@@ -283,14 +283,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\BlockWrite.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\BlockWrite.hh"
-				>
-			</File>
-			<File
 				RelativePath=".\Command.cc"
 				>
 			</File>
@@ -304,14 +296,6 @@
 			</File>
 			<File
 				RelativePath=".\DataBlock.hh"
-				>
-			</File>
-			<File
-				RelativePath=".\DataBlockWrite.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\DataBlockWrite.hh"
 				>
 			</File>
 			<File

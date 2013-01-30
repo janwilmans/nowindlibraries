@@ -1,8 +1,5 @@
 ; flashWriter.asm
 ; Flashes and erases the AMD29F040/M29F032-D
-
-; assumptions:
-; mainrom must available in page 0 when flasherStart is called
             
 ; this label is before the _PHASE_ so it's address refers to the actual rom location
 ; not the 'copied' $c000 location            
@@ -11,20 +8,12 @@ waitForFlashCommand:
         PHASE $c000  
 
 flasherStart:     
+
         di
         
         in a,($aa)
         and $f0
         out ($aa),a     ; select keyboard row 0 
-        
-        ld a,(IDBYTE_2D)
-        cp 3                ; MSX Turbo-R?
-        jr nz,no_r800
-        
-        ld a,$80            ; A = LED 0 0 0 0 0 x x 
-                            ;      \ 1 = LED off, 0 = LED on, 0 0 = Z80 (ROM) mode
-        call CHGCPU         ; switch to z80 mode for flashing 
-no_r800:        
         
 .loop
         in a,($a9)
@@ -34,8 +23,6 @@ no_r800:
         bit 2,a
         ld b,2
         jr z,.switchSlot            ; '2' pressed?
-        bit 3,a
-        jr z,testmode               ; '3' pressed?
         
         ld h,HIGH usbReadPage0
         ld a,(hl)                   ; header $BB ?
@@ -55,7 +42,7 @@ no_r800:
         cp $a2
         jp z,verifyFlash
         cp $a3
-        jp z,writeFlash
+        jr z,writeFlash
         cp $a4
         jr z,chipErase
         cp $a5
@@ -68,6 +55,8 @@ no_r800:
      
 ; in: b = main slot to enable for page 0 and 1   
 enableFlashMainslot: 
+
+        
         ld a,(currectSlot)
         cp b
         ret z               ; do nothing if already selected
@@ -91,23 +80,10 @@ enableFlashMainslot:
 		ld a,48
 		add b
 		out ($98),a         ; print 1/2	
-		ret  
-		
-testmode:
-		ld a,"T"
-		out ($98),a         ; print 1/2	
-
-        ld h,HIGH usbReadPage0
-.lp2:   ld b,255
-.loop   ld a,(hl)                   ; read
-        djnz .loop
-        in a,($aa)
-        xor 64
-        out ($aa),a
-        jr .lp2
+		ret        
     
-; 'autoselect' is a flashrom feature and has nothing to do with 'selectSlot'
-; the 'autoselect' feature is used to identify the type of flashrom
+; 'autoselect' is flashrom feature, has nothing to do with 'selectSlot'
+; the 'autoselect' feature can be used to identify the type of flashrom
 autoselectMode:
         ld a,$90
         call writeCommandSequence

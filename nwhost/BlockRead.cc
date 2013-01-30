@@ -1,5 +1,4 @@
 
-#include "libgeneral.h"
 #include "BlockRead.hh"
 #include "DataBlock.hh"
 #include "NowindHostSupport.hh"
@@ -51,8 +50,7 @@ void BlockRead::blockRead(word startAddress, word size)
     
     if (startAddress < TWOBANKLIMIT)
     {
-        // notice the () around std::min, this is to prevent conflicts with min/max defines (if any, like in windows.h)
-        word endAddress = (std::min)(TWOBANKLIMIT, startAddress + size);
+        word endAddress = std::min(TWOBANKLIMIT, startAddress + size);
         word transferSize = endAddress - startAddress;
         blockReadHelper(startAddress, transferSize);
     }
@@ -67,7 +65,7 @@ void BlockRead::blockReadHelper(word startAddress, word size)
 {
     //DBERR("BlockRead::blockReadHelper, size: 0x%02x, processedData: 0x%02x\n", size, processedData);
     
-    // delete any blocks still in the dataBlockQueue (unacknowleged by msx, could be caused by timeout or disconnect)
+    // delete any blocks still in the dataBlockQueue (unacknowleged by msx, could be caused by timeouts)
     for(unsigned int i=0; i< dataBlockQueue.size(); i++)
     {        
         delete dataBlockQueue[i];
@@ -135,38 +133,30 @@ void BlockRead::sendDataBlock(unsigned int blocknr)
     error255++;
     if (error255 == 20) error255=0;
 */
-
     nwhSupport->send(dataBlock->header);    // header
     for (unsigned int i=0; i<dataBlock->data.size(); i++)
     {
         nwhSupport->send(dataBlock->data[i]);
         //DBERR("dataBlock[%i] -> data: 0x%02x\n", i, dataBlock->data[i]);
     }
-
-    /*
+/*
     static int wrong = 0;
-    if (wrong > 185)
+    if (wrong == 0)
     {
-        DBERR("ERROR INSERTED for TESTing 4x 0xff added in data block\n");
-        // this will cause BlockRead::ack to detect a wrong tail, and if all goes well, automatically resend the data.
-        // todo: on a corrupt communication channel, this can cause infinate looping, the msx should timeout and the
-        // host will automatically fall back to STATE_SYNC1 at the next valid command.
         nwhSupport->send(0xff); // insert extra 0xff to simulate buffer underrun
         nwhSupport->send(0xff); // insert extra 0xff to simulate buffer underrun
         nwhSupport->send(0xff); // insert extra 0xff to simulate buffer underrun
         nwhSupport->send(0xff); // insert extra 0xff to simulate buffer underrun
     }
     wrong++;
-    DBERR("wrong: %i\n", wrong);
-    //if (wrong == 20) wrong=0;
-    */
-
+    if (wrong == 20) wrong=0;
+*/
     nwhSupport->send(dataBlock->header);    // tail
 }
 
 void BlockRead::blockReadContinue()
 {
-    unsigned int address = startAddress + processedData;
+    unsigned address = startAddress + processedData;
     if (processedData < transferSize)     // still bytes to be transferred?
     {
     /*
@@ -226,10 +216,7 @@ void BlockRead::ack(byte tail)
         // even at 3.56Mhz block may fail, but it should be sporadically, otherwise something is
         // wrong or at least unusual (100% CPU load on the host side can cause that for example)
         
-        DBERR("BlockRead::ack, block %u failed! (errors: %u, tail: 0x%02x, but received: 0x%02x)\n", dataBlock->number, errors, dataBlock->header, tail);
-#ifdef WIN32
-        general::beep(1750, 50);
-#endif
+        //DBERR("BlockRead::ack, block %u failed! (errors: %u, tail: 0x%02x)\n", dataBlock->number, errors, tail);
 
 	    nwhSupport->sendHeader();
 	    if (dataBlock->fastTransfer)

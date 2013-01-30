@@ -24,7 +24,7 @@ void UsbStream::openBlocking()
     bool retrying = false;
     while (open() == false) {
         if (!retrying) {
-            Util::debug("Using driver %s, please connect nowind interface...\n", getIdString());
+            Util::debug("Using driver %s, please insert nowind interface...\n", getIdString());
             retrying = true;
         }
         Util::sleep(250);

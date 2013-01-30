@@ -2,7 +2,7 @@
 
   Sjasm Z80 Assembler version 0.42
 
-  Copyright 2011 Sjoerd Mastijn
+  Copyright 2009 Sjoerd Mastijn
 
   This software is provided 'as-is', without any express or implied warranty.
   In no event will the authors be held liable for any damages arising from the
@@ -140,9 +140,9 @@ string RawSource::_KillComments() {
               if (_nextline()) return res;
               else { op=p=_it->begin(); continue; }
             }
-            if (*p=='/' && nextchar(p,*_it)=='*') { ++nest; p+=2; } 
-            else if (*p=='*' && nextchar(p,*_it)=='/') { --nest; p+=2; if (!nest) break; }
-            else ++p;
+            if (*p=='/' && nextchar(p,*_it)=='*') { ++nest; p+=2; } else
+            if (*p=='*' && nextchar(p,*_it)=='/') { --nest; p+=2; if (!nest) break; } else
+            ++p;
           }
           listopt._char=ochar;
         }

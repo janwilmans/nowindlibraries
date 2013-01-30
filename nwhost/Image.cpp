@@ -180,8 +180,8 @@ int Image::writeSectors(nw_byte * buffer, unsigned int startSector, unsigned int
 
 	if ((startSector+sectorCount) > length)
 	{
-		DBERR("Warning: writing outside FAT defined area, startSector %u, amount %u\n", startSector, sectorCount);
-		//return -2;
+		DBERR("Warning: trying to write outside FAT defined area, startSector %u, amount %u\n", startSector, sectorCount);
+		return -2;
 	}
 
     DBERR("Image::writeSectors, startSector %u, amount %u\n", startSector, sectorCount);

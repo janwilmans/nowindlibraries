@@ -2,7 +2,6 @@
 
 namespace nwhost {
 
-// used by BlockRead
 DataBlock::DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData, unsigned int offset, word aTransferAddress, word aSize)
 {
     number = aNumber;

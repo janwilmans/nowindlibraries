@@ -7,7 +7,7 @@
         ; enables messages that can only be viewed in emulation, 
         ; are harmless on real hardware but cause small delays
         ; recommened: turn off for releases
-        ;define DEBUG      
+        define DEBUG      
         
         ; enables messages for debugging can be logged even on real hardware 
         ; by sending them to the host over USB, causes somewhat larger delays
@@ -29,18 +29,11 @@
         include "labels.asm"
         include "debug.asm"
 
-        ; bank 0..3     MSXDOS2
-        ; bank 4        MSXDOS1 
-        ; bank 5        Nowind functions
-        ; bank 6..7     empty
-        ; bank 8..31    reserved
-       
-pageNumber := 0
-        repeat 32
-        defpage pageNumber, $4000, $4000
-pageNumber := pageNumber + 1        
-        endrepeat
-         
+        defpage 0, $4000, $4000         ; MSXDOS2 bank 0
+        defpage 1, $4000, 3 * $4000     ; MSXDOS2 bank 1..3
+        defpage 2, $4000, $4000         ; MSXDOS1
+        defpage 3, $4000, (512-80)*1024 ; empty
+        
         ; insert MSXDOS2
 
         page 0
@@ -72,13 +65,16 @@ pageNumber := pageNumber + 1
         PATCH $5797, OEMSTA
 
         PATCH $4093, mapper
-        
+
         code ! $4881
         db LOW initDiskBasic
         code ! $4884
         db HIGH initDiskBasic
 
         code @ $72f0
+
+        include "init.asm"
+        include "flashWriter.asm"  ; todo: move to flash bank 5?
 
         include "common.asm"
         include "extendedBios.asm"
@@ -88,35 +84,28 @@ pageNumber := pageNumber + 1
         include "dos_aux.asm"
         include "device.asm"
 
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
         BANKSWITCHING 0
 
         page 1
-        incbin "..\roms\MSXDOS22.ROM", $4000, $4000
-        PATCH $4002, bankInit 
-        PATCH $4093, mapper        
-        BANKSWITCHING 1
+        incbin "..\roms\MSXDOS22.ROM", $4000, 3 * $4000
 
-        page 2
-        incbin "..\roms\MSXDOS22.ROM", $8000, $4000
-        PATCH $4002, bankInit 
-        PATCH $4093, mapper        
-        BANKSWITCHING 2
-        
-        page 3
-        incbin "..\roms\MSXDOS22.ROM", $c000, $4000
-        PATCH $4002, bankInit 
-        PATCH $4093, mapper        
-        BANKSWITCHING 3
+;        PATCH $4002, bankInit
+        PATCH $4093, mapper
+;        PATCH $8002, bankInit
+        PATCH $8093, mapper
+;        PATCH $C002, bankInit
+        PATCH $C093, mapper
+
+; TODO: bank switch routines!
 
         ; areas not used in MSXDOS22.ROM
         ; bank 1: 0x5CA0 - 0x7FFF (9056 bytes)
         ; bank 2: 0x7F30 - 0x7FFF (208 bytes)
         ; bank 3: 0x7E70 - 0x7FFF (400 bytes)
 
-        endmodule MSXDOS2_MODULE
-
 ; insert MSXDOS1
-        page 4                          ; overwrite page2 with our patched DOS1 diskrom
+        page 2
         module MSXDOS1_MODULE
 
         define MSXDOSVER 1
@@ -144,9 +133,8 @@ pageNumber := pageNumber + 1
         PATCH $5ae8, DEFDPB             ; different address in some roms
         PATCH $65af, OEMSTA
         PATCH $5809, initDiskBasic      ; HRUNC
-        ;PATCH $5b9a, getHostDate        ; get date from host when no clockchip found (different 5b95)              ; does not appear to work?
-        ;PATCH $599c, initClockchip      ; intercept 'check for and initialize clockchip' normally 0x40B8 is called ; does not appear to work?
-        ;PATCH $5b9a, initClockchip      ; intercept 'check for and initialize clockchip' normally 0x40B8 is called ; does not appear to work?
+        ;PATCH $5b9a, getHostDate        ; get date from host when no clockchip found (different 5b95)
+
 
         code @ $7405
 
@@ -161,32 +149,19 @@ pageNumber := pageNumber + 1
         ifdef BDOS_NOWIND
         include "nowindbdos.asm"
         endif
-    
-        BANKSWITCHING 4
-        endmodule MSXDOS1_MODULE
-        
-        page 5
-        module NOWIND_MODULE
-        MSXROMHEADER
-        include "init.asm"
-        include "flashWriter.asm"
-        include "slotRoutines.asm"
-        include "common.asm"
-        BANKSWITCHING 5
-        endmodule NOWIND_MODULE        
-        
-        page 6
-        code @ $4000
-        MSXROMHEADER
-        BANKSWITCHING 6
 
-        page 7
-        code @ $4000
-        MSXROMHEADER
-        BANKSWITCHING 7
-        
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
+        BANKSWITCHING 4
+
+        page 3         
         module REMAINING_ROM_MODULE
                        
+        ; create rom-headers required for Nowind Interface v1
+
+;bankNumber := 5
+;        repeat 27
+;        ROMHEADER bankNumber
+;bankNumber := bankNumber + 1
+;        endrepeat
+
         INCLUDE_ROMDISK_360KB "..\disks\dos2.dsk"
-    
-        endmodule REMAINING_ROM_MODULE

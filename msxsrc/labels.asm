@@ -1,11 +1,9 @@
 ; labels.asm doesn't generate any code 
 ; it provides names for several memory addresses and some macros
 
-; BIOS addresses in mainrom
+; BIOS
 CALSLT          equ $001c
 ENASLT          equ $0024
-CHPUT           equ $00A2
-
 IDBYTE_2D       equ $002d               ; MSX version number, 0=MSX1, 1=MSX2, 2=MSX2+, 3=MSX Turbo R
 INITXT          equ $006C
 SNSMAT          equ $0141
@@ -13,7 +11,6 @@ CHGMOD          equ $005f
 CHGCLR          equ $0062
 EXTROM          equ $015f
 SDFSCR          equ $0185               ; restore screen parameters from clockchip (in SUBROM)
-CHGCPU          equ $0180
 
 ; variables 
 LASTDRV         equ $f33f               ; stores CTRL-key status during boot
@@ -54,7 +51,7 @@ C_CHOICE        equ $83
 C_DSKFMT        equ $84
 C_DRIVES        equ $85
 C_INIENV        equ $86
-C_GETDATE       equ $87
+C_SETDATE       equ $87
 C_DEVICEOPEN    equ $88
 C_DEVICECLOSE   equ $89
 C_DEVICERNDIO   equ $8a
@@ -71,7 +68,6 @@ C_BLOCKREAD     equ $94
 C_BLOCKWRITE    equ $95
 C_CPUINFO       equ $96
 C_COMMAND       equ $97
-C_STDOUT        equ $98
 
 API_NOWMAP      equ 0
 
@@ -110,14 +106,11 @@ currentFilePosition := $
 
 ; BANKSWITCHING macro
         macro BANKSWITCHING bankNumber
-        
-        code ! $8000-(.end-.start)
-        
-.start:
+
 bankInit := $
         ld hl,nowindInit
         push hl
-        ld a,5                          ; bank 5 contains init routine  
+        xor a
         jr switchBank        
 
 copyFromBank := $ 
@@ -129,62 +122,85 @@ callInBank := $
         ld h,bankNumber                 ; store current bank
         ex (sp),hl
         ld (mapper),a                   ; enable new bank
-        call .jumpIX
+        call jumpIX
         pop af
-
 switchBank := $
         ld (mapper),a                   ; restore bank
         ret
 
-.jumpIX:
+jumpIX := $
         jp (ix)
-.end:
+
+bankswitchEnd := $
+
+
         endmacro                        
 
+
+; ROMHEADER macro
+        macro ROMHEADER bankNumber
+
+        MSXROMHEADER
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
+        
+        BANKSWITCHING bankNumber
+        
+        endmacro
+
+; ROMDISK macro
+        macro INCLUDE_ROMDISK_360KB dskimage
+        
+bankNumber := 5
+offset := 0
+
+        repeat 3
+
+; 3 empty banks with rom headers
+        MSXROMHEADER
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
+        BANKSWITCHING bankNumber        
+bankNumber := bankNumber + 1        
+        endrepeat
+        
+; 22 banks with sector data
+        repeat 22
+        
+        MSXROMHEADER        
+        ds $4100 - $, $ff
+        incbin dskimage, offset+512, 16384-512
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
+        BANKSWITCHING bankNumber
+        
+bankNumber := bankNumber + 1
+offset := offset + 16384        
+        
+        endrepeat
+
+; 1 bank with remaining 8192 bytes       
+        MSXROMHEADER
+        ds $4100 - $, $ff
+        incbin dskimage, offset, 8192
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
+        BANKSWITCHING bankNumber        
+bankNumber := bankNumber + 1
+
+; 1 bank with sectors 00, 32, 64, ...
+        MSXROMHEADER        
+offset := 0
+        ds $4100 - $, $ff
+        repeat 23
+        incbin dskimage, offset, 512
+offset := offset + 16384
+        endrepeat
+        ds $8000-(bankswitchEnd - bankInit)-$, $ff
+        BANKSWITCHING bankNumber        
+        
+        endmacro
         
 ; MSXROMHEADER
         macro MSXROMHEADER
+        org $4000
         db "AB"
         dw bankInit
         ds 12,0
         endmacro
-
-; INCLUDE_ROMDISK_360KB
-
-        macro INCLUDE_ROMDISK_360KB dskimage
-        
-bankNumber := 8
-offset := 0
-       
-; 22 banks with sector data
-        repeat 22
-        page bankNumber
-        code @ $4000
-        MSXROMHEADER
-        ds $4100 - $, $ff
-        incbin dskimage, offset+512, 16384-512
-        BANKSWITCHING bankNumber
-offset := offset + $4000
-bankNumber := bankNumber + 1        
-        endrepeat     
-
-; 1 bank with remaining 8192 bytes
-        page bankNumber
-        MSXROMHEADER
-        ds $4100 - $, $ff
-        incbin dskimage, offset, 8192
-        BANKSWITCHING bankNumber
-bankNumber := bankNumber + 1        
-
-; 1 bank with sectors 00, 32, 64, ...
-        page bankNumber
-        MSXROMHEADER
-        ds $4100 - $, $ff
-offset := 0
-        repeat 23
-        incbin dskimage, offset, 512
-offset := offset + $4000
-        endrepeat
-        BANKSWITCHING bankNumber        
-
-        endmacro 

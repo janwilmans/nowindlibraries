@@ -26,8 +26,6 @@ public:
             virtual void install(layoutType layout, Uint8 mainSlot, Uint8 subSlot, nw_word address);
             virtual void activate(unsigned int block);
             virtual ~NowindInterface();
-            void setAttribute(int attr, bool value);
-            void setRomDisk(nw_byte driveNumber);
             
             static void debugout(const char *msg);
 };

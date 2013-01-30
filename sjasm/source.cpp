@@ -2,7 +2,7 @@
 
   Sjasm Z80 Assembler version 0.42
 
-  Copyright 2011 Sjoerd Mastijn
+  Copyright 2009 Sjoerd Mastijn
 
   This software is provided 'as-is', without any express or implied warranty.
   In no event will the authors be held liable for any damages arising from the
@@ -470,23 +470,21 @@ dIncbin::dIncbin(std::string n_line, bool list) : _line(n_line),_listinfo(0) {
   if (file.ok()) {
     byte *buffer; int size;
     file.getbuffer(buffer,size);
-    _data.setdata(buffer,size);
+    _e.setdata(buffer,size);
   }
-  else { _data.clear(); error("Syntax error",ERRREP); }
+  else { _e.clear(); error("Syntax error",ERRREP); }
   if (list) _listtype=LISTDATA; else _listtype=LISTINFO;
   listopt=olistopt;
 }
 
 void dIncbin::Process() {
-  if (_data.empty()) return;
+  if (_e.empty()) return;
   string s=_line;
-  int offset=0,length=_data.size(),val;
+  int offset=0,length=_e.size(),val;
   if (comma(s)) {
     switch (comma(s)) {
       case false:
-        if (ParseExpression(s,val)) { 
-          offset=val; length-=offset;
-        } else { error("Expression expected",ERRREP); return; }
+        if (ParseExpression(s,val)) offset=val; else { error("Expression expected",ERRREP); return; }
         if (!comma(s)) break;
       case true:
         if (ParseExpression(s,val)) length=val; else { error("Expression expected",ERRREP); return; }
@@ -496,18 +494,10 @@ void dIncbin::Process() {
   checkjunk(s);
   if (offset<0) { offset=0; error("Negative offset is not allowed"); }
   if (length<0) { length=0; error("Negative length is not allowed"); }
-  if (offset+length>_data.size()) { error("offset+length>file size not allowed"); return; }
-  _e.setdata(_data.getdatap(offset),length);
-  output[onr]->emit(_e);
+  if (offset+length>_e.size()) { error("offset+length>file size not allowed"); return; }
+  Data e(_e.getdatap(offset),length);
+  output[onr]->emit(e);
   _listinfo=length;
-}
-
-Data &dIncbin::listdata() {
-  return _e;
-}
-
-void SetOutput::Process() {
-  setoutput(_onr);
 }
 
 void StructExp::Process() {

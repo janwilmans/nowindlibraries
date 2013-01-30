@@ -2,7 +2,7 @@
 
   Sjasm Z80 Assembler version 0.42
 
-  Copyright 2011 Sjoerd Mastijn
+  Copyright 2009 Sjoerd Mastijn
 
   This software is provided 'as-is', without any express or implied warranty.
   In no event will the authors be held liable for any damages arising from the
@@ -341,10 +341,10 @@ public:
   dIncbin(string n_line, bool list);
   void Process();
   string listline() { return '('+tohex(_listinfo)+')'; }
-  Data &listdata();
+  Data &listdata() { return _e; }
 private:
   string _line;
-  Data _data,_e;
+  Data _e;
   int _listinfo;
   int _listdata;
 };
@@ -352,7 +352,7 @@ private:
 class SetOutput : public SourceNode {
 public:
   SetOutput(int n_onr) : _onr(n_onr) {}
-  void Process();
+  void Process() { setoutput(_onr); }
 private:
   int _onr;
 };

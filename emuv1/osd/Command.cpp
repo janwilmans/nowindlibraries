@@ -15,7 +15,6 @@
 #include "DiskInterface.h"
 #include "video/V9938.h"
 #include "Debug.h"
-#include "Media.h"
 
 using namespace std;
 
@@ -41,9 +40,6 @@ Command::Command() {
     command["mon"] = COMMAND_MON;
     command["print"] = COMMAND_PRINT;
     command["?"] = COMMAND_PRINT;
-    command["dis"] = COMMAND_DISASM;
-    command["debug"] = COMMAND_DEBUG;
-    command["disk"] = COMMAND_CHANGE_DISK;
     
 	DBERR("Command constructor...finished\n");
 }
@@ -234,60 +230,65 @@ void Command::interpretCommand() {
             sprintf(tmp, "dec:%i hex:%04x char(&255):%c", value, value, value & 255);
             addLine(tmp);
         }
-        break;
-    case COMMAND_DISASM:
-        {
-            // TODO: check addresses > 0xffff !!!!
-            char address[50];
-            nw_word addr = string2Word(part[1]);
-            for (int i=0;i<20;i++) {
-                
-                nw_word oc_part1 = Z80::Instance()->readMem16Public(addr);
-                nw_word oc_part2 = Z80::Instance()->readMem16Public(addr+2);
-
-                string opcode_str = Disassembler::Instance()->disAsm(&addr, oc_part1, oc_part2, true);
-                sprintf(address, "0x%04x: ", addr);
-                addLine(address + opcode_str);
-            }
-        }
-        break;
-/*
-    case COMMAND_DEBUG:
-        {
-    		commandMode = DEBUGMODE;
-            OnScreenDisplay::Instance()->setTextBuffer();
-        }
-        break;
-*/
-    case COMMAND_CHANGE_DISK:
-        {
-		    Media::Instance()->insertMedia(part[1], 0);
-        }
-        break;
+        break;    
     default:
         if (commandLine != "") addLine("Unknown command...");
     }
     
     if (error) addLine("Invalid argument(s)...");
+
+/*
+	} else if (commandLine.substr(0,5) == "disk " ) {
+		string diskname = commandLine.substr(5);
+		DiskInterface::Instance()->insertDisk(0, diskname);
+	} else if (commandLine.substr(0,5) == "dis $" ) {
+        nw_word dis_addr = hexStringToInt(commandLine.substr(5));
+        
+        OnScreenDisplay::Instance()->osdMessage("Disasm: $" + wordToHexstring(dis_addr));
+        
+        // TODO: 
+        // - out ($98),a        ; write to vram
+        // - out ($99),a        ; write vdp data
+        // - out ($99),a        ; write to vdp register XX
+        
+        for (int i=0;i<8;i++) {
+            nw_word oc_part1 = Z80::Instance()->readMem16Public(dis_addr);
+            nw_word oc_part2 = Z80::Instance()->readMem16Public(dis_addr+2);
+
+            nw_word dis_start = dis_addr;  
+            string pc_str = wordToHexstring(dis_addr);
+            string opcode_str = Disassembler::Instance()->disAsm(&dis_addr,oc_part1,oc_part2,true);
+
+            string print_str = pc_str + ": ";
+            while(print_str.length() < 7) print_str = print_str + " ";
+
+            string bytes_str = wordsToHexstring(dis_addr - dis_start, oc_part1, oc_part2);
+            print_str += bytes_str + " " + opcode_str;
+            
+            OnScreenDisplay::Instance()->osdMessage(print_str);
+        }
+	} else if (commandLine.substr(0,5) == "debug" ) {
+		commandMode = DEBUGMODE;
+        OnScreenDisplay::Instance()->setTextBuffer();
+		
+    }
+*/
 }
 
 nw_word Command::string2Word(string str) {
-       
-    nw_word word = 0;
+    
     int len = str.length();
-    if (len > 0)
-    {
-        if (str[0] == '$') return hex2Word(str.substr(1));
-        if (str[len-1] == 'h') return hex2Word(str.substr(0, len-1));
- 
-        nw_word power = 1;
-        for (int i=0;i<len;i++) {
-           
-            nw_word value = str[len-i-1] - 48;
-            if (value > 9) return 0xffff;
-            word += value * power;
-            power *= 10;
-        }
+    if (str[0] == '$') return hex2Word(str.substr(1));
+    if (str[len-1] == 'h') return hex2Word(str.substr(0, len-1));
+
+    nw_word word = 0;
+    nw_word power = 1;
+    for (int i=0;i<len;i++) {
+        
+        nw_word value = str[len-i-1] - 48;
+        if (value > 9) return 0xffff;
+        word += value * power;
+        power *= 10;
     }
     return word;    
 }

@@ -15,37 +15,6 @@ initDiskBasic:
 .continue:        
         jp ORIGINAL_HOOK_RUNC
 
-; function: search for a clockchip and initialize it if present
-;           the host decides to use the msx' own clockchip date/time if present, or
-;           to set the host date/time.
-; in:  ?
-; out: zero flag set if present??
-; changed: af, bc
-initClockchip:
-        DEBUGMESSAGE "initClockchip"
-        
-        push af
-        push bc
-        push de
-        push hl
-        
-        call sendRegisters
-        ld (hl),C_GETDATE       
-
-        pop hl
-        pop de
-        pop bc 
-        pop af
-        xor a
-        ret
-        
-;       YF248   equ     0F248H                  ; current day (1..31)
-;115	YF249   equ     0F249H                  ; current month (1..12)
-;116	YF24A   equ     0F24AH                  ; current year (offset to 1980)
-;117	YF24C   equ     0F24CH                  ; current days since 1-1-1980
-;118	YF24E   equ     0F24EH                  ; current day of week (0=sunday)        
-        
-
 ; search call statement or device name
 findStatementName:
         DEBUGMESSAGE "findStatementName"
@@ -67,21 +36,6 @@ findStatementName:
         or (hl)
         jr nz,findStatementName
         scf                             ; not found
-        ret
-
-; function: send af, bc, de and hl registers to the host, but dont change any registers.
-;           mainly used for quick first implementations.
-; in: af, bc, de, hl
-; out: none
-; changed: none
-sendRegistersSafe:
-        push af    
-        push de
-        push hl
-        call sendRegisters
-        pop hl
-        pop de
-        pop af
         ret
 
 ; function: send af, bc, de and hl registers to the host 
@@ -378,8 +332,7 @@ executeCommandNowindInPage2:
 ; out: carry = error / timeout occurred
 ; changed: all?
 ; requirements: stack available
-; todo: refactor 'blockRead' so the host detemines what kind of transfer to do (loose the requirement for A as input )
-;       just do a blockRead01 always and have the host switch to > 0x8000 when needed.
+
 blockRead:
         rlca                            ; tranfer address < 0x8000 ?
         jr c,.page23
@@ -443,8 +396,7 @@ blockRead23:
 
 ; used by blockRead01 and blockRead23
 ; Input:    HL = usb read address (either usbReadPage0 or usbReadPage2)
-; Routine: 'blockReadTranfer'
-; todo: we should re-think this so 'deadlocks' cannot occur, using a timeout or retry mechnism
+
 invalidHeader:
         ; TODO timeout
         DEBUGMESSAGE "invalidHeader"
@@ -472,7 +424,7 @@ blockReadTranfer:
         jr z,invalidHeader
 
 .good:
-        repeat 64                       ; blocks of 128 bytes, this should match HARDCODED_READ_DATABLOCK_SIZE, NowindHost.cpp
+        repeat 64                       ; blocks of 128 bytes hardcoded (NowindHost.cpp)
         ld d,(hl)
         ld e,(hl)
         push de
@@ -549,7 +501,6 @@ blockWrite:
         call executeCommandNowindInPage2
         ret c                           ; return error (error code in a)
         ret pe                          ; host returns 0xfe when data for page 2/3 is available
-                                        ; todo: using ret pe, relying on 0xfe makes returning other error codes in A impossible?
         ;DEBUGMESSAGE "doorgaan!"
 
 .page23:
@@ -558,7 +509,7 @@ blockWrite:
         ;DEBUGMESSAGE "back"
         ret c                           ; return error (error code in a)
         xor a                           ; some software (wb?) requires that a is zero, because they do not check the carry
-        ret                             ; todo: why is the zero not implemented for blockWrite01 above?
+        ret
 
         PHASE $ + $4000
 
@@ -615,3 +566,39 @@ blockWrite23:
 .error: scf
         ld a,(hl)                       ; get error code
         ret
+
+
+        ; include flash routine only once
+        if MSXDOSVER = 2
+
+flashWriter:
+        DEBUGMESSAGE "flashWriter"
+        ld a,3
+        call SNSMAT
+        and 8
+        ret nz              ; 'f' pressed?
+        
+        xor a
+        call CHGMOD         ; screen 0
+
+        ld a,8
+        ld ($f3ea),a        ; red background
+        xor a               ; screen 0 (width unchanged)        
+        call CHGCLR
+
+        call PRINTTEXT
+        db 10,13,"Nowind Flash Writer v2.1",10,13," "
+        ds 33,"."
+        db 13," ",0
+
+        call getSlotPage1
+        call enableSlotPage0
+
+        ld hl,waitForFlashCommand
+        ld de,flasherStart
+        push de
+        ld bc,flasherEnd - flasherStart
+        ldir
+        ret     ; jump to the address push'ed from 'de'
+
+        endif

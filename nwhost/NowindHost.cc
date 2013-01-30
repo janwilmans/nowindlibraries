@@ -1,5 +1,3 @@
-#include "libgeneral.h"
-
 #include "DiskHandler.hh"
 #include "SectorMedium.hh"
 #include "Image.h"
@@ -13,22 +11,10 @@
 #include <iostream>
 #include <vector>
 
-/*
-Coding Guidelines for NwHost project 
-
-- prefix member variables with 'm' and start with a Capital, ie. mMemberVariable
-- use any name for arguments, local variables etc. but use camelCase not C unix_style
-- start Classnames with a Capital, method names withoutCapital()
-- use ? : syntax only if it makes the code easier to read
-
-*/
-
 #define ToUpper(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper)
 
 #define NWHOST_API_EXPORT
 #include "NowindHost.hh"
-
-#define USE_OLD_DISKWRITE
 
 // splits a string into parts separated by delimeters (returns a vector of substrings)
 std::vector<std::string> split(const std::string& s, const std::string& delim, const bool keep_empty = true) {
@@ -105,7 +91,6 @@ void NowindHost::initialize()
 	response = nwhSupport->getresponse();
 
     blockRead.initialize(nwhSupport);
-    blockWrite.initialize(nwhSupport);
     bdosProxy.initialize(nwhSupport);
     command.initialize(nwhSupport);
     device.initialize(nwhSupport);
@@ -127,9 +112,7 @@ byte NowindHost::peek() const
 
 byte NowindHost::read()
 {
-    byte value = response->read();
-    //DBERR("Respond: 0x%02x, %u bytes left\n", value, response->getSize());
-	return value;  // msx <- pc
+	return response->read();  // msx <- pc
 }
 
 bool NowindHost::isDataAvailable() const
@@ -155,9 +138,10 @@ void NowindHost::write(byte data, unsigned int time)
 	{
 	  c = '.';
 	}
-	//DBERR("received: [%c] (0x%02x) @ time: %d ms, in state: %d, activeCommand: %d (0x%02x)\n", c, data, time, state, activeCommand, activeCommand);
+	//DBERR("received: [%c] (0x%02x) in state: %d, activeCommand: %d (0x%02x)\n", c, data, state, activeCommand, activeCommand);
 	switch (state) {
 	case STATE_SYNC1:
+		timer1 = time;
 		if (data == 0xAF) setState(STATE_SYNC2);
 		break;
 	case STATE_SYNC2:
@@ -188,15 +172,13 @@ void NowindHost::write(byte data, unsigned int time)
 	case STATE_EXECUTING_COMMAND:
 			executeCommand();
 		break;
-#ifdef USE_OLD_DISKWRITE
-	case STATE_DISKWRITE:   // todo: move write-code from doDiskWrite1 / doDiskWrite2 into BlockWrite class 
+	case STATE_DISKWRITE:
 		assert(recvCount < (transferSize + 2));
 		command.extraData[recvCount] = data;
 		if (++recvCount == (transferSize + 2)) {
 			doDiskWrite2();
 		}
 		break;
-#endif //USE_OLD_DISKWRITE
 	case STATE_DEVOPEN:
 		assert(recvCount < 11);
 		command.extraData[recvCount] = data;
@@ -225,61 +207,12 @@ void NowindHost::write(byte data, unsigned int time)
 			setState(STATE_SYNC1);
 		}
 		break;
-
-    // should this be an internal state of a DSKIO_READ command? see BDOSProxy::RandomBlockRead style
-    // also, move DiskDriver commands DSKIO_READ / DSKIO_WRITE / into a separate class. 
-	case STATE_BLOCKREAD: 
+	case STATE_BLOCKREAD:
 		// in STATE_BLOCKREAD we receive ack's from the send blocks and continue to send new blocks    
 		blockRead.ack(data);     
 		if (blockRead.isDone())
 		{
-            readEndTime = time;
-            unsigned int bytesWritten = blockRead.getTransferSize();
-            unsigned int duration = readEndTime - readStartTime;
-            if (duration > 0)
-            {
-                double speed = ((1000.0*bytesWritten) / duration)/1024;
-                DBERR("READ SPEED: %u bytes in %u ms -> %0.2f kB/s\n", bytesWritten, duration, speed);
-            }
-            else
-            {
-                DBERR("READ SPEED: %u bytes in %u ms -> very fast?!\n", bytesWritten, duration);
-            }
-		    setState(STATE_SYNC1);
-		}
-		break;
-	case STATE_BLOCKWRITE: // not used yet, completely untested
-		// in STATE_BLOCKWRITE we receive blocks with sequencenr's and request blocks again if the sequencenrs do not match
-        // a block-request is x bytes in length, there can be multiple (up to 26?) 'outstanding' requests in the FT245R buffer.
-		blockWrite.receiveData(data);     
-		if (blockWrite.isDone())
-		{
-            //DBERR("STATE_BLOCKWRITE done!\n");
-
-            writeEndTime = time;
-            unsigned int bytesWritten = blockWrite.getTransferSize();
-            unsigned int duration = writeEndTime - writeStartTime;
-            if (duration > 0)
-            {
-                double speed = ((1000.0*bytesWritten) / duration)/1024;
-                DBERR("WRITE SPEED: %u bytes in %u ms -> %0.2f kB/s\n", bytesWritten, duration, speed);
-            }
-            else
-            {
-                DBERR("WRITE SPEED: %u bytes in %u ms -> very fast?!\n", bytesWritten, duration);
-            }
-
-            /*
-	    	unsigned sectorAmount = unsigned(buffer.size()) / 512;
-		    unsigned startSector = getStartSector();
-		    if (SectorMedium* disk = getDisk()) {
-			    int result = disk->writeSectors(&buffer[0], startSector, sectorAmount);
-			    if (0 != result) {
-			        DBERR("Error %i writing disk image!\n", result);
-			    }
-		    }
-            */
-	
+            //DBERR("Blockread duration: %u\n", time-timer1);
 		    setState(STATE_SYNC1);
 		}
 		break;
@@ -298,6 +231,15 @@ void NowindHost::write(byte data, unsigned int time)
     case STATE_RECEIVE_DATA:
         apiReceiveData(data);
         break;
+/*
+    case STATE_BDOS_FIND_FIRST:
+		command.extraData[recvCount] = data;
+		if (++recvCount == 36) {
+		    state = STATE_SYNC1;
+		    if (bdosProxy.FindFirst(command, *response)) state = STATE_BLOCKREAD;
+		}
+        break;
+*/
 	default:
 		assert(false);
 	}
@@ -325,7 +267,6 @@ void NowindHost::setState(State aState)
 	case STATE_IMAGE:
 	case STATE_MESSAGE:
 	case STATE_BLOCKREAD:
-	case STATE_BLOCKWRITE:
 	case STATE_CPUINFO:
 	case STATE_RECEIVE_STRING:
 	case STATE_BDOS_OPEN_FILE:
@@ -360,8 +301,6 @@ void NowindHost::setState(State aState)
 		DBERR(" # STATE_MESSAGE\n"); break;
 	case STATE_BLOCKREAD:
 		DBERR(" # STATE_BLOCKREAD\n"); break;
-	case STATE_BLOCKWRITE:
-		DBERR(" # STATE_BLOCKWRITE\n"); break;
 	case STATE_CPUINFO:
 		DBERR(" # STATE_CPUINFO\n"); break;
 	case STATE_RECEIVE_DATA:
@@ -379,8 +318,6 @@ void NowindHost::setState(State aState)
 	*/
 }
 
-// prepare will switch to STATE_RECEIVE_PARAMETERS is needed for the command,
-// otherwise, it will set STATE_EXECUTING_COMMAND immediately.
 void NowindHost::prepareCommand()
 {
 	assert(activeCommand == 0);			// prepare should only be called when no command is active yet
@@ -441,7 +378,7 @@ void NowindHost::executeCommand()
 	// http://map.grauw.nl/resources/dos2_functioncalls.php#_SETDTA
 	// http://map.grauw.nl/resources/dos2_environment.php
 
-	case C_DSKIO: { // DSKIO  //todo: move into function, with internal state
+	case 0x80: { // DSKIO
 		SectorMedium* disk = getDisk();
 		if (!disk) {
 			// no such drive or no disk inserted
@@ -449,71 +386,44 @@ void NowindHost::executeCommand()
 			return;
 		}
 		if (command.getF() & Command::F_CARRY) { 
-#ifdef USE_OLD_DISKWRITE            
-			if (diskWriteInit_old(*disk)) nextState = STATE_DISKWRITE;
-#else
-			if (diskWriteInit(*disk)) nextState = STATE_BLOCKWRITE;
-#endif
+			if (diskWriteInit(*disk)) nextState = STATE_DISKWRITE;
 		} else {
 			if (diskReadInit(*disk)) nextState = STATE_BLOCKREAD;
 		}
 		break;
 	}
 
-	case C_DSKCHG: DSKCHG(); break;
-	case C_GETDPB: GETDPB(); break;
-	//case C_CHOICE: CHOICE();
-	//case C_DSKFMT: DSKFMT();
-	case C_DRIVES: DRIVES(); break;
-	case C_INIENV: INIENV(); break;
-	case C_GETDATE: getDate(); break;
+	case 0x81: DSKCHG(); break;
+	case 0x82: GETDPB(); break;
+	//case 0x83: CHOICE();
+	//case 0x84: DSKFMT();
+	case 0x85: DRIVES(); break;
+	case 0x86: INIENV(); break;
+	case 0x87: setDateMSX(); break;
 
-	case C_DEVICEOPEN: nextState = STATE_DEVOPEN; break;
-	case C_DEVICECLOSE: device.close(command.cmdData); break;
-	//case C_DEVICERNDIO: deviceRandomIO(fcb);
-	case C_DEVICEWRITE: device.write(command.cmdData); break;
-	case C_DEVICEREAD: device.read(command.cmdData);  break;
-	//case C_DEVICEEOF: deviceEof(fcb);
-	case C_AUXIN: auxIn(); break;
-	case C_AUXOUT: auxOut(); break;
-	case C_MESSAGE: receiveExtraData(); nextState = STATE_MESSAGE; break;
-	case C_CHANGEIMAGE: receiveExtraData(); nextState = STATE_IMAGE; break;
-    case C_GETDOSVERSION: getDosVersion(); break;
-	case C_CMDREQUEST: commandRequested(); break;
+	case 0x88: nextState = STATE_DEVOPEN; break;
+	case 0x89: device.close(command.cmdData); break;
+	//case 0x8A: deviceRandomIO(fcb);
+	case 0x8B: device.write(command.cmdData); break;
+	case 0x8C: device.read(command.cmdData);  break;
+	//case 0x8D: deviceEof(fcb);
+	case 0x8E: auxIn(); break;
+	case 0x8F: auxOut(); break;
+	case 0x90: receiveExtraData(); nextState = STATE_MESSAGE; break;
+	case 0x91: receiveExtraData(); nextState = STATE_IMAGE; break;
+    case 0x92: getDosVersion(); break;
+	case 0x93: commandRequested(); break;
 	//case 0xFF: vramDump();
-    case C_CPUINFO: receiveExtraData(); nextState = STATE_CPUINFO; break;
-    case C_COMMAND: apiCommand();  break;
-    case C_STDOUT: stdOutCatch();  nextState = STATE_SYNC1; break;
-    
+	case 0x94: blockReadCmd(); break;
+    case 0x95: blockWriteCmd(); break;
+    case 0x96: receiveExtraData(); nextState = STATE_CPUINFO; break;
+    case 0x97: apiCommand();  break;
 	default:
 		DBERR("Unknown command! (0x%02x)\n", activeCommand);
 		nextState = STATE_SYNC1;
 		break;
 	}
 	setState(nextState);
-}
-
-void NowindHost::stdOutCatch()
-{
-    static std::string buffer = "";
-    byte reg_a = command.getA();
-
-    //DBERR("stdOutCatch host side char: 0x%02X\n", reg_a);
-
-    if (reg_a == 0x0d || reg_a == 0x0a || reg_a == 0 || reg_a == '$')
-    {   
-        if (buffer.length() > 0)
-        {
-            DBERR("MSX says> %s\n", buffer.c_str());
-            buffer = "";
-        }
-    }
-    else
-    {
-        //DBERR("stdOutCatch host side char: 0x%02X\n", reg_a);
-        buffer.append(1, reg_a);
-    }
-    
 }
 
 void NowindHost::apiCommand()
@@ -671,7 +581,6 @@ void NowindHost::receiveExtraData()
 
 bool NowindHost::diskReadInit(SectorMedium& disk)
 {
-    readStartTime = command.time;
 	bool result = false;
 	unsigned sectorAmount = getSectorAmount();
 	buffer.resize(sectorAmount * 512);
@@ -687,17 +596,10 @@ bool NowindHost::diskReadInit(SectorMedium& disk)
 	return result;
 }
 
-// returns true if the disk is writable and the blockWrite transfer initialized 
 bool NowindHost::diskWriteInit(SectorMedium& disk)
 {
-    writeStartTime = command.time;
 	bool result = false;
-	unsigned sectorAmount = getSectorAmount();
-	buffer.resize(sectorAmount * 512);
-	unsigned startSector = getStartSector();
-    unsigned address = getStartAddress();
-
-	DBERR("NowindHost::diskWriteNew, startSector: %u  sectorAmount: %u, address: 0x%04x\n", startSector, sectorAmount, address);
+	DBERR("NowindHost::diskWrite, startSector: %u  sectorAmount: %u\n", getStartSector(), getSectorAmount());
 	if (disk.isWriteProtected()) 
 	{
 		response->sendHeader();
@@ -706,29 +608,7 @@ bool NowindHost::diskWriteInit(SectorMedium& disk)
 	}
 	else
 	{
-		unsigned sectorAmount = (std::min)(128u, getSectorAmount()); 
-		buffer.resize(sectorAmount * 512);  //todo: move hardcoded sectorSize (512) into Image class
-		transferred = 0;
-        blockWrite.init(writeStartTime, address, sectorAmount * 512, &buffer, BlockWrite::BLOCKWRITE_END);
-		result = true;
-	}
-	return result;
-}
-
-bool NowindHost::diskWriteInit_old(SectorMedium& disk)
-{
-    writeStartTime = command.time;
-	bool result = false;
-	DBERR("NowindHost::diskWriteOld, startSector: %u  sectorAmount: %u\n", getStartSector(), getSectorAmount());
-	if (disk.isWriteProtected()) 
-	{
-		response->sendHeader();
-		response->send(1);
-		response->send(0); // WRITEPROTECTED
-	}
-	else
-	{
-		unsigned sectorAmount = (std::min)(128u, getSectorAmount());
+		unsigned sectorAmount = std::min(128u, getSectorAmount());
 		buffer.resize(sectorAmount * 512);
 		transferred = 0;
 		doDiskWrite1();
@@ -739,23 +619,9 @@ bool NowindHost::diskWriteInit_old(SectorMedium& disk)
 
 void NowindHost::doDiskWrite1()
 {
-    writeEndTime = command.time;
 	unsigned bytesLeft = unsigned(buffer.size()) - transferred;
 	if (bytesLeft == 0) {
 		// All data transferred!
-
-        unsigned int bytesWritten = buffer.size();
-        unsigned int duration = writeEndTime - writeStartTime;
-        if (duration > 0)
-        {
-            double speed = ((1000.0*bytesWritten) / duration)/1024;
-            DBERR("WRITE SPEED: %u bytes in %u ms -> %0.2f kB/s\n", bytesWritten, duration, speed);
-        }
-        else
-        {
-            DBERR("WRITE SPEED: %u bytes in %u ms -> very fast?!\n", bytesWritten, duration);
-        }
-
 		unsigned sectorAmount = unsigned(buffer.size()) / 512;
 		unsigned startSector = getStartSector();
 		if (SectorMedium* disk = getDisk()) {
@@ -771,7 +637,7 @@ void NowindHost::doDiskWrite1()
 	}
 
 	static const unsigned BLOCKSIZE = 240;
-	transferSize = (std::min)(bytesLeft, BLOCKSIZE);
+	transferSize = std::min(bytesLeft, BLOCKSIZE);
 
 	unsigned address = getCurrentAddress();
 	unsigned endAddress = address + transferSize;
@@ -786,7 +652,7 @@ void NowindHost::doDiskWrite1()
 	response->send(0);          // data ahead!
 	response->send16(address);
 	response->send16(transferSize);
-	response->send(0xaa);           // block sequence nr
+	response->send(0xaa);
 
 	// wait for data
 	setState(STATE_DISKWRITE);
@@ -802,9 +668,6 @@ void NowindHost::doDiskWrite2()
 
 	byte seq1 = command.extraData[0];
 	byte seq2 = command.extraData[transferSize + 1];
-
-    // not a perfect check, but 0xaf and 0x05 are avoided.
-    // when seq1 != seq2, we're sure something went wrong.
 	if ((seq1 == 0xaa) && (seq2 == 0xaa)) {
 		// good block received
 		transferred += transferSize;
@@ -823,6 +686,28 @@ void NowindHost::doDiskWrite2()
 
 	// continue the rest of the disk write
 	doDiskWrite1();
+}
+
+// dummy command (reads first 16Kb of disk as test)
+void NowindHost::blockReadCmd()
+{
+    DBERR("blockReadCmd\n");
+/*
+    SectorMedium* disk = drives[0]->getSectorMedium();
+    
+    vector<byte> data(16*1024);
+	if (disk->readSectors(&data[0], 0, 32)) {
+		DBERR("readSectors error reading sector 0-31\n");
+	}
+	
+    blockRead.init(0x8000, 0x4000, data);
+    state = STATE_BLOCKREAD;	
+*/
+}
+
+void NowindHost::blockWriteCmd()
+{
+    DBERR("blockWriteCmd\n");
 }
 
 void NowindHost::debugMessage(const char *, ...) const
@@ -1045,7 +930,7 @@ void NowindHost::INIENV()
 	response->send(romdisk); // calculated in DRIVES()
 }
 
-void NowindHost::getDate()
+void NowindHost::setDateMSX()
 {
 	time_t td = time(NULL);
 	struct tm* tm = localtime(&td);
@@ -1141,10 +1026,7 @@ void NowindHost::getDosVersion()
     DBERR("MSX IDBYTE_2D contains: %u (%s detected)\n", msxVersion, msxString.c_str());
     if (msxVersion == 3)
     {
-        if (!allowOtherDiskroms)
-        {
-            DBERR("Suggestion: Try using the -a option on MSX Turbo-R (allows internal ROMs to initialize)\n");
-        }
+        DBERR("Suggestion: Try using the -a option on MSX Turbo-R!\n");
     }
 
     if (msxVersion == 1 || msxVersion == 2)
@@ -1170,18 +1052,6 @@ void NowindHost::getDosVersion()
             }
             else
             {
-                DBERR("DOS2 disabled! (not needed on %s)\n", msxString.c_str());
-            }
-        }
-        else
-        {
-            if (msxVersion == 0)
-            {
-                DBERR("DOS1 enabled as requested.\n");
-            }
-            else
-            {
-                // looks strange in code, but from the MSX Turbo-R user perspective, this message makes more sense.
                 DBERR("DOS2 disabled! (not needed on %s)\n", msxString.c_str());
             }
         }    

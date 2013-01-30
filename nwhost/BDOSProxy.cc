@@ -100,6 +100,12 @@ void BDOSProxy::SetRandomRecordField(const Command& command, Response& response)
     command.reportCpuInfo();
 }
 
+void BDOSProxy::RandomBlockWrite(const Command& command, Response& response)
+{
+    DBERR(" >> RandomBlockWrite\n");
+    command.reportCpuInfo();
+}
+
 void BDOSProxy::WriteRandomFileWithZeros(const Command& command, Response& response)
 {
     DBERR(" >> WriteRandomFileWithZeros\n");
@@ -139,32 +145,14 @@ bool BDOSProxy::OpenFile(const Command& command, Response& response)
 	vector<byte> buffer(command.extraData);
 	buffer.resize(37);
 
-    // http://www.konamiman.com/msx/msx2th/th-3.txt
-    // "opening" a file
-
-	buffer[0x0e] = 0;   // set default record size to 512 (tested) // should we test for CP/M and set 128 is some cases, not sure.
-    buffer[0x0f] = 2;   
+	buffer[0x0e] = 0;   // reset extent high byte
+	buffer[0x0f] = 1;
 	
 	buffer[0x10] = filesize & 0xff;
 	buffer[0x11] = (filesize >> 8) & 0xff;
 	buffer[0x12] = (filesize >> 16) & 0xff;
 	buffer[0x13] = (filesize >> 24) & 0xff;
-
-	buffer[0x18] = 0; 
-	buffer[0x19] = 0; 
-	buffer[0x1a] = 0; 
-	buffer[0x1b] = 0; 
-	buffer[0x1c] = 0; 
-	buffer[0x1d] = 0; 
-	buffer[0x1e] = 0; 
-	buffer[0x1f] = 0; 
 	
-	buffer[0x20] = 0; 
-	buffer[0x21] = 0; 
-	buffer[0x22] = 0; 
-	buffer[0x23] = 0; 
-
-
 	//command.reportFCB(&buffer[0]);
     
     if (bdosfile->fail())
@@ -351,7 +339,7 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
     if (result != 0)
     {
         blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
-		//DBERR("BDOSProxy::FindNext <file not fond>\n");
+		DBERR("BDOSProxy::FindNext <file not fond>\n");
     }
     else
     {
@@ -361,10 +349,9 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
 
         vector<byte> buffer;
         getVectorFromFileName(buffer, filename);
-		buffer.resize(64);  
+		buffer.resize(36);
 
 		//todo: find out why this is offset +1 ? size should start at 0x0c (getVectorFromFileName returns prefixed 0 !?) 8+3 = 11, not 12
-		// not a clue why this works AT ALL, FindNext is supposed to return a 64 byte FileInfoBlock (do not confuse with FCB) 
 		buffer[0x1d] = filesize & 0xff;
 		buffer[0x1e] = (filesize >> 8) & 0xff;
 		buffer[0x1f] = (filesize >> 16) & 0xff;
@@ -373,7 +360,7 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
         blockRead.init(command.getHL(), buffer.size(), buffer);
 		findNextState = BDOSCMD_EXECUTING;
 		found = true;
-		//DBERR("file: %s size: %u\n", data.name, data.size);
+		DBERR("file: %s size: %u\n", data.name, data.size);
     }
     
 #else
@@ -447,12 +434,6 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
     recordSize = command.getFCBrecordSize();
     word offset = recordSize*command.getRandomAccessRecord();
 
-    string file = command.getFilenameFromExtraData();
-    if (file.find("SOURCE.TXT") != string::npos)
-    {
-        //DBERR("CMD_INSTR_ON");
-    }
-    
     DBERR("> FCB address: 0x%04X, offset: %u, recordsRequested: %u, recordSize: %u\n", fcbAddress, offset, recordsRequested, recordSize);
 
     std::vector<byte> buffer;
@@ -473,9 +454,9 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
         }
         
         // add zero padding to partial record
-        DBERR("padding: %u\n", paddingBytes);
         for (int i=0; i<paddingBytes; ++i)
         {
+            DBERR("padd address: 0x%04x\n", actuallyRead+i);
             buffer[actuallyRead+i] = 0;
         }
 	}
@@ -484,7 +465,7 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
     if (actuallyRead == 0)
     {
         DBERR("actuallyRead == 0, cancel tranfer\n");
-        // requesting more data after EOF is reached is legal, 
+        // requesting more data where the EOF is reached is legal, 
         // but we dont have anything to transfer, so let the blockRead exit.
         blockRead.cancelWithCode(BlockRead::BLOCKREAD_EXIT);
         
@@ -504,133 +485,13 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
     }
     else
     {
-        DBERR(" * RandomBlockReadState = BDOSCMD_EXECUTING, send back %u bytes\n", recordsToSend*recordSize);
+		DBERR(" * RandomBlockReadState = BDOSCMD_EXECUTING\n");
         dmaAddress = command.getBC();
         blockRead.init(dmaAddress, recordsToSend*recordSize, buffer);
 		RandomBlockReadState = BDOSCMD_EXECUTING;
     }
 	return true;
 }
-
-bool BDOSProxy::RandomBlockWrite(const Command& command, Response& response)
-{
-    static word dmaAddress = 0;         // BC
-    static word fcbAddress = 0;         // DE 
-    static word recordsRequested = 0;   // HL
-    static word recordSize = 0;         // from FCB
-
-    static word recordsToSend = 0;
-	static BdosState RandomBlockReadState = BDOSCMD_READY;      //todo: figure out how to reset if timeout occurs in command
-	static bool endOfFileReached = false;
-
-	// this is true when the RandomBlockRead response (the data) is being sent
-	if (RandomBlockReadState == BDOSCMD_EXECUTING)
-	{
-		blockRead.ack(command.data);
-		
-		// the block data is done, continue to execute 'ReceiveRegisters'
-		if (blockRead.isDone())
-		{
-		    DBERR("receiveRegisters, endOfFileReached: %u\n", endOfFileReached ? 1:0);
-			RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS;
-			receiveRegisters.clear();
-    	    receiveRegisters.setA(endOfFileReached ? 1:0);
-			receiveRegisters.setF(0);
-			receiveRegisters.setBC(0);
-			receiveRegisters.setDE(fcbAddress);
-			receiveRegisters.setHL(recordsToSend);
-			receiveRegisters.setIX(fcbAddress);
-			receiveRegisters.setIY(0);
-			receiveRegisters.send();
-        }
-		return true; // true means the command is not done, so call me again when data arrives
-	}
-	else if (RandomBlockReadState == BDOSCMD_RECEIVE_REGISTERS)
-	{
-	    DBERR("getting receiveRegisters.ACK\n");
-	    receiveRegisters.ack(command.data);
-	    if (receiveRegisters.isDone())
-	    {
-	        RandomBlockReadState = BDOSCMD_READY;
-	        return false; // false means the command is done, so dont call me again.
-	    }
-	    return true;
-	}
-
-    DBERR("BDOSProxy::RandomBlockRead()\n");
-
-    command.reportFCB(&command.extraData[0]);
-
-    fcbAddress = command.getDE();
-    recordsRequested = command.getHL();
-    recordSize = command.getFCBrecordSize();
-    word offset = recordSize*command.getRandomAccessRecord();
-
-    string file = command.getFilenameFromExtraData();
-    if (file.find("SOURCE.TXT") != string::npos)
-    {
-        //DBERR("CMD_INSTR_ON");
-    }
-    
-    DBERR("> FCB address: 0x%04X, offset: %u, recordsRequested: %u, recordSize: %u\n", fcbAddress, offset, recordsRequested, recordSize);
-
-    std::vector<byte> buffer;
-	size_t actuallyRead = 0;
-    int amount = recordsRequested*recordSize;
-	if (amount > 0)
-	{
-		buffer.resize(amount); 
-		bdosfile->seekg(offset);
-		bdosfile->read((char*)&buffer[0], amount);
-		endOfFileReached = bdosfile->eof();
-		actuallyRead = bdosfile->gcount();
-		recordsToSend = actuallyRead / recordSize;   
-		int paddingBytes = actuallyRead % recordSize;
-        if (paddingBytes != 0)
-        {
-            recordsToSend++;
-        }
-        
-        // add zero padding to partial record
-        DBERR("padding: %u\n", paddingBytes);
-        for (int i=0; i<paddingBytes; ++i)
-        {
-            buffer[actuallyRead+i] = 0;
-        }
-	}
-	DBERR(" >> requested: %u records (%u bytes), actuallyRead: %u bytes\n", recordsRequested, amount, actuallyRead);
-    
-    if (actuallyRead == 0)
-    {
-        DBERR("actuallyRead == 0, cancel tranfer\n");
-        // requesting more data after EOF is reached is legal, 
-        // but we dont have anything to transfer, so let the blockRead exit.
-        blockRead.cancelWithCode(BlockRead::BLOCKREAD_EXIT);
-        
-		RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS;
-		DBERR(" * RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS\n");
-		
-		receiveRegisters.clear();
-		receiveRegisters.setA(1);
-		receiveRegisters.setF(0);
-        receiveRegisters.setBC(0);
-		receiveRegisters.setDE(fcbAddress);
-		receiveRegisters.setHL(0);  // recordsToSend
-		receiveRegisters.setIX(fcbAddress);
-		receiveRegisters.setIY(0);
-		receiveRegisters.send();
-		return true;
-    }
-    else
-    {
-        DBERR(" * RandomBlockReadState = BDOSCMD_EXECUTING, send back %u bytes\n", recordsToSend*recordSize);
-        dmaAddress = command.getBC();
-        blockRead.init(dmaAddress, recordsToSend*recordSize, buffer);
-		RandomBlockReadState = BDOSCMD_EXECUTING;
-    }
-	return true;
-}
-
 
 void BDOSProxy::ReadLogicalSector(const Command& command, Response& response)
 {

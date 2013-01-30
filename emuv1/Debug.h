@@ -20,10 +20,10 @@
 
 /* when ON enables logging of all calls and jumps to stderr */
 // at runtime Debug::Instance()->STACK_TRACING must be set to 'true' for logging to be enabled.
-#define STACKTRACK_ON
+#define STACKTRACK_OFF
 
 /* when ON enables logging of all executed instructions */
-#define INSTRUCTIONS_ON
+#define INSTRUCTIONS_OFF
 
 /* when ON enables logging of all IO (OUT) commands executed */
 #define OUT_INSTRUCTIONS_OFF

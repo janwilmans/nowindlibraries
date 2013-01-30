@@ -101,9 +101,9 @@ emuTimeType Emulator::getNextCPUInterruptTime() {
 
 void Emulator::scheduleVDPInterrupt(bool enable, emuTimeType interruptTime) {
     
-        //DBERR("  Emulator::scheduleVDPInterrupt, enable: %i op %u\n", enable, interruptTime);
-        //DBERR("  Emulator::cpuInterrupt: %u\n");
-        
+//        DBERR("  Emulator::scheduleVDPInterrupt, enable: " << enable << " op " << interruptTime << endl);
+//        DBERR("  Emulator::cpuInterrupt: " << cpuInterrupt << endl);
+
         VDPInterruptEnable = enable;
     	newVDPInterruptTime = interruptTime;
 		scheduleNextInterrupt();
@@ -154,34 +154,17 @@ void Emulator::setCPUInterrupt(bool enable) {
       
 }
 
-unsigned long long OUR_SDL_GetTicks()
-{
-    unsigned long long offset = starttime;
-    offset *= 1000;
-    offset /= Z80::Instance()->cpuFrequency;
-
-    return SDL_GetTicks()+offset;
-}
-
 inline void Emulator::scheduleNextInterrupt() {
 
-    // Is is important to use signed types here, and compare offsets, not absolute times.
-    // this way when emutime wraps, the comparisons are still valid.
-
-    static emuTimeType lastEmutime = 0;
-    if (lastEmutime > cpu->emuTime)
-    {
-        unsigned long lTicks = OUR_SDL_GetTicks() & 0xffffffff;
-        DBERR("Emutime WRAPPPED at %i ms (%i min).", lTicks, lTicks / 60000);        
-    }
-    lastEmutime = cpu->emuTime;
+    // this fails when the emutime wraps because the signed datatypes (int offset)
+    // will become HUGE and the interrupt will not occur
 
 	cpu->nextInterrupt = newRenderScreenInterruptTime;
 	interruptType = INT_RENDERSCREEN;
-	int offset = int(newRenderScreenInterruptTime - cpu->emuTime);
+	int offset = newRenderScreenInterruptTime - cpu->emuTime;
 	
     if (cpuInterrupt && VDPInterruptEnable) {
-	    int newOffset = int(newVDPInterruptTime - cpu->emuTime);
+	    int newOffset = newVDPInterruptTime - cpu->emuTime;
 		if (newOffset < offset) {
 			cpu->nextInterrupt = newVDPInterruptTime;
 			offset = newOffset;
@@ -191,7 +174,7 @@ inline void Emulator::scheduleNextInterrupt() {
     }
 
     if (screenChangeInterruptEnable) {
-		int newOffset = int(newScreenChangeInterruptTime - cpu->emuTime);
+		int newOffset = newScreenChangeInterruptTime - cpu->emuTime;
 		if (newOffset < offset) {
 			cpu->nextInterrupt = newScreenChangeInterruptTime;
 			offset = newOffset;
@@ -200,7 +183,7 @@ inline void Emulator::scheduleNextInterrupt() {
     }
 
     if (debuggerInterruptEnable) {
-		int newOffset = int(newDebuggerInterruptTime - cpu->emuTime);
+		int newOffset = newDebuggerInterruptTime - cpu->emuTime;
 		if (newOffset < offset) {
 			cpu->nextInterrupt = newDebuggerInterruptTime;
 			offset = newOffset;
@@ -209,7 +192,7 @@ inline void Emulator::scheduleNextInterrupt() {
     }
     
     if (msxAudioInterruptEnable) {
-		int newOffset = int(newMsxAudioInterruptTime - cpu->emuTime);
+		int newOffset = newMsxAudioInterruptTime - cpu->emuTime;
 		if (newOffset < offset) {
 			cpu->nextInterrupt = newMsxAudioInterruptTime;
 			offset = newOffset;
@@ -218,7 +201,7 @@ inline void Emulator::scheduleNextInterrupt() {
 		}
     }
 
-	int newOffset = int(newAudioInterruptTime - cpu->emuTime);
+	int newOffset = newAudioInterruptTime - cpu->emuTime;
 	if (newOffset < offset) {
 		cpu->nextInterrupt = newAudioInterruptTime;
 		offset = newOffset;
@@ -299,6 +282,15 @@ void Emulator::reset() {
     vdp->reset();       // zet de lastNormalInterruptTime op emuTime
 }
 
+unsigned long long OUR_SDL_GetTicks()
+{
+    unsigned long long offset = starttime;
+    offset *= 1000;
+    offset /= Z80::Instance()->cpuFrequency;
+
+    return SDL_GetTicks()+offset;
+}
+
 ofstream ofs("timereport.txt"); 
 
 void reportCyclesInit()
@@ -325,7 +317,7 @@ void Emulator::start() {
 	// todo: execute one instruction before we really start, so emuTime will not be zero and
 	// we still won't need extra checks to prevent "division by zero"
 
-//Debug::Instance()->INSTRUCTION_TRACING = true;
+Debug::Instance()->INSTRUCTION_TRACING = true;
 
 #ifdef ZEXALL_ON
     cpu->setupBdosEnv("zexall/zexdoc.com");
@@ -386,8 +378,33 @@ void Emulator::start() {
             //DBERR("execute INT_RENDERSCREEN\n");
             vdp->renderScreen(cpu->nextInterrupt);
 #endif
+
 			/* check if we're not going to fast */
-            speedCheck();
+			msTimeType lastestMs = OUR_SDL_GetTicks();
+			msTimeType passedTime = (lastestMs-startTime);
+
+            //DBERR("lastestMs: %u\n", lastestMs);
+            //DBERR("passedTime: %u\n", passedTime);
+	
+			#ifndef ZEXALL_ON
+
+			int slicesReleased = 0;
+			
+			reportCycles(cpu->emuTime, lastestMs);
+	
+			/* release time-slices until the average is back in range 
+			 * on very fast machines this can be 100s of slices
+			 */
+			while(cpu->emuTime > (statesPerMilliSecond * passedTime)) {
+				SDL_Delay(1);
+
+                lastestMs = OUR_SDL_GetTicks();
+				passedTime = (lastestMs-startTime);
+				slicesReleased++;
+			}
+//			if (slicesReleased > 0) DBERR("[%u]", slicesReleased);
+			reportCycles(cpu->emuTime, lastestMs);
+			#endif        
             
             if (autoPause) notPaused = false;           
             break;
@@ -418,61 +435,6 @@ void Emulator::start() {
 
 	/* classes Z80, VDP, AY38910 etc... will die on their own, they're singletons ;) */
 	SDL_Quit();
-}
-
-/* release time-slices until the average is back in range 
- * on very fast machines this can be 100s of slices
- */
-void Emulator::speedCheck()
-{
-
-#ifndef ZEXALL_ON
-	int slicesReleased = 0;
-    msTimeType passedTime = OUR_SDL_GetTicks();
-	reportCycles(cpu->emuTime, passedTime);  // log time+emutime for analysis
-
-    /*
-    Comparisons against emuTimeType are always done using a subtraction and conversion to int (signed type)
-    This solves the problem where emuTimeType wraps.
-
-    todo: after emutime wraps 'passedTime' will not be ok!
-    also, at startup and when the emutime wraps, the emulator will temporarily at full speed?
-    re-think this.
-
-    2^64 == 18446744073709551616  
-
-    z80 @ 3.57Mhz == 3579545 cycles/second
-
-    == 12886362000 cycles / hour
-    == 112884531120000 cycles / year
-
-    18446744073709551616 / 112884531120000 = 163412.50559919543754047706939707
-    so: emuTimeType will wraps after 163.412 years
-
-    a workaround has been implemented:
-    - emuTimeType is now a 'unsigned long long' and will not wrap any time soon (~163.412 years)
-
-    there are two problems still to be solved:
-    - when cpu is loaded 100%, and emulator is not given cpu executions time, real time passes 
-      and the emulator seems to be running behind _a lot_, so it will run at full speed until it catches up.
-      notice: i know of no way to detect this, I dont think there is a good solution for this, but a workaround, 
-      might be to let the emulator run at max. 101% (or something) so the 'catching up' is not noticable by the user.
-      we should also consider what happens when fail to provide an audiobuffer in time.
-      ideally, the emulator should stop producing sound and resume when enough time has passed to fill a buffer again?
-      (so we still hear a 'hickup' but sound is Ok again afterwards)
-    - when the emulator is paused, no instructions are executed, but real time passes, this will also
-      cause the emulator to run at full speed until it catches up. This situation is very simular to the cputime-starvarion
-      scenario.
-    */
-   
-	while(cpu->emuTime > (statesPerMilliSecond * passedTime)) {
-		SDL_Delay(1);
-		passedTime = OUR_SDL_GetTicks();
-		slicesReleased++;
-	}
-//	if (slicesReleased > 0) DBERR("[%u]", slicesReleased);
-	reportCycles(cpu->emuTime, passedTime);
-	#endif      
 }
 
 void Emulator::handle_key_and_sdl_events() {
@@ -519,7 +481,7 @@ void Emulator::handle_key_and_sdl_events() {
                     if (data != NULL) 
                     { 
 			   		 	Emulator::Instance()->clipboardStream = string(data);
-                        //DBERR("data pasted: %s\n", data);
+                        DBERR("data pasted: %s\n", data);
                         GlobalUnlock(clipboardHandle); 
                     } else {
                         DBERR("failed to obtain clipboard lock, no data pasted.\n");
@@ -574,19 +536,19 @@ void Emulator::handle_key_and_sdl_events() {
         case SDL_MOUSEMOTION:
             if (mouseDragging) {
                 GUI::Instance()->updateSelection(event.motion.x,event.motion.y);
-                //DBERR("SDL_MOUSEMOTION\n");
+                DBERR("SDL_MOUSEMOTION\n");
             }
             break;
         case SDL_MOUSEBUTTONDOWN:
             GUI::Instance()->startSelection(event.motion.x,event.motion.y);
             mouseDragging = true;
-            //DBERR("SDL_MOUSEBUTTONDOWN\n");
+            DBERR("SDL_MOUSEBUTTONDOWN\n");
             break;
         case SDL_MOUSEBUTTONUP:
             {
             GUI::Instance()->endSelection(event.motion.x,event.motion.y);
             mouseDragging = false;
-            //DBERR("SDL_MOUSEBUTTONUP\n");      
+            DBERR("SDL_MOUSEBUTTONUP\n");      
             break;
         }
 

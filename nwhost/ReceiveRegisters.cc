@@ -1,5 +1,6 @@
 
 #include "ReceiveRegisters.hh"
+#include "DataBlock.hh"
 #include "NowindHostSupport.hh"
 
 #include <cassert>

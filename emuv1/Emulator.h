@@ -34,7 +34,6 @@ private:
 							Emulator();
 			static void     handle_key_and_sdl_events();
 			void            scheduleNextInterrupt();
-            void            speedCheck();
 
             emuTimeType		newVDPInterruptTime;
             emuTimeType		newScreenChangeInterruptTime;	

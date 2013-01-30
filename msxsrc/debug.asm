@@ -19,19 +19,6 @@
         endif
         endmacro
         
-; SAFE_CALL
-        macro SAFE_CALL address
-        push af
-        push bc
-        push de
-        push hl
-        call address
-        push hl
-        push de
-        push bc
-        push af
-        endmacro        
-        
 ; USB_SENDCPUINFO
         macro USB_SENDCPUINFO
         ifdef USBDEBUG

@@ -19,9 +19,9 @@ public:
 	virtual ~Command();
 	void initialize(NowindHostSupport* aSupport);
 
-	byte data;                      // last received command byte
-	unsigned int time;              // time in ms since start of application the last command byte was received 
-	byte cmdData[9];                // reg_[cbedlhfa] + cmd
+	byte data;
+	unsigned int time;
+	byte cmdData[9];         // reg_[cbedlhfa] + cmd
 		
 	byte getC() const { return cmdData[0]; }		// cmdData getters
 	byte getB() const { return cmdData[1]; }

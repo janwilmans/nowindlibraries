@@ -9,20 +9,15 @@ namespace nwhost {
 
 class DataBlock {
 public:
-    DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData, unsigned int offset, word aTransferAddress, word aSize);
+    DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData, unsigned int offset, word aTransferAddress, word size);
     ~DataBlock();
-  
+    
     word number;
     byte header;
     word size;
     bool fastTransfer;
-    word offset;
     word transferAddress;
-    std::deque<byte> data;
-
-private:
-    DataBlock();
-
+    std::deque < byte > data;
 };
 
 #endif // DATABLOCK_HH

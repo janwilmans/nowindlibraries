@@ -73,7 +73,7 @@ void HostApp::hostImage()
 
 int HostApp::execute()
 {
-    Util::debug("Nowind Interface USB host application v4.3\n");
+    Util::debug("Nowind Interface USB host application v4.2\n");
 
     mHostService->setAttribute(enable_phantom_drives, false);
 	mHostService->setAttribute(allow_other_diskroms, false);
@@ -355,7 +355,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
 
     if (hasErrors) {
 
-        printf("Usage: nwhostapp [-2afgijmpz] [-i image.dsk] [-f firmware.rom]\n");
+        printf("Usage: usbhost [-2afgijmpz] [-i image.dsk] [-f firmware.rom]\n");
         printf("Options: --image, -i    specify disk image or partition image\n");
         printf("         --hdimage, -m  specify harddisk image\n");
         printf("         --physical, -y specify physical disk\n");
@@ -377,15 +377,15 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
         printf("         --test, -t[mode]  -twrite (send a fixed 'HELLO MSX' infinitely to MSX)\n");
         printf("         --test, -t[mode]  -tdev (device test, not implemented on win32)\n");
         printf("\n");
-        printf("Examples: nwhostapp -i image.dsk\n");
-        //printf("          nwhostapp kungfu.rom\n");        
-        printf("          nwhostapp -2 -i image.dsk\n");
-        printf("          nwhostapp --flash nowind.rom\n"); //,none (flash new firmware and disable romdisk, but write bank-headers)\n");
-//        printf("          nwhostapp --flash firmware.bin,myromdisk.dsk (flash new firmware and use myromdisk.dsk as romdisk)\n");
-//        printf("          nwhostapp --flash firmware.bin,raw (only flash new firmware and do no update romdisk or bank-headers, use with caution!)\n");
-		printf("          nwhostapp -m hdimage.dsk inserts all partitions\n");
-		printf("          nwhostapp -m hdimage.dsk:0 inserts the first partition\n");
-		printf("          nwhostapp -m hdimage.dsk:1-3 inserts the second, third and forth\n");
+        printf("Examples: usbhost -i image.dsk\n");
+        //printf("          usbhost kungfu.rom\n");        
+        printf("          usbhost -2 -i image.dsk\n");
+        printf("          usbhost --flash nowind.rom"); //,none (flash new firmware and disable romdisk, but write bank-headers)\n");
+//        printf("          usbhost --flash firmware.bin,myromdisk.dsk (flash new firmware and use myromdisk.dsk as romdisk)\n");
+//        printf("          usbhost --flash firmware.bin,raw (only flash new firmware and do no update romdisk or bank-headers, use with caution!)\n");
+		printf("          usbhost -m hdimage.dsk inserts the first partition\n");
+		printf("          usbhost -m hdimage.dsk:0 inserts the first partition\n");
+		printf("          usbhost -m hdimage.dsk:1-3 inserts the second, third and forth\n");
         exit(1);
     }
 

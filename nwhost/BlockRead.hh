@@ -29,7 +29,6 @@ public:
     void blockReadAck(byte tail);
     bool isDone() const;
     void cancelWithCode(byte);
-    word getTransferSize() { return transferSize; }
 
 	enum {
 		BLOCKREAD_EXIT_MORE_DATE_AHEAD,
@@ -49,7 +48,7 @@ private:
     bool transferingToPage01;
     NowindHostSupport* nwhSupport;
     std::vector<byte> buffer;                   // work buffer for current tranfer
-	std::deque< DataBlock* > dataBlockQueue;    // contains transmitted blocks that are waiting to be acknowledged
+	std::deque< DataBlock* > dataBlockQueue;    // currently send blocks that are waiting to be acknowledged
 	bool done;
 	byte returnCode;
     

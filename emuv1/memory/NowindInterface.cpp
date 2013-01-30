@@ -83,13 +83,13 @@ void NowindInterface::write(nw_word address, nw_byte value) {
 	case 0x4000:
 	case 0x8000:
 		//DBERR("nowindusb_write at 0x%04X: 0x%02x\n", address,  value);
-        nowindusb_write(value, Z80::Instance()->emuTime/(Z80::Instance()->cpuFrequency/1000));
+        nowindusb_write(value, Z80::Instance()->emuTime/Z80::Instance()->cpuFrequency);
 		break;
 
 	case 0x6000:
 	case 0xa000:
 
-        // support nowind v2 (sunrise) its mapper responds only to odd addresses
+        // snelle hack om nowind_sunrise te ondersteunen (mapper reageert alleen op oneven adressen)
         if ((address & 1) == 0) {
             DBERR("Nowind write that does nothing: %u (at addr: 0x%04x)\n", value, address);
             break;
@@ -175,14 +175,4 @@ void NowindInterface::activate(unsigned int theBlock) {
 void NowindInterface::debugout(const char *msg)
 {
     DBERR(msg);   
-}
-
-void NowindInterface::setAttribute(int attr, bool value)
-{
-    nowindusb_attribute(nwhost::nw_attribute(attr), value);
-}
-
-void NowindInterface::setRomDisk(nw_byte driveNumber)
-{
-    nowindusb_set_romdisk(driveNumber);
 }

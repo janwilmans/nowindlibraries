@@ -33,9 +33,9 @@ Drives drives;
 static const unsigned MAX_MEDIA = 8;
 
 /* this library can be used in: 
- * - the portable nwhostapp (cmdline version)
+ * - the portable usbhost (cmdline version)
  * - libnowindapp
- * - nwhostapp wxpython GUI 
+ * - usbhost wxpython GUI (todo: create this gui)
  * - nowind MSX emulator
  * - other emulators like BlueMsx
  *
@@ -57,7 +57,13 @@ void nowindusb_debug(const char *msg)
     if (mDebug_callback) {
         Util::snprintf(lTemp, MAXMSG, "[nwhost] %s", msg);
         mDebug_callback(lTemp);
-    }  
+    }
+    else
+    {
+#ifdef WIN32
+	OutputDebugStringA(lTemp);
+#endif
+    }    
 }
 
 // the DBERR macro uses this method to wrap vsprintf for convenience
