@@ -12,11 +12,7 @@ external dependencies:
 Example of compiling on Fedora 13:
 - make sure boost headers are in /usr/include/boost, see BOOST) below
 - export BOOST_ROOT=/usr
-- sudo yum -y install cmake
-- sudo yum -y install libftdi-devel
-- sudo yum -y install boost-devel
-- sudo yum -y install gcc
-- sudo yum -y install gcc-g++
+- sudo yum -y install cmake libftdi-devel boost-devel gcc gcc-c++
 - use 'cmake -G 'Unix Makefiles' to generate makefiles.
 - run 'make' 
 
@@ -27,6 +23,7 @@ For Debian 64 or Ubuntu 12:
 - sudo apt-get cmake
 - sudo apt-get subversion
 - sudo apt-get gcc
+- sudo apt-get gcc-c++
 - sudo apt-get g++
 - sudo apt-get libboost-filesystem*
 - use 'cmake -G 'Unix Makefiles' to generate makefiles.
