@@ -45,6 +45,26 @@ INSTALL(TARGETS nwhostapp
 INSTALL(FILES ${Boost_LIBRARIES} DESTINATION ${library_dest_dir} COMPONENT Runtime)
 INSTALL(FILES ${FTDI} DESTINATION ${library_dest_dir} COMPONENT Runtime)
 
+# this was suppose to copy the real files too, not just the symlinks, but it doesnt work,
+# just copy them manually once
+if (0)
+
+INSTALL(CODE "
+        file(GLOB_RECURSE LIBS
+        \"${CMAKE_INSTALL_PREFIX}/\${library_dest_dir}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+
+        foreach(item \${LIBS})
+        message(\"check: \${item}\")
+        get_filename_component(absfile \${item} REALPATH)
+        if (NOT( \${item} STREQUAL \${absfile}))
+        message(\"  real file: \${absfile}\")
+	file(COPY \${absfile} DESTINATION \"${CMAKE_INSTALL_PREFIX}/\${library_dest_dir}\")
+        list(APPEND REALFILES \${absfile})
+        endif()
+        endforeach()
+")
+ENDIF()
+
 # directories to look for dependencies
 SET(DIRS ${Boost_LIBRARY_DIRS})
 
