@@ -134,7 +134,7 @@ flashWriter:
         call CHGCLR
 
         call PrintText
-        db 10,13,"Nowind Flash Writer v2.1",10,13," "
+        db 10,13,"Nowind Flash Writer Mode v2.1",10,13," "
         ds 33,"."
         db 13," ",0
 

@@ -90,13 +90,13 @@ enableFlashMainslot:
 		
 		ld a,48
 		add b
-		out ($98),a         ; print 1/2	
+		out ($98),a         ; print "1"/"2"	
 		ret  
 		
 testmode:
 		ld a,"T"
-		out ($98),a         ; print 1/2	
-
+		out ($98),a         ; print "T"
+		
         ld h,HIGH usbReadPage0
 .lp2:   ld b,255
 .loop   ld a,(hl)                   ; read
