@@ -29,6 +29,7 @@ public:
 
 		static void statStartMeasument();
 		static void statStopMeasument(unsigned int);
+		static void processNormalExit();
 		static void processExit();
 	
 private:
@@ -43,6 +44,7 @@ private:
 		static unsigned long mTransferredBytes;
 		static bool mDebug;
 		static HostApp* mHostApp;
+		static int mNormalExit;
 		NwhostService* mHostService;
 };
 

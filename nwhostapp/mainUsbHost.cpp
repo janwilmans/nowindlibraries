@@ -8,6 +8,11 @@ int main(int argc, char *argv[])
 	HostApp app;
 	app.setParameters(argc, argv);
 	atexit(&HostApp::processExit); 
-	return app.execute();
+	int exitcode = app.execute();
+
+	HostApp::processNormalExit();
+	
+	// app. normal exit
+	return exitcode;
 }
 

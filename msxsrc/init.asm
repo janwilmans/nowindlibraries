@@ -1,24 +1,17 @@
 ; init.asm contains initialization and startup code 
 
+; todo:
+; - let '1' disable DOS2 even if 
+
         include "tracer.asm"
 
 @nowindInit:                            ; this label should be accessible from others banks as well, hence the @
+        DEBUGMESSAGE "nowindInit"
+       
+; first thing we do is check for flashWriter request
         call flashWriter
         call installTracer
 
-CHK_6:              
-        LD    HL,$FBE5          ; '6' pressed ?       
-        BIT   6,(HL)                      
-        JR    NZ,nowindInit                    
-        LD    A,($FFE8)         ; read the default frequency
-        XOR   2                 ; change it (switch 50 <=> 60hz)
-        LD    ($FFE8),A                            
-        OUT   ($99),A                     
-        LD    A,$80+9
-        OUT   ($99),A                     
-nowindInit:
-
-        DEBUGMESSAGE "nowindInit"
         ld a,(IDBYTE_2D)
         or a
         push af
@@ -33,6 +26,18 @@ nowindInit:
         db " [beta]"
         endif
         db 0
+
+CHK_6:              
+        LD    HL,$FBE5          ; '6' pressed ?       
+        BIT   6,(HL)                      
+        JR    NZ,defaultHz                    
+        LD    A,($FFE8)         ; read the default frequency
+        XOR   2                 ; change it (switch 50 <=> 60hz)
+        LD    ($FFE8),A                            
+        OUT   ($99),A                     
+        LD    A,$80+9
+        OUT   ($99),A                     
+defaultHz:    
 
         call enableNowindPage0          ; clear hostToMSXFifo by reading 4Kb of random data
         ld bc,4096
@@ -89,6 +94,11 @@ noNextCommand:
         cp 3
         jr z, bootMSXDOS1           ; on MSX Turbo R disable DOS2 because it has its own DOS2.xx roms        
                                     ; otherwise requested DOS version in A (1 = dos1, 2, = dos2)
+
+        LD    HL,$FBE5				; '1' pressed?   
+        BIT   1,(HL)     
+        jr z, bootMSXDOS1             
+                                    
 bootMSXDOS2:            
         DEBUGMESSAGE "Booting DOS2"            
         ld hl,$47d6                 ; address of ROMINIT in DOS2
