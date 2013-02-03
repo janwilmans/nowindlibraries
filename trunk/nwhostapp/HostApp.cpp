@@ -34,6 +34,7 @@ unsigned long HostApp::mTotalTime = 0;
 unsigned long HostApp::mTransferredBytes = 0;
 bool HostApp::mDebug = false;
 HostApp* HostApp::mHostApp = 0;
+int HostApp::mNormalExit = 0;
 
 // format: LL = length CB = commandbyte (command 0 means, no more commands, so dont use it)
 static const nwhost::byte requestWait[2] = { 1, 1 };    // LL = 1, CB = 1 (command of 1 byte: 1)
@@ -393,11 +394,24 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
     return 0;
 }
 
+void HostApp::processNormalExit()
+{
+	if (HostApp::mHostApp->mHostService)
+	{
+		//todo: HostService is not deleted if Ctrl-C is pressed, no sure whether it is a problem.
+		delete HostApp::mHostApp->mHostService;
+		HostApp::mHostApp->mHostService = 0;
+	}
+	HostApp::mNormalExit = 1;
+}
+	
 void HostApp::processExit()
 {
-	if (mDebug) Util::debug("process closing down...\n");
-	
-	//delete the mHostService object here, otherwise the destructor will not run if ctrl-c is pressed
-	delete HostApp::mHostApp->mHostService;
-	if (mDebug) Util::debug("done.\n");
+	if (mDebug) Util::debug("processExit Enter\n");
+	// if Ctrl-C is pressed, cannot access HostApp::mHostApp->mHostService anymore here!, its gone already.
+	if (HostApp::mNormalExit == 0)
+	{
+		printf("Forced exit. (Ctrl-C)\n");
+	}
+	if (mDebug) Util::debug("processExit Exit\n");
 }
