@@ -12,7 +12,7 @@ initDiskBasic:
         srl a
         inc a
         ld (DEVICE),a
-.continue:        
+.continue:
         jp ORIGINAL_HOOK_RUNC
 
 ; function: search for a clockchip and initialize it if present
@@ -23,28 +23,28 @@ initDiskBasic:
 ; changed: af, bc
 initClockchip:
         DEBUGMESSAGE "initClockchip"
-        
+
         push af
         push bc
         push de
         push hl
-        
+
         call sendRegisters
-        ld (hl),C_GETDATE       
+        ld (hl),C_GETDATE
 
         pop hl
         pop de
-        pop bc 
+        pop bc
         pop af
         xor a
         ret
-        
+
 ;       YF248   equ     0F248H                  ; current day (1..31)
 ;115	YF249   equ     0F249H                  ; current month (1..12)
 ;116	YF24A   equ     0F24AH                  ; current year (offset to 1980)
 ;117	YF24C   equ     0F24CH                  ; current days since 1-1-1980
-;118	YF24E   equ     0F24EH                  ; current day of week (0=sunday)        
-        
+;118	YF24E   equ     0F24EH                  ; current day of week (0=sunday)
+
 
 ; search call statement or device name
 findStatementName:
@@ -75,7 +75,7 @@ findStatementName:
 ; out: none
 ; changed: none
 sendRegistersSafe:
-        push af    
+        push af
         push de
         push hl
         call sendRegisters
@@ -84,9 +84,9 @@ sendRegistersSafe:
         pop af
         ret
 
-; function: send af, bc, de and hl registers to the host 
+; function: send af, bc, de and hl registers to the host
 ; in: af, bc, de, hl
-; out: none
+; out: the value of 'h' in 'a' and the value of 'af' in 'de'
 ; changed: a, h, de
 
 sendRegisters:
@@ -108,18 +108,18 @@ sendRegisters:
 
 ; function: receive a value for AF, BC, DE and HL from the host.
 ; in: none
-; out: a, bc, de, hl, ix, iy, 
+; out: a, bc, de, hl, ix, iy,
 ;      all flags in f except bit 0 (carry is set on timeout)
 ; requirements: stack available, page 0 will switched to the slot of page 1 and restored after communication.
 
 receiveRegisters:
         ;DEBUGMESSAGE "receiveRegisters"
-            
+
         call enableNowindPage0
-.loop:        
+.loop:
         call getHeaderInPage0       ; h = HIGH usbReadPage0
         jp c, restorePage0          ; timeout, exit with carry (F is saved by restorePage0)
-        
+
         ; dummy 0xff was already been read in A, by getHeaderInPage0
         ld e,(hl)                   ; header
 
@@ -142,39 +142,39 @@ receiveRegisters:
         ld c,(hl)
         ld b,(hl)
         push bc
-        
+
         ld a,(hl)                   ; tail
         ld (usbWritePage1),a
         cp e
         jr z,.done
-        
+
 .retry:
         pop bc        ; throw away data
-        pop bc        
-        pop bc        
-        pop bc     
-        pop bc        
-        pop bc     
-        jr  .loop   
-        
+        pop bc
+        pop bc
+        pop bc
+        pop bc
+        pop bc
+        jr  .loop
+
 .done:
         call restorePage0
         pop iy              ; pop our return values
         pop ix
-        pop hl                  
+        pop hl
         pop de
         pop bc
-        pop af        
+        pop af
         scf             ; reset carry (normal exit)
         ccf
         ret
 
-; function: waits for a header (0xAF 0x05) to be received, 
+; function: waits for a header (0xAF 0x05) to be received,
 ; in: none
 ; out: A = first byte of data after the header
 ;      H = high byte of usbReadPage0 address
 ;      carry flag is set and A=2 if a timeout occurs
-; changed: BC, 
+; changed: BC
 ; requirements: nowind must be enabled in page0
 
 getHeaderInPage0:
@@ -205,8 +205,8 @@ getHeaderInPage0:
 getHeaderInPage2:
         ;DEBUGMESSAGE "gH2"
         ld h,HIGH usbReadPage2
-        jr getHeaderInPage0.init + $4000 
-        
+        jr getHeaderInPage0.init + $4000
+
         DEPHASE
 
 ; used by the USB_DBMSG macro
@@ -339,7 +339,7 @@ executeCommandNowindInPage2:
         push de
         push hl                         ; address callback
         push bc
-        call getSlotPage2               ; get current slot of page2 
+        call getSlotPage2               ; get current slot of page2
         ld ixl,a                        ; store it
         call getSlotPage1
         ld ixh,a                        ; ixh = current nowind slot
@@ -371,7 +371,7 @@ executeCommandNowindInPage2:
         ret
 
 ; function: read a block of data from the host. The host tells us what kind(s) of transfer(s) to do.
-;           a data block is automatically split up into multiple transfers by the host when page borders are crossed. 
+;           a data block is automatically split up into multiple transfers by the host when page borders are crossed.
 ;           Also when the amount of bytes is odd, a different byte-for-byte transfer is done (which is slower, but rarely needed)
 ;
 ; in:  A = Transfer address (high byte)
@@ -393,7 +393,7 @@ blockRead:
 .page23:
         ld hl,blockRead23
         jp executeCommandNowindInPage0
-     
+
         PHASE $ + $4000
 
 blockRead01:
@@ -430,7 +430,7 @@ blockRead23:
 ;        ret z                          ; exit (more data for page23)
         cp 2
         ret nz                          ; exit (return code 2-255, bit7 signals error)
-        
+
         //DEBUGMESSAGE "slw23"
         call slowTransfer
         ld (usbWritePage1),a            ; return header
@@ -477,7 +477,7 @@ blockReadTranfer:
         ld e,(hl)
         push de
         endrepeat
-      
+
         bit 7,h                         ; if HL < 0x8000, this code is executing in page 1 (otherwise in page 2)
         ld a,(hl)
         jr nz,.codeInPage2
@@ -491,7 +491,7 @@ blockReadTranfer:
         jp nz,.loop
         ld sp,iy                        ; restore stack pointer
         ret
-        
+
 .errorInPage1:
         ;DEBUGMESSAGE ".err1"
         ; TODO timeout
@@ -509,7 +509,7 @@ blockReadTranfer:
         jp nz,.loop + $4000
         ld sp,iy                        ; restore stack pointer
         ret
-        
+
 .errorInPage2:
         ;DEBUGMESSAGE ".err2"
         ; TODO timeout
@@ -522,7 +522,7 @@ slowTransfer:
         ;DEBUGMESSAGE "SlowTR"
         ld e,(hl)                       ; slow transfer
         ld d,(hl)
-        ld c,(hl)        
+        ld c,(hl)
         ld b,(hl)
         ld a,(hl)                       ; header
         ldir
@@ -532,7 +532,7 @@ slowTransfer:
         ret
 
 ; function: write a block of data to the host. This works like the blockRead function, the host tells us what kind(s) of transfer(s) to do.
-;           a data block is automatically split up into multiple transfer assignments by the host when page borders are crossed. 
+;           a data block is automatically split up into multiple transfer assignments by the host when page borders are crossed.
 ;           Unlike the blockRead function only one kind of transfer routine is used, blocks of <sequencenr> <d0> .. <dx> <sequencenr> are send
 ;           The sequence numbers are generated and checked by the host.
 ;
