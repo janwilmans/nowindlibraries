@@ -35,7 +35,7 @@ private:
     
 	static const unsigned MAX_DEVICES = 16;
 	struct {
-		std::auto_ptr<std::fstream> fs; // not in use when fs == NULL
+		std::unique_ptr<std::fstream> fs; // not in use when fs == NULL
 		unsigned fcb;
 	} devices[MAX_DEVICES];    
 	

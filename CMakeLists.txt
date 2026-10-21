@@ -1,17 +1,24 @@
+cmake_minimum_required(VERSION 3.23 FATAL_ERROR)
+
 PROJECT(nowindlibraries)
-# important: declare the project before anything else
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
-#set(BOOST_USE_STATIC_LIBS   ON)
-#set(BOOST_USE_MULTITHREADED ON)
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "installation path" FORCE)
+endif()
 
-find_package(Boost COMPONENTS system filesystem REQUIRED)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories ( ${Boost_INCLUDE_DIRS} )
-link_directories ( ${Boost_LIBRARY_DIRS} )
+# all libraries are built as static libraries, so no dllimport/dllexport decoration
+add_compile_definitions(NOWIND_STATIC_LIBS)
+if(WIN32)
+  # link the FTD2XX library statically
+  add_compile_definitions(FTD2XX_STATIC)
+endif()
 
-MESSAGE("find_package Boost: ${Boost_INCLUDE_DIRS} <end> ")
-MESSAGE("find_package Boost: ${Boost_LIBRARY_DIRS} <end> ")
+# Setting the rpath to '$ORIGIN' ensures our application looks for
+# libraries in its own directory first.
+set(CMAKE_INSTALL_RPATH "\$ORIGIN")
 
 add_subdirectory(general)
 add_subdirectory(nwhost)
@@ -19,3 +26,15 @@ add_subdirectory(ftdx)
 add_subdirectory(nowind)
 add_subdirectory(nwhostapp)
 
+if(${CMAKE_SIZEOF_VOID_P} EQUAL 4)
+   set(TARGETBITS 32)
+else()
+   set(TARGETBITS 64)
+endif()
+
+message("")
+message("${PROJECT_NAME} configured to run on:  ${CMAKE_SYSTEM_NAME} ${TARGETBITS} bit, ${CMAKE_BUILD_TYPE} Mode")
+message("${PROJECT_NAME} will be built in:      ${CMAKE_BINARY_DIR}")
+message("${PROJECT_NAME} will be installed in:  ${CMAKE_INSTALL_PREFIX}")
+message("
+")

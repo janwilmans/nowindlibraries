@@ -22,7 +22,7 @@
 # define CCALL
 #endif 
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(NOWIND_STATIC_LIBS)
     #ifdef GEN_API_EXPORT
         #define GEN_API __declspec(dllexport)
     #else

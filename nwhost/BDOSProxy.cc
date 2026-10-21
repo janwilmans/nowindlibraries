@@ -220,30 +220,28 @@ void BDOSProxy::getVectorFromFileName(vector<byte>& buffer, string filename)
 
 }
 
-#ifndef WIN_FILESYSTEM
-
-bool BDOSProxy::FindFileResponse(const Command& command, Response& response)
+bool BDOSProxy::FindFileResponse(const Command& command, Response& response, size_t bufferSize)
 {
 	bool found = false;
-	boost::filesystem::directory_iterator noMoreFiles; // past the end
+	std::filesystem::directory_iterator noMoreFiles; // past the end
 	if (findFirstIterator != noMoreFiles)
 	{
-		path dirEntry = findFirstIterator->path().string();
+		std::filesystem::path dirEntry = findFirstIterator->path();
 		std::string filename = dirEntry.filename().string();
 		std::string stem = dirEntry.filename().stem().string();
 		std::string ext = dirEntry.filename().extension().string();
 
-		boost::uintmax_t filesize = 0;
-		if (!is_directory(dirEntry))
+		std::uintmax_t filesize = 0;
+		if (!std::filesystem::is_directory(dirEntry))
 		{
 			// todo filter directories, and add masks *.*
-			filesize = file_size(dirEntry);
+			filesize = std::filesystem::file_size(dirEntry);
 		}
 
 		ToUpper(filename);
 		vector<byte> buffer;
 		getVectorFromFileName(buffer, filename);
-		buffer.resize(36);
+		buffer.resize(bufferSize);
 
 		buffer[0x1d] = filesize & 0xff;
 		buffer[0x1e] = (filesize >> 8) & 0xff;
@@ -256,8 +254,6 @@ bool BDOSProxy::FindFileResponse(const Command& command, Response& response)
 	}
 	return found;
 }
-
-#endif 
 
 // todo: load "thexder.bas" does not return to state_sync1!
 
@@ -282,38 +278,9 @@ bool BDOSProxy::FindFirst(const Command& command, Response& response)
     DBERR("%s\n", __FUNCTION__);
     string filename = command.getFilenameFromExtraData();
     
-#ifdef WIN_FILESYSTEM
-    struct _finddata_t data;
-    findFirstHandle = _findfirst(filename.c_str(), &data); 
-    if (findFirstHandle == -1)
-    {
-        blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
-		DBERR("BDOSProxy::FindFirst <file not found>\n");
-		findFirstState = BDOSCMD_READY;
-    }
-    else
-    {
-		size_t filesize = data.size;
-        string filename(data.name);
-        ToUpper(filename);
-        vector<byte> buffer;
-        getVectorFromFileName(buffer, filename);
-		buffer.resize(36);
-
-		buffer[0x1d] = filesize & 0xff;
-		buffer[0x1e] = (filesize >> 8) & 0xff;
-		buffer[0x1f] = (filesize >> 16) & 0xff;
-		buffer[0x20] = (filesize >> 24) & 0xff;
-
-        blockRead.init(command.getHL(), buffer.size(), buffer);
-        findFirstState = BDOSCMD_EXECUTING;
-		found = true;
-		DBERR("file: %s size: %u\n", data.name, data.size);
-    }
-#else
 		const std::string targetPath = ".";
-		findFirstIterator = directory_iterator(targetPath);
-		found = FindFileResponse(command, response);
+		findFirstIterator = std::filesystem::directory_iterator(targetPath);
+		found = FindFileResponse(command, response, 36);
 		if (found) 
 		{
 			findFirstState = BDOSCMD_EXECUTING;
@@ -323,7 +290,6 @@ bool BDOSProxy::FindFirst(const Command& command, Response& response)
 			blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
 			findFirstState = BDOSCMD_READY;
 		}
-#endif
 	return found;
 }
 
@@ -345,41 +311,8 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
 
 	bool found = false;
 
-#ifdef WIN_FILESYSTEM
-    struct _finddata_t data;
-    long result = _findnext(findFirstHandle, &data); 
-    if (result != 0)
-    {
-        blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
-		//DBERR("BDOSProxy::FindNext <file not fond>\n");
-    }
-    else
-    {
-		size_t filesize = data.size;
-        string filename(data.name);
-        ToUpper(filename);
-
-        vector<byte> buffer;
-        getVectorFromFileName(buffer, filename);
-		buffer.resize(64);  
-
-		//todo: find out why this is offset +1 ? size should start at 0x0c (getVectorFromFileName returns prefixed 0 !?) 8+3 = 11, not 12
-		// not a clue why this works AT ALL, FindNext is supposed to return a 64 byte FileInfoBlock (do not confuse with FCB) 
-		buffer[0x1d] = filesize & 0xff;
-		buffer[0x1e] = (filesize >> 8) & 0xff;
-		buffer[0x1f] = (filesize >> 16) & 0xff;
-		buffer[0x20] = (filesize >> 24) & 0xff;
-
-        blockRead.init(command.getHL(), buffer.size(), buffer);
-		findNextState = BDOSCMD_EXECUTING;
-		found = true;
-		//DBERR("file: %s size: %u\n", data.name, data.size);
-    }
-    
-#else
-		boost::filesystem::directory_iterator noMoreFiles; // past the end
 		++findFirstIterator;
-		found = FindFileResponse(command, response);
+		found = FindFileResponse(command, response, 64);
 		if (found) 
 		{
 			findNextState = BDOSCMD_EXECUTING;
@@ -389,7 +322,6 @@ bool BDOSProxy::FindNext(const Command& command, Response& response)
 			blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
 			findNextState = BDOSCMD_READY;
 		}
-#endif
 	return found;
 }
 

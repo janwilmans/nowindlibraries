@@ -6,18 +6,24 @@ INCLUDE_DIRECTORIES(../nwhost)
 INCLUDE_DIRECTORIES(../ftdx)
 INCLUDE_DIRECTORIES(../nowind)
 
-find_package(Boost COMPONENTS system filesystem REQUIRED)
-find_library(FTDI ftdi NAMES ftdi PATHS /usr/lib /usr/local/lib /opt/local/lib /usr/lib/i386-linux-gnu)
-
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+if(WIN32)
+  # static x64 FTD2XX library
+  set(FTDI ${CMAKE_CURRENT_SOURCE_DIR}/../ftdx/FTD2XX-msc/FTD2XX.lib)
+else()
+  find_library(FTDI ftdi NAMES ftdi PATHS /usr/lib /usr/local/lib /opt/local/lib /usr/lib/i386-linux-gnu)
+endif()
 
 MESSAGE ("find_library FTDI: ${FTDI} <end>")
-MESSAGE ("using Boost: ${Boost_LIBRARIES} <end>")
 
 # the MACOSX_BUNDLE supports the make install feature, it is ignored on other platforms
 ADD_EXECUTABLE(nwhostapp MACOSX_BUNDLE mainUsbHost.cpp HostApp.cpp getopt.c getopt1.c)
 
-target_link_libraries(nwhostapp nowind nwhost ftdx nwgeneral ${FTDI} ${Boost_LIBRARIES})
+if(WIN32)
+  # msvcrt has no getopt, use the bundled glibc copy
+  target_include_directories(nwhostapp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
+
+target_link_libraries(nwhostapp nowind nwhost ftdx nwgeneral ${FTDI})
 
 #--------------------------------------------------------------------------------
 # Now the installation stuff below
@@ -41,9 +47,10 @@ INSTALL(TARGETS nwhostapp
     )
 
 #--------------------------------------------------------------------------------
-# Install needed libraries by copying from library installation directories 
-INSTALL(FILES ${Boost_LIBRARIES} DESTINATION ${library_dest_dir} COMPONENT Runtime)
-INSTALL(FILES ${FTDI} DESTINATION ${library_dest_dir} COMPONENT Runtime)
+# Install needed libraries by copying from library installation directories
+if(NOT WIN32)
+  INSTALL(FILES ${FTDI} DESTINATION ${library_dest_dir} COMPONENT Runtime)
+endif()
 
 # this was suppose to copy the real files too, not just the symlinks, but it doesnt work,
 # just copy them manually once
@@ -65,21 +72,18 @@ INSTALL(CODE "
 ")
 ENDIF()
 
-# directories to look for dependencies
-SET(DIRS ${Boost_LIBRARY_DIRS})
+# # Now the work of copying dependencies into the bundle/package
+# # The quotes are escaped and variables to use at install time have their $ escaped
+# INSTALL(CODE "
+#     file(GLOB_RECURSE LIBS
+#       \"${CMAKE_INSTALL_PREFIX}/${library_dest_dir}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+#     include(BundleUtilities)
+#     fixup_bundle(\"${APPS}\" \"\${LIBS}\" \"\")
+#     " COMPONENT Runtime)
 
-# Now the work of copying dependencies into the bundle/package
-# The quotes are escaped and variables to use at install time have their $ escaped
-INSTALL(CODE "
-    file(GLOB_RECURSE LIBS
-      \"${CMAKE_INSTALL_PREFIX}/${library_dest_dir}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-    include(BundleUtilities)
-    fixup_bundle(\"${APPS}\" \"\${LIBS}\" \"${DIRS}\")
-    " COMPONENT Runtime)
-
-# To Create a package, one can run "cpack -G DragNDrop CPackConfig.cmake" on Mac OS X
-# where CPackConfig.cmake is created by including CPack
-# And then there's ways to customize this as well
-set(CPACK_BINARY_DRAGNDROP ON)
-include(CPack)
+# # To Create a package, one can run "cpack -G DragNDrop CPackConfig.cmake" on Mac OS X
+# # where CPackConfig.cmake is created by including CPack
+# # And then there's ways to customize this as well
+# set(CPACK_BINARY_DRAGNDROP ON)
+# include(CPack)
 
