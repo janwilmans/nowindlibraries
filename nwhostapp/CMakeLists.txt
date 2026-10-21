@@ -10,10 +10,18 @@ if(WIN32)
   # static x64 FTD2XX library
   set(FTDI ${CMAKE_CURRENT_SOURCE_DIR}/../ftdx/FTD2XX-msc/FTD2XX.lib)
 else()
-  find_library(FTDI ftdi NAMES ftdi PATHS /usr/lib /usr/local/lib /opt/local/lib /usr/lib/i386-linux-gnu)
+  find_library(FTDI ftdi NAMES ftdi1)
 endif()
 
-MESSAGE ("find_library FTDI: ${FTDI} <end>")
+MESSAGE ("find_library FTDI: ${FTDI}")
+
+find_path(FTDI_INCLUDE_DIR
+    NAMES ftdi.h
+    PATH_SUFFIXES libftdi1
+    REQUIRED
+)
+
+target_include_directories(ftdx PRIVATE ${FTDI_INCLUDE_DIR})
 
 # the MACOSX_BUNDLE supports the make install feature, it is ignored on other platforms
 ADD_EXECUTABLE(nwhostapp MACOSX_BUNDLE mainUsbHost.cpp HostApp.cpp getopt.c getopt1.c)
