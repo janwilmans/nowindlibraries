@@ -685,6 +685,12 @@ bool NowindHost::diskReadInit(SectorMedium& disk)
     readStartTime = command.time;
 	bool result = false;
 	unsigned sectorAmount = getSectorAmount();
+	if (sectorAmount == 0) {
+		// nothing to read: a transfer of size 0 would make the MSX ldir 64 kB (slowTransfer, BC = 0)
+		response->sendHeader();
+		response->send(BlockRead::BLOCKREAD_EXIT);
+		return false;
+	}
 	buffer.resize(sectorAmount * 512);
 	unsigned startSector = getStartSector();
     if (!disk.readSectors(&buffer[0], startSector, sectorAmount)) {
