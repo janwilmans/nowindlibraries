@@ -119,8 +119,7 @@ void Device::read(const byte* cmdData)
 	char buffer[256];
 	unsigned readLen = readHelper1(dev, buffer);
 	bool eof = readLen < 256;
-	nwhSupport->send(0xAF);
-	nwhSupport->send(0x05);
+	nwhSupport->sendHeader(); // with the leading 0xFF, the first read of the MSX might fail
 	nwhSupport->send(0x00); // dummy
 	nwhSupport->send16(getFCB(cmdData) + 9);
 	nwhSupport->send16(readLen + (eof ? 1 : 0));
