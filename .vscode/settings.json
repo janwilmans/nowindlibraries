@@ -1,0 +1,7 @@
+{
+  // the emuv1 .inc files are C++ fragments included by Z80.cpp, not assembler
+  "files.associations": {
+    "**/emuv1/**/*.inc": "cpp"
+  },
+  "asm-code-lens.excludeFiles": "**/emuv1/**"
+}
