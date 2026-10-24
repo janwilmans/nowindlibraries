@@ -34,9 +34,7 @@ edit the paths in the script if it is installed elsewhere.
 Linux
 -----
 Prerequisites (Debian / Ubuntu):
-  sudo apt install build-essential cmake libftdi1-dev
-optional, for faster builds:
-  sudo apt install ninja-build
+  sudo apt install build-essential cmake libftdi1-dev ninja-build
 
 Prerequisites (Fedora):
   sudo dnf install gcc-c++ cmake libftdi-devel
