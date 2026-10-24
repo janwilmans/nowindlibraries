@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <algorithm>
 #include <vector>
 
 #include "Image.h"
@@ -244,9 +245,13 @@ bool Image::ReadPartitionInfo(int partitionNumber)
 
 const nw_byte * Image::GetNewPartitionTable()
 {
-	nw_byte * mbr = new nw_byte[sectorSize];
+	// all zero (no partitions) when the image could not be opened or read
+	nw_byte * mbr = new nw_byte[sectorSize]();
+	if (stream == 0) return mbr;
+    stream->clear();
     stream->seekg(0);
     stream->read((char *) mbr, sectorSize);
+    if (stream->fail()) std::fill(mbr, mbr + sectorSize, 0);
     return mbr;
 }
 

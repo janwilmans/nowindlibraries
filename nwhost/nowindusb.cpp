@@ -109,7 +109,12 @@ unsigned int NowindHost_InsertHarddiskPartitions(unsigned int driveNr, std::stri
 	unsigned int insertedPartitions = 0;
 
 	Image * hdImage = new Image();
-	hdImage->openDiskImage(aHarddiskimage);
+	if (!hdImage->openDiskImage(aHarddiskimage))
+	{
+		DBERR("Cannot open harddisk image %s\n", aHarddiskimage.c_str());
+		delete hdImage;
+		return 0;
+	}
 	const nw_byte * partitionTable = hdImage->GetNewPartitionTable();
 	delete hdImage;
 
