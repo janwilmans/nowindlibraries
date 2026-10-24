@@ -1,0 +1,9 @@
+# third-party sources, keep them as they were imported
+sjasm/*
+msxsrc/asmlibs/g9klib/*/*/*
+setup/boost_python/*
+ftdx/FTD2XX-msc/*
+ftdx/other/*
+nwhostapp/getopt*
+emuv1/FastDelegate.h
+emuv1/osd/SDL_ttf.h

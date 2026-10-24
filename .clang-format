@@ -1,11 +1,10 @@
-# matches the prevailing style of the existing sources (tabs, allman braces,
-# short single-line ifs); the code is not reformatted in bulk, use this for
-# new and changed code (git clang-format)
+# based on the prevailing style of the original sources; third-party code is
+# excluded in .clang-format-ignore
 BasedOnStyle: LLVM
 Language: Cpp
 Standard: Latest
 
-UseTab: ForIndentation
+UseTab: Never
 IndentWidth: 4
 TabWidth: 4
 ContinuationIndentWidth: 4
