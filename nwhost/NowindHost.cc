@@ -986,8 +986,8 @@ void NowindHost::GETDPB()
     }
 
 	word firstDirSector = firstFatSector + (fatCopies * sectorsPerFat);
-	word entriesPerSector = bytesPerSector / 16;
-	word directorySizeInSectors = (rootDirEntries * entriesPerSector)/bytesPerSector;   // TODO: should be rounded up!?
+	// 32 bytes per directory entry, a partly used sector still belongs to the directory
+	word directorySizeInSectors = (rootDirEntries * 32 + bytesPerSector - 1) / bytesPerSector;
 	word firstRecordSector = firstDirSector + directorySizeInSectors;
     word maxClusters = ((numberOfSectors - firstRecordSector)/sectorsPerCluster) + 1;
 
