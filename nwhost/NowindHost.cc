@@ -769,14 +769,21 @@ void NowindHost::doDiskWrite1()
 
 		unsigned sectorAmount = unsigned(buffer.size()) / 512;
 		unsigned startSector = getStartSector();
+		int result = -1;
 		if (SectorMedium* disk = getDisk()) {
-			int result = disk->writeSectors(&buffer[0], startSector, sectorAmount);
+			result = disk->writeSectors(&buffer[0], startSector, sectorAmount);
 			if (0 != result) {
 			    DBERR("Error %i writing disk image!\n", result);
 			}
 		}
 		response->sendHeader();
-		response->send(255);
+		if (result == 0) {
+			response->send(255);    // done
+		} else {
+			// blockWrite01/blockWrite23: 1..127 is an error, the DSKIO error code follows
+			response->send(1);
+			response->send(10);     // write fault
+		}
 		setState(STATE_SYNC1);
 		return;
 	}
