@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <vector>
 
 #include "Image.h"
 #include "NwhostInternal.h"
@@ -22,6 +23,11 @@ Image::Image() {
     containsRomdisk = false;
     stream = 0;
     filename = "";
+    offset = 0;
+    length = 0;
+    fileSize = 0;
+    partitionNr = 0;
+    harddiskPartition = false;
 }
 
 Image::~Image() {
@@ -43,6 +49,7 @@ bool Image::openDiskImage(string aFilename) {
 	// for disk images, the offset is always zero.
 	offset = 0;
 	length = fileSize/sectorSize;
+    harddiskPartition = false;      // the previous image may have been a harddisk partition
     return fileOpened;
 }
 
@@ -62,9 +69,7 @@ bool Image::openPartitionImage(int partitionNumber, bool ignoreBootflag, string 
     harddiskPartition = true;
     this->partitionNr = partitionNumber;
 
-    ReadPartitionInfo(partitionNumber);
-	
-	if (partitionInfo.startLBA == 0 || partitionInfo.length == 0) return false;   // not a valid partition entry
+	if (!ReadPartitionInfo(partitionNumber)) return false;   // not a valid partition entry
 
 	if (ignoreBootflag || (partitionInfo.disabled == false) )
 	{
@@ -81,11 +86,15 @@ bool Image::openPartitionImage(int partitionNumber, bool ignoreBootflag, string 
     return false;
 }
 
-void Image::SetActivePartition(int partitionNumber)
+// false (and nothing changed) when the partition does not exist
+bool Image::SetActivePartition(int partitionNumber)
 {
-    ReadPartitionInfo(partitionNumber);
+    if (!ReadPartitionInfo(partitionNumber)) return false;
+    partitionNr = partitionNumber;
+    diskChanged = true;     // the MSX must not keep using the FAT and DPB of the previous partition
     offset = sectorSize*partitionInfo.startLBA;
-	length = partitionInfo.length;    
+	length = partitionInfo.length;
+    return true;
 }
 
 void Image::setRomdisk() {
@@ -195,12 +204,20 @@ int Image::writeSectors(nw_byte * buffer, unsigned int startSector, unsigned int
 	return 0;
 }
 
-void Image::ReadPartitionInfo(int partitionNumber)
+// false when the partition number is out of range, the table can not be read or the entry is empty
+bool Image::ReadPartitionInfo(int partitionNumber)
 {
-	nw_byte * mbr = new nw_byte[sectorSize];
+    partitionInfo.startLBA = 0;
+    partitionInfo.length = 0;
+    // the entries are read backwards from 0x1EE, a higher number would be outside the sector
+    if (partitionNumber < 0 || partitionNumber >= MAX_PARTITIONS || stream == 0) return false;
+
+	std::vector<nw_byte> mbr(sectorSize);
+    stream->clear();
     stream->seekg(0);
-    stream->read((char *) mbr, sectorSize);
-    
+    stream->read((char *) &mbr[0], sectorSize);
+    if (stream->fail()) return false;
+
 	unsigned int tableEntry = 0x1EE - (partitionNumber*16);		// support more then 4 partitions
 
 	// check for disabled partition
@@ -222,6 +239,7 @@ void Image::ReadPartitionInfo(int partitionNumber)
 	length += mbr[tableEntry+0x0E]*256*256;
 	length += mbr[tableEntry+0x0F]*256*256*256;	
 	partitionInfo.length = length;
+	return partitionInfo.startLBA != 0 && partitionInfo.length != 0;
 }
 
 const nw_byte * Image::GetNewPartitionTable()

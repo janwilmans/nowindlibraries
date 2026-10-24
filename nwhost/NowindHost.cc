@@ -612,27 +612,27 @@ std::string NowindHost::nowMap(std::string arguments)
     ToUpper(arguments);
     DBERR("arguments: %s\n", arguments.c_str());
 
-    char temp[250];
+    // std::string, not a fixed buffer: the image description is the full path of the image, of any length
     char letter = 'A';
     std::string response = "Nowind Map v1.2\r\n";
     for (unsigned i = 0; i < driveOffset; ++i) {
-        sprintf(temp, "Drive %c: DiskRom\r\n", letter); // todo: get SLOT ?-? from drvtbl
+        response += std::string("Drive ") + letter + ": DiskRom\r\n"; // todo: get SLOT ?-? from drvtbl
         letter++;
-        response += std::string(temp);        
     }
-  
+
     for (unsigned i = 0; i < drives.size(); ++i) {
+        response += std::string("Drive ") + letter + ", driveId " + std::to_string(i);
         Image* image = dynamic_cast<Image*>(drives[i]->getSectorMedium());
-        if (image->isHarddiskPartition())
+        if (image != 0)
         {
-            sprintf(temp, "Drive %c, driveId %d (%s), partition %d\r\n", letter, i, image->getDescription().c_str(), image->getPartitionNr());
+            response += " (" + image->getDescription() + ")";
+            if (image->isHarddiskPartition())
+            {
+                response += ", partition " + std::to_string(image->getPartitionNr());
+            }
         }
-        else
-        {
-            sprintf(temp, "Drive %c, driveId %d (%s)\r\n", letter, i, image->getDescription().c_str());
-        }
+        response += "\r\n";
         letter++;
-        response += std::string(temp);
     }
     response += "\r\n";
     
@@ -658,18 +658,21 @@ std::string NowindHost::nowMap(std::string arguments)
     }
     
     Image* image = dynamic_cast<Image*>(drives[driveId]->getSectorMedium());
-    
-    if (!image->isHarddiskPartition())
+
+    if (image == 0 || !image->isHarddiskPartition())
     {
-        sprintf(temp, "error: drive is not a hdd!\nusage: nowmap <drive_id> <partition> [/Nx] [/L]\n", driveId);
-        return string(temp);
+        return "error: drive is not a hdd!\nusage: nowmap <drive_id> <partition> [/Nx] [/L]\n";
     }
-    
-    image->SetActivePartition(partition);
-    sprintf(temp, "hdd of drive id %d was set to partition %u\n", driveId, partition);
-    
-    DBERR("response: %s\n", temp);            
-    return string(temp);
+
+    // the partition number comes from the MSX, SetActivePartition checks that it exists
+    if (!image->SetActivePartition(partition))
+    {
+        return "error: partition " + std::to_string(partition) + " does not exist!\nusage: nowmap <drive_id> <partition> [/Nx] [/L]\n";
+    }
+    string result = "hdd of drive id " + std::to_string(driveId) + " was set to partition " + std::to_string(partition) + "\n";
+
+    DBERR("response: %s\n", result.c_str());
+    return result;
 }
 
 void NowindHost::receiveExtraData()

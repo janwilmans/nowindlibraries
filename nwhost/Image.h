@@ -45,7 +45,10 @@ public:
     virtual unsigned int getPartitionNr();
     virtual unsigned int getPartitionOffset();
     
-    void SetActivePartition(int partitionNumber);
+    // the partition table holds this many entries, read backwards from 0x1EE
+    static const int MAX_PARTITIONS = 30;
+
+    bool SetActivePartition(int partitionNumber);
     
     virtual int readSectors(nw_byte * buffer, unsigned int startSector, unsigned int sectorCount);
     virtual int writeSectors(nw_byte * buffer, unsigned int startSector, unsigned int sectorCount);
@@ -54,7 +57,7 @@ public:
 
 	const nw_byte * GetNewPartitionTable(); // obsolete, remove
 	static void GetPartitionInfo(const nw_byte * mbr, PartitionInfo *info, unsigned int partitionNumber); // obsolete, remove
-	void ReadPartitionInfo(int partitionNumber); // new
+	bool ReadPartitionInfo(int partitionNumber); // new
 };
 
 #endif //IMAGE_H
