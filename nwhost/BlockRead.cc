@@ -35,7 +35,8 @@ void BlockRead::init(word aStartAddress, word aSize, const std::vector <byte >& 
     transferSize = aSize;
     returnCode = aReturnCode;
 
-    transferingToPage01 = (startAddress <= TWOBANKLIMIT);
+    // like the MSX (blockRead in common.asm: rlca), 0x8000 itself is already page 2/3
+    transferingToPage01 = (startAddress < TWOBANKLIMIT);
     processedData = 0;
     done = false;
     
