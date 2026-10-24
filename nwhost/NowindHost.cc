@@ -967,6 +967,12 @@ void NowindHost::GETDPB()
 	byte mediaType = sectorBuffer[21];
 	word sectorsPerFat = sectorBuffer[22]+256*sectorBuffer[23];
 
+	// a zero or corrupt boot sector would divide by zero below; DSKIO always transfers 512 byte sectors
+	if (bytesPerSector != 512 || sectorsPerCluster == 0) {
+		DBERR("GETDPB error invalid boot sector (bytes per sector: %u, sectors per cluster: %u)\n", bytesPerSector, sectorsPerCluster);
+		return;
+	}
+
     if (numberOfSectors == 0) {
 	    // use sectorsBig instead
         numberOfSectors = sectorBuffer[32] + 256*sectorBuffer[33] + 256*256*sectorBuffer[34] + 256*256*256*sectorBuffer[35];
