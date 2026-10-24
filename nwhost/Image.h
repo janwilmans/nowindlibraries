@@ -4,6 +4,7 @@
 
 #include <string>
 #include <fstream>
+#include <cstdint>
 
 #include "PartitionInfo.h"
 #include "DiskHandler.hh"
@@ -18,9 +19,9 @@ private:
     bool readOnly;
     bool diskChanged;
     bool containsRomdisk;
-	unsigned int offset;
+	std::uint64_t offset;		// in bytes; hard disk images can be larger than 4 GB
 	unsigned int length;		// highest sector in image
-	unsigned int fileSize;
+	std::uint64_t fileSize;
     unsigned int partitionNr;
     bool harddiskPartition;
     PartitionInfo partitionInfo;
@@ -43,7 +44,7 @@ public:
     
     virtual bool isHarddiskPartition();
     virtual unsigned int getPartitionNr();
-    virtual unsigned int getPartitionOffset();
+    virtual std::uint64_t getPartitionOffset();
     
     // the partition table holds this many entries, read backwards from 0x1EE
     static const int MAX_PARTITIONS = 30;

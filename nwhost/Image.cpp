@@ -48,7 +48,7 @@ bool Image::openDiskImage(string aFilename) {
     bool fileOpened = reOpenDiskImage();
 	// for disk images, the offset is always zero.
 	offset = 0;
-	length = fileSize/sectorSize;
+	length = (unsigned int) (fileSize/sectorSize);
     harddiskPartition = false;      // the previous image may have been a harddisk partition
     return fileOpened;
 }
@@ -73,7 +73,7 @@ bool Image::openPartitionImage(int partitionNumber, bool ignoreBootflag, string 
 
 	if (ignoreBootflag || (partitionInfo.disabled == false) )
 	{
-		offset = sectorSize*partitionInfo.startLBA;
+		offset = std::uint64_t(sectorSize)*partitionInfo.startLBA;
 		length = partitionInfo.length;
 		return true; 
 	}
@@ -92,7 +92,7 @@ bool Image::SetActivePartition(int partitionNumber)
     if (!ReadPartitionInfo(partitionNumber)) return false;
     partitionNr = partitionNumber;
     diskChanged = true;     // the MSX must not keep using the FAT and DPB of the previous partition
-    offset = sectorSize*partitionInfo.startLBA;
+    offset = std::uint64_t(sectorSize)*partitionInfo.startLBA;
 	length = partitionInfo.length;
     return true;
 }
@@ -128,7 +128,7 @@ bool Image::reOpenDiskImage() {
 	{
 		diskChanged = true;
 		stream->seekg(0, ios::end);
-		fileSize = stream->tellg();
+		fileSize = std::uint64_t(stream->tellg());
 	}
 	return !fileOpenError;
 }
@@ -161,7 +161,7 @@ unsigned int Image::getSectorSize() {
 int Image::readSectors(nw_byte * buffer, unsigned int startSector, unsigned int sectorCount) {
 
     unsigned int count = sectorCount * sectorSize;
-    unsigned int source = offset + (startSector * sectorSize);
+    std::uint64_t source = offset + std::uint64_t(startSector) * sectorSize;
 
 	if (stream == 0 || this->hasDisk() == false) {
         DBERR("Image::readSectors, no image loaded\n");
@@ -173,7 +173,7 @@ int Image::readSectors(nw_byte * buffer, unsigned int startSector, unsigned int 
 
     // a failed read (past the end of a truncated image) leaves failbit set, then seekg and every next read fail too
     stream->clear();
-    stream->seekg(source);
+    stream->seekg(std::streamoff(source));
     stream->read((char *)buffer,count);
 	if (stream->fail()) return -3;
 	return 0;
@@ -182,7 +182,7 @@ int Image::readSectors(nw_byte * buffer, unsigned int startSector, unsigned int 
 int Image::writeSectors(nw_byte * buffer, unsigned int startSector, unsigned int sectorCount) {
     
     unsigned int count = sectorCount * sectorSize;
-    unsigned int dest = offset + (startSector * sectorSize);
+    std::uint64_t dest = offset + std::uint64_t(startSector) * sectorSize;
 
 	if (stream == 0 || this->hasDisk() == false) {
        DBERR("Image::readSectors, no image loaded\n");
@@ -198,7 +198,7 @@ int Image::writeSectors(nw_byte * buffer, unsigned int startSector, unsigned int
     DBERR("Image::writeSectors, startSector %u, amount %u\n", startSector, sectorCount);
 
     stream->clear();
-    stream->seekp(dest);
+    stream->seekp(std::streamoff(dest));
     stream->write((char *)buffer,count);
 	if (stream->fail()) return -3;
 	return 0;
@@ -317,7 +317,7 @@ unsigned int Image::getPartitionNr()
     return partitionNr;
 }
 
-unsigned int Image::getPartitionOffset()
+std::uint64_t Image::getPartitionOffset()
 {
     return offset;
 }
