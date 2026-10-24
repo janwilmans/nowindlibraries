@@ -1,27 +1,11 @@
+cmake_minimum_required(VERSION 3.23 FATAL_ERROR)
+
 PROJECT(nwhostapp)
-cmake_minimum_required(VERSION 2.8)
 
 INCLUDE_DIRECTORIES(../general)
 INCLUDE_DIRECTORIES(../nwhost)
 INCLUDE_DIRECTORIES(../ftdx)
 INCLUDE_DIRECTORIES(../nowind)
-
-if(WIN32)
-  # static x64 FTD2XX library
-  set(FTDI ${CMAKE_CURRENT_SOURCE_DIR}/../ftdx/FTD2XX-msc/FTD2XX.lib)
-else()
-  find_library(FTDI ftdi NAMES ftdi1)
-endif()
-
-MESSAGE ("find_library FTDI: ${FTDI}")
-
-find_path(FTDI_INCLUDE_DIR
-    NAMES ftdi.h
-    PATH_SUFFIXES libftdi1
-    REQUIRED
-)
-
-target_include_directories(ftdx PRIVATE ${FTDI_INCLUDE_DIR})
 
 # the MACOSX_BUNDLE supports the make install feature, it is ignored on other platforms
 ADD_EXECUTABLE(nwhostapp MACOSX_BUNDLE mainUsbHost.cpp HostApp.cpp getopt.c getopt1.c)
@@ -31,7 +15,7 @@ if(WIN32)
   target_include_directories(nwhostapp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
-target_link_libraries(nwhostapp nowind nwhost ftdx nwgeneral ${FTDI})
+target_link_libraries(nwhostapp nowind nwhost ftdx nwgeneral)
 
 #--------------------------------------------------------------------------------
 # Now the installation stuff below
@@ -57,7 +41,7 @@ INSTALL(TARGETS nwhostapp
 #--------------------------------------------------------------------------------
 # Install needed libraries by copying from library installation directories
 if(NOT WIN32)
-  INSTALL(FILES ${FTDI} DESTINATION ${library_dest_dir} COMPONENT Runtime)
+  INSTALL(FILES ${FTDI_LIB} DESTINATION ${library_dest_dir} COMPONENT Runtime)
 endif()
 
 # this was suppose to copy the real files too, not just the symlinks, but it doesnt work,
