@@ -35,7 +35,7 @@ static const nw_byte registerMask[64] = {
 
 static const unsigned int DISPLAYCHUNKS = 128;
 
-// (59+27+100+102+56+1024)/6;	 SCANLINETIME = 1368 / (21.48 Mhz / 3.57 MHz)
+// (59+27+100+102+56+1024)/6;    SCANLINETIME = 1368 / (21.48 Mhz / 3.57 MHz)
 static const unsigned int SCANLINETIME = 228;
 
 class V9938 {

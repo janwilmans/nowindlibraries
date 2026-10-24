@@ -62,7 +62,7 @@ void PPISound::write(bool value)
 void PPISound::sync(unsigned int)
 {
     /* TODO:
-	Als de output NUL is en er ook geen verandering in het geluid is geweest, doe dan niets!
+    Als de output NUL is en er ook geen verandering in het geluid is geweest, doe dan niets!
 */
     emuTimeType timeSpan = emuTime - lastUpdateEmuTime;
     unsigned int samples = (unsigned int)(((float)timeSpan * (float)audioSampleRate) / (float)3579545);

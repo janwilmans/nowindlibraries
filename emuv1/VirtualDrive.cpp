@@ -84,7 +84,8 @@ VirtualDrive::VirtualDrive()
 
     string pattern = Debug::Instance()->getPath() + "\\virtualdisk\\*.*";
     long sHandle = _findfirst(pattern.c_str(), &data);
-    do {
+    do
+    {
         DBERR("file: %s size: %u\n", data.name, data.size);
         string filename(data.name);
         ToUpper(filename);
@@ -351,17 +352,17 @@ char * VirtualDrive::getSector(unsigned int sector) {
     }
     
 
-		// write sector to disk for debugging
-		char filename[250];
-		sprintf(filename,"sector_%i.bin",sector);
-		ofstream ofs(filename,ios::binary|ios::trunc);
-		if (ofs.fail()) {
-				DBERR("Error opening file " << filename << "!\n");
-		}
-		ofs.write((char *)buffer,512);
-		ofs.close();
+        // write sector to disk for debugging
+        char filename[250];
+        sprintf(filename,"sector_%i.bin",sector);
+        ofstream ofs(filename,ios::binary|ios::trunc);
+        if (ofs.fail()) {
+                DBERR("Error opening file " << filename << "!\n");
+        }
+        ofs.write((char *)buffer,512);
+        ofs.close();
 
-		delete [] buffer;
+        delete [] buffer;
     
     DBERR("VirtualDrive::readSector: " << sector << " ends \n");
 }

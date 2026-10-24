@@ -114,7 +114,7 @@ void Emulator::scheduleScreenChangeInterrupt(bool enable, emuTimeType interruptT
 {
     screenChangeInterruptEnable = enable;
     newScreenChangeInterruptTime = interruptTime;
-    //  		DBERR("scheduleScreenChangeInterrupt: " << newScreenChangeInterruptTime << endl);
+    //          DBERR("scheduleScreenChangeInterrupt: " << newScreenChangeInterruptTime << endl);
     scheduleNextInterrupt();
 }
 
@@ -122,14 +122,14 @@ void Emulator::scheduleDebuggerInterrupt(bool enable, emuTimeType interruptTime)
 {
     debuggerInterruptEnable = enable;
     newDebuggerInterruptTime = interruptTime;
-    //  		DBERR("newDebuggerInterruptTime: " << newDebuggerInterruptTime << endl);
+    //          DBERR("newDebuggerInterruptTime: " << newDebuggerInterruptTime << endl);
     scheduleNextInterrupt();
 }
 
 void Emulator::scheduleRenderScreenInterrupt(emuTimeType interruptTime)
 {
     newRenderScreenInterruptTime = interruptTime;
-    //  		DBERR("scheduleRenderScreenInterrupt: " << newRenderScreenInterruptTime << endl);
+    //          DBERR("scheduleRenderScreenInterrupt: " << newRenderScreenInterruptTime << endl);
     scheduleNextInterrupt();
 }
 
@@ -137,14 +137,14 @@ void Emulator::scheduleMsxAudioInterrupt(bool enable, emuTimeType interruptTime)
 {
     msxAudioInterruptEnable = enable;
     newMsxAudioInterruptTime = interruptTime;
-    //  		DBERR("scheduleRenderScreenInterrupt: " << newRenderScreenInterruptTime << endl);
+    //          DBERR("scheduleRenderScreenInterrupt: " << newRenderScreenInterruptTime << endl);
     scheduleNextInterrupt();
 }
 
 void Emulator::scheduleAudioInterrupt(bool enable, emuTimeType interruptTime)
 {
     newAudioInterruptTime = interruptTime;
-    //  		DBERR("scheduleAudioInterrupt: " << newAudioInterruptTime << endl);
+    //          DBERR("scheduleAudioInterrupt: " << newAudioInterruptTime << endl);
     scheduleNextInterrupt();
 }
 
@@ -330,7 +330,7 @@ void reportCycles(emuTimeType emuTime, unsigned long long msRunning)
 void Emulator::start()
 {
     DBERR("entering main loop\n");
-    //	SDL_WM_SetCaption("Nowind MSX",0);
+    //  SDL_WM_SetCaption("Nowind MSX",0);
 
     /* calculate the amount of T-states per millisecond the cpu should run at */
     statesPerMilliSecond = cpu->cpuFrequency / 1000;
@@ -487,7 +487,7 @@ void Emulator::speedCheck()
         passedTime = OUR_SDL_GetTicks();
         slicesReleased++;
     }
-    //	if (slicesReleased > 0) DBERR("[%u]", slicesReleased);
+    //  if (slicesReleased > 0) DBERR("[%u]", slicesReleased);
     reportCycles(cpu->emuTime, passedTime);
 #endif
 }
@@ -700,19 +700,19 @@ void Emulator::handle_key_and_sdl_events()
                 // even tijdelijk een break hier, anders komen er veel meldingen van events not handled.
                 break;
                 /*
-			     mouseMotion(event);
-			     break;
+                 mouseMotion(event);
+                 break;
             case SDL_MOUSEBUTTONDOWN:
-			     mouseButtonDown(event);
+                 mouseButtonDown(event);
                  DBERR("--SDL_MOUSEBUTTONDOWN--\n");
-			     break;
-	       	case SDL_MOUSEBUTTONUP:
+                 break;
+            case SDL_MOUSEBUTTONUP:
                  mouseButtonUp(event);
                  DBERR("--SDL_MOUSEBUTTONUP--\n");
                  break;
 */
             default:
-                //				 DBERR("Event not handled by MSX!\n");
+                //               DBERR("Event not handled by MSX!\n");
                 break;
             }
         }

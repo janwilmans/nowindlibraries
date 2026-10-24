@@ -39,24 +39,24 @@ GUI::GUI()
     selecting = false;
 
     /* On hardware that supports double-buffering, this function sets up a flip and returns.
-		The hardware will wait for vertical retrace, and then swap video buffers before the next
-		video surface blit or lock will return. On hardware that doesn't support double-buffering,
-		this is equivalent to calling SDL_UpdateRect(screen, 0, 0, 0, 0) */
+        The hardware will wait for vertical retrace, and then swap video buffers before the next
+        video surface blit or lock will return. On hardware that doesn't support double-buffering,
+        this is equivalent to calling SDL_UpdateRect(screen, 0, 0, 0, 0) */
 
     blendmask = 0x010101;
     /*
-	    string disksImage = Debug::Instance()->getPath() + "disks.bmp";
-		SDL_Surface *temp = SDL_LoadBMP(disksImage.c_str());
-		if (temp == NULL) {
+        string disksImage = Debug::Instance()->getPath() + "disks.bmp";
+        SDL_Surface *temp = SDL_LoadBMP(disksImage.c_str());
+        if (temp == NULL) {
             DBERR("GUI: LoadBmp: " << disksImage << " not found!\n");
             exit(1);
         }    
-  		bmpdisk = SDL_DisplayFormat(temp);
-  		SDL_FreeSurface(temp);
+        bmpdisk = SDL_DisplayFormat(temp);
+        SDL_FreeSurface(temp);
 
-  		int colorkey = SDL_MapRGB(screen->format, 255, 255, 255);
-  		SDL_SetColorKey(bmpdisk, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
-  		SDL_SetAlpha(bmpdisk, SDL_SRCALPHA | SDL_RLEACCEL, 175);
+        int colorkey = SDL_MapRGB(screen->format, 255, 255, 255);
+        SDL_SetColorKey(bmpdisk, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
+        SDL_SetAlpha(bmpdisk, SDL_SRCALPHA | SDL_RLEACCEL, 175);
 */
     osd = OnScreenDisplay::Instance();
 
@@ -64,9 +64,9 @@ GUI::GUI()
     bufp1 = screenBase;
 
     //        SDL_Rect Con_rect;
-    //    	Con_rect.x = Con_rect.y = 0;
+    //      Con_rect.x = Con_rect.y = 0;
     //        Con_rect.w = Con_rect.h = 300;
-    //    	if((Consoles[0] = CON_Init("ConsoleFont.bmp", Screen, 100, Con_rect)) == NULL) assert(false);
+    //      if((Consoles[0] = CON_Init("ConsoleFont.bmp", Screen, 100, Con_rect)) == NULL) assert(false);
 
     DBERR("GUI constructor...finished\n");
 }
@@ -77,7 +77,7 @@ GUI::~GUI()
     // destructor
 
     // only free the surface if to was loaded
-    //		SDL_FreeSurface(fontImg);
+    //      SDL_FreeSurface(fontImg);
     DBERR("GUI destroyed.\n");
 }
 
@@ -114,9 +114,9 @@ void GUI::fullscreenToggle()
         screen = SDL_SetVideoMode(..., flags); 
     */
 
-    //	SDL_FillRect(screen,0,0);
-    //	screen = SDL_SetVideoMode(resolution*256, resolution*212+(resolution*16), 32, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_FULLSCREEN);
-    //	SDL_FillRect(screen,0,0);
+    //  SDL_FillRect(screen,0,0);
+    //  screen = SDL_SetVideoMode(resolution*256, resolution*212+(resolution*16), 32, SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_FULLSCREEN);
+    //  SDL_FillRect(screen,0,0);
 }
 
 /* SDL standaard method to lock the screen, use before updating a screen */
@@ -230,7 +230,7 @@ void GUI::scaler(unsigned int* screenStream)
         break;
     }
 
-    //	if (osdEnabled) OSDstrings();
+    //  if (osdEnabled) OSDstrings();
 
 #ifndef CONSOLE_DEBUGGING_ON
     SDL_Flip(screen);
@@ -239,7 +239,7 @@ void GUI::scaler(unsigned int* screenStream)
 
 void GUI::setResolution(unsigned int res)
 {
-    /* 	In deze routine geen V9938 methodes aanroepen ! -> endless loop */
+    /*  In deze routine geen V9938 methodes aanroepen ! -> endless loop */
 
     char driverName[20];
     const SDL_VideoInfo* info;
@@ -271,8 +271,8 @@ void GUI::setResolution(unsigned int res)
         DBERR(" - color fills accelerated: %s\n", info->blit_fill == 1 ? "yes" : "no");
 
 //
-//		dit werkt ook?! proberen op laptop...
-//		SDL_SetVideoMode(res*256, res*212+(res*16), 32, SDL_SWSURFACE);
+//      dit werkt ook?! proberen op laptop...
+//      SDL_SetVideoMode(res*256, res*212+(res*16), 32, SDL_SWSURFACE);
 //
 #endif
 
@@ -298,47 +298,47 @@ SDL_Surface* GUI::getFakeSDL_Surface(unsigned int width, unsigned int height)
 
 
     /*
-		SDL_PixelFormat *fake_pixelFormat = new SDL_PixelFormat();
+        SDL_PixelFormat *fake_pixelFormat = new SDL_PixelFormat();
 
-		fake_pixelFormat->palette = new SDL_Palette();
-		fake_pixelFormat->palette->ncolors = 0;
+        fake_pixelFormat->palette = new SDL_Palette();
+        fake_pixelFormat->palette->ncolors = 0;
 
-		fake_pixelFormat->BitsPerPixel = 32;
-		fake_pixelFormat->BytesPerPixel = 4;
-		fake_pixelFormat->Rmask = 255;	
-		fake_pixelFormat->Gmask = 255;	
-		fake_pixelFormat->Bmask = 255;	
-		fake_pixelFormat->Amask = 255;	
+        fake_pixelFormat->BitsPerPixel = 32;
+        fake_pixelFormat->BytesPerPixel = 4;
+        fake_pixelFormat->Rmask = 255;  
+        fake_pixelFormat->Gmask = 255;  
+        fake_pixelFormat->Bmask = 255;  
+        fake_pixelFormat->Amask = 255;  
 
-		fake_pixelFormat->Rshift = 0;	
-		fake_pixelFormat->Gshift = 0;	
-		fake_pixelFormat->Bshift = 0;	
-		fake_pixelFormat->Ashift = 0;	
+        fake_pixelFormat->Rshift = 0;   
+        fake_pixelFormat->Gshift = 0;   
+        fake_pixelFormat->Bshift = 0;   
+        fake_pixelFormat->Ashift = 0;   
 
-		fake_pixelFormat->Rloss = 0;	
-		fake_pixelFormat->Gloss = 0;	
-		fake_pixelFormat->Bloss = 0;	
-		fake_pixelFormat->Aloss = 0;	
+        fake_pixelFormat->Rloss = 0;    
+        fake_pixelFormat->Gloss = 0;    
+        fake_pixelFormat->Bloss = 0;    
+        fake_pixelFormat->Aloss = 0;    
 
-		fake_pixelFormat->colorkey = 0;	
-		fake_pixelFormat->alpha = 0;	
+        fake_pixelFormat->colorkey = 0; 
+        fake_pixelFormat->alpha = 0;    
 
-		SDL_Surface *fake_surface = new SDL_Surface();
-		fake_surface->flags = 0;
-		fake_surface->format = fake_pixelFormat;
-		fake_surface->w = width;
-		fake_surface->h = height;
-		fake_surface->pixels = new unsigned int[width*height];
-		fake_surface->refcount = 1;
+        SDL_Surface *fake_surface = new SDL_Surface();
+        fake_surface->flags = 0;
+        fake_surface->format = fake_pixelFormat;
+        fake_surface->w = width;
+        fake_surface->h = height;
+        fake_surface->pixels = new unsigned int[width*height];
+        fake_surface->refcount = 1;
 
-		fake_surface->pitch = SDL_CalculatePitch(fake_surface);
-		fake_surface->offset = 0;
-		fake_surface->hwdata = NULL;
-		fake_surface->locked = 0;
-		fake_surface->map = NULL;
-		fake_surface->unused1 = 0;
-		SDL_SetClipRect(fake_surface, NULL);
-		SDL_FormatChanged(fake_surface);
+        fake_surface->pitch = SDL_CalculatePitch(fake_surface);
+        fake_surface->offset = 0;
+        fake_surface->hwdata = NULL;
+        fake_surface->locked = 0;
+        fake_surface->map = NULL;
+        fake_surface->unused1 = 0;
+        SDL_SetClipRect(fake_surface, NULL);
+        SDL_FormatChanged(fake_surface);
 */
 
     return fake_surface;
@@ -433,58 +433,58 @@ __asm ("mov %eax, _time1a");
 __asm ("mov %edx, _time1d");
 __asm ("popl %edx");
 __asm ("popl %eax");
-	
-	// initialize
-	__asm ("pushal; 					\
-			pushf;						\
-			cld;						\
-			movl (_msxscr), %esi;		\
-			movl (_asmp1), %edi;		\
-			movl $2176, %ebp;			\
-			movl (_asmborder), %ebx;	\
-			movl (_asmcount), %edx;		\
-			");
-		
-	// draw border
-	__asm ("movl (_asmhadjust), %ecx;	\
-			shll %ecx;					\
- 			movl %ebx, %eax;			\
- 			drawborder:					\
-  			rep stosl;					\
-  			");
-	
-	// draw screenline (move van esi edi en edi+544)
-	__asm ("movw $512, %cx;				\
-			drawline:					\
-   			lodsl;						\
-   			movl %eax, (%ebp, %edi);	\
-			stosl;						\
-			loop drawline;				\
-   			");
-   			
-	// draw border even line and determine last line
-    __asm ("movb $32, %cl;				\
-    	    movl %ebx, %eax;			\
-    	    rep stosl;					\
-    		\
- 	        movb $32, %cl;				\
-    		leal 2048(%edi), %edi;		\
-       		decl %edx;					\
-    		jnz drawborder;				\
-    		");
-    		
+    
+    // initialize
+    __asm ("pushal;                     \
+            pushf;                      \
+            cld;                        \
+            movl (_msxscr), %esi;       \
+            movl (_asmp1), %edi;        \
+            movl $2176, %ebp;           \
+            movl (_asmborder), %ebx;    \
+            movl (_asmcount), %edx;     \
+            ");
+        
+    // draw border
+    __asm ("movl (_asmhadjust), %ecx;   \
+            shll %ecx;                  \
+            movl %ebx, %eax;            \
+            drawborder:                 \
+            rep stosl;                  \
+            ");
+    
+    // draw screenline (move van esi edi en edi+544)
+    __asm ("movw $512, %cx;             \
+            drawline:                   \
+            lodsl;                      \
+            movl %eax, (%ebp, %edi);    \
+            stosl;                      \
+            loop drawline;              \
+            ");
+            
+    // draw border even line and determine last line
+    __asm ("movb $32, %cl;              \
+            movl %ebx, %eax;            \
+            rep stosl;                  \
+            \
+            movb $32, %cl;              \
+            leal 2048(%edi), %edi;      \
+            decl %edx;                  \
+            jnz drawborder;             \
+            ");
+            
     // draw last piece of border
-    __asm ("movl $16, %ecx;				\
-    		subl (_asmhadjust), %ecx;	\
-    		shll %ecx;					\
-    		rep stosl;					\
-    		\
-    		popf;						\
-    		popal;						\
-    		");
-   			  
-		  currentMSXscreenPosition += 256 * count;
-		  bufp1 += 544 * count;
+    __asm ("movl $16, %ecx;             \
+            subl (_asmhadjust), %ecx;   \
+            shll %ecx;                  \
+            rep stosl;                  \
+            \
+            popf;                       \
+            popal;                      \
+            ");
+              
+          currentMSXscreenPosition += 256 * count;
+          bufp1 += 544 * count;
 
 __asm ("pushl %eax");
 __asm ("pushl %edx");
@@ -548,7 +548,7 @@ __asm ("popl %eax");
         }
         bufp1 = bufp2;
     }
-    //	Sulock(screen);
+    //  Sulock(screen);
     /*
 __asm ("pushl %eax");
 __asm ("pushl %edx");
@@ -613,7 +613,7 @@ void GUI::simple3x(register unsigned int* MSXscreen)
             *bufp2++ = eee;
             *bufp2++ = eee;
             *bufp2++ = eee;
-            //	eee = (eee >> 1) & 0x7F7F7F;
+            //  eee = (eee >> 1) & 0x7F7F7F;
             *bufp3++ = eee;
             *bufp3++ = eee;
             *bufp3++ = eee;
@@ -735,11 +735,11 @@ inline unsigned GUI::INTERPOLATE(unsigned int A, unsigned int B)
 void GUI::scale2xSaI(unsigned int* MSXscreen)
 {
     /* Map of the pixels:
- 		I|E F|J
- 		G|A B|K
- 		H|C D|L
- 		M|N O|P
-	*/
+        I|E F|J
+        G|A B|K
+        H|C D|L
+        M|N O|P
+    */
 
     unsigned int colorA, colorB, colorC, colorD, colorE, colorF;
     unsigned int colorG, colorH, colorI, colorJ, colorK, colorL;

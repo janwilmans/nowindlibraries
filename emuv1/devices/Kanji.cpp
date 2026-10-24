@@ -8,8 +8,8 @@
 using namespace std;
 
 /* TODO:
-	JIS2 is nu net zo geimplementeerd als JIS1
-	Is dit in werkelijkheid ook zo? En waarmee kun je JIS2 testen???
+    JIS2 is nu net zo geimplementeerd als JIS1
+    Is dit in werkelijkheid ook zo? En waarmee kun je JIS2 testen???
 */
 
 Kanji::Kanji()

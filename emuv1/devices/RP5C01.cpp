@@ -89,7 +89,7 @@ void RP5C01::writePortB5(nw_byte value)
 
 nw_byte RP5C01::readPortB5()
 {
-    //	   return 0xff;
+    //     return 0xff;
     time_t td = time(NULL);
     struct tm* tm = localtime(&td);
 

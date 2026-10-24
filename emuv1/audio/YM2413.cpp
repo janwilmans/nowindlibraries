@@ -77,7 +77,7 @@ void YM2413::generateTables()
     {
         double db = 0.75 * i;
         modulationIndex[i] = pow(10, db / 20);
-        //		DBERR("mIndex: " << modulationIndex[i] << endl);
+        //      DBERR("mIndex: " << modulationIndex[i] << endl);
     }
 
     // key scale
@@ -163,7 +163,7 @@ void YM2413::writeData(nw_byte value)
         sustain[channel] = (value & 0x20) != 0;
         phase[channel] = 0; // TODO: verkomt noise bij aanslag, maar check! (gebeurt dit alleen bij en key-on?)
         phaseM[channel] = 0;
-        //		keyScaleNo = value & 15;
+        //      keyScaleNo = value & 15;
         if (value & 0x10)
         {
             DBERR("keyON channel: %u\n", channel);
@@ -210,7 +210,7 @@ void YM2413::writeData(nw_byte value)
 void YM2413::updateUserInstrument()
 {
     unsigned int cpuFrequency = Z80::Instance()->cpuFrequency;
-    //	unsigned int sampleTime = cpuFrequency / audioSampleRate;
+    //  unsigned int sampleTime = cpuFrequency / audioSampleRate;
     unsigned int fSam = cpuFrequency / 72;
 
     int instr = instrument[0];
@@ -227,13 +227,13 @@ void YM2413::updateUserInstrument()
     DBERR("oct: %u\n", octave[0]);
 
     /*
-	// TODO: check of R=0, dan is RATE ook 0
-	if (instrumentData[instr][0] & 0x10) {
-		keyScaleOffset = keyScaleNo;
-	} else {
-		keyScaleOffset = keyScaleNo >> 2;
-	}
-	attackStep
+    // TODO: check of R=0, dan is RATE ook 0
+    if (instrumentData[instr][0] & 0x10) {
+        keyScaleOffset = keyScaleNo;
+    } else {
+        keyScaleOffset = keyScaleNo >> 2;
+    }
+    attackStep
 */
 }
 
@@ -244,18 +244,18 @@ void YM2413::updateBuffer(unsigned int samples)
     unsigned int sampleTime = Z80::Instance()->cpuFrequency / audioSampleRate;
 
     // modulator wave
-    //	double multiM = multiplyFactor[instrumentData[inst][0] & 15];
-    //	double freqM = (FNumber[0] * octave[0] * 50000 * multiM) / (double)262144;
-    //	unsigned int periodM = 3579545 / freqM;
+    //  double multiM = multiplyFactor[instrumentData[inst][0] & 15];
+    //  double freqM = (FNumber[0] * octave[0] * 50000 * multiM) / (double)262144;
+    //  unsigned int periodM = 3579545 / freqM;
 
-    //	if (periodM == 0) periodM = 1;
+    //  if (periodM == 0) periodM = 1;
 
-    //	double mi = modulationIndex[instrumentData[0][2] & 0x3f];
-    //	DBERR("db: " << int(instrumentData[0][2] & 0x1f) << endl);
-    //	DBERR("mi: " << mi << endl);
+    //  double mi = modulationIndex[instrumentData[0][2] & 0x3f];
+    //  DBERR("db: " << int(instrumentData[0][2] & 0x1f) << endl);
+    //  DBERR("mi: " << mi << endl);
 
-    //	DBERR("modulation Index: " << mi << endl);
-    //	double volume = 16384/2;
+    //  DBERR("modulation Index: " << mi << endl);
+    //  double volume = 16384/2;
 
     for (unsigned int i = 0; i < samples; i++)
     {
@@ -266,16 +266,16 @@ void YM2413::updateBuffer(unsigned int samples)
             //value += 16000; // maak er unsigned van....TODO: moet anders!
 
             double ph = (double)phase[0] * 2 * PI / periodC;
-            //			double phm = (double)phaseM[0]*2*PI/periodM;
-            //			value = (signed int)(volume * sin(ph + mi*sin(phm)));
+            //          double phm = (double)phaseM[0]*2*PI/periodM;
+            //          value = (signed int)(volume * sin(ph + mi*sin(phm)));
             value = (signed int)(16384 * sin(ph)); // grond frequentie
 
-            //			value = (signed int)(16000 * sin((double)(phase[c]/period)*2*PI));
+            //          value = (signed int)(16000 * sin((double)(phase[c]/period)*2*PI));
 
             phase[0] += sampleTime;
             phase[0] %= periodC;
-            //			phaseM[0] += sampleTime;
-            //			phaseM[0] %= periodM;
+            //          phaseM[0] += sampleTime;
+            //          phaseM[0] %= periodM;
         }
 
         assert(audioBufferIndex <= maxBufferSize);
@@ -307,8 +307,8 @@ void YM2413::sync(unsigned int)
 /*
 
 rate = 1 -> keyScale Rate is sneller
-	heeft iig invloed op attack rate (AR)
-	dus waarschijnlijk ook op DR
+    heeft iig invloed op attack rate (AR)
+    dus waarschijnlijk ook op DR
 
 
  */

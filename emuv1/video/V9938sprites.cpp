@@ -8,16 +8,16 @@ using namespace std;
 
 /* TODO:
     
-	- sprite maginificatie
-	- what happens exactly when TP=1 (collision and display of color 0???)
-	- what happens when sprite priority is cancelled and when 2 sprites are
-	already OR'ed and a third sprite with (CC=1) is at the same location?
-	- in case of more collisions in mode2, the coordinates of the last collision
-	is stored. (it makes more sense that only the first collision is stored)
-	- in stead of one big spriteOverlay: store only and array of addresses which
-	contain a sprite line (list of max 32 sprites x 32 lines (in case of 16x16)
- 	 = 1024 addresses and spritelines of 8 pixels)
-	
+    - sprite maginificatie
+    - what happens exactly when TP=1 (collision and display of color 0???)
+    - what happens when sprite priority is cancelled and when 2 sprites are
+    already OR'ed and a third sprite with (CC=1) is at the same location?
+    - in case of more collisions in mode2, the coordinates of the last collision
+    is stored. (it makes more sense that only the first collision is stored)
+    - in stead of one big spriteOverlay: store only and array of addresses which
+    contain a sprite line (list of max 32 sprites x 32 lines (in case of 16x16)
+     = 1024 addresses and spritelines of 8 pixels)
+    
 */
 
 
@@ -135,7 +135,7 @@ void V9938sprites::updateSpriteOverlayMode1(nw_byte vdpModeRegister1) {
     for (int i=0;i<256;++i) lineCount[i] = 0;
     for (int i=0;i<(256*256);++i) spriteOverlay[i] = 0;
 
-	if (vdpModeRegister1 & SI) {
+    if (vdpModeRegister1 & SI) {
 
         // size 16x16
         for (int sprite=0;sprite<32;sprite++) {

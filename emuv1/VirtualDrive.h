@@ -66,21 +66,21 @@ public:
 
 Bootsector (sector 0)
 
-BS_FAT12			STRUC			    (offset)     Default Value (LSB, MSB)
+BS_FAT12            STRUC               (offset)     Default Value (LSB, MSB)
 -----               ------              ------       ------
-bsJmp			    DB 3 DUP (?)		0x00          EB FE 90        // unused on MSX, E9 of EB een 8086 JUMP instructie
-bsOemName			DB 8 DUP (?)		0x03          "12345678"
-bsFAT12             BPB_FAT12 Structure	0x0B            
+bsJmp               DB 3 DUP (?)        0x00          EB FE 90        // unused on MSX, E9 of EB een 8086 JUMP instructie
+bsOemName           DB 8 DUP (?)        0x03          "12345678"
+bsFAT12             BPB_FAT12 Structure 0x0B            
                     (see below)
 FAT16?:
-bsDriveNumber		DB ?				0x24
-bsUnused			DB ?				0x25
-bsExtBootSignature	DB ?				0x26
-bsSerialNumber		DD ?				0x27
-bsVolumeLabel		DB "NO NAME    "	0x2B
-bsFileSystem		DB "FAT12   "		0x36
-bsBootCode		    DB 450 DUP (?)		0x3E
-BS_FAT12	ENDS	
+bsDriveNumber       DB ?                0x24
+bsUnused            DB ?                0x25
+bsExtBootSignature  DB ?                0x26
+bsSerialNumber      DD ?                0x27
+bsVolumeLabel       DB "NO NAME    "    0x2B
+bsFileSystem        DB "FAT12   "       0x36
+bsBootCode          DB 450 DUP (?)      0x3E
+BS_FAT12    ENDS    
 
     
 The FAT12 Disk Parameter Block (aka Bios Parameter Block) is at offset 

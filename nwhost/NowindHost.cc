@@ -59,7 +59,7 @@ std::vector<std::string> split(const std::string& s, const std::string& delim, c
 
 /*
 LIBRARY WISH LIST:
-	enum to string functions for printing enum-values
+    enum to string functions for printing enum-values
 */
 
 
@@ -287,14 +287,14 @@ void NowindHost::write(byte data, unsigned int time)
             }
 
             /*
-	    	unsigned sectorAmount = unsigned(buffer.size()) / 512;
-		    unsigned startSector = getStartSector();
-		    if (SectorMedium* disk = getDisk()) {
-			    int result = disk->writeSectors(&buffer[0], startSector, sectorAmount);
-			    if (0 != result) {
-			        DBERR("Error %i writing disk image!\n", result);
-			    }
-		    }
+            unsigned sectorAmount = unsigned(buffer.size()) / 512;
+            unsigned startSector = getStartSector();
+            if (SectorMedium* disk = getDisk()) {
+                int result = disk->writeSectors(&buffer[0], startSector, sectorAmount);
+                if (0 != result) {
+                    DBERR("Error %i writing disk image!\n", result);
+                }
+            }
             */
 
             setState(STATE_SYNC1);
@@ -356,45 +356,45 @@ void NowindHost::setState(State aState)
     }
 
     /*
-	switch (state)
-	{
-	case STATE_SYNC1:
-		DBERR(" # STATE_SYNC1\n"); break;
-	case STATE_SYNC2:
-		DBERR(" # STATE_SYNC2\n"); break;
-	case STATE_RECEIVE_COMMAND:
-		DBERR(" # STATE_RECEIVE_COMMAND\n"); break;
-	case STATE_RECEIVE_PARAMETERS:
-		DBERR(" # STATE_RECEIVE_PARAMETERS\n"); break;
-	case STATE_EXECUTING_COMMAND:
-		DBERR(" # STATE_EXECUTING_COMMAND\n"); break;
-	case STATE_DISKWRITE:
-		DBERR(" # STATE_DISKWRITE\n"); break;
-	case STATE_DEVOPEN:
-		DBERR(" # STATE_DEVOPEN\n"); break;
-	case STATE_IMAGE:
-		DBERR(" # STATE_IMAGE\n"); break;
-	case STATE_MESSAGE:
-		DBERR(" # STATE_MESSAGE\n"); break;
-	case STATE_BLOCKREAD:
-		DBERR(" # STATE_BLOCKREAD\n"); break;
-	case STATE_BLOCKWRITE:
-		DBERR(" # STATE_BLOCKWRITE\n"); break;
-	case STATE_CPUINFO:
-		DBERR(" # STATE_CPUINFO\n"); break;
-	case STATE_RECEIVE_DATA:
-		DBERR(" # STATE_RECEIVE_DATA\n"); break;
-	case STATE_RECEIVE_STRING:
-		DBERR(" # STATE_RECEIVE_STRING\n"); break;
-	case STATE_BDOS_OPEN_FILE:
-		DBERR(" # STATE_BDOS_OPEN_FILE\n"); break;
-	case STATE_BDOS_FIND_FIRST:
-		DBERR(" # STATE_BDOS_FIND_FIRST\n"); break;
-	default:
-		DBERR(" # STATE_ unknown !\n"); break;
-		break;
-	}
-	*/
+    switch (state)
+    {
+    case STATE_SYNC1:
+        DBERR(" # STATE_SYNC1\n"); break;
+    case STATE_SYNC2:
+        DBERR(" # STATE_SYNC2\n"); break;
+    case STATE_RECEIVE_COMMAND:
+        DBERR(" # STATE_RECEIVE_COMMAND\n"); break;
+    case STATE_RECEIVE_PARAMETERS:
+        DBERR(" # STATE_RECEIVE_PARAMETERS\n"); break;
+    case STATE_EXECUTING_COMMAND:
+        DBERR(" # STATE_EXECUTING_COMMAND\n"); break;
+    case STATE_DISKWRITE:
+        DBERR(" # STATE_DISKWRITE\n"); break;
+    case STATE_DEVOPEN:
+        DBERR(" # STATE_DEVOPEN\n"); break;
+    case STATE_IMAGE:
+        DBERR(" # STATE_IMAGE\n"); break;
+    case STATE_MESSAGE:
+        DBERR(" # STATE_MESSAGE\n"); break;
+    case STATE_BLOCKREAD:
+        DBERR(" # STATE_BLOCKREAD\n"); break;
+    case STATE_BLOCKWRITE:
+        DBERR(" # STATE_BLOCKWRITE\n"); break;
+    case STATE_CPUINFO:
+        DBERR(" # STATE_CPUINFO\n"); break;
+    case STATE_RECEIVE_DATA:
+        DBERR(" # STATE_RECEIVE_DATA\n"); break;
+    case STATE_RECEIVE_STRING:
+        DBERR(" # STATE_RECEIVE_STRING\n"); break;
+    case STATE_BDOS_OPEN_FILE:
+        DBERR(" # STATE_BDOS_OPEN_FILE\n"); break;
+    case STATE_BDOS_FIND_FIRST:
+        DBERR(" # STATE_BDOS_FIND_FIRST\n"); break;
+    default:
+        DBERR(" # STATE_ unknown !\n"); break;
+        break;
+    }
+    */
 }
 
 // prepare will switch to STATE_RECEIVE_PARAMETERS is needed for the command,

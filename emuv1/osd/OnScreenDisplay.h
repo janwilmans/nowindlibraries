@@ -52,10 +52,10 @@ public:
     void displayOSD(SDL_Surface*);
     void setAlphaBlending(int);
     /*! Replaces the last line of the console with a new string 
-	 * 
-	 *  \param text The text to add 
-	 *  \return the amount of characters that was added ?
-	 */
+     * 
+     *  \param text The text to add 
+     *  \return the amount of characters that was added ?
+     */
 
     void xorBar(SDL_Surface*, int);
 };

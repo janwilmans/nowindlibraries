@@ -137,8 +137,8 @@ void V9938renderer::checkTransparency()
     if (inTextMode)
     {
         /* In textmode color0 is always solid,
-		   when textColor = 0 it assumes the backDropColor
-     	*/
+           when textColor = 0 it assumes the backDropColor
+        */
 
         RGBpalette[0] = paletteColor0;
         backDropColor = RGBpalette[colorRegister & 15];
@@ -151,9 +151,9 @@ void V9938renderer::checkTransparency()
     else
     {
         /* In graphic modes when TP=0 color0 is solid, otherwise it is
-	       transparent which means it assumes the colorRegister. When transparent
-	       and colorRegister=0, it becomes solid again.
-	    */
+           transparent which means it assumes the colorRegister. When transparent
+           and colorRegister=0, it becomes solid again.
+        */
         if (transparent && ((colorRegister & 15) != 0))
         {
             RGBpalette[0] = RGBpalette[colorRegister & 15];
@@ -214,7 +214,7 @@ void V9938renderer::setDisplayOffset(nw_byte value)
 
 void V9938renderer::dumpText1(unsigned int firstChunk, unsigned int count)
 {
-    //	DBERR("TEXT1\n");
+    //  DBERR("TEXT1\n");
 
     unsigned int nt = (nameTable & 0x7F) << 10;
     unsigned int firstChunkInLine = firstChunk & (DISPLAYCHUNKS - 1);
@@ -318,7 +318,7 @@ std::string V9938renderer::copyFromText2(unsigned int x, unsigned int y, unsigne
 
 void V9938renderer::dumpText2(unsigned int firstChunk, unsigned int count)
 {
-    //	DBERR("TEXT2\n");
+    //  DBERR("TEXT2\n");
 
     if (count > (212 * 128))
     {
@@ -424,7 +424,7 @@ void V9938renderer::dumpText2(unsigned int firstChunk, unsigned int count)
 
 void V9938renderer::dumpGraphic1(unsigned int firstChunk, unsigned int count)
 {
-    //	DBERR("GRAPH1\n");
+    //  DBERR("GRAPH1\n");
 
     unsigned int nt = (nameTable & 0x7F) << 10;
     unsigned int firstChunkInLine = firstChunk & (DISPLAYCHUNKS - 1);
@@ -671,7 +671,8 @@ void V9938renderer::dumpGraphic4(unsigned int firstChunk, unsigned int count)
     switch (count & 7)
     {
     case 0:
-        do {
+        do
+        {
             G4chunk;
         case 7: G4chunk;
         case 6: G4chunk;
@@ -723,7 +724,8 @@ void V9938renderer::dumpGraphic5(unsigned int firstChunk, unsigned int count)
     switch (count & 7)
     {
     case 0:
-        do {
+        do
+        {
             G5chunk;
         case 7: G5chunk;
         case 6: G5chunk;
@@ -759,7 +761,8 @@ void V9938renderer::dumpGraphic6(unsigned int firstChunk, unsigned int count)
     switch (count & 7)
     {
     case 0:
-        do {
+        do
+        {
             G6chunk;
         case 7: G6chunk;
         case 6: G6chunk;
@@ -794,7 +797,8 @@ void V9938renderer::dumpGraphic7(unsigned int firstChunk, unsigned int count)
     switch (count & 7)
     {
     case 0:
-        do {
+        do
+        {
             G7chunk;
         case 7: G7chunk;
         case 6: G7chunk;
@@ -844,7 +848,8 @@ void V9938renderer::dumpGraphic7yjk(unsigned int firstChunk, unsigned int count)
     switch (count & 7)
     {
     case 0:
-        do {
+        do
+        {
             G7yjkChunk;
         case 7: G7yjkChunk;
         case 6: G7yjkChunk;

@@ -16,8 +16,8 @@ DiskInterface::DiskInterface()
     z80 = Z80::Instance();
     drive[0] = new DiskDrive();
     drive[1] = new DiskDrive();
-    //	drive[1]->openDiskImage("disks/hd100f16.dsk");
-    //	drive[0] = new VirtualDrive();
+    //  drive[1]->openDiskImage("disks/hd100f16.dsk");
+    //  drive[0] = new VirtualDrive();
     disk = drive[0];
 
     DBERR("DiskInterface constructor...finished\n");
@@ -48,12 +48,12 @@ void DiskInterface::insertDisk(unsigned int diskNumber, string filename)
         DBERR("Disk for drive A: %s\n", filename.c_str());
 
         // TODO: in textbuffer van command.cpp plaatsen
-        //    	OnScreenDisplay::Instance()->osdMessage("Disk for drive A: " + filename);
+        //      OnScreenDisplay::Instance()->osdMessage("Disk for drive A: " + filename);
     }
     else
     {
         DBERR("Disk for drive B: %s\n", filename.c_str());
-        //    	OnScreenDisplay::Instance()->osdMessage("Disk for drive B: " + filename);
+        //      OnScreenDisplay::Instance()->osdMessage("Disk for drive B: " + filename);
     }
 
     assert(diskNumber < 2);
@@ -64,7 +64,7 @@ void DiskInterface::insertDisk(unsigned int diskNumber, string filename)
 
 /*! \brief method is called by an added z80-instruction ED 00
  *
- *	Several DiskInterface-io calls in Main-rom are patched with ED 00 C9 so this method 
+ *  Several DiskInterface-io calls in Main-rom are patched with ED 00 C9 so this method 
  *  will be called instead of the real DiskInterface-rom
  * 
  *  (reg_pc-2) indicates which call was actually made:
@@ -88,11 +88,11 @@ void DiskInterface::diskIO()
     {
     case 0x4010: //DSKIO
         /*
-		A = drive number (relative)
-		B = number of sectors
-		C = media descriptor (also used for 23 bits sector support)
-		DE = start sector
-		HL = transfer address
+        A = drive number (relative)
+        B = number of sectors
+        C = media descriptor (also used for 23 bits sector support)
+        DE = start sector
+        HL = transfer address
         */
 
         setDrive(z80->reg_a & 1);
@@ -148,10 +148,10 @@ void DiskInterface::diskIO()
 
     case 0x4013: //DSKCHG
                  /*
-		A = drive number (relative)
-		B  = 1st byte of FAT (media descriptor)
+        A = drive number (relative)
+        B  = 1st byte of FAT (media descriptor)
         C = media descriptor
-		HL = address of DPB
+        HL = address of DPB
         */
         DBERR("DSKCHG_normal\n");
         z80->dumpCpuInfo();
@@ -177,11 +177,11 @@ void DiskInterface::diskIO()
 
     case 0x4016:
         /* GETDPB
-			A  = drive number (relative)
-			B  = 1st byte of FAT (media descriptor)
-			C  = Media descriptor?
-            HL = Base address of DPB 				
-		*/
+            A  = drive number (relative)
+            B  = 1st byte of FAT (media descriptor)
+            C  = Media descriptor?
+            HL = Base address of DPB                
+        */
         assert(false);
         break;
 

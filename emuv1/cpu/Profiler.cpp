@@ -17,7 +17,7 @@ Profiler::Profiler()
     memset(opcodeCounterDD, 0, sizeof(opcodeCounterDD));
     memset(opcodeCounterED, 0, sizeof(opcodeCounterED));
     memset(opcodeCounterFD, 0, sizeof(opcodeCounterFD));
-	*/
+    */
     //    memset(opcodeCounterDDCB, 0, sizeof(opcodeCounterDDCB));
     //    memset(opcodeCounterFDCB, 0, sizeof(opcodeCounterFDCB));
     total = 0;

@@ -192,26 +192,26 @@ void MSXAudio::sync(unsigned int)
 void MSXAudio::updateBuffer(unsigned int samples)
 {
     AudioMixer::Lock();
-    //	unsigned int sampleTime = Z80::Instance()->cpuFrequency / audioSampleRate;
+    //  unsigned int sampleTime = Z80::Instance()->cpuFrequency / audioSampleRate;
 
     // modulator wave
-    //	double multiM = multiplyFactor[instrumentData[inst][0] & 15];
-    //	double freqM = (FNumber[0] * octave[0] * 50000 * multiM) / (double)262144;
-    //	unsigned int periodM = 3579545 / freqM;
+    //  double multiM = multiplyFactor[instrumentData[inst][0] & 15];
+    //  double freqM = (FNumber[0] * octave[0] * 50000 * multiM) / (double)262144;
+    //  unsigned int periodM = 3579545 / freqM;
 
-    //	if (periodM == 0) periodM = 1;
+    //  if (periodM == 0) periodM = 1;
 
-    //	double mi = modulationIndex[instrumentData[0][2] & 0x3f];
-    //	DBERR("db: " << int(instrumentData[0][2] & 0x1f) << endl);
-    //	DBERR("mi: " << mi << endl);
+    //  double mi = modulationIndex[instrumentData[0][2] & 0x3f];
+    //  DBERR("db: " << int(instrumentData[0][2] & 0x1f) << endl);
+    //  DBERR("mi: " << mi << endl);
 
-    //	DBERR("modulation Index: " << mi << endl);
-    //	double volume = 16384/2;
+    //  DBERR("modulation Index: " << mi << endl);
+    //  double volume = 16384/2;
     signed int value = 0;
 
     for (unsigned int i = 0; i < samples; i++)
     {
-        //	    float f = i;
+        //      float f = i;
         value = 0; //(sin(f/samples))*16384;
 
         assert(audioBufferIndex <= maxBufferSize);

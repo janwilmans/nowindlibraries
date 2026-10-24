@@ -319,19 +319,19 @@ int main(int argc, char* argv[])
     DBERR("Nowind v1.0\n");
 
     /*
-	// CheckSanity();
-	TestA * t = new TestA();
-	unsigned int * bvp = (unsigned int *) t;
-	bvp--;
-	unsigned int bv = *bvp;
+    // CheckSanity();
+    TestA * t = new TestA();
+    unsigned int * bvp = (unsigned int *) t;
+    bvp--;
+    unsigned int bv = *bvp;
 
-	unsigned char * evp = (unsigned char *) t;
-	evp =  evp + sizeof(t);
-	unsigned int * evp2 = (unsigned int *) evp;
-	unsigned int ev = *evp2;
-	// *bvp = 1;
-	// CheckSanity();
-	*/
+    unsigned char * evp = (unsigned char *) t;
+    evp =  evp + sizeof(t);
+    unsigned int * evp2 = (unsigned int *) evp;
+    unsigned int ev = *evp2;
+    // *bvp = 1;
+    // CheckSanity();
+    */
 
     DBERR("Emulator initializing...\n");
     Emulator::Instance()->initialize(); // this constructs EVERYTHING

@@ -28,15 +28,16 @@ Mapper::Mapper(nw_byte memBanks)
     DBERR("Mapper ends : %u\n", memory + (memBanks * 16 * 1024));
 
     /* masker voor ioports 0x0FCh - 0x0FFh
-	   dit simuleert niet-aangesloten memory, dit wordt soms door programma's gebruikt voor memory-grootte-detectie
-	*/
+       dit simuleert niet-aangesloten memory, dit wordt soms door programma's gebruikt voor memory-grootte-detectie
+    */
 
     maxBank = memBanks - 1;
     bankmask = maxBank ^ 0xFF;
 
     unsigned int bank = 0;
     unsigned int p = 4;
-    do {
+    do
+    {
         p--;
         mapPage[p] = (nw_byte*)memory + (bank * 16 * 1024);
         bankOfPage[p] = bank;
@@ -47,7 +48,7 @@ Mapper::Mapper(nw_byte memBanks)
             bank++;
     } while (p != 0);
 
-    wipe(); // fill entire memory with 0's 	(depends on maxBank to be set)
+    wipe(); // fill entire memory with 0's  (depends on maxBank to be set)
     DBERR("Mapper constructor...finished\n");
 }
 

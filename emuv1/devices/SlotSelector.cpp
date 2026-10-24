@@ -112,20 +112,20 @@ void SlotSelector::configure(unsigned int msxVersion)
 
         //        addMemoryDevice(new MapperKonami5("../roms/MJTT.ROM"),1,0,0x4000);
 
-        //		RomBlock *bla = new RomBlock("../../MSX Games/roms/THEXDER.ROM");
+        //      RomBlock *bla = new RomBlock("../../MSX Games/roms/THEXDER.ROM");
         //      RomBlock *bla = new RomBlock("../../MSX Games/roms/Theseus.rom"); // 0x8000!!!
-        //		RomBlock *bla = new RomBlock("../roms/kobashi.rom");
-        //		addMemoryDevice(bla, 1, 0, 0x4000);
+        //      RomBlock *bla = new RomBlock("../roms/kobashi.rom");
+        //      addMemoryDevice(bla, 1, 0, 0x4000);
 
         // KONAMI4 8kB
-        //		putMegaRom("../MSX Games/konami4/Metal Gear.rom",1,0,0x4000);
+        //      putMegaRom("../MSX Games/konami4/Metal Gear.rom",1,0,0x4000);
         // KONAMI5 8kB met SCC
-        //		putMapperKonami5("../MSX Games/konami5/quarth.rom",1,0,0x4000);
-        //		putMegaRom("../MSX Games/konami5/SOLID.ROM",1,0,0x4000);
+        //      putMapperKonami5("../MSX Games/konami5/quarth.rom",1,0,0x4000);
+        //      putMegaRom("../MSX Games/konami5/SOLID.ROM",1,0,0x4000);
         // ANDERE ROMS:
-        //		putMegaRom("../MSX Games/konami4/HEAVEN.ROM",1,0,0x4000);		// 6800/7000/7800
-        //		putMegaRom("../MSX Games/1942.rom",1,0,0x4000);					// writes to 6800/7800
-        //		addMemoryDevice(new MapperKonami5("../MSX Games/konami5/Kings Valley2 (msx2).rom"),1,0,0x4000);
+        //      putMegaRom("../MSX Games/konami4/HEAVEN.ROM",1,0,0x4000);       // 6800/7000/7800
+        //      putMegaRom("../MSX Games/1942.rom",1,0,0x4000);                 // writes to 6800/7800
+        //      addMemoryDevice(new MapperKonami5("../MSX Games/konami5/Kings Valley2 (msx2).rom"),1,0,0x4000);
 
 #define NOWIND
 #define OPENDISKROM_off
@@ -160,14 +160,14 @@ void SlotSelector::configure(unsigned int msxVersion)
 
         //usbInterface->insertDisk(0, "../disks/adnukes.dsk");
 
-        //	usbInterface->insertHarddisk(1, "../disks/32mb_manuel_hd.dsk", 0);
-        //	usbInterface->insertHarddisk(1, "../disks/32mb_manuel_hd.dsk", 1);
-        //	usbInterface->insertHarddisk(2, "../disks/32mb_manuel_hd.dsk", 2);
+        //  usbInterface->insertHarddisk(1, "../disks/32mb_manuel_hd.dsk", 0);
+        //  usbInterface->insertHarddisk(1, "../disks/32mb_manuel_hd.dsk", 1);
+        //  usbInterface->insertHarddisk(2, "../disks/32mb_manuel_hd.dsk", 2);
         //  usbInterface->insertHarddisk(3, "../disks/32mb_manuel_hd.dsk", 3);
-        //	usbInterface->insertHarddisk(4, "../disks/32mb_manuel_hd.dsk", 4);
-        //	usbInterface->insertHarddisk(5, "../disks/32mb_manuel_hd.dsk", 5);
-        //	usbInterface->insertHarddisk(6, "../disks/32mb_manuel_hd.dsk", 6);
-        //	usbInterface->insertHarddisk(7, "../disks/32mb_manuel_hd.dsk", 7);
+        //  usbInterface->insertHarddisk(4, "../disks/32mb_manuel_hd.dsk", 4);
+        //  usbInterface->insertHarddisk(5, "../disks/32mb_manuel_hd.dsk", 5);
+        //  usbInterface->insertHarddisk(6, "../disks/32mb_manuel_hd.dsk", 6);
+        //  usbInterface->insertHarddisk(7, "../disks/32mb_manuel_hd.dsk", 7);
 
 
 #endif
@@ -233,22 +233,22 @@ void SlotSelector::configure(unsigned int msxVersion)
     }
 
     /*
-	if (Config::Instance()->msxVersion == 3) {
-	    // MSX2+
-		slot_expanded[0] = false;
-		slot_expanded[1] = false;
-		slot_expanded[2] = false;
-		slot_expanded[3] = true;
-		configureSlots();
-		loadRomRel("../roms/MSX2P.ROM",0,0,0,2);
-		loadRomRel("../roms/MSX2PMUS.ROM",0,2,1,1);
-		installMapper(3,0);
-		loadRomRel("../roms/MSX2PEXT.ROM",3,1,0,1);
-		loadRomRel("../roms/MSXKANJI.ROM",3,1,1,2);
-		installDiskRom(3,2,1); // ander diskrom misschien???
-		loadRomRel("../roms/XBASIC2.ROM",3,3,1,1);
-	}
-	//loadRomRel("../roms/FMPAC.ROM",2,0,1,3);    
+    if (Config::Instance()->msxVersion == 3) {
+        // MSX2+
+        slot_expanded[0] = false;
+        slot_expanded[1] = false;
+        slot_expanded[2] = false;
+        slot_expanded[3] = true;
+        configureSlots();
+        loadRomRel("../roms/MSX2P.ROM",0,0,0,2);
+        loadRomRel("../roms/MSX2PMUS.ROM",0,2,1,1);
+        installMapper(3,0);
+        loadRomRel("../roms/MSX2PEXT.ROM",3,1,0,1);
+        loadRomRel("../roms/MSXKANJI.ROM",3,1,1,2);
+        installDiskRom(3,2,1); // ander diskrom misschien???
+        loadRomRel("../roms/XBASIC2.ROM",3,3,1,1);
+    }
+    //loadRomRel("../roms/FMPAC.ROM",2,0,1,3);    
 */
 
     if (msxVersion == 99)
@@ -261,32 +261,32 @@ void SlotSelector::configure(unsigned int msxVersion)
         Z80::Instance()->mapper = new Mapper(32);
         addMemoryDevice(Z80::Instance()->mapper, 3, 2, 0x0000);
 
-        //		RomBlock *diskRom = new RomBlock("../roms/cbios/cbios_disk.rom");
-        //		addMemoryDevice(diskRom,3,3,0x4000);
+        //      RomBlock *diskRom = new RomBlock("../roms/cbios/cbios_disk.rom");
+        //      addMemoryDevice(diskRom,3,3,0x4000);
         /*
-		diskRom->patch(0x4010,0xed); //DISKIO
-		diskRom->patch(0x4011,0x00);
-		diskRom->patch(0x4012,0xc9);
+        diskRom->patch(0x4010,0xed); //DISKIO
+        diskRom->patch(0x4011,0x00);
+        diskRom->patch(0x4012,0xc9);
 
-		diskRom->patch(0x4013,0xed); //DSKCHG
-		diskRom->patch(0x4014,0x00);
-		diskRom->patch(0x4015,0xc9);
+        diskRom->patch(0x4013,0xed); //DSKCHG
+        diskRom->patch(0x4014,0x00);
+        diskRom->patch(0x4015,0xc9);
 
-		diskRom->patch(0x4016,0xed); //GETDPB
-		diskRom->patch(0x4017,0x00);
-		diskRom->patch(0x4018,0xc9);
+        diskRom->patch(0x4016,0xed); //GETDPB
+        diskRom->patch(0x4017,0x00);
+        diskRom->patch(0x4018,0xc9);
 
-		diskRom->patch(0x4019,0xed); //CHOICE
-		diskRom->patch(0x401a,0x00);
-		diskRom->patch(0x401b,0xc9);
+        diskRom->patch(0x4019,0xed); //CHOICE
+        diskRom->patch(0x401a,0x00);
+        diskRom->patch(0x401b,0xc9);
 
-		diskRom->patch(0x401c,0xed); //DSKFMT
-		diskRom->patch(0x401d,0x00);
-		diskRom->patch(0x401e,0xc9);
+        diskRom->patch(0x401c,0xed); //DSKFMT
+        diskRom->patch(0x401d,0x00);
+        diskRom->patch(0x401e,0xc9);
 
-		diskRom->patch(0x401f,0xed); // ?
-		diskRom->patch(0x4020,0x00);
-		diskRom->patch(0x4021,0xc9);
+        diskRom->patch(0x401f,0xed); // ?
+        diskRom->patch(0x4020,0x00);
+        diskRom->patch(0x4021,0xc9);
 */
         //addMemoryDevice(new MapperKonami5("../msx games/konami5/Kings Valley2 (msx2).rom"),1,0,0x4000);
         addMemoryDevice(new RomBlock("../../msx games/galaga.rom"), 1, 0, 0x4000);

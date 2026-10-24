@@ -68,7 +68,10 @@ void DebugDevice::printBinary(nw_byte value)
     for (int i = 128; i > 0; i >>= 1)
     {
         if (value & i) { DBERR("1"); }
-        else { DBERR("0"); }
+        else
+        {
+            DBERR("0");
+        }
     }
     DBERR("b ");
 }

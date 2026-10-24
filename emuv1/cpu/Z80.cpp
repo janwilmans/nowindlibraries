@@ -43,9 +43,9 @@ Z80::Z80()
     cpuFrequency = 3579545;
 
     /* initialize flag tables
-		 * instructions use these so the flags do not have to be calculated 
-		 * the undocumented (we call them: X and Y) flags are calculated here too.
-   		 */
+         * instructions use these so the flags do not have to be calculated 
+         * the undocumented (we call them: X and Y) flags are calculated here too.
+         */
     for (int i = 0; i < 256; ++i)
     {
         flagSZ[i] = (i & (SFLAG | XFLAG | YFLAG)) | ((i == 0) ? ZFLAG : 0);
@@ -286,7 +286,8 @@ void Z80::executeInstructions()
     // this is sometimes usefull, but not accurate.. why did we do that ?
     // see also Emulator::setCPUInterrupt
 
-    do {
+    do
+    {
         nw_word reg1 = 0;
         nw_word reg2 = 0;
         nw_word opcode = 0;
@@ -337,7 +338,8 @@ void Z80::executeInstructions()
         case 0xdd:
         case 0xfd:
             reg2 = 0;
-            do {
+            do
+            {
                 reg2++;
                 reg1 = opcode;
                 opcode = opcodeFetch(reg_pc++);
@@ -383,9 +385,9 @@ void Z80::executeInstructions()
         assert(reg_pc < 0x10000);
         assert(reg_sp < 0x10000);
 
-        //    		assert (reg_sp != 0x0fffe);		// duidt op een stack overflow, vaak wordt dat veroorzaakt door een eerder probleem
-        //    		assert (reg_sp != 1);  			// komt voor in zexall!
-        //    		assert (reg_sp != 2);           // jan: dat kan ook voorkomen als instructies worden getest die sp gebruiken,
+        //          assert (reg_sp != 0x0fffe);     // duidt op een stack overflow, vaak wordt dat veroorzaakt door een eerder probleem
+        //          assert (reg_sp != 1);           // komt voor in zexall!
+        //          assert (reg_sp != 2);           // jan: dat kan ook voorkomen als instructies worden getest die sp gebruiken,
         // als je maar zorgt dat je sp niet gebruikt op dat moment, gaat dat wel goed.
 
         Disassembler::Instance()->triggerDisassembler();
@@ -493,7 +495,7 @@ inline nw_word Z80::readMem16(nw_word address)
     if (address == 0xfffe || address == 0xffff)
     {
         DBERR("16 bits reading of address FFFF not implemented !!\n");
-        //	   assert(false);
+        //     assert(false);
     }
 #endif
 
@@ -549,7 +551,7 @@ inline void Z80::writeMem(nw_word address, nw_byte value)
     }
     writeFunc[address >> 13](address, value);
     /*
-	if (address == 0xc0ff) {
+    if (address == 0xc0ff) {
                 DBERR("val: 0x%02x\n", value);
                 if (value == 0xff) return;
                 if (value == 0x00) return;
@@ -630,8 +632,8 @@ void Z80::writeIo(nw_word port, nw_byte value)
         switchedPorts->writePort(port, value);
         break;
 
-        //	case 0x7c: fmpac->writeAddress(value); break;
-        //	case 0x7d: fmpac->writeData(value); break;
+        //  case 0x7c: fmpac->writeAddress(value); break;
+        //  case 0x7d: fmpac->writeData(value); break;
     case 0x91: break; //DBERR("write to PRINTER PORT not implemented: " << (nw_word) value << endl); break;
 
     case 0x98: vdp->writeVram(value); break;
@@ -675,7 +677,7 @@ void Z80::writeIo(nw_word port, nw_byte value)
     case 0xf4:
         f4Device->writeRegister(value);
         break;
-        // 	 	case 0xf5: system control (used to enable kanji)
+        //      case 0xf5: system control (used to enable kanji)
 
     case 0xf7: DBERR("writeIO (0xf7) 0x%02X (A/V controller)\n", value); break;
     case 0xf8: DBERR("writeIO (0xf8) 0x%02X (Optional PAL A/V controller)\n", value); break;
@@ -733,7 +735,10 @@ nw_byte Z80::readIo(nw_word port)
 
     case 0xb5:
         if (Config::Instance()->msxVersion == 1) { return 0xff; }
-        else { return realTimeClock->readPortB5(); }
+        else
+        {
+            return realTimeClock->readPortB5();
+        }
         break;
 
         // msx-audio en moonsound

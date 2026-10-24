@@ -32,32 +32,32 @@ int main(int argc, char* argv[])
 
     cerr << "Started..." << endl;
     /*
-	long start;
-	long end;
-	long long teller = 0;
+    long start;
+    long end;
+    long long teller = 0;
  
- 	long long test1;
-	cerr << "long long "; gotest(test1)
-	
- 	long test2;
-	cerr << "long "; gotest(test2)
-	
- 	int test3;
-	cerr << "int "; gotest(test3)
+    long long test1;
+    cerr << "long long "; gotest(test1)
+    
+    long test2;
+    cerr << "long "; gotest(test2)
+    
+    int test3;
+    cerr << "int "; gotest(test3)
 
-	unsigned int test4;
-	cerr << "unsigned int "; gotest(test4)
+    unsigned int test4;
+    cerr << "unsigned int "; gotest(test4)
 
-	unsigned long test5;
-	cerr << "unsigned long "; gotest(test5)
-	
-	double test6;
-	cerr << "double "; gotest(test6)
-	
-	float test7;
-	cerr << "float "; gotest(test7)
-	
-	return 0;
+    unsigned long test5;
+    cerr << "unsigned long "; gotest(test5)
+    
+    double test6;
+    cerr << "double "; gotest(test6)
+    
+    float test7;
+    cerr << "float "; gotest(test7)
+    
+    return 0;
 */
 
     Zexall* zexall = Zexall::Instance();

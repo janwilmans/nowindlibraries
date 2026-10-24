@@ -35,8 +35,8 @@ OnScreenDisplay::OnScreenDisplay()
         exit(1);
     }
     
-	background = SDL_DisplayFormat(image);
-	SDL_FreeSurface(image);
+    background = SDL_DisplayFormat(image);
+    SDL_FreeSurface(image);
 */
     osdEnabled = false;
     DBERR("OnScreenDisplay constructor...finished");
@@ -57,7 +57,7 @@ OnScreenDisplay::~OnScreenDisplay()
 void OnScreenDisplay::initOSD_Surface(int osdWidth, int osdHeight)
 {
     osdSurface = SDL_CreateRGBSurface(SDL_SWSURFACE | SDL_SRCALPHA, osdWidth, osdHeight, 32, 0, 0, 0, 0);
-    //	SDL_SetColorKey(osdSurface, SDL_SRCCOLORKEY, 0xff0000); // alleen nodig voor transparatie
+    //  SDL_SetColorKey(osdSurface, SDL_SRCCOLORKEY, 0xff0000); // alleen nodig voor transparatie
     SDL_FillRect(osdSurface, NULL, 0xFF0000);
 }
 
@@ -70,7 +70,7 @@ void OnScreenDisplay::initializeFont()
     }
 
 
-    //	 string filename = Debug::Instance()->getPath() + "freetype/FreeSans.ttf";
+    //   string filename = Debug::Instance()->getPath() + "freetype/FreeSans.ttf";
     string filename = Debug::Instance()->getPath() + "freetype/VeraMono.ttf";
     DBERR("loading font: %s\n", filename.c_str());
     TTF_Font* font = TTF_OpenFont(filename.c_str(), 11);

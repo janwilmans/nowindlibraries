@@ -119,7 +119,7 @@ int HostApp::execute()
  */
 
         /*   "optionname", needsArgument, storeFlag, 'corresponding short option'  
-	needsArgument: 0= no argument, 1=requires argument, 2=optional argument
+    needsArgument: 0= no argument, 1=requires argument, 2=optional argument
 */
         static struct option long_options[] =
             {
@@ -276,13 +276,13 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
         case 'f':
         {
             string lFlashArg = string(optarg);
-			string first = "";
-			string second = "";
-    		size_t pos = lFlashArg.find(",");
+            string first = "";
+            string second = "";
+            size_t pos = lFlashArg.find(",");
             if (pos != string::npos) 
             {
-			    first = lFlashArg.substr(0,pos);
-			    second = lFlashArg.substr(pos+1);
+                first = lFlashArg.substr(0,pos);
+                second = lFlashArg.substr(pos+1);
             }
             if (pos == string::npos || first == "" || second == "")
             {
@@ -321,13 +321,13 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
             break;
             /*
         case 'p':       
-        	//todo: implement 
-        	
-			nowindusb_cmd(cmd_putmem_clear, 0, 0, 0 ,0, 0);
-			// filename, start-adres, mainslot, subslot, exec-adres
-			nowindusb_cmd(cmd_putmem, optarg, 0x0000, 3, 2, 0x100);
+            //todo: implement 
+            
+            nowindusb_cmd(cmd_putmem_clear, 0, 0, 0 ,0, 0);
+            // filename, start-adres, mainslot, subslot, exec-adres
+            nowindusb_cmd(cmd_putmem, optarg, 0x0000, 3, 2, 0x100);
             break;        
-			*/
+            */
         case '?':
             hasErrors = true;
             Util::debug("hasErrors = true;\n");

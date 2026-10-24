@@ -55,15 +55,15 @@ bool DiskDrive::reOpenDiskImage()
         {
             DBERR("Error opening file %s for read !\n", filename.c_str());
             /*
-    				string image = "disks/image.dsk";
-    				DBERR("Trying " %s instead...\n", image);
-    				stream = new fstream(image.c_str(),ios::binary | ios::in | ios::out);
-    				if (stream->fail()) {
-    						DBERR("Error opening file %s read/write !\n", image);
-    				} else {
-    				    containsDisk = true;
-    					readOnly = false;    
-					}    
+                    string image = "disks/image.dsk";
+                    DBERR("Trying " %s instead...\n", image);
+                    stream = new fstream(image.c_str(),ios::binary | ios::in | ios::out);
+                    if (stream->fail()) {
+                            DBERR("Error opening file %s read/write !\n", image);
+                    } else {
+                        containsDisk = true;
+                        readOnly = false;    
+                    }    
 */
         }
         else
@@ -125,17 +125,17 @@ void DiskDrive::readSectors(nw_byte* buffer, unsigned int startSector, unsigned 
     /*    
     char *buf = buffer;
     for(unsigned int sector=startSector;sector<sectorCount;sector++) {
-		// write sector to disk for debugging
-		char filename[250];
-		sprintf(filename,"sector_%i.bin",sector);
-		ofstream ofs(filename,ios::binary|ios::trunc);
-		if (ofs.fail()) {
-				DBERR("Error opening file " << filename << "!\n");
-		}
-		ofs.write((char *)buf,512);
-		ofs.close();
-		buf+=512;
-	}
+        // write sector to disk for debugging
+        char filename[250];
+        sprintf(filename,"sector_%i.bin",sector);
+        ofstream ofs(filename,ios::binary|ios::trunc);
+        if (ofs.fail()) {
+                DBERR("Error opening file " << filename << "!\n");
+        }
+        ofs.write((char *)buf,512);
+        ofs.close();
+        buf+=512;
+    }
 */
 }
 

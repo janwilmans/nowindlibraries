@@ -18,9 +18,9 @@ behalf. The port numbers #41-#4F are the actual switched ports, and the device '
 This device ID can be a number from 1-254, and when port #40 is read it returns the 
 complement of the current device ID.
 
-Port range 	Description
-#40 	Device ID register
-#41-#4F 	Switched I/O ports
+Port range  Description
+#40     Device ID register
+#41-#4F     Switched I/O ports
 
 ID numbers between 1 and 127 are manufacturer ID numbers, and ID numbers 128 to 254 
 are device ID's. As a basic rule, those devices which are designed specifically for 
@@ -33,29 +33,29 @@ for devices which are connected with their make ID it can be expected that they
 might eventually need more addressing space, and with this it will be future-proofed.
 List of BIOS extension device ID's:
     
-1	ASCII/Microsoft
-2	Canon
-3	Casio
-4	Fujitsu
-5	General
-6	Hitachi
-7	Kyocera
-8	Matsushita (Panasonic)
-9	Mitsubishi
-10	NEC
-11	Nippon Gakki
-12	JVC
-13	Philips
-14	Pioneer
-15	Sanyo
-16	Sharp
-17	SONY
-18	Spectravideo
-19	Toshiba
-20	Mitsumi
-128	Image Scanner (Matsushita)
+1   ASCII/Microsoft
+2   Canon
+3   Casio
+4   Fujitsu
+5   General
+6   Hitachi
+7   Kyocera
+8   Matsushita (Panasonic)
+9   Mitsubishi
+10  NEC
+11  Nippon Gakki
+12  JVC
+13  Philips
+14  Pioneer
+15  Sanyo
+16  Sharp
+17  SONY
+18  Spectravideo
+19  Toshiba
+20  Mitsumi
+128 Image Scanner (Matsushita)
 247 Kanji 12x12 dots National (FS-4600 and Panasonic FS-A1FM)
-254	MPS2 (ASCII)
+254 MPS2 (ASCII)
 */
 
 #include "SwitchedPorts.h"
@@ -86,7 +86,7 @@ void SwitchedPorts::reset()
     DBERR("RESET SwitchedPorts\n");
 
     for (int i = 0; i < 256; i++) deviceEnabled[i] = false;
-    // 	deviceEnabled[0xf7] = true;
+    //  deviceEnabled[0xf7] = true;
     deviceID = 255;
 }
 

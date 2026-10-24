@@ -51,7 +51,7 @@ private:
     /* keep this a double for accuracy! */
     double statesPerMilliSecond;
 
-    //	        msTimeType      diffMeting;
+    //          msTimeType      diffMeting;
 
     msTimeType startTime;
     static msTimeType startPauseTime;

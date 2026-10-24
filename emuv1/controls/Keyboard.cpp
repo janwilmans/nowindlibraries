@@ -148,7 +148,7 @@ void Keyboard::modifyMatrix(SDL_KeyboardEvent keyevent)
     case SDLK_KP_MULTIPLY: SETKB(9, 0); break;
 
     case SDLK_KP_PERIOD: SETKB(10, 7); break;
-    // No KP_COMMA key on PC keyboards	SETKB(10,6); break;
+    // No KP_COMMA key on PC keyboards  SETKB(10,6); break;
     case SDLK_KP_MINUS: SETKB(10, 5); break;
     case SDLK_KP9: SETKB(10, 4); break;
     case SDLK_KP8: SETKB(10, 3); break;
@@ -158,7 +158,7 @@ void Keyboard::modifyMatrix(SDL_KeyboardEvent keyevent)
         SETKB(10, 0);
         break;
 
-        //	case SDLK_PAGEUP:           SETKB(11,1); break; // TURBO-R YES , SDLK_PAGEUP used for STOP
+        //  case SDLK_PAGEUP:           SETKB(11,1); break; // TURBO-R YES , SDLK_PAGEUP used for STOP
     case SDLK_PAGEDOWN: SETKB(11, 3); break; // TURBO-R NO
     default:
         DBERR("Key not handled by MSX!!! (%s)\n", SDL_GetKeyName(keyevent.keysym.sym));

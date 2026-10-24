@@ -1,4 +1,4 @@
-/* 	
+/*  
  * Media.cpp: Insert media (disks/roms etc... into Nowind 
  *
  * Copyright (C) 2004 Jan Wilmans <jw@dds.nl>
@@ -71,16 +71,16 @@ void Media::insertMedia(string filename, unsigned int priority)
 
         delete fs;
 
-        /*          	
-   		unsigned int thePages = fileSize/(16*1024);
-   		if (thePages > 3)
-   		   Z80::Instance()->loadRom(filename,1+priority,0,0,4);
+        /*              
+        unsigned int thePages = fileSize/(16*1024);
+        if (thePages > 3)
+           Z80::Instance()->loadRom(filename,1+priority,0,0,4);
         else {
             if (thePages == 0) {
                 DBERR("Warning: rom to small, might be incomplete..\n");
                 thePages = 1;
-       	    }    	    
-       	    Z80::Instance()->loadRom(filename,1+priority,0,1,thePages);
+            }           
+            Z80::Instance()->loadRom(filename,1+priority,0,1,thePages);
         }
         */
     }

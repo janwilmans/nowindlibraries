@@ -280,7 +280,7 @@ void Debug::debug_wrap_sprintf_erl(const char* file, int line, const char* cForm
     SNPRINTF(scratch_with_sourceline, MAXMSG + 260, "%s (%s:%u)\n", scratch, file, line);
 
     // we need a compatible MSC alternative?
-    //	SNPRINTF(scratch_with_sourceline, MAXMSG+260, MAXMSG+260, "%s (%s:%u)\n", scratch, file, line);
+    //  SNPRINTF(scratch_with_sourceline, MAXMSG+260, MAXMSG+260, "%s (%s:%u)\n", scratch, file, line);
 
 
 #ifdef LOG_TO_ERRFILE

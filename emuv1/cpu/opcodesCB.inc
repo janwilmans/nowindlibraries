@@ -1,4 +1,6 @@
 //! opcodesCB.inc
+// hand-aligned opcode table, keep clang-format away from it
+// clang-format off
 // included in Z80.cc
 
 #define RLC(r) reg_f = r>>7; r = ((r<<1)|reg_f)&255; reg_f |= flagSZP[r]
@@ -23,7 +25,7 @@ case 0x0C: TS(8); reg2 = reg_h; RRC(reg2); reg_hl = LREG(reg_hl)|(reg2<<8); brea
 case 0x0D: TS(8); reg2 = reg_l; RRC(reg2); reg_hl = HREG(reg_hl)|reg2; break;        // rrc l
 case 0x0E: TS(15); reg2 = READMEM(reg_hl); RRC(reg2); WRITEMEM(reg_hl, reg2); break; // rrc (hl)
 case 0x0F: TS(8); RRC(reg_a); break;   // rrc a
-        
+
 case 0x10: TS(8); RL(reg_b); break;    // rl b
 case 0x11: TS(8); RL(reg_c); break;    // rl c
 case 0x12: TS(8); reg2 = reg_d; RL(reg2); reg_de = LREG(reg_de)|(reg2<<8); break;   // rl d
@@ -54,7 +56,7 @@ case 0x22: TS(8); reg2 = reg_d; SLA(reg2); reg_de = LREG(reg_de)|(reg2<<8); brea
 case 0x23: TS(8); reg2 = reg_e; SLA(reg2); reg_de = HREG(reg_de)|reg2; break;        // sla e
 case 0x24: TS(8); reg2 = reg_h; SLA(reg2); reg_hl = LREG(reg_hl)|(reg2<<8); break;   // sla h
 case 0x25: TS(8); reg2 = reg_l; SLA(reg2); reg_hl = HREG(reg_hl)|reg2; break;        // sla l
-case 0x26: TS(15); reg2 = READMEM(reg_hl); SLA(reg2); WRITEMEM(reg_hl, reg2); break; // sla (hl) 
+case 0x26: TS(15); reg2 = READMEM(reg_hl); SLA(reg2); WRITEMEM(reg_hl, reg2); break; // sla (hl)
 case 0x27: TS(8); SLA(reg_a); break;   // sla a
 
 case 0x28: TS(8); SRA(reg_b); break;   // sra b
@@ -92,9 +94,9 @@ case 0x3F: TS(8); SRL(reg_a); break;   // srl a
 #define BIT3(r) reg_f = (reg_f&CFLAG) | (r & 0x28) | ((r&0x08) ? HFLAG:PFLAG|ZFLAG|HFLAG)
 #define BIT4(r) reg_f = (reg_f&CFLAG) | (r & 0x28) | ((r&0x10) ? HFLAG:PFLAG|ZFLAG|HFLAG)
 #define BIT5(r) reg_f = (reg_f&CFLAG) | (r & 0x28) | ((r&0x20) ? HFLAG:PFLAG|ZFLAG|HFLAG)
-#define BIT6(r) reg_f = (reg_f&CFLAG) | (r & 0x28) | ((r&0x40) ? HFLAG:PFLAG|ZFLAG|HFLAG)                
+#define BIT6(r) reg_f = (reg_f&CFLAG) | (r & 0x28) | ((r&0x40) ? HFLAG:PFLAG|ZFLAG|HFLAG)
 #define BIT7(r) reg_f = (reg_f&CFLAG) | (r & (SFLAG|0x28)) | ((r&0x80) ? HFLAG:PFLAG|ZFLAG|HFLAG)
-     
+
 // TODO: check reg_wz!
 #define BITHL0(r) reg_f = (reg_f&CFLAG) | ((reg_wz>>8)&0x28) | ((r&0x01) ? HFLAG:PFLAG|ZFLAG|HFLAG)
 #define BITHL1(r) reg_f = (reg_f&CFLAG) | ((reg_wz>>8)&0x28) | ((r&0x02) ? HFLAG:PFLAG|ZFLAG|HFLAG)
@@ -105,77 +107,77 @@ case 0x3F: TS(8); SRL(reg_a); break;   // srl a
 #define BITHL6(r) reg_f = (reg_f&CFLAG) | ((reg_wz>>8)&0x28) | ((r&0x40) ? HFLAG:PFLAG|ZFLAG|HFLAG)
 #define BITHL7(r) reg_f = (reg_f&CFLAG) | ((reg_wz>>8)&0x28) | ((r&0x80) ? SFLAG|HFLAG:PFLAG|ZFLAG|HFLAG)
 
-case 0x40: TS(8); BIT0(reg_b); break;           	// bit 0,b
-case 0x41: TS(8); BIT0(reg_c); break;           	// bit 0,c
-case 0x42: TS(8); BIT0(reg_d); break;           	// bit 0,d
-case 0x43: TS(8); BIT0(reg_e); break;           	// bit 0,e
-case 0x44: TS(8); BIT0(reg_h); break;           	// bit 0,h
-case 0x45: TS(8); BIT0(reg_l); break;           	// bit 0,l
+case 0x40: TS(8); BIT0(reg_b); break;               // bit 0,b
+case 0x41: TS(8); BIT0(reg_c); break;               // bit 0,c
+case 0x42: TS(8); BIT0(reg_d); break;               // bit 0,d
+case 0x43: TS(8); BIT0(reg_e); break;               // bit 0,e
+case 0x44: TS(8); BIT0(reg_h); break;               // bit 0,h
+case 0x45: TS(8); BIT0(reg_l); break;               // bit 0,l
 case 0x46: TS(12); BITHL0(READMEM(reg_hl)); break;  // bit 0,(hl)
-case 0x47: TS(8); BIT0(reg_a); break;           	// bit 0,a
+case 0x47: TS(8); BIT0(reg_a); break;               // bit 0,a
 
-case 0x48: TS(8); BIT1(reg_b); break;           	// bit 1,b
-case 0x49: TS(8); BIT1(reg_c); break;           	// bit 1,c
-case 0x4A: TS(8); BIT1(reg_d); break;           	// bit 1,d
-case 0x4B: TS(8); BIT1(reg_e); break;           	// bit 1,e
-case 0x4C: TS(8); BIT1(reg_h); break;           	// bit 1,h
-case 0x4D: TS(8); BIT1(reg_l); break;           	// bit 1,l
+case 0x48: TS(8); BIT1(reg_b); break;               // bit 1,b
+case 0x49: TS(8); BIT1(reg_c); break;               // bit 1,c
+case 0x4A: TS(8); BIT1(reg_d); break;               // bit 1,d
+case 0x4B: TS(8); BIT1(reg_e); break;               // bit 1,e
+case 0x4C: TS(8); BIT1(reg_h); break;               // bit 1,h
+case 0x4D: TS(8); BIT1(reg_l); break;               // bit 1,l
 case 0x4E: TS(12); BITHL1(READMEM(reg_hl)); break;  // bit 1,(hl)
-case 0x4F: TS(8); BIT1(reg_a); break;           	// bit 1,a
+case 0x4F: TS(8); BIT1(reg_a); break;               // bit 1,a
 
-case 0x50: TS(8); BIT2(reg_b); break;           	// bit 2,b
-case 0x51: TS(8); BIT2(reg_c); break;           	// bit 2,c
-case 0x52: TS(8); BIT2(reg_d); break;           	// bit 2,d
-case 0x53: TS(8); BIT2(reg_e); break;           	// bit 2,e
-case 0x54: TS(8); BIT2(reg_h); break;           	// bit 2,h
-case 0x55: TS(8); BIT2(reg_l); break;           	// bit 2,l
+case 0x50: TS(8); BIT2(reg_b); break;               // bit 2,b
+case 0x51: TS(8); BIT2(reg_c); break;               // bit 2,c
+case 0x52: TS(8); BIT2(reg_d); break;               // bit 2,d
+case 0x53: TS(8); BIT2(reg_e); break;               // bit 2,e
+case 0x54: TS(8); BIT2(reg_h); break;               // bit 2,h
+case 0x55: TS(8); BIT2(reg_l); break;               // bit 2,l
 case 0x56: TS(12); BITHL2(READMEM(reg_hl)); break;  // bit 2,(hl)
-case 0x57: TS(8); BIT2(reg_a); break;           	// bit 2,a
+case 0x57: TS(8); BIT2(reg_a); break;               // bit 2,a
 
-case 0x58: TS(8); BIT3(reg_b); break;           	// bit 3,b
-case 0x59: TS(8); BIT3(reg_c); break;           	// bit 3,c
-case 0x5A: TS(8); BIT3(reg_d); break;           	// bit 3,d
-case 0x5B: TS(8); BIT3(reg_e); break;           	// bit 3,e
-case 0x5C: TS(8); BIT3(reg_h); break;           	// bit 3,h
-case 0x5D: TS(8); BIT3(reg_l); break;           	// bit 3,l
+case 0x58: TS(8); BIT3(reg_b); break;               // bit 3,b
+case 0x59: TS(8); BIT3(reg_c); break;               // bit 3,c
+case 0x5A: TS(8); BIT3(reg_d); break;               // bit 3,d
+case 0x5B: TS(8); BIT3(reg_e); break;               // bit 3,e
+case 0x5C: TS(8); BIT3(reg_h); break;               // bit 3,h
+case 0x5D: TS(8); BIT3(reg_l); break;               // bit 3,l
 case 0x5E: TS(12); BITHL3(READMEM(reg_hl)); break;  // bit 3,(hl)
-case 0x5F: TS(8); BIT3(reg_a); break;           	// bit 3,a
+case 0x5F: TS(8); BIT3(reg_a); break;               // bit 3,a
 
-case 0x60: TS(8); BIT4(reg_b); break;           	// bit 4,b
-case 0x61: TS(8); BIT4(reg_c); break;           	// bit 4,c
-case 0x62: TS(8); BIT4(reg_d); break;           	// bit 4,d
-case 0x63: TS(8); BIT4(reg_e); break;           	// bit 4,e
-case 0x64: TS(8); BIT4(reg_h); break;           	// bit 4,h
-case 0x65: TS(8); BIT4(reg_l); break;           	// bit 4,l
+case 0x60: TS(8); BIT4(reg_b); break;               // bit 4,b
+case 0x61: TS(8); BIT4(reg_c); break;               // bit 4,c
+case 0x62: TS(8); BIT4(reg_d); break;               // bit 4,d
+case 0x63: TS(8); BIT4(reg_e); break;               // bit 4,e
+case 0x64: TS(8); BIT4(reg_h); break;               // bit 4,h
+case 0x65: TS(8); BIT4(reg_l); break;               // bit 4,l
 case 0x66: TS(12); BITHL4(READMEM(reg_hl)); break;  // bit 4,(hl)
-case 0x67: TS(8); BIT4(reg_a); break;           	// bit 4,a
+case 0x67: TS(8); BIT4(reg_a); break;               // bit 4,a
 
-case 0x68: TS(8); BIT5(reg_b); break;           	// bit 5,b
-case 0x69: TS(8); BIT5(reg_c); break;           	// bit 5,c
-case 0x6A: TS(8); BIT5(reg_d); break;           	// bit 5,d
-case 0x6B: TS(8); BIT5(reg_e); break;           	// bit 5,e
-case 0x6C: TS(8); BIT5(reg_h); break;           	// bit 5,h
-case 0x6D: TS(8); BIT5(reg_l); break;           	// bit 5,l
+case 0x68: TS(8); BIT5(reg_b); break;               // bit 5,b
+case 0x69: TS(8); BIT5(reg_c); break;               // bit 5,c
+case 0x6A: TS(8); BIT5(reg_d); break;               // bit 5,d
+case 0x6B: TS(8); BIT5(reg_e); break;               // bit 5,e
+case 0x6C: TS(8); BIT5(reg_h); break;               // bit 5,h
+case 0x6D: TS(8); BIT5(reg_l); break;               // bit 5,l
 case 0x6E: TS(12); BITHL5(READMEM(reg_hl)); break;  // bit 5,(hl)
-case 0x6F: TS(8); BIT5(reg_a); break;           	// bit 5,a
+case 0x6F: TS(8); BIT5(reg_a); break;               // bit 5,a
 
-case 0x70: TS(8); BIT6(reg_b); break;           	// bit 6,b
-case 0x71: TS(8); BIT6(reg_c); break;           	// bit 6,c
-case 0x72: TS(8); BIT6(reg_d); break;           	// bit 6,d
-case 0x73: TS(8); BIT6(reg_e); break;           	// bit 6,e
-case 0x74: TS(8); BIT6(reg_h); break;           	// bit 6,h
-case 0x75: TS(8); BIT6(reg_l); break;           	// bit 6,l
+case 0x70: TS(8); BIT6(reg_b); break;               // bit 6,b
+case 0x71: TS(8); BIT6(reg_c); break;               // bit 6,c
+case 0x72: TS(8); BIT6(reg_d); break;               // bit 6,d
+case 0x73: TS(8); BIT6(reg_e); break;               // bit 6,e
+case 0x74: TS(8); BIT6(reg_h); break;               // bit 6,h
+case 0x75: TS(8); BIT6(reg_l); break;               // bit 6,l
 case 0x76: TS(12); BITHL6(READMEM(reg_hl)); break;  // bit 6,(hl)
-case 0x77: TS(8); BIT6(reg_a); break;           	// bit 6,a
+case 0x77: TS(8); BIT6(reg_a); break;               // bit 6,a
 
-case 0x78: TS(8); BIT7(reg_b); break;          		// bit 7,b
-case 0x79: TS(8); BIT7(reg_c); break;          		// bit 7,c
-case 0x7A: TS(8); BIT7(reg_d); break;          		// bit 7,d
-case 0x7B: TS(8); BIT7(reg_e); break;          		// bit 7,e
-case 0x7C: TS(8); BIT7(reg_h); break;          		// bit 7,h
-case 0x7D: TS(8); BIT7(reg_l); break;          		// bit 7,l
+case 0x78: TS(8); BIT7(reg_b); break;               // bit 7,b
+case 0x79: TS(8); BIT7(reg_c); break;               // bit 7,c
+case 0x7A: TS(8); BIT7(reg_d); break;               // bit 7,d
+case 0x7B: TS(8); BIT7(reg_e); break;               // bit 7,e
+case 0x7C: TS(8); BIT7(reg_h); break;               // bit 7,h
+case 0x7D: TS(8); BIT7(reg_l); break;               // bit 7,l
 case 0x7E: TS(12); BITHL7(READMEM(reg_hl)); break;  // bit 7,(hl)
-case 0x7F: TS(8); BIT7(reg_a); break;          		// bit 7,a
+case 0x7F: TS(8); BIT7(reg_a); break;               // bit 7,a
 
 case 0x80: TS(8); reg_b &= 0xFE; break;           // res 0,b
 case 0x81: TS(8); reg_c &= 0xFE; break;           // res 0,c
@@ -322,5 +324,5 @@ case 0xFE: TS(15); WRITEMEM(reg_hl, READMEM(reg_hl) | 0x80); break;     // set 7
 case 0xFF: TS(8); reg_a |= 0x80; break;           // set 7,a
 
 default:
-	assert(false); // opcode > 255 ?!
-	break;
+    assert(false); // opcode > 255 ?!
+    break;

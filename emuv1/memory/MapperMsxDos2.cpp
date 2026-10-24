@@ -39,8 +39,8 @@ void MapperMsxDos2::write(nw_word address, nw_byte value)
         break;
     }
 
-    //	nw_byte * writeable = (nw_byte *) memory;
-    //	writeable[address-offset] = value;
+    //  nw_byte * writeable = (nw_byte *) memory;
+    //  writeable[address-offset] = value;
 }
 
 void MapperMsxDos2::install(layoutType layout, Uint8 mainSlot, Uint8 subSlot, nw_word address)

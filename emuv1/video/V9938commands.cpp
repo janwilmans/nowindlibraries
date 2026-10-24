@@ -122,29 +122,29 @@ void V9938commands::executeCommand()
     // TODO: check screen 5 tot 8
 
     /*
-	bool debuggenkreng = true;
+    bool debuggenkreng = true;
 
     switch (command>>4) {
-	
+    
     case 0x00: DBERR("vdpCommand: STOP "); break;
-	case 0x04: DBERR("vdpCommand: POIN "); break;
-	case 0x05: DBERR("vdpCommand: PSET "); break;
-	case 0x06: DBERR("vdpCommand: SRCH "); break;
-	case 0x07: DBERR("vdpCommand: LINE "); break;
-	case 0x08: DBERR("vdpCommand: LMMV "); break;
-	case 0x09: DBERR("vdpCommand: LMMM "); break;
-	case 0x0a: DBERR("vdpCommand: LMCM "); break;
-	case 0x0b: DBERR("vdpCommand: LMMC "); break;
-	case 0x0c: DBERR("vdpCommand: HMMV "); break;
-	case 0x0d: DBERR("vdpCommand: HMMM "); break;
-	case 0x0e: DBERR("vdpCommand: YMMM "); break;
-	case 0x0f: DBERR("vdpCommand: HMMC "); break;
+    case 0x04: DBERR("vdpCommand: POIN "); break;
+    case 0x05: DBERR("vdpCommand: PSET "); break;
+    case 0x06: DBERR("vdpCommand: SRCH "); break;
+    case 0x07: DBERR("vdpCommand: LINE "); break;
+    case 0x08: DBERR("vdpCommand: LMMV "); break;
+    case 0x09: DBERR("vdpCommand: LMMM "); break;
+    case 0x0a: DBERR("vdpCommand: LMCM "); break;
+    case 0x0b: DBERR("vdpCommand: LMMC "); break;
+    case 0x0c: DBERR("vdpCommand: HMMV "); break;
+    case 0x0d: DBERR("vdpCommand: HMMM "); break;
+    case 0x0e: DBERR("vdpCommand: YMMM "); break;
+    case 0x0f: DBERR("vdpCommand: HMMC "); break;
 
-	default: debuggenkreng = false;
+    default: debuggenkreng = false;
         break;
     }
-	if (debuggenkreng) {
-	    DBERR("-> dx:%3i dy:%3i sx:%3i sy:%3i nx:%3i ny:%3i color:%3i ARG:%i vdp0&0x0e: %i\n",dx,dy,sx,sy,nx,ny,color,argument, (int)screenMode);
+    if (debuggenkreng) {
+        DBERR("-> dx:%3i dy:%3i sx:%3i sy:%3i nx:%3i ny:%3i color:%3i ARG:%i vdp0&0x0e: %i\n",dx,dy,sx,sy,nx,ny,color,argument, (int)screenMode);
     }
 */
 
@@ -171,7 +171,7 @@ void V9938commands::executeCommand()
         break;
     }
 
-    //	Emulator::Instance()->setPause(true);
+    //  Emulator::Instance()->setPause(true);
 }
 
 inline nw_byte V9938commands::pointG4(int x, int y)
@@ -822,8 +822,8 @@ void V9938commands::commandYmmm()
 
 void V9938commands::commandHmmc()
 {
-    //	assert((argument & DIX)==0);
-    //	assert((argument & DIY)==0);
+    //  assert((argument & DIX)==0);
+    //  assert((argument & DIY)==0);
 
     switch (screenMode)
     {

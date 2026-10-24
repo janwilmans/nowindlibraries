@@ -61,7 +61,7 @@ public:
 
     void updateBuffer(unsigned int);
     void writeRegister(nw_word, nw_byte);
-    //		nw_byte    readRegister(nw_word);
+    //      nw_byte    readRegister(nw_word);
 
     // AudioDevice interface
     void startup();

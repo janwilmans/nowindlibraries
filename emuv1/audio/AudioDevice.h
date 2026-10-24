@@ -26,9 +26,9 @@ public:
     /*! Requests buffer from the AudioMixer and clears it */
     virtual void startup() = 0;
     /*! Called by AudioDevice just before the channel buffers are mixed 
-		 *
-		 * \param offset Position in an audiobuffer to sync to
-		 */
+         *
+         * \param offset Position in an audiobuffer to sync to
+         */
     virtual void sync(Uint32 offset) = 0;
     virtual void audioDone() {}
     virtual ~AudioDevice();

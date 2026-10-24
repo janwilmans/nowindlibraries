@@ -175,8 +175,8 @@ nw_byte V9938::readStatusRegister()
         unsigned int positionInCurrentLine = (emuTime - frameStartTime) % SCANLINETIME;
         if (positionInCurrentLine >= horizontalDisplayTime) value |= 0x20;
         /*        
-		if ((positionInCurrentLine > 190) || (positionInCurrentLine < 20)) {
-  		   value |= 0x20;
+        if ((positionInCurrentLine > 190) || (positionInCurrentLine < 20)) {
+           value |= 0x20;
         }
 */
         //DBERR("JANSNAPTNIETWATIKWIL: " << dec << (value & 0x20) << endl);
@@ -349,8 +349,8 @@ void V9938::writeRegister(nw_byte r, nw_byte value)
     case 9:
         vdpReg[9] = value & registerMask[9];
         gui->setScreenHeight(value & 0x80 ? 212 : 192);
-        //     	if (value & 0x08) assert(false); // interlace
-        //     	if (value & 0x04) assert(false); // EO
+        //      if (value & 0x08) assert(false); // interlace
+        //      if (value & 0x04) assert(false); // EO
         break;
     case 10:
         vdpReg[10] = value & registerMask[10];
@@ -611,24 +611,24 @@ void V9938::calculateVDPtiming()
 }
 
 /*! \brief processes the normal VDP interrupt if it is enabled generates a Z80 interrupt
- * 	
- * 	VDPreg[1] bit 5 is "1" if the normal interrupt is enabled
+ *  
+ *  VDPreg[1] bit 5 is "1" if the normal interrupt is enabled
  */
 void V9938::renderScreen(emuTimeType screenTime)
 {
     unsigned int lastChunk = screenHeight * DISPLAYCHUNKS;
     unsigned int chunksToDump = lastChunk - nextDisplayChunk;
 
-    //	DBERR("CURRENTSCANLINE: " << CURRENTSCANLINE << endl);
-    //	DBERR("nextDisplayChunk: " << nextDisplayChunk << endl);
-    //	DBERR("lastChunk: " << lastChunk << endl);
+    //  DBERR("CURRENTSCANLINE: " << CURRENTSCANLINE << endl);
+    //  DBERR("nextDisplayChunk: " << nextDisplayChunk << endl);
+    //  DBERR("lastChunk: " << lastChunk << endl);
     assert(nextDisplayChunk <= lastChunk);
     if (nextDisplayChunk < lastChunk)
     {
         (*renderer.*dumpScreen)(nextDisplayChunk, chunksToDump);
     }
     nextDisplayChunk = 0;
-    /* 	
+    /*  
     SE_line[SE_counter + 1] = screenHeight;
     for (unsigned int i=0;i<SE_counter+1;i++) {
         if (SE_resolution256[i]) {
@@ -730,8 +730,8 @@ void V9938::dumpScreenPart()
     dumpPos();
     unsigned int currentChunk, chunksToDump;
     unsigned int i = CURRENTSCANLINE;
-    //	DBERR("CURRENTSCANLINE " << i << endl);
-    //	DBERR("scanLines " << scanLines << endl);
+    //  DBERR("CURRENTSCANLINE " << i << endl);
+    //  DBERR("scanLines " << scanLines << endl);
     assert(i <= scanLines); // gedurende teveel tijd geen dumpScreenPart aangeroepen
 
     if ((i >= firstDisplayLine) && (nextDisplayChunk < (screenHeight * DISPLAYCHUNKS)))

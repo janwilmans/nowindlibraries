@@ -274,7 +274,7 @@ void Command::interpretCommand()
         /*
     case COMMAND_DEBUG:
         {
-    		commandMode = DEBUGMODE;
+            commandMode = DEBUGMODE;
             OnScreenDisplay::Instance()->setTextBuffer();
         }
         break;

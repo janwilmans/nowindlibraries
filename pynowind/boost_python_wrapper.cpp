@@ -14,7 +14,7 @@ BOOST_PYTHON_MODULE(pynowind)
     ;
     
 
-	class_<PyNwhostService, bases<NwhostService> >("PyNwhostService")
+    class_<PyNwhostService, bases<NwhostService> >("PyNwhostService")
         .def("start", &PyNwhostService::start)
         .def("stop", &PyNwhostService::stop)
     ;

@@ -111,7 +111,7 @@ void Debugger::updateDisplay(SDL_Surface* screen, list<string>* textBuffer)
 
         textBuffer->push_back(rowString);
     }
-    //	OnScreenDisplay::Instance()->updateDisplay(screen);
+    //  OnScreenDisplay::Instance()->updateDisplay(screen);
     OnScreenDisplay::Instance()->xorBar(screen, currentAddress - startAddress);
 }
 
