@@ -18,7 +18,7 @@ define  DEBUG
         or a
         jr nz,nowmap
         ld hl,list
-        ld a,3
+        ld b,2                          ; length of "/L", the host gets exactly B bytes
         
 nowmap:        
         xor a                           ; first Nowind interface
