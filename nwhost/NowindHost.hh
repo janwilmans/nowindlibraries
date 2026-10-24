@@ -137,7 +137,10 @@ public:
 	
 	enum ApiCommands {
 		API_NOWMAP = 0
-	};	
+	};
+
+	// EXTBIO sendCommandWithData (extendedBios.asm) sends at most this many bytes
+	static const unsigned MAX_COMMAND_DATA = 240;
 	
 
 	virtual void debugMessage(const char *cFormat, ...) const;

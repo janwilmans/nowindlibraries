@@ -540,6 +540,12 @@ void NowindHost::apiCommand()
                     DBERR("API_NOWMAP received without commandline!\n");
                     setState(STATE_SYNC1);
                 }
+                else if (reg_b > MAX_COMMAND_DATA)
+                {
+                    // EXTBIO sendCommandWithData allows max 240 bytes, more does not fit in extraData
+                    DBERR("API_NOWMAP received with %u bytes of data, max %u!\n", reg_b, MAX_COMMAND_DATA);
+                    setState(STATE_SYNC1);
+                }
                 else
                 {
 					setState(STATE_RECEIVE_DATA);
@@ -574,7 +580,9 @@ void NowindHost::apiReceiveData(byte data)
         {
             case API_NOWMAP:
             {
-                string args = string(reinterpret_cast<char*>(&command.extraData[0]));
+                // the MSX sends exactly reg_b bytes, without a terminating zero
+                string args = string(reinterpret_cast<char*>(&command.extraData[0]), recvCount);
+                args = args.substr(0, args.find('\0'));
                 string result = nowMap(args);
                 vector<byte> resultData;
                 resultData.assign(result.begin(), result.end());
