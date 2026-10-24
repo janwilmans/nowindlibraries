@@ -162,9 +162,11 @@ int Image::readSectors(nw_byte * buffer, unsigned int startSector, unsigned int 
     // TODO: check of sectornumber isn't too high (has to fit in the current image!!!
 	//DBERR("[%s] Offset: 0x%08X Image::readSectors, startSector %u, amount %u\n", filename.c_str(), offset/512, startSector, sectorCount);
 
+    // a failed read (past the end of a truncated image) leaves failbit set, then seekg and every next read fail too
+    stream->clear();
     stream->seekg(source);
     stream->read((char *)buffer,count);
-	if (stream->fail()) return -3; 
+	if (stream->fail()) return -3;
 	return 0;
 }
 
@@ -186,6 +188,7 @@ int Image::writeSectors(nw_byte * buffer, unsigned int startSector, unsigned int
 
     DBERR("Image::writeSectors, startSector %u, amount %u\n", startSector, sectorCount);
 
+    stream->clear();
     stream->seekp(dest);
     stream->write((char *)buffer,count);
 	if (stream->fail()) return -3;
