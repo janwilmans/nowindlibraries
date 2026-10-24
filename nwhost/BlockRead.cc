@@ -92,7 +92,9 @@ void BlockRead::blockReadHelper(word startAddress, word size)
     else
     {
         // fast blocks
-        byte blocks = size / HARDCODED_READ_DATABLOCK_SIZE;
+        // the MSX gets the number of blocks in one byte (blockReadTranfer: ld b,(hl)), so at most 255;
+        // what is left is sent as the next chunk by blockReadContinue()
+        byte blocks = (std::min)(size / HARDCODED_READ_DATABLOCK_SIZE, 255u);
         word actualTransferSize = blocks*HARDCODED_READ_DATABLOCK_SIZE;
         unsigned int blockNr = 0;
         //DBERR("create fast block of size: 0x%02x\n", actualTransferSize);
