@@ -10,9 +10,8 @@
 
 #include "NwhostExports.h"
 
-namespace nwhost
-{
-    void NWHOST_API initialize();
+namespace nwhost {
+void NWHOST_API initialize();
 }
 
 #endif // NWHOST_H

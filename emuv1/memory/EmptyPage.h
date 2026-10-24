@@ -6,7 +6,6 @@
 #include "MemoryDevice.h"
 
 class EmptyPage : public MemoryDevice {
-
 public:
     EmptyPage();
     nw_byte read(nw_word address);
@@ -16,4 +15,3 @@ public:
 };
 
 #endif
-

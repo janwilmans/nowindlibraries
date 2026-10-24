@@ -12,4 +12,4 @@
 #include "NowindTypes.hh"
 #include "nowindusb.h"
 
-#endif // LIBNWHOST_H	
+#endif // LIBNWHOST_H

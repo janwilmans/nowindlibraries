@@ -13,18 +13,17 @@
  */
 class Media {
 private:
-			    Media();
+    Media();
+
 public:
-   
-static Media    * Instance();
-            	~Media();
+    static Media* Instance();
+    ~Media();
 
-void            insertMedia(std::string filename, Uint32 priority);
-void 			insertNowindImage(std::string filename, Uint32 size);
-void            loadRom(Uint32 diskNumber, std::string filename);
+    void insertMedia(std::string filename, Uint32 priority);
+    void insertNowindImage(std::string filename, Uint32 size);
+    void loadRom(Uint32 diskNumber, std::string filename);
 
-static std::fstream * openfile(std::string filename, NW_OPENMODE mode);
-   
+    static std::fstream* openfile(std::string filename, NW_OPENMODE mode);
 };
 
 #endif

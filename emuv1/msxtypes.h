@@ -4,9 +4,9 @@
 
 #include "SDL_types.h"
 
-typedef unsigned char nw_byte;          // should be (at least?) an 8 bit type
-typedef unsigned int nw_word;           // should be (at least?) an 16 bit type
-    
+typedef unsigned char nw_byte; // should be (at least?) an 8 bit type
+typedef unsigned int nw_word;  // should be (at least?) an 16 bit type
+
 typedef unsigned long long emuTimeType;
 typedef unsigned long long msTimeType;
 

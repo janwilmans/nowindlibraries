@@ -7,24 +7,25 @@
 
 using namespace std;
 
-Profiler::Profiler() {
-
+Profiler::Profiler()
+{
     DBERR("Profiler constructor...\n");
 
-	/*
+    /*
     memset(opcodeCounter, 0, sizeof(opcodeCounter));
     memset(opcodeCounterCB, 0, sizeof(opcodeCounterCB));
     memset(opcodeCounterDD, 0, sizeof(opcodeCounterDD));
     memset(opcodeCounterED, 0, sizeof(opcodeCounterED));
     memset(opcodeCounterFD, 0, sizeof(opcodeCounterFD));
 	*/
-//    memset(opcodeCounterDDCB, 0, sizeof(opcodeCounterDDCB));
-//    memset(opcodeCounterFDCB, 0, sizeof(opcodeCounterFDCB));
+    //    memset(opcodeCounterDDCB, 0, sizeof(opcodeCounterDDCB));
+    //    memset(opcodeCounterFDCB, 0, sizeof(opcodeCounterFDCB));
     total = 0;
 }
 
-Profiler::~Profiler() {
-/*
+Profiler::~Profiler()
+{
+    /*
     DBERR("Profiler destructor...\n");
     DBERR("  Instructions executed: %u\n", total);
 
@@ -54,18 +55,19 @@ Profiler::~Profiler() {
         DBERR("   %2f%% FD 0x%02x %s\n", average, i, mnemonic.c_str());
     }
 */
-	DBERR("Profiler destroyed.\n");
+    DBERR("Profiler destroyed.\n");
 }
 
-void Profiler::count(nw_byte opcode, nw_byte operand) {
-
+void Profiler::count(nw_byte opcode, nw_byte operand)
+{
     // TODO: reg_pc meegeven en zelf geheugen lezen voor operands en eventueel extra bytes
-    switch (opcode) {
-        case 0xcb: opcodeCounterCB[operand]++; break;
-        case 0xdd: opcodeCounterDD[operand]++; break;
-        case 0xed: opcodeCounterED[operand]++; break;
-        case 0xfd: opcodeCounterFD[operand]++; break;
-        default: opcodeCounter[opcode]++;
+    switch (opcode)
+    {
+    case 0xcb: opcodeCounterCB[operand]++; break;
+    case 0xdd: opcodeCounterDD[operand]++; break;
+    case 0xed: opcodeCounterED[operand]++; break;
+    case 0xfd: opcodeCounterFD[operand]++; break;
+    default: opcodeCounter[opcode]++;
     }
-    total++;  
+    total++;
 }

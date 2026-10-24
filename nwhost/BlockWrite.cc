@@ -8,7 +8,7 @@
 #define DBERR nwhSupport->debugMessage
 
 // the BLOCKWRITE_SIZE is not hardcoded in ROM, the host requests the exact amount the msx should send.
-static const unsigned BLOCKWRITE_SIZE = 240;    
+static const unsigned BLOCKWRITE_SIZE = 240;
 
 namespace nwhost {
 
@@ -21,7 +21,7 @@ BlockWrite::BlockWrite()
 
 void BlockWrite::copyData(std::vector<byte>& aDestinationData)
 {
-    for (unsigned int i=0; i< mBuffer.size();i++)
+    for (unsigned int i = 0; i < mBuffer.size(); i++)
     {
         aDestinationData[i] = mBuffer[i];
     }
@@ -45,7 +45,7 @@ bool BlockWrite::isDone() const
 void BlockWrite::init(unsigned int mMsTime, word aStartAddress, word aSize, std::vector<byte>* aReceiveBuffer, byte aReturnCode)
 {
     DBERR("BlockWrite::init(startAddress: 0x%04x, size: 0x%04x\n", aStartAddress, aSize);
-    
+
     mBlockSequenceNr = 0;
     mReceiveIndex = 0;
     mReceivedData = 0;
@@ -71,7 +71,7 @@ void BlockWrite::init(unsigned int mMsTime, word aStartAddress, word aSize, std:
 
     mBuffer.clear();
     mBuffer.resize(aSize);
-    
+
     mReceiveBuffer = aReceiveBuffer;
     mReceiveBuffer->clear();
     continueWithNextBlock();
@@ -86,7 +86,7 @@ void BlockWrite::init(unsigned int mMsTime, word aStartAddress, word aSize, std:
 
 // todo:
 // - add all blocks to receive from msx to a queue
-// - send several 9-byte requests for data 
+// - send several 9-byte requests for data
 // - receive blocks of 240+2 bytes, check the markers, request again
 
 void BlockWrite::continueWithNextBlock()
@@ -107,23 +107,23 @@ void BlockWrite::continueWithNextBlock()
     // make sure the transfer does not cross the TWOBANKLIMIT
     if (startAddr < TWOBANKLIMIT)
     {
-        word endAddress = std::min(TWOBANKLIMIT-1, startAddr + getBytesLeft());
+        word endAddress = std::min(TWOBANKLIMIT - 1, startAddr + getBytesLeft());
         word transferSize = endAddress - startAddr;
         requestBlock(startAddr, mTransferSize);
     }
     else
     {
         requestBlock(startAddr, getBytesLeft());
-    }  
+    }
 }
 
 void BlockWrite::requestBlock(word aStartAddress, word aSize)
 {
-	word lBlockSize = std::min(aSize, BLOCKWRITE_SIZE);
-	unsigned int endAddress = aStartAddress + aSize;
+    word lBlockSize = std::min(aSize, BLOCKWRITE_SIZE);
+    unsigned int endAddress = aStartAddress + aSize;
 
     //DBERR("BlockWrite::requestBlock, address: 0x%04x, transferSize: 0x%04X \n", aStartAddress, lBlockSize);
-    
+
     if (mTransferingToPage23 == false && aStartAddress >= TWOBANKLIMIT)
     {
         // until now no Page23 blocks were send and the next block is a Page23 block
@@ -136,27 +136,27 @@ void BlockWrite::requestBlock(word aStartAddress, word aSize)
         else
         {
             //DBERR("BlockWrite::requestBlock, switching to page23 mode.\n");
-		    nwhSupport->sendHeader();
-		    nwhSupport->send(BLOCKWRITE_PAGE23_DATA);
+            nwhSupport->sendHeader();
+            nwhSupport->send(BLOCKWRITE_PAGE23_DATA);
             mTransferingToPage23 = true;
         }
     }
 
     // request the next block of data (consists of 3+1+2+2+1 = 9 bytes)
-	nwhSupport->sendHeader();
-	nwhSupport->send(0);                // transfer not done
-	nwhSupport->send16(aStartAddress);
-	nwhSupport->send16(lBlockSize);
-	nwhSupport->send(mBlockSequenceNr);
-    
+    nwhSupport->sendHeader();
+    nwhSupport->send(0); // transfer not done
+    nwhSupport->send16(aStartAddress);
+    nwhSupport->send16(lBlockSize);
+    nwhSupport->send(mBlockSequenceNr);
+
     DataBlockWrite* lData = new DataBlockWrite(mBlockSequenceNr, mRequestedData, aStartAddress, lBlockSize);
 
     //DBERR("DataBlockWrite: mBlockSequenceNr: %u, aStartAddress: 0x%04X, lBlockSize: %u\n", mBlockSequenceNr, aStartAddress, lBlockSize);
     mDataBlockQueue.push_back(lData);
-    mBlockSequenceNr = (mBlockSequenceNr+1) & 255;
+    mBlockSequenceNr = (mBlockSequenceNr + 1) & 255;
     mRequestedData += lBlockSize;
 
-    //todo: maybe write speed can be optimized by requesting multiple blocks at once, 
+    //todo: maybe write speed can be optimized by requesting multiple blocks at once,
     // special care should taken to ensure the msx-receive buffer is does not overflow
     // and that our garantees are still met?? I think this is not reliable!
     // for example by making sure there are never more then 256/9 = 28 blocks out-standing.
@@ -180,7 +180,7 @@ void BlockWrite::receiveData(byte data)
             cancelWithCode(BLOCKWRITE_ERROR);
         }
         mReceiveIndex++;
-    } 
+    }
     else if (mReceiveIndex <= lData->getSize())
     {
         mBuffer[mReceivedData] = data;
@@ -207,8 +207,8 @@ void BlockWrite::receiveData(byte data)
 
 void BlockWrite::cancelWithCode(byte returnCode)
 {
-//    nwhSupport->sendHeader();
-//    nwhSupport->send(returnCode);   //todo: BlockWrite does not stop correctly on BLOCKWRITE_ERROR? (a timeout seems to be the only way to cause a 'disk offline' 
+    //    nwhSupport->sendHeader();
+    //    nwhSupport->send(returnCode);   //todo: BlockWrite does not stop correctly on BLOCKWRITE_ERROR? (a timeout seems to be the only way to cause a 'disk offline'
     mDone = true;
 }
 

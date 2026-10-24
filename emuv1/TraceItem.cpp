@@ -5,7 +5,8 @@
 
 using namespace std;
 
-TraceItem::TraceItem(Uint32	theSize, Uint32 theNeededSize, string theFile, Uint32 theLine, string theType) {
+TraceItem::TraceItem(Uint32 theSize, Uint32 theNeededSize, string theFile, Uint32 theLine, string theType)
+{
     size = theSize;
     neededSize = theNeededSize;
     file = theFile;
@@ -13,6 +14,6 @@ TraceItem::TraceItem(Uint32	theSize, Uint32 theNeededSize, string theFile, Uint3
     type = theType;
 }
 
-TraceItem::~TraceItem() {
-
+TraceItem::~TraceItem()
+{
 }

@@ -16,17 +16,16 @@ class Z80;
  * and RET (C9) and the z80 calls functions in this class to replace them.
  */
 class DiskInterface {
-
 private:
-		 	DiskInterface();
-Z80     	*z80;
+    DiskInterface();
+    Z80* z80;
 
-DiskDrive   *disk;
-DiskDrive  	*drive[2];
+    DiskDrive* disk;
+    DiskDrive* drive[2];
 
 public:
-			~DiskInterface();
-static		DiskInterface * Instance();
+    ~DiskInterface();
+    static DiskInterface* Instance();
 
     /*! \brief insert a disk-image in drive a:
     *  \param filename name of the disk-image
@@ -43,4 +42,3 @@ static		DiskInterface * Instance();
 };
 
 #endif
-

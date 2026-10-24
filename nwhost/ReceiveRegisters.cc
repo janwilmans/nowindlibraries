@@ -10,11 +10,11 @@ namespace nwhost {
 
 ReceiveRegisters::ReceiveRegisters()
 {
-	processedData = 0;
-	transferSize = 12; // fixed size
-	header = 0;
-	errors = 0;
-	clear();
+    processedData = 0;
+    transferSize = 12; // fixed size
+    header = 0;
+    errors = 0;
+    clear();
 }
 
 void ReceiveRegisters::initialize(NowindHostSupport* aSupport)
@@ -83,20 +83,20 @@ void ReceiveRegisters::setIY(word data)
 
 void ReceiveRegisters::send()
 {
-    transferSize = buffer.size();  // hardcoded to AF+BC+DE+HL = 8 bytes
+    transferSize = buffer.size(); // hardcoded to AF+BC+DE+HL = 8 bytes
     done = false;
-   
-    bool byteInUse[256];    // 'byte in use' map
-    for (int i=0;i<256;i++)
+
+    bool byteInUse[256]; // 'byte in use' map
+    for (int i = 0; i < 256; i++)
     {
         byteInUse[i] = false;
     }
-    for (unsigned int i=0;i<transferSize;i++)
+    for (unsigned int i = 0; i < transferSize; i++)
     {
         byte currentByte = buffer[i];
         byteInUse[currentByte] = true;
-    }      
-    for (int i=0; i<256; i++)
+    }
+    for (int i = 0; i < 256; i++)
     {
         if (byteInUse[i] == false)
         {
@@ -111,22 +111,22 @@ void ReceiveRegisters::send()
 void ReceiveRegisters::sendData()
 {
     nwhSupport->sendHeader();
-    nwhSupport->send(0xff);     // dummy so it is never possible to mistake for a new command
-    nwhSupport->send(header);   // data header
-    for (unsigned int i=0; i<transferSize; i++)
+    nwhSupport->send(0xff);   // dummy so it is never possible to mistake for a new command
+    nwhSupport->send(header); // data header
+    for (unsigned int i = 0; i < transferSize; i++)
     {
         byte currentByte = buffer[i];
         nwhSupport->send(currentByte);
-    }      
-    nwhSupport->send(header);   // data tail
+    }
+    nwhSupport->send(header); // data tail
 }
 
 void ReceiveRegisters::ack(byte tail)
 {
     if (header == tail)
-    {		
-		//DBERR("ReceiveRegisters::ack, tail matched\n");
-		done = true;
+    {
+        //DBERR("ReceiveRegisters::ack, tail matched\n");
+        done = true;
     }
     else
     {

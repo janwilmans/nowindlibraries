@@ -8,29 +8,30 @@
 
 #define FTDX_API_EXPORT
 #include "UsbStream.h"
-#include "libgeneral.h"     // for Util::debug / Util::sleep
+#include "libgeneral.h" // for Util::debug / Util::sleep
 
 using namespace general;
 using namespace ftdx;
 
 UsbStream::UsbStream()
 {
-	mTimeoutSet = false;
+    mTimeoutSet = false;
 }
 
 // wait until a mUsbStream has been made
 void UsbStream::openBlocking()
 {
     bool retrying = false;
-    while (open() == false) {
-        if (!retrying) {
+    while (open() == false)
+    {
+        if (!retrying)
+        {
             Util::debug("Using driver %s, please connect nowind interface...\n", getIdString());
             retrying = true;
         }
         Util::sleep(250);
     }
     Util::debug("Found Nowind Interface using %s!\n", getIdString());
-
 }
 
 UsbStream::~UsbStream()
@@ -39,7 +40,7 @@ UsbStream::~UsbStream()
 
 void UsbStream::setTimeouts(unsigned int aRxTimeout, unsigned int aTxTimeout)
 {
-	mRxTimeout = aRxTimeout;
-	mTxTimeout = aTxTimeout;
-	mTimeoutSet = true; 
+    mRxTimeout = aRxTimeout;
+    mTxTimeout = aTxTimeout;
+    mTimeoutSet = true;
 }

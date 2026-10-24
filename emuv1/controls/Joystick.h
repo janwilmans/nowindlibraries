@@ -16,23 +16,20 @@
 #define TRESHOLD 6400
 
 class Joystick {
-
 private:
-		Joystick();
+    Joystick();
 
-		nw_byte	joystickPort[2];
-		nw_byte PSGPortA;
-		nw_byte PSGPortB;
-		
+    nw_byte joystickPort[2];
+    nw_byte PSGPortA;
+    nw_byte PSGPortB;
+
 public:
+    ~Joystick();
+    static Joystick* Instance();
 
-		~Joystick();
-		static Joystick * Instance();
-
-		void 	axisMotion(SDL_Event *);
-		void 	buttonDown(SDL_Event *);
-		void 	buttonUp(SDL_Event *);
-
+    void axisMotion(SDL_Event*);
+    void buttonDown(SDL_Event*);
+    void buttonUp(SDL_Event*);
 };
 
 #endif

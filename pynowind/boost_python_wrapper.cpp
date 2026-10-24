@@ -8,7 +8,7 @@ using namespace boost::python;
 
 BOOST_PYTHON_MODULE(pynowind)
 {
-	/*
+    /*
     class_<NwhostService>("NwhostService")
         .def("setImage", &NwhostService::setImage)
     ;
@@ -23,6 +23,5 @@ BOOST_PYTHON_MODULE(pynowind)
     class_<PyNwhostService>("PyNwhostService")
         .def("setImage", &PyNwhostService::setImage)
         .def("start", &PyNwhostService::start)
-        .def("stop", &PyNwhostService::stop)
-	;
+        .def("stop", &PyNwhostService::stop);
 }

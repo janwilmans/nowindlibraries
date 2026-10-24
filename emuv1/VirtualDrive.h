@@ -9,26 +9,25 @@
 #include "DiskDrive.h"
 
 class VirtualDrive : public DiskDrive {
+    class PhysicalLocation {
+    public:
+        PhysicalLocation(std::string theFileName, unsigned int theOffset)
+        {
+            fileName = theFileName;
+            offset = theOffset;
+        }
+        std::string fileName;
+        unsigned int offset;
+    };
 
-class PhysicalLocation {
-    
-public:
-    PhysicalLocation(std::string theFileName, unsigned int theOffset) {
-        fileName = theFileName;
-        offset = theOffset;
-    }   
-    std::string fileName;
-    unsigned int offset;
-};
-
-typedef std::map<unsigned int, unsigned char *> SectorMap;
-typedef std::map<unsigned int, PhysicalLocation *> ClusterMap;
+    typedef std::map<unsigned int, unsigned char*> SectorMap;
+    typedef std::map<unsigned int, PhysicalLocation*> ClusterMap;
 
 private:
-    std::fstream *stream;
+    std::fstream* stream;
     bool containsDisk;
     bool readOnly;
-    
+
     SectorMap sectorMap;
     ClusterMap clusterMap;
 
@@ -38,29 +37,29 @@ private:
     unsigned int directoryStartSector;
     unsigned int dataAreaStartSector;
 
-    void writeLEinc(unsigned char ** buffer, unsigned len, unsigned long value);
-    void writeLE(unsigned char * buffer, unsigned len, unsigned long value);
-    void writeStr(unsigned char ** buffer, char * str);
+    void writeLEinc(unsigned char** buffer, unsigned len, unsigned long value);
+    void writeLE(unsigned char* buffer, unsigned len, unsigned long value);
+    void writeStr(unsigned char** buffer, char* str);
+
 public:
     VirtualDrive();
-	virtual ~VirtualDrive();
+    virtual ~VirtualDrive();
 
     virtual bool openDiskImage(std::string);
     virtual bool hasDisk();
     virtual bool isWriteProtected();
-    virtual bool reOpenDiskImage();      /* close the disk-image and reopens it to make sure it's read-only status has not changed */
+    virtual bool reOpenDiskImage(); /* close the disk-image and reopens it to make sure it's read-only status has not changed */
     virtual unsigned int getSectorSize();
-    virtual void readSectors(char * buffer, unsigned int startSector, unsigned int sectorCount);
-    virtual void writeSectors(char * buffer, unsigned int startSector, unsigned int sectorCount);
+    virtual void readSectors(char* buffer, unsigned int startSector, unsigned int sectorCount);
+    virtual void writeSectors(char* buffer, unsigned int startSector, unsigned int sectorCount);
 
-    void readSector(char * buffer, unsigned int sector);
-    void writeSector(char * buffer, unsigned int sector);
-    
+    void readSector(char* buffer, unsigned int sector);
+    void writeSector(char* buffer, unsigned int sector);
+
     void addFile(std::string);
     void addFileToFat(std::string, std::string, unsigned int size);
-    
+
     void linkFatEntry(unsigned int entryNr, unsigned int linkToEntry);
-   
 };
 
 /*
@@ -123,6 +122,4 @@ F8     -----      Fixed disk
 */
 
 
-
 #endif
-

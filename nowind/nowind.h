@@ -10,9 +10,8 @@
 
 #include "NowindExports.h"
 
-namespace nowind
-{
-    void NOWIND_API initialize();
+namespace nowind {
+void NOWIND_API initialize();
 }
 
 #endif // NOWIND_H

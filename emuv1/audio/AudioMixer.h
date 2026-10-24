@@ -19,68 +19,66 @@
 class AudioDevice;
 
 class AudioMixer {
-
 private:
-        unsigned int        callbackCounter;
-        Uint32              startTicks;
+    unsigned int callbackCounter;
+    Uint32 startTicks;
 
-        unsigned int        sampleRate;
+    unsigned int sampleRate;
 
-		AudioMixer();
-		static void         staticAudioCallback(void *unused, Uint8 *stream, int len);
-		unsigned int        soundBufferIndex;
-        void                audioCallback(Uint8 *stream, int len);
-		void 				determineAudioFormat(Uint16);
-        unsigned int		zeroValue;
-        unsigned int		silentValue;
-        unsigned int		channelCount;
-        
-        unsigned int        lastTime;
-        unsigned int        volumeDeler;
-        std::fstream        *rawout;
-        
-        // DC filter
-        float				lastFilterIn;
-        float				lastFilterOut;
+    AudioMixer();
+    static void staticAudioCallback(void* unused, Uint8* stream, int len);
+    unsigned int soundBufferIndex;
+    void audioCallback(Uint8* stream, int len);
+    void determineAudioFormat(Uint16);
+    unsigned int zeroValue;
+    unsigned int silentValue;
+    unsigned int channelCount;
 
-		unsigned int        audioBufferSize; 
-		unsigned int        outputAudioBufferSize;
-		unsigned int        sampleSize;
-		static SDL_mutex *  mixerMutex;
+    unsigned int lastTime;
+    unsigned int volumeDeler;
+    std::fstream* rawout;
 
-        signed int *        outputBuffer;
-        unsigned int        outputBufferReadPointer;
-        unsigned int        outputBufferWritePointer;
-        
+    // DC filter
+    float lastFilterIn;
+    float lastFilterOut;
+
+    unsigned int audioBufferSize;
+    unsigned int outputAudioBufferSize;
+    unsigned int sampleSize;
+    static SDL_mutex* mixerMutex;
+
+    signed int* outputBuffer;
+    unsigned int outputBufferReadPointer;
+    unsigned int outputBufferWritePointer;
+
 
 public:
-		static AudioMixer * Instance();
-        void                addDevice(AudioDevice *);
-        void                initialize();
+    static AudioMixer* Instance();
+    void addDevice(AudioDevice*);
+    void initialize();
 
-        unsigned int *      getBuffer(unsigned int);    
-        unsigned int        getBufferSize();
-        unsigned int        getSampleRate();
-        unsigned int        getMaxBufferIndex();
+    unsigned int* getBuffer(unsigned int);
+    unsigned int getBufferSize();
+    unsigned int getSampleRate();
+    unsigned int getMaxBufferIndex();
 
-		static void Lock();
-		static void Unlock();
+    static void Lock();
+    static void Unlock();
 
-		~AudioMixer();
+    ~AudioMixer();
 
-        unsigned int      bufferDepth;
-        unsigned int *    buffers[20];          /*!< no Uint8, because these buffers contain multiple already added channels */
-												/*!< Max. 20 audioDevices, TODO: make this dynamic? */
-		int               bufferCount;
+    unsigned int bufferDepth;
+    unsigned int* buffers[20]; /*!< no Uint8, because these buffers contain multiple already added channels */
+                               /*!< Max. 20 audioDevices, TODO: make this dynamic? */
+    int bufferCount;
 
-        AudioDevice *     devices[20];
-		unsigned int      deviceCount;
-        
-		void writeWav(FILE *fptr,char *samples,long nsamples,int nfreq);
-		
-		void volume(unsigned int);
-        void AudioInterrupt(emuTimeType scheduledTime);
+    AudioDevice* devices[20];
+    unsigned int deviceCount;
+
+    void writeWav(FILE* fptr, char* samples, long nsamples, int nfreq);
+
+    void volume(unsigned int);
+    void AudioInterrupt(emuTimeType scheduledTime);
 };
 
 #endif
-

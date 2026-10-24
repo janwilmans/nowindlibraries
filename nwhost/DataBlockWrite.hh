@@ -16,7 +16,7 @@ public:
     bool getPage23() { return mPage23; }
     word getTransferAddress() { return mTransferAddress; }
     ~DataBlockWrite();
-  
+
 private:
     word mSequenceNr;
     unsigned int mOffset;
@@ -25,7 +25,6 @@ private:
     word mTransferAddress;
 
     DataBlockWrite();
-
 };
 
 #endif // DATABLOCKWRITE_HH

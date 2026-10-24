@@ -35,47 +35,45 @@
 
 class WD279X : public MemoryDevice {
 private:
-			DiskDrive    *disk;
-			
-			nw_byte trackRegister;
-			nw_byte statusRegister;
-			nw_byte dataRegister;
-			nw_byte sectorRegister;
-			nw_byte commandRegister;
-            nw_byte diskSide;			
+    DiskDrive* disk;
 
-            bool dataRequest;
-            bool intRequest;
-			
-			int currentSector;
-			int currentTrack;
-			
-			int transferCounter;
-			
-			int seekDirection;
-			nw_byte sectorBuffer[512];
-			
-            nw_byte readDataRegister(void);
-            void writeDataRegister(nw_byte);
-			void statusCommandTypeI(void);
-            
-            nw_byte getStatusRegister(void);
-            void commandReadSector(void);
-            void commandWriteSector(void);
+    nw_byte trackRegister;
+    nw_byte statusRegister;
+    nw_byte dataRegister;
+    nw_byte sectorRegister;
+    nw_byte commandRegister;
+    nw_byte diskSide;
+
+    bool dataRequest;
+    bool intRequest;
+
+    int currentSector;
+    int currentTrack;
+
+    int transferCounter;
+
+    int seekDirection;
+    nw_byte sectorBuffer[512];
+
+    nw_byte readDataRegister(void);
+    void writeDataRegister(nw_byte);
+    void statusCommandTypeI(void);
+
+    nw_byte getStatusRegister(void);
+    void commandReadSector(void);
+    void commandWriteSector(void);
 
 public:
-			WD279X(std::string filename);
-			void insertDisk(std::string filename);
-			
-			bool isEnabled(nw_word address);
-			
-            nw_byte read(nw_word address);
-            virtual void write(nw_word address, nw_byte value);
-            virtual void install(layoutType layout, Uint8 mainSlot, Uint8 subSlot, nw_word address);
-            virtual void activate(unsigned int block);
-            virtual ~WD279X();
+    WD279X(std::string filename);
+    void insertDisk(std::string filename);
+
+    bool isEnabled(nw_word address);
+
+    nw_byte read(nw_word address);
+    virtual void write(nw_word address, nw_byte value);
+    virtual void install(layoutType layout, Uint8 mainSlot, Uint8 subSlot, nw_word address);
+    virtual void activate(unsigned int block);
+    virtual ~WD279X();
 };
 
 #endif
-
-

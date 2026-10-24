@@ -15,6 +15,6 @@
 void nowind::initialize()
 {
     ftdx::initialize();
-    NwhostService::initialize();    // installs debug callback
+    NwhostService::initialize(); // installs debug callback
     nwhost::initialize();
 }

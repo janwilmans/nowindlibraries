@@ -6,7 +6,6 @@
 #include "MemoryDevice.h"
 
 class RomBlock : public MemoryDevice {
-
 public:
     RomBlock(std::string);
     nw_byte read(nw_word address);
@@ -16,4 +15,3 @@ public:
 };
 
 #endif
-

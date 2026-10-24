@@ -8,30 +8,28 @@
 
 class NowindInterface : public MemoryDevice {
 private:
-			unsigned int switchedBlock;
-			unsigned int switchedBlockMask;
-			
-			DiskDrive    *disk;
-            int numberOfLatencyReads;
+    unsigned int switchedBlock;
+    unsigned int switchedBlockMask;
+
+    DiskDrive* disk;
+    int numberOfLatencyReads;
 
 public:
-			NowindInterface(std::string filename);
-			void insertDisk(int driveNr, std::string filename);
-			void insertHarddisk(int, std::string filename, int);
-			
-			bool isEnabled(nw_word address);
-			
-            nw_byte read(nw_word address);
-            virtual void write(nw_word address, nw_byte value);
-            virtual void install(layoutType layout, Uint8 mainSlot, Uint8 subSlot, nw_word address);
-            virtual void activate(unsigned int block);
-            virtual ~NowindInterface();
-            void setAttribute(int attr, bool value);
-            void setRomDisk(nw_byte driveNumber);
-            
-            static void debugout(const char *msg);
+    NowindInterface(std::string filename);
+    void insertDisk(int driveNr, std::string filename);
+    void insertHarddisk(int, std::string filename, int);
+
+    bool isEnabled(nw_word address);
+
+    nw_byte read(nw_word address);
+    virtual void write(nw_word address, nw_byte value);
+    virtual void install(layoutType layout, Uint8 mainSlot, Uint8 subSlot, nw_word address);
+    virtual void activate(unsigned int block);
+    virtual ~NowindInterface();
+    void setAttribute(int attr, bool value);
+    void setRomDisk(nw_byte driveNumber);
+
+    static void debugout(const char* msg);
 };
 
-#endif 
-
-
+#endif

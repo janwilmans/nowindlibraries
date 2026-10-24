@@ -20,93 +20,90 @@
  * should have been played
  */
 class YM2413 {
-    
-static const nw_byte USE_ENVELOPE = 16;
-static const unsigned int soundBufferSize = 16000;
-static const unsigned int sampleRate = 44100;
+    static const nw_byte USE_ENVELOPE = 16;
+    static const unsigned int soundBufferSize = 16000;
+    static const unsigned int sampleRate = 44100;
 
 private:
+    YM2413();
+    emuTimeType& emuTime;
+    double lastClockPulseEmutime;
+    double emutimeElapsed;
+    double lastCallBackEmutime;
 
-		YM2413();
-		emuTimeType     &emuTime;
-		double          lastClockPulseEmutime;
-		double          emutimeElapsed;
-		double          lastCallBackEmutime;		
+    unsigned int currentRegister;
+    unsigned int reg[0x40];
 
-		unsigned int	currentRegister;
-		unsigned int	reg[0x40];
+    struct chanStruct {
+        unsigned int freq;
+        unsigned int oct;
+        unsigned int key;
+        unsigned int sustain;
+        unsigned int volume;
+        unsigned int stroke;
 
-		struct chanStruct {
-    		unsigned int 	freq;
-   			unsigned int	oct;
-			unsigned int	key;
-			unsigned int	sustain;
-			unsigned int	volume;
-			unsigned int	stroke;
+    } chan[10];
 
-		} chan[10]; 
+    chanStruct lastChan[10];
 
-		chanStruct lastChan[10]; 
+    std::string chanNote[10];
+    std::string lastNote[10];
 
-		std::string chanNote[10]; 
-		std::string lastNote[10]; 
+    unsigned int drum[5];
+    unsigned int drumStroke;
+    unsigned int AYbeat;
 
-		unsigned int drum[5];
-  		unsigned int drumStroke;
-		unsigned int AYbeat;
+    std::fstream* mbmStream;
 
-		std::fstream 	*mbmStream;
+    typedef struct {
+        unsigned short length;
+        unsigned char id;
+        unsigned char voiceData[16 * 9];
+        unsigned char instrumentList[16];
+        unsigned char instrumentVolList[32];
+        unsigned char channelChipSettings[10];
+        unsigned char startTempo;
+        unsigned char sustainMsxaudio;
 
-		typedef struct {
-			unsigned short	length;
-			unsigned char	id;
-			unsigned char	voiceData[16*9];
-			unsigned char	instrumentList[16];
-			unsigned char	instrumentVolList[32];
-			unsigned char	channelChipSettings[10];
-			unsigned char	startTempo;
-			unsigned char	sustainMsxaudio;
+        char trackName[41];
+        unsigned char startInstrumentsMsxAudio[9];
+        unsigned char startInstrumentsMsxMusic[9];
+        unsigned char msxMusicOriginalInstrumentData[6 * 8];
+        unsigned char msxMusicOriginalProgNummer[6];
+        char sampleKitName[8];
 
-			char			trackName[41];
-			unsigned char	startInstrumentsMsxAudio[9];
-			unsigned char	startInstrumentsMsxMusic[9];
-			unsigned char	msxMusicOriginalInstrumentData[6*8];
-			unsigned char	msxMusicOriginalProgNummer[6];
-			char			sampleKitName[8];
-			
-			unsigned char	drumSetupMsxMusicPsg[15];
-			unsigned char	drumVolumesMsxMusic[3];
-			unsigned char	drumFrequenciesMsxMusic[20];
-			unsigned char	startDetune[9];
-			unsigned char	loopPosition;
-			
-		} mbmHeaderStruct;
+        unsigned char drumSetupMsxMusicPsg[15];
+        unsigned char drumVolumesMsxMusic[3];
+        unsigned char drumFrequenciesMsxMusic[20];
+        unsigned char startDetune[9];
+        unsigned char loopPosition;
 
-		std::list<char *> noteLines;
-  		nw_byte * lastLine;
-	
+    } mbmHeaderStruct;
+
+    std::list<char*> noteLines;
+    nw_byte* lastLine;
+
 public:
-		static YM2413 * Instance();
-		~YM2413();
+    static YM2413* Instance();
+    ~YM2413();
 
-		void writeAddress(nw_byte value);
-		void writeData(nw_byte value);
-		std::string getNote(unsigned int);
-		int getNoteNr(unsigned int freq);
+    void writeAddress(nw_byte value);
+    void writeData(nw_byte value);
+    std::string getNote(unsigned int);
+    int getNoteNr(unsigned int freq);
 
-		bool noteMatch(unsigned int freq, unsigned int fixedFreq);
+    bool noteMatch(unsigned int freq, unsigned int fixedFreq);
 
-		void    clockPulse();
+    void clockPulse();
 
-		Uint8   soundBuffer[soundBufferSize];
-		
-		unsigned int    soundBufferIndex;
+    Uint8 soundBuffer[soundBufferSize];
 
-		void dumpChannelsBeat();
-		void dumpChannels();
-		void dump9Channels();
-		void dump6ChannelsAndRhythm();
+    unsigned int soundBufferIndex;
+
+    void dumpChannelsBeat();
+    void dumpChannels();
+    void dump9Channels();
+    void dump6ChannelsAndRhythm();
 };
 
 #endif
-

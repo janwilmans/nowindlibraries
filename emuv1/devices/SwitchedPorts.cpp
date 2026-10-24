@@ -61,62 +61,65 @@ List of BIOS extension device ID's:
 #include "SwitchedPorts.h"
 #include "stdio.h"
 
-SwitchedPorts::SwitchedPorts() {
+SwitchedPorts::SwitchedPorts()
+{
+    DBERR("SwitchedPorts constructor...\n");
 
-	DBERR("SwitchedPorts constructor...\n");
-	
- 	reset(); // TODO: uiteindelijk niet hier!!!!!!
-	DBERR("SwitchedPorts constructor...finished\n");
+    reset(); // TODO: uiteindelijk niet hier!!!!!!
+    DBERR("SwitchedPorts constructor...finished\n");
 }
 
-SwitchedPorts * SwitchedPorts::Instance() {
-
-	/* implies singleton class */
-	static SwitchedPorts deInstantie;
-	return &deInstantie;
+SwitchedPorts* SwitchedPorts::Instance()
+{
+    /* implies singleton class */
+    static SwitchedPorts deInstantie;
+    return &deInstantie;
 }
 
-SwitchedPorts::~SwitchedPorts() {
-	
-	DBERR("SwitchedPorts destroyed.\n");
+SwitchedPorts::~SwitchedPorts()
+{
+    DBERR("SwitchedPorts destroyed.\n");
 }
 
-void SwitchedPorts::reset() {
-    
+void SwitchedPorts::reset()
+{
     DBERR("RESET SwitchedPorts\n");
 
- 	for (int i=0;i<256;i++) deviceEnabled[i] = false;
-// 	deviceEnabled[0xf7] = true; 
+    for (int i = 0; i < 256; i++) deviceEnabled[i] = false;
+    // 	deviceEnabled[0xf7] = true;
     deviceID = 255;
-}    
-
-void SwitchedPorts::writeDeviceID(nw_byte value) {
-
-	deviceID = value & 255;
-	
 }
 
-nw_byte SwitchedPorts::readDeviceID() {
-    
+void SwitchedPorts::writeDeviceID(nw_byte value)
+{
+    deviceID = value & 255;
+}
+
+nw_byte SwitchedPorts::readDeviceID()
+{
     if (deviceEnabled[deviceID]) return (~deviceID) & 255;
     return 255;
 }
 
-nw_byte SwitchedPorts::readPort(nw_word port) {
-    
-    if (deviceEnabled[deviceID]) {
-        switch (deviceID) {
+nw_byte SwitchedPorts::readPort(nw_word port)
+{
+    if (deviceEnabled[deviceID])
+    {
+        switch (deviceID)
+        {
         case 0xf7: return 255; //Kanji::Instance()->readPort(port);
-        }    
-    }    
+        }
+    }
     return 255;
 }
 
-void SwitchedPorts::writePort(nw_word port, nw_byte value) {
-    
-    if (deviceEnabled[deviceID]) {
-        switch (deviceID) {
+void SwitchedPorts::writePort(nw_word port, nw_byte value)
+{
+    if (deviceEnabled[deviceID])
+    {
+        switch (deviceID)
+        {
         case 0xf7: break; //Kanji::Instance()->writePort(port, value);
-        }    
-    }    
+        }
+    }
 }

@@ -3,7 +3,7 @@
 namespace nwhost {
 
 // used by BlockRead
-DataBlock::DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData, unsigned int offset, word aTransferAddress, word aSize)
+DataBlock::DataBlock(unsigned int aNumber, const std::vector<byte>& sourceData, unsigned int offset, word aTransferAddress, word aSize)
 {
     number = aNumber;
     size = aSize;
@@ -11,34 +11,34 @@ DataBlock::DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData
     // HARDCODED_READ_DATABLOCK_SIZE  hardcoded in nowind-roms blockRead (common.asm)
     fastTransfer = ((size & 0x7f) == 0);
 
-    bool byteInUse[256];    // 'byte in use' map
-    for (int i=0;i<256;i++)
+    bool byteInUse[256]; // 'byte in use' map
+    for (int i = 0; i < 256; i++)
     {
         byteInUse[i] = false;
     }
-    
+
     data.clear();
     if (fastTransfer)
     {
         transferAddress += size;
-        for (unsigned int i=0;i<size;i++)
+        for (unsigned int i = 0; i < size; i++)
         {
-            byte currentByte = sourceData[offset+i];         
-            data.push_front(currentByte);               // reverse the data order
+            byte currentByte = sourceData[offset + i];
+            data.push_front(currentByte); // reverse the data order
             byteInUse[currentByte] = true;
         }
     }
     else
     {
-        for (unsigned int i=0;i<size;i++)
+        for (unsigned int i = 0; i < size; i++)
         {
-            byte currentByte = sourceData[offset+i];         
-            data.push_back(currentByte);                // normal data order
+            byte currentByte = sourceData[offset + i];
+            data.push_back(currentByte); // normal data order
             byteInUse[currentByte] = true;
-        }    
+        }
     }
 
-    for (int i=0;i<256;i++)
+    for (int i = 0; i < 256; i++)
     {
         if (byteInUse[i] == false)
         {

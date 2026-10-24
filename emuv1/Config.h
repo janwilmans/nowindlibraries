@@ -7,20 +7,16 @@
 #include <string>
 
 class Config {
-
 private:
+    Config();
+    int getIntValueOf(std::string name, int defaultValue);
 
-						Config();
-		int             getIntValueOf(std::string name, int defaultValue);
 public:
+    std::ifstream* conffile;
+    static Config* Instance();
+    ~Config();
 
-		std::ifstream   *conffile;
-		static Config   *Instance();
-						~Config();
-
-		/* configuration options */
-		int             msxVersion;
-
+    /* configuration options */
+    int msxVersion;
 };
 #endif
-

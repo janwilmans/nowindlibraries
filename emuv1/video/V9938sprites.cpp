@@ -21,50 +21,51 @@ using namespace std;
 */
 
 
-V9938sprites::V9938sprites(V9938 *thevdp) {
-
+V9938sprites::V9938sprites(V9938* thevdp)
+{
     vdp = thevdp;
-	vram = vdp->videoRam;
-	spriteOverlay = vdp->spriteOverlay;
+    vram = vdp->videoRam;
+    spriteOverlay = vdp->spriteOverlay;
 }
 
-V9938sprites::~V9938sprites() {
-
-   DBERR("V9938sprites destroyed.\n");
+V9938sprites::~V9938sprites()
+{
+    DBERR("V9938sprites destroyed.\n");
 }
 
-void V9938sprites::reset() {
-    
+void V9938sprites::reset()
+{
     DBERR("RESET V9938sprites\n");
     patternGeneratorTable = 0;
     attributeTable = 0;
-	collisionX = 0;
-	collisionY = 0;	
-}    
+    collisionX = 0;
+    collisionY = 0;
+}
 
-void V9938sprites::setAttributeTableLow(nw_byte value) {
-
-	// vdp 5 
+void V9938sprites::setAttributeTableLow(nw_byte value)
+{
+    // vdp 5
     attributeTable = (attributeTable & 0x18000) | (value << 7);
 }
 
-void V9938sprites::setPatternGeneratorTable(nw_byte value) {
-
-	// vdp 6
+void V9938sprites::setPatternGeneratorTable(nw_byte value)
+{
+    // vdp 6
     patternGeneratorTable = (value & 0x3f) << 11;
 }
 
-void V9938sprites::setAttributeTableHigh(nw_byte value) {
-
-	// vdp 11
-	attributeTable = (attributeTable & 0x07f80) | ((value & 3) << 15);
+void V9938sprites::setAttributeTableHigh(nw_byte value)
+{
+    // vdp 11
+    attributeTable = (attributeTable & 0x07f80) | ((value & 3) << 15);
 }
 
-nw_byte V9938sprites::getCollisionCoordinate(nw_byte value) {
-
+nw_byte V9938sprites::getCollisionCoordinate(nw_byte value)
+{
     nw_byte coordinate;
 
-    switch (value) {
+    switch (value)
+    {
     case 3: coordinate = collisionX & 255; break;
     case 4: coordinate = (collisionX >> 8) | 0xFE; break;
     case 5:
@@ -79,41 +80,48 @@ nw_byte V9938sprites::getCollisionCoordinate(nw_byte value) {
     }
     return coordinate;
 }
-void V9938sprites::updateSpriteOverlayMode1(nw_byte vdpModeRegister1) {
-	
+void V9938sprites::updateSpriteOverlayMode1(nw_byte vdpModeRegister1)
+{
     unsigned int sx, sy, p1, p2;
     unsigned int patternColumn, color;
     unsigned int attr = attributeTable;
 
     // spriteOverlay and lineCount
-    for (int i=0;i<(256*256);++i) spriteOverlay[i] = 0;
+    for (int i = 0; i < (256 * 256); ++i) spriteOverlay[i] = 0;
 
-	for (unsigned int i=0;i<256;i++) {
-		unsigned int spriteCount = 0;
-		for (int sprite=0;sprite<32;sprite++) {
-			attr = attributeTable | (sprite << 2);
-			sy = vram[attr];
-			if (sy == 208) break;
-			sy = (sy + 1) & 255;
-			if ((i >= sy) && (i < (sy+16))) {
-				sx = vram[attr+1];
-				patternColumn = patternGeneratorTable + (8 * (vram[attr+2] & 0xfc)) + (i - sy);
-				color = vram[attr+3];
-				p1 = vram[patternColumn];
-				p2 = vram[patternColumn + 16];
-				if (p1 || p2) {
-					spriteCount++;
-					if (spriteCount > 4) {
-						ninthSpriteDetected(sprite);
-						break;
-					} else {
-						drawSpriteMode1(sx, i, p1, color);
-						drawSpriteMode1(sx+8, i, p2, color);
-					}
-				}
-			}
-		}
-	}	
+    for (unsigned int i = 0; i < 256; i++)
+    {
+        unsigned int spriteCount = 0;
+        for (int sprite = 0; sprite < 32; sprite++)
+        {
+            attr = attributeTable | (sprite << 2);
+            sy = vram[attr];
+            if (sy == 208) break;
+            sy = (sy + 1) & 255;
+            if ((i >= sy) && (i < (sy + 16)))
+            {
+                sx = vram[attr + 1];
+                patternColumn = patternGeneratorTable + (8 * (vram[attr + 2] & 0xfc)) + (i - sy);
+                color = vram[attr + 3];
+                p1 = vram[patternColumn];
+                p2 = vram[patternColumn + 16];
+                if (p1 || p2)
+                {
+                    spriteCount++;
+                    if (spriteCount > 4)
+                    {
+                        ninthSpriteDetected(sprite);
+                        break;
+                    }
+                    else
+                    {
+                        drawSpriteMode1(sx, i, p1, color);
+                        drawSpriteMode1(sx + 8, i, p2, color);
+                    }
+                }
+            }
+        }
+    }
 }
 
 /*
@@ -179,62 +187,75 @@ void V9938sprites::updateSpriteOverlayMode1(nw_byte vdpModeRegister1) {
 }
 */
 
-void V9938sprites::updateSpriteOverlayMode2(nw_byte vdpModeRegister1) {
-
+void V9938sprites::updateSpriteOverlayMode2(nw_byte vdpModeRegister1)
+{
     unsigned int sx, sy, p1, p2;
     unsigned int patternColumn, color;
     // bit 9 maakt onderscheid tussen attribute en color
     // TODO: vallen attribute en color samen indien de bit9 op 0 wordt gezet???
-    
-	unsigned int colorTable = attributeTable & 0x1fc00; // bit 9 is reset
-	unsigned int attr = colorTable | 512;
+
+    unsigned int colorTable = attributeTable & 0x1fc00; // bit 9 is reset
+    unsigned int attr = colorTable | 512;
 
     // spriteOverlay and lineCount
-    for (int i=0;i<256;++i) lineCount[i] = 0;
-    for (int i=0;i<(256*256);++i) spriteOverlay[i] = 0;
+    for (int i = 0; i < 256; ++i) lineCount[i] = 0;
+    for (int i = 0; i < (256 * 256); ++i) spriteOverlay[i] = 0;
 
-	if (vdpModeRegister1 & SI) {
-
+    if (vdpModeRegister1 & SI)
+    {
         // size 16x16
-        for (int sprite=0;sprite<32;sprite++, attr += 2) {
+        for (int sprite = 0; sprite < 32; sprite++, attr += 2)
+        {
             sy = vram[attr++];
             if (sy == 216) break;
             sx = vram[attr++];
             patternColumn = patternGeneratorTable + 8 * (vram[attr] & 0xfc);
 
-            for (int y=0;y<16;y++,colorTable++) {
+            for (int y = 0; y < 16; y++, colorTable++)
+            {
                 ++sy &= 255;
                 p1 = vram[patternColumn];
                 p2 = vram[16 + patternColumn++];
-                if (p1 || p2) {
+                if (p1 || p2)
+                {
                     lineCount[sy]++;
-                    if (lineCount[sy] > 8) {
+                    if (lineCount[sy] > 8)
+                    {
                         ninthSpriteDetected(sprite);
-                    } else {
+                    }
+                    else
+                    {
                         color = vram[colorTable];
                         drawSpriteMode2(sx, sy, p1, color);
-                        drawSpriteMode2(sx+8, sy, p2, color);
+                        drawSpriteMode2(sx + 8, sy, p2, color);
                     }
                 }
             }
         }
-    } else {
-
+    }
+    else
+    {
         // size 8x8
-        for (int sprite=0;sprite<32;sprite++, attr +=2) {
+        for (int sprite = 0; sprite < 32; sprite++, attr += 2)
+        {
             sy = vram[attr++];
             if (sy == 216) break;
             sx = vram[attr++];
             patternColumn = patternGeneratorTable + 8 * vram[attr];
-            
-            for (int y=0;y<8;y++,colorTable++) {
+
+            for (int y = 0; y < 8; y++, colorTable++)
+            {
                 ++sy &= 255;
                 p1 = vram[patternColumn++];
-                if (p1) {
+                if (p1)
+                {
                     lineCount[sy]++;
-                    if (lineCount[sy] > 8) {
+                    if (lineCount[sy] > 8)
+                    {
                         ninthSpriteDetected(sprite);
-                    } else {
+                    }
+                    else
+                    {
                         drawSpriteMode2(sx, sy, p1, vram[colorTable]);
                     }
                 }
@@ -243,19 +264,24 @@ void V9938sprites::updateSpriteOverlayMode2(nw_byte vdpModeRegister1) {
     }
 }
 
-void V9938sprites::drawSpriteMode1(int x, int y, unsigned int pattern, unsigned int color) {
-
+void V9938sprites::drawSpriteMode1(int x, int y, unsigned int pattern, unsigned int color)
+{
     int xc;
-    if (color & EC) x=-32;
+    if (color & EC) x = -32;
 
-    for (int x1=0;x1<8;x1++) {
+    for (int x1 = 0; x1 < 8; x1++)
+    {
         xc = x + x1;
-        if ((xc<0) || (xc>255)) continue;
-        if (pattern & (0x80 >> x1)) {
-            if (spriteOverlay[(y << 8) + xc]) {
+        if ((xc < 0) || (xc > 255)) continue;
+        if (pattern & (0x80 >> x1))
+        {
+            if (spriteOverlay[(y << 8) + xc])
+            {
                 // collision detected
                 vdp->statusReg[0] |= 0x20;
-            } else {
+            }
+            else
+            {
                 // no sprite at present location
                 spriteOverlay[(y << 8) + xc] = color & 15;
             }
@@ -263,32 +289,41 @@ void V9938sprites::drawSpriteMode1(int x, int y, unsigned int pattern, unsigned 
     }
 }
 
-void V9938sprites::drawSpriteMode2(int x, int y, unsigned int pattern, unsigned int color) {
-
+void V9938sprites::drawSpriteMode2(int x, int y, unsigned int pattern, unsigned int color)
+{
     unsigned int previousColor;
     int xc;
     bool priorityCancelled = color && CC;
     bool collisionDetectionEnabled = !(color && IC);
-    if (color & EC) x=-32;
+    if (color & EC) x = -32;
 
-    for (int x1=0;x1<8;x1++) {
+    for (int x1 = 0; x1 < 8; x1++)
+    {
         xc = x + x1;
-        if ((xc<0) || (xc>255)) continue;
-        if (pattern & (0x80 >> x1)) {
+        if ((xc < 0) || (xc > 255)) continue;
+        if (pattern & (0x80 >> x1))
+        {
             previousColor = spriteOverlay[(y << 8) + xc];
-            if (previousColor) {
+            if (previousColor)
+            {
                 // sprite with higher priority at present location
-                if (priorityCancelled) {
+                if (priorityCancelled)
+                {
                     // priority is cancelled, sprite is OR'ed with previous
                     spriteOverlay[(y << 8) + xc] = (color | previousColor) & 15;
-                } else {
-                    if (collisionDetectionEnabled) {
+                }
+                else
+                {
+                    if (collisionDetectionEnabled)
+                    {
                         collisionX = xc + 12;
                         collisionY = y + 8;
                         vdp->statusReg[0] |= 0x20;
                     }
                 }
-            } else {
+            }
+            else
+            {
                 // no sprite at present location
                 spriteOverlay[(y << 8) + xc] = color & 15;
             }
@@ -296,9 +331,8 @@ void V9938sprites::drawSpriteMode2(int x, int y, unsigned int pattern, unsigned 
     }
 }
 
-void V9938sprites::ninthSpriteDetected(int spriteNumber) {
-
+void V9938sprites::ninthSpriteDetected(int spriteNumber)
+{
     // 5th/9th spritenumber in S#0 and set bit 6
     vdp->statusReg[0] = (vdp->statusReg[0] & 0xE0) | spriteNumber | 0x40;
 }
-

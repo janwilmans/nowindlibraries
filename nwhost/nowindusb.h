@@ -3,7 +3,7 @@
 
 #include "NwhostExports.h"
 
-typedef void (*FP_void_const_char_p)(const char *);
+typedef void (*FP_void_const_char_p)(const char*);
 typedef void (*FP_void_void_p)(void);
 
 #include "NowindTypes.hh"
@@ -18,11 +18,11 @@ NWHOST_API void CCALL nowindusb_startup(void);
 NWHOST_API void CCALL nowindusb_cleanup(void);
 
 // insert a disk image, can be an image of a single partition or a real disk image
-NWHOST_API bool CCALL nowindusb_set_image(unsigned int driveNr, const char *filename);
+NWHOST_API bool CCALL nowindusb_set_image(unsigned int driveNr, const char* filename);
 
 // the filename here contains a harddisk image with a partition table
 // the partition table is used to find the start of the partition within the file
-NWHOST_API unsigned int CCALL nowindusb_set_harddisk_image(unsigned int driveNr, int partitionNumber, bool ignoreBootflag, const char *filename);
+NWHOST_API unsigned int CCALL nowindusb_set_harddisk_image(unsigned int driveNr, int partitionNumber, bool ignoreBootflag, const char* filename);
 
 NWHOST_API bool nowindusb_set_romdisk(unsigned int driveNr);
 
@@ -42,7 +42,6 @@ NWHOST_API void CCALL nowindusb_clear_startup_requests();
 
 NWHOST_API void CCALL nowindusb_add_request(const nwhost::byte* cRequest);
 NWHOST_API void CCALL nowindusb_add_startup_request(const nwhost::byte* cRequest);
-
 
 
 #endif /* _NOWINDUSB_H_ */

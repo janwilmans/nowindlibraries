@@ -7,15 +7,13 @@
 
 using namespace boost;
 
-class PyNwhostService: public nowind::NwhostService {
-	
-	public:
-		void start();
-    	void stop();
-    private:
-	    boost::shared_ptr<boost::thread> m_thread;
+class PyNwhostService : public nowind::NwhostService {
+public:
+    void start();
+    void stop();
 
-    
+private:
+    boost::shared_ptr<boost::thread> m_thread;
 };
 
 #endif

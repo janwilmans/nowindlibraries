@@ -9,28 +9,27 @@
 #define LIBGENERAL_EXPORTS_H
 
 #ifdef __cplusplus
-# define DECORATE extern "C"
+#define DECORATE extern "C"
 
 #ifdef WIN32
-# define CCALL __cdecl
+#define CCALL __cdecl
 #else
-# define CCALL
+#define CCALL
 #endif
 
 #else
-# define DECORATE
-# define CCALL
-#endif 
+#define DECORATE
+#define CCALL
+#endif
 
 #if defined(_MSC_VER) && !defined(NOWIND_STATIC_LIBS)
-    #ifdef GEN_API_EXPORT
-        #define GEN_API __declspec(dllexport)
-    #else
-        #define GEN_API __declspec(dllimport)
-    #endif
+#ifdef GEN_API_EXPORT
+#define GEN_API __declspec(dllexport)
 #else
-    #define GEN_API 
+#define GEN_API __declspec(dllimport)
+#endif
+#else
+#define GEN_API
 #endif // _MSC_VER
 
 #endif //LIBGENERAL_EXPORTS_H
-

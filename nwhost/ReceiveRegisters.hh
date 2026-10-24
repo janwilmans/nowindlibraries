@@ -8,17 +8,16 @@ namespace nwhost {
 
 class NowindHostSupport;
 
-class ReceiveRegisters
-{
+class ReceiveRegisters {
 public:
-	ReceiveRegisters();
-	virtual ~ReceiveRegisters();
-	void initialize(NowindHostSupport* aSupport);
+    ReceiveRegisters();
+    virtual ~ReceiveRegisters();
+    void initialize(NowindHostSupport* aSupport);
 
     void send();
     void ack(byte tail);
     bool isDone() const;
-    
+
     void clear();
     void setF(byte data);
     void setA(byte data);
@@ -27,17 +26,17 @@ public:
     void setHL(word data);
     void setIX(word data);
     void setIY(word data);
-        
+
 private:
     void sendData();
-	word processedData;
-	word transferSize;
-	byte header;
-	int errors;
+    word processedData;
+    word transferSize;
+    byte header;
+    int errors;
 
     NowindHostSupport* nwhSupport;
-    std::vector<byte> buffer;       // work buffer for current tranfer
-	bool done;
+    std::vector<byte> buffer; // work buffer for current tranfer
+    bool done;
 };
 
 } // namespace nwhost

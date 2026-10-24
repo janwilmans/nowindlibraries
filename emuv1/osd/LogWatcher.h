@@ -10,27 +10,24 @@
  * The LogWatcher class 
  */
 class LogWatcher {
-
 private:
-		LogWatcher();
-		std::list<std::string> textBuffer;
-		bool update;
-		bool displayTail;
+    LogWatcher();
+    std::list<std::string> textBuffer;
+    bool update;
+    bool displayTail;
 
-        std::list<std::string> logBuffer;		
-		std::list<std::string>::iterator logIterator;
-        
+    std::list<std::string> logBuffer;
+    std::list<std::string>::iterator logIterator;
+
 public:
-		~LogWatcher();
-		static LogWatcher * Instance();
-		
-		std::list<std::string> *getTextBuffer();
+    ~LogWatcher();
+    static LogWatcher* Instance();
 
-		bool    handleKeyEvent(SDL_Event *);
-        void    updateTextBuffer();
-        void    addLogLine(char *);
+    std::list<std::string>* getTextBuffer();
 
+    bool handleKeyEvent(SDL_Event*);
+    void updateTextBuffer();
+    void addLogLine(char*);
 };
 
 #endif
-

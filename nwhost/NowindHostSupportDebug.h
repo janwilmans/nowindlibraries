@@ -8,16 +8,15 @@
 */
 
 #include "NowindHostSupport.hh"
-#include <stdarg.h>		// for va_list
+#include <stdarg.h> // for va_list
 
 namespace nwhost {
 
-class NowindHostSupportDebug : public NowindHostSupport
-{
+class NowindHostSupportDebug : public NowindHostSupport {
 public:
-	NowindHostSupportDebug();
-	virtual ~NowindHostSupportDebug();
-	virtual void debugMessage(const char *cFormat, ...) const;
+    NowindHostSupportDebug();
+    virtual ~NowindHostSupportDebug();
+    virtual void debugMessage(const char* cFormat, ...) const;
 };
 
 } // namespace nowind

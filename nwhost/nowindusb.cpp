@@ -26,7 +26,7 @@ static FP_void_void_p mDataAvailable_callback = 0;
 
 /* some global instances */
 
-nwhost::NowindHost * nowindHost;
+nwhost::NowindHost* nowindHost;
 typedef std::vector<DiskHandler*> Drives;
 Drives drives;
 
@@ -49,171 +49,184 @@ void nowindusb_set_debug_callback(FP_void_const_char_p aHostdebug_callback)
 }
 
 // actually write a message to an output
-void nowindusb_debug(const char *msg)
+void nowindusb_debug(const char* msg)
 {
-    char lTemp[MAXMSG]; lTemp[0] = 0;
-    // if the host registered a debug output callback function, 
+    char lTemp[MAXMSG];
+    lTemp[0] = 0;
+    // if the host registered a debug output callback function,
     // pass the output to it
-    if (mDebug_callback) {
+    if (mDebug_callback)
+    {
         Util::snprintf(lTemp, MAXMSG, "[nwhost] %s", msg);
         mDebug_callback(lTemp);
-    }  
+    }
 }
 
 // the DBERR macro uses this method to wrap vsprintf for convenience
-void nowindusb_debug_wrap_sprintf(const char *cFormat, ...)
+void nowindusb_debug_wrap_sprintf(const char* cFormat, ...)
 {
-	va_list arg_list;
-	char scratch[MAXMSG];		// notice: HARDCODED limit of MAXMSG bytes !
-	
-	va_start (arg_list, cFormat);  
-    Util::vsnprintf(scratch, MAXMSG, cFormat, arg_list);
-	va_end (arg_list);
+    va_list arg_list;
+    char scratch[MAXMSG]; // notice: HARDCODED limit of MAXMSG bytes !
 
-	nowindusb_debug(scratch);
+    va_start(arg_list, cFormat);
+    Util::vsnprintf(scratch, MAXMSG, cFormat, arg_list);
+    va_end(arg_list);
+
+    nowindusb_debug(scratch);
 }
 
 void nowindusb_startup(void)
 {
-	drives.push_back(new ImageHandler());
-	nowindHost = new nwhost::NowindHostDebug(drives);
-	nowindHost->initialize();
-	nowindusb_debug("nowindusb_startup\n");
+    drives.push_back(new ImageHandler());
+    nowindHost = new nwhost::NowindHostDebug(drives);
+    nowindHost->initialize();
+    nowindusb_debug("nowindusb_startup\n");
 
-	//nowindusb_set_image(0, "c:\\disk_dos2.dsk");
-	//nowindusb_set_image(1, "c:\\disk_hd.dsk");
+    //nowindusb_set_image(0, "c:\\disk_dos2.dsk");
+    //nowindusb_set_image(1, "c:\\disk_hd.dsk");
 }
 
 void nowindusb_cleanup(void)
 {
     nowindusb_debug("nowindusb_cleanup\n");
     delete nowindHost;
-    for (Drives::iterator it = drives.begin(); it != drives.end(); ++it) {
+    for (Drives::iterator it = drives.begin(); it != drives.end(); ++it)
+    {
         delete *it;
     }
 }
 
-unsigned int NowindHost_InsertPartition(unsigned int driveNr, unsigned int partitionNumber, std::string aHarddiskimage) {
-
-	if (driveNr < MAX_MEDIA) {
-		// don't use openPartitionImage directly, we want to report results to the user
-		return nowindusb_set_harddisk_image(driveNr, partitionNumber, false, aHarddiskimage.c_str());
-	}
-	DBERR("Cannot insert %s:%u, out of drives\n", aHarddiskimage.c_str(), partitionNumber);
-	return 0;
+unsigned int NowindHost_InsertPartition(unsigned int driveNr, unsigned int partitionNumber, std::string aHarddiskimage)
+{
+    if (driveNr < MAX_MEDIA)
+    {
+        // don't use openPartitionImage directly, we want to report results to the user
+        return nowindusb_set_harddisk_image(driveNr, partitionNumber, false, aHarddiskimage.c_str());
+    }
+    DBERR("Cannot insert %s:%u, out of drives\n", aHarddiskimage.c_str(), partitionNumber);
+    return 0;
 }
 
-unsigned int NowindHost_InsertHarddiskPartitions(unsigned int driveNr, std::string aHarddiskimage) {
+unsigned int NowindHost_InsertHarddiskPartitions(unsigned int driveNr, std::string aHarddiskimage)
+{
+    std::list<PartitionInfo> partitionList;
+    unsigned int insertedPartitions = 0;
 
-	std::list<PartitionInfo> partitionList;
-	unsigned int insertedPartitions = 0;
+    Image* hdImage = new Image();
+    if (!hdImage->openDiskImage(aHarddiskimage))
+    {
+        DBERR("Cannot open harddisk image %s\n", aHarddiskimage.c_str());
+        delete hdImage;
+        return 0;
+    }
+    const nw_byte* partitionTable = hdImage->GetNewPartitionTable();
+    delete hdImage;
 
-	Image * hdImage = new Image();
-	if (!hdImage->openDiskImage(aHarddiskimage))
-	{
-		DBERR("Cannot open harddisk image %s\n", aHarddiskimage.c_str());
-		delete hdImage;
-		return 0;
-	}
-	const nw_byte * partitionTable = hdImage->GetNewPartitionTable();
-	delete hdImage;
+    for (int i = 0; i < 30; i++)
+    {
+        PartitionInfo p;
+        p.index = i;
+        Image::GetPartitionInfo(partitionTable, &p, i);
+        if (p.startLBA == 0 || p.length == 0) break;
+        partitionList.push_back(p);
+        DBERR("Partition: %u, bootable: %u, disabled: %u, readonly: %u\n", i, p.bootable, p.disabled, p.readonly);
+    }
 
-	for (int i=0;i<30;i++)
-	{
-		PartitionInfo p;
-		p.index = i;
-		Image::GetPartitionInfo(partitionTable, &p, i);
-		if (p.startLBA == 0 || p.length == 0) break;
-		partitionList.push_back(p);
-		DBERR("Partition: %u, bootable: %u, disabled: %u, readonly: %u\n", i, p.bootable, p.disabled, p.readonly);
-	}
+    for (std::list<PartitionInfo>::iterator p = partitionList.begin(); p != partitionList.end(); p++)
+    {
+        if (p->bootable)
+        {
+            p->inserted = true;
+            unsigned int result = NowindHost_InsertPartition(driveNr, p->index, aHarddiskimage);
+            if (result > 0)
+            {
+                driveNr++;
+                insertedPartitions++;
+            }
+            break;
+        }
+    }
 
-	for(std::list<PartitionInfo>::iterator p = partitionList.begin(); p != partitionList.end();p++)
-	{
-		if (p->bootable) {
-			p->inserted = true;
-			unsigned int result = NowindHost_InsertPartition(driveNr, p->index, aHarddiskimage);
-			if (result > 0)
-			{
-				driveNr++;
-				insertedPartitions++;
-			}
-			break;
-		}
-	}
+    for (std::list<PartitionInfo>::iterator p = partitionList.begin(); p != partitionList.end(); p++)
+    {
+        if (p->inserted) continue;
+        unsigned int result = NowindHost_InsertPartition(driveNr, p->index, aHarddiskimage);
+        if (result > 0)
+        {
+            driveNr++;
+            insertedPartitions++;
+        }
+    }
 
-	for(std::list<PartitionInfo>::iterator p = partitionList.begin(); p != partitionList.end();p++)
-	{
-		if (p->inserted) continue;
-		unsigned int result = NowindHost_InsertPartition(driveNr, p->index, aHarddiskimage);
-		if (result > 0)
-		{
-			driveNr++;
-			insertedPartitions++;
-		}
-	}
-
-	delete [] partitionTable;
-	return insertedPartitions;
+    delete[] partitionTable;
+    return insertedPartitions;
 }
 
 /* usb communication */
 
 bool nowindusb_add_drive(unsigned int driveNr)
 {
-	DBERR("nowindusb_add_drive %u\n", driveNr);
+    DBERR("nowindusb_add_drive %u\n", driveNr);
 
-	if (driveNr >= MAX_MEDIA) {
-		DBERR("Too many images!\n");
-		return false;
-	}
+    if (driveNr >= MAX_MEDIA)
+    {
+        DBERR("Too many images!\n");
+        return false;
+    }
 
-	while (drives.size() <= driveNr) {
-		drives.push_back(new ImageHandler());
-	}
-	return true;
+    while (drives.size() <= driveNr)
+    {
+        drives.push_back(new ImageHandler());
+    }
+    return true;
 }
 
-bool nowindusb_set_image(unsigned int driveNr, const char *filename)
+bool nowindusb_set_image(unsigned int driveNr, const char* filename)
 {
-	DBERR("nowindusb_set_image %u, %s\n", driveNr, filename);
+    DBERR("nowindusb_set_image %u, %s\n", driveNr, filename);
 
     if (!nowindusb_add_drive(driveNr))
     {
         DBERR("ignoring image %s\n", filename);
         return false;
     }
-	int result = drives[driveNr]->insertDisk(filename);
-	return (result == 0);
+    int result = drives[driveNr]->insertDisk(filename);
+    return (result == 0);
 }
 
-unsigned int nowindusb_set_harddisk_image(unsigned int driveNr, int partitionNumber, bool ignoreBootflag, const char *filename)
+unsigned int nowindusb_set_harddisk_image(unsigned int driveNr, int partitionNumber, bool ignoreBootflag, const char* filename)
 {
-	DBERR("nowindusb_set_harddisk_image %u, %s\n", driveNr, filename);
-	bool result = false;
-	if (partitionNumber == 0xff)
-	{
-		// use autodetection
-		return NowindHost_InsertHarddiskPartitions(driveNr, filename);
-	}
+    DBERR("nowindusb_set_harddisk_image %u, %s\n", driveNr, filename);
+    bool result = false;
+    if (partitionNumber == 0xff)
+    {
+        // use autodetection
+        return NowindHost_InsertHarddiskPartitions(driveNr, filename);
+    }
 
-	// make sure it exists, todo: re-design this?
-	nowindusb_set_image(driveNr, filename);
+    // make sure it exists, todo: re-design this?
+    nowindusb_set_image(driveNr, filename);
 
-	if (driveNr < drives.size()) {
-		ImageHandler* imageHandler = static_cast<ImageHandler*>(drives[driveNr]);
-		DBERR(" %s part: %u -> drive: %u\n", filename, partitionNumber, driveNr);
-		Image * image = static_cast<Image *> (imageHandler->getSectorMedium());
-		bool success = image->openPartitionImage(partitionNumber, ignoreBootflag, filename);
-		if (success) {
-			result = true;
-		} else {
-			DBERR(" %s part: %u not inserted (disabled?)\n", filename, partitionNumber);
-		}
-    } else {
+    if (driveNr < drives.size())
+    {
+        ImageHandler* imageHandler = static_cast<ImageHandler*>(drives[driveNr]);
+        DBERR(" %s part: %u -> drive: %u\n", filename, partitionNumber, driveNr);
+        Image* image = static_cast<Image*>(imageHandler->getSectorMedium());
+        bool success = image->openPartitionImage(partitionNumber, ignoreBootflag, filename);
+        if (success)
+        {
+            result = true;
+        }
+        else
+        {
+            DBERR(" %s part: %u not inserted (disabled?)\n", filename, partitionNumber);
+        }
+    }
+    else
+    {
         DBERR("Too many images! (%s ignored)\n", filename);
     }
-	return result;
+    return result;
 }
 
 bool nowindusb_set_romdisk(unsigned int driveNr)
@@ -227,37 +240,38 @@ bool nowindusb_set_romdisk(unsigned int driveNr)
     return true;
 }
 
-void nowindusb_write(unsigned char value, unsigned int msTime)     // (msx -> pc)
+void nowindusb_write(unsigned char value, unsigned int msTime) // (msx -> pc)
 {
     nowindHost->write(value, msTime);
 }
 
-unsigned char nowindusb_read(void)  // (msx <- pc) for emulators
+unsigned char nowindusb_read(void) // (msx <- pc) for emulators
 {
     return nowindHost->read();
 }
 
 int nowindusb_attribute(nw_attribute aAttribute, bool aValue)
 {
-	switch (aAttribute) {
-	case enable_phantom_drives:
-		nowindHost->setEnablePhantomDrives(aValue);
-		break;
-	case allow_other_diskroms:
-		nowindHost->setAllowOtherDiskroms(aValue);
-		break;
-	case enable_dos2:
-		nowindHost->setEnableMSXDOS2(aValue);
-		break;
-	default:
-		break;
-	}
-	return 0;
+    switch (aAttribute)
+    {
+    case enable_phantom_drives:
+        nowindHost->setEnablePhantomDrives(aValue);
+        break;
+    case allow_other_diskroms:
+        nowindHost->setAllowOtherDiskroms(aValue);
+        break;
+    case enable_dos2:
+        nowindHost->setEnableMSXDOS2(aValue);
+        break;
+    default:
+        break;
+    }
+    return 0;
 }
 
 bool nowindusb_is_data_available()
 {
-	return nowindHost->isDataAvailable();
+    return nowindHost->isDataAvailable();
 }
 
 void nowindusb_clear_requests()
@@ -265,7 +279,7 @@ void nowindusb_clear_requests()
     nowindHost->clearRequests();
 }
 
-void nowindusb_add_request(const nwhost::byte* cRequest)     // formatted LL (length) CB (command byte) LL CB CB CB ... ie. 03 0A 0B 0C
+void nowindusb_add_request(const nwhost::byte* cRequest) // formatted LL (length) CB (command byte) LL CB CB CB ... ie. 03 0A 0B 0C
 {
     std::vector<nwhost::byte> request;
     int len = cRequest[0];
@@ -273,7 +287,7 @@ void nowindusb_add_request(const nwhost::byte* cRequest)     // formatted LL (le
     {
         DBERR("add_request to large!\n");
     }
-    for (int i=0;i<len;i++)
+    for (int i = 0; i < len; i++)
     {
         request.push_back(cRequest[i]);
     }
@@ -285,7 +299,7 @@ void nowindusb_clear_startup_requests()
     nowindHost->clearStartupRequests();
 }
 
-void nowindusb_add_startup_request(const nwhost::byte* cRequest)     // formatted LL (length) CB (command byte) LL CB CB CB ... ie. 03 0A 0B 0C
+void nowindusb_add_startup_request(const nwhost::byte* cRequest) // formatted LL (length) CB (command byte) LL CB CB CB ... ie. 03 0A 0B 0C
 {
     std::vector<nwhost::byte> request;
     int len = cRequest[0];
@@ -293,10 +307,9 @@ void nowindusb_add_startup_request(const nwhost::byte* cRequest)     // formatte
     {
         DBERR("add_request to large!\n");
     }
-    for (int i=0;i<len;i++)
+    for (int i = 0; i < len; i++)
     {
         request.push_back(cRequest[i]);
     }
     nowindHost->addStartupRequest(request);
 }
-

@@ -9,7 +9,8 @@
 class MapperKonami5 : public MemoryDevice {
 private:
     unsigned int switchedBlock[4];
-	SCC *scc;
+    SCC* scc;
+
 public:
     MapperKonami5(std::string filename);
     nw_byte read(nw_word address);
@@ -20,5 +21,3 @@ public:
 };
 
 #endif
-
-

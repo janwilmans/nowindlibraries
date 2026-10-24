@@ -9,9 +9,9 @@ namespace nwhost {
 
 class DataBlock {
 public:
-    DataBlock(unsigned int aNumber, const std::vector <byte >& sourceData, unsigned int offset, word aTransferAddress, word aSize);
+    DataBlock(unsigned int aNumber, const std::vector<byte>& sourceData, unsigned int offset, word aTransferAddress, word aSize);
     ~DataBlock();
-  
+
     word number;
     byte header;
     word size;
@@ -22,7 +22,6 @@ public:
 
 private:
     DataBlock();
-
 };
 
 #endif // DATABLOCK_HH

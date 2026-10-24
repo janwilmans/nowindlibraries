@@ -11,7 +11,7 @@ NowindHostSupport::~NowindHostSupport()
 {
 }
 
-void NowindHostSupport::debugMessage(const char *, ...) const
+void NowindHostSupport::debugMessage(const char*, ...) const
 {
     // override this method in a subclass to log messages
 }
@@ -19,38 +19,38 @@ void NowindHostSupport::debugMessage(const char *, ...) const
 // send:  pc -> msx
 void NowindHostSupport::send(byte value)
 {
-	response.send(value);
+    response.send(value);
 }
 
 void NowindHostSupport::send16(word value)
 {
-	response.send16(value);
+    response.send16(value);
 }
 
 void NowindHostSupport::purge()
 {
-	response.purge();
+    response.purge();
 }
 
 void NowindHostSupport::sendHeader()
 {
-	response.sendHeader();
+    response.sendHeader();
 }
 
 byte NowindHostSupport::peek() const
 {
-	return response.peek();
+    return response.peek();
 }
 
 // receive:  msx <- pc
 byte NowindHostSupport::read()
 {
-	return response.read();
+    return response.read();
 }
 
 bool NowindHostSupport::isDataAvailable() const
 {
-	return response.isDataAvailable();
+    return response.isDataAvailable();
 }
 
 

@@ -9,13 +9,12 @@ namespace nwhost {
 class SectorMedium;
 
 class DiskHandler {
-
 public:
-		virtual SectorMedium * getSectorMedium() = 0;
-		virtual int insertDisk(std::string filename) = 0;
-		virtual bool diskChanged() = 0;
-		virtual bool isRomdisk() = 0;
-		virtual ~DiskHandler() {};
+    virtual SectorMedium* getSectorMedium() = 0;
+    virtual int insertDisk(std::string filename) = 0;
+    virtual bool diskChanged() = 0;
+    virtual bool isRomdisk() = 0;
+    virtual ~DiskHandler() {};
 };
 
 } // namespace nowind

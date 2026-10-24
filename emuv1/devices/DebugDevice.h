@@ -6,23 +6,20 @@
 #include "msxtypes.h"
 
 class DebugDevice {
-	
 private:
-	
-	nw_byte		modeRegister;
-	
-	void		printHex(nw_byte);	
-	void 		printBinary(nw_byte);
-	void		printDecimal(nw_byte);
-	void		printAscii(nw_byte);
+    nw_byte modeRegister;
+
+    void printHex(nw_byte);
+    void printBinary(nw_byte);
+    void printDecimal(nw_byte);
+    void printAscii(nw_byte);
 
 public:
-				DebugDevice();
-				~DebugDevice();
+    DebugDevice();
+    ~DebugDevice();
 
-	void 		setModeRegister(nw_byte);
-	void 		writeData(nw_byte);
+    void setModeRegister(nw_byte);
+    void writeData(nw_byte);
 };
 
 #endif
-

@@ -7,18 +7,17 @@
 
 namespace nwhost {
 
-class Response : private std::deque<byte>
-{
+class Response : private std::deque<byte> {
 public:
-	Response();
-	virtual ~Response();
+    Response();
+    virtual ~Response();
 
     void send(byte value);
     void send16(word value);
 
     void purge();
     void sendHeader();
-    
+
     size_t getSize();
     byte peek() const;
     byte read();

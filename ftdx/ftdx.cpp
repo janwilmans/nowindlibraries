@@ -11,19 +11,19 @@
 #include "libgeneral.h"
 
 #ifdef WIN32
-    #define FTDI_BINARY_DRIVER
+#define FTDI_BINARY_DRIVER
 #endif
 
 #ifdef FTDI_BINARY_DRIVER
-    #include "ConFTD2XX.h"
+#include "ConFTD2XX.h"
 #else
-    #include "ConFtdiSio.h"
+#include "ConFtdiSio.h"
 
-    // the libftdi works on libusb-win32 aswell, _but_ libusb relies on the
-    // windows usbser.dll driver which performs very poorly 
-    // and because we do not want to rely on libusb0.dll if we are never going to use it
-    // it is excluded from the windows build
-    #include "ConLibFtdi.h"
+// the libftdi works on libusb-win32 aswell, _but_ libusb relies on the
+// windows usbser.dll driver which performs very poorly
+// and because we do not want to rely on libusb0.dll if we are never going to use it
+// it is excluded from the windows build
+#include "ConLibFtdi.h"
 #endif
 
 using namespace general;
@@ -44,7 +44,7 @@ ftdx::UsbStream* ftdx::newUsbStream()
     // on linux we favor libusb to minimize dependencies on propriatary binaries
     Util::debug("Using LIBUSB + LIBFTDI\n");
     lUsbStream = new ConLibFtdi();
-    
+
     // LIBUSB driver is a user-space driver, maybe slower in some cases?
     // this is strange because this shouldnt have any effect on the polling rate
     // (which is an important factor in retries)
@@ -54,27 +54,27 @@ ftdx::UsbStream* ftdx::newUsbStream()
 
 ftdx::UsbStream* ftdx::newUsbStream(FtdiDriverType aDriverType)
 {
-	UsbStream* lUsbStream = 0;
-	switch (aDriverType)
-	{
+    UsbStream* lUsbStream = 0;
+    switch (aDriverType)
+    {
 #ifdef FTDI_BINARY_DRIVER
-	case eDRIVER_FTD2XX:
-		lUsbStream = new ConFTD2XX();
-		break;
+    case eDRIVER_FTD2XX:
+        lUsbStream = new ConFTD2XX();
+        break;
 #else
-	case eDRIVER_LibUsb:
-		lUsbStream = new ConLibFtdi();
-		break;
-	case eDRIVER_FtdiSio:
-		lUsbStream = new ConFtdiSio();
-		break;
+    case eDRIVER_LibUsb:
+        lUsbStream = new ConLibFtdi();
+        break;
+    case eDRIVER_FtdiSio:
+        lUsbStream = new ConFtdiSio();
+        break;
 #endif
 
-    // todo: support for FTDI's FTSER2K.SYS (or any other virtual serial port driver) on windows (COMx:) and linux /dev/TTYSx?
+        // todo: support for FTDI's FTSER2K.SYS (or any other virtual serial port driver) on windows (COMx:) and linux /dev/TTYSx?
 
-	default:
-		Util::debug("unknown driver type %u specified, null returned\n", aDriverType);
-		break;	
-	}
-	return lUsbStream;	
+    default:
+        Util::debug("unknown driver type %u specified, null returned\n", aDriverType);
+        break;
+    }
+    return lUsbStream;
 }

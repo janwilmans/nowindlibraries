@@ -10,7 +10,7 @@
 #include <algorithm>
 
 #define DBERR nwhSupport->debugMessage
-#define ToUpper(s) std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper)
+#define ToUpper(s) std::transform(s.begin(), s.end(), s.begin(), (int (*)(int))toupper)
 
 namespace nwhost {
 
@@ -26,8 +26,8 @@ BDOSProxy::BDOSProxy()
 void BDOSProxy::initialize(NowindHostSupport* aSupport)
 {
     nwhSupport = aSupport;
-	blockRead.initialize(aSupport);
-	receiveRegisters.initialize(aSupport);
+    blockRead.initialize(aSupport);
+    receiveRegisters.initialize(aSupport);
 }
 
 BDOSProxy::~BDOSProxy()
@@ -108,77 +108,77 @@ void BDOSProxy::WriteRandomFileWithZeros(const Command& command, Response& respo
 
 bool BDOSProxy::OpenFile(const Command& command, Response& response)
 {
-	static BdosState findOpenFile = BDOSCMD_READY;
+    static BdosState findOpenFile = BDOSCMD_READY;
 
-	// this is true when the response is being sent
-	if (findOpenFile == BDOSCMD_EXECUTING)
-	{
-		blockRead.ack(command.data);
-		if (blockRead.isDone())
-		{
-			findOpenFile = BDOSCMD_READY;
-			return false;
-		}
-		return true;
-	}
+    // this is true when the response is being sent
+    if (findOpenFile == BDOSCMD_EXECUTING)
+    {
+        blockRead.ack(command.data);
+        if (blockRead.isDone())
+        {
+            findOpenFile = BDOSCMD_READY;
+            return false;
+        }
+        return true;
+    }
 
-	bool found = false;
+    bool found = false;
     string filename = command.getFilenameFromExtraData();
-    
+
     //command.reportFCB(&command.extraData[0]);
-    
+
     // TODO: use findfirst here to support wildcards!
     // TODO: maybe handle DOS device names (e.g. con, lpt, aux)
     DBERR("BDOSProxy::OpenFile FCB for: %s\n", filename.c_str());
     //bdosFiles.push_back( new fstream(imageName.c_str(), ios::binary | ios::in);
     bdosfile = new fstream(filename.c_str(), ios::binary | ios::in);
-	bdosfile->seekg(0, ios::end);
-	size_t filesize = bdosfile->tellg();
-	bdosfile->seekg(0, ios::beg);
+    bdosfile->seekg(0, ios::end);
+    size_t filesize = bdosfile->tellg();
+    bdosfile->seekg(0, ios::beg);
 
-	vector<byte> buffer(command.extraData);
-	buffer.resize(37);
+    vector<byte> buffer(command.extraData);
+    buffer.resize(37);
 
     // http://www.konamiman.com/msx/msx2th/th-3.txt
     // "opening" a file
 
-	buffer[0x0e] = 0;   // set default record size to 512 (tested) // should we test for CP/M and set 128 is some cases, not sure.
-    buffer[0x0f] = 2;   
-	
-	buffer[0x10] = filesize & 0xff;
-	buffer[0x11] = (filesize >> 8) & 0xff;
-	buffer[0x12] = (filesize >> 16) & 0xff;
-	buffer[0x13] = (filesize >> 24) & 0xff;
+    buffer[0x0e] = 0; // set default record size to 512 (tested) // should we test for CP/M and set 128 is some cases, not sure.
+    buffer[0x0f] = 2;
 
-	buffer[0x18] = 0; 
-	buffer[0x19] = 0; 
-	buffer[0x1a] = 0; 
-	buffer[0x1b] = 0; 
-	buffer[0x1c] = 0; 
-	buffer[0x1d] = 0; 
-	buffer[0x1e] = 0; 
-	buffer[0x1f] = 0; 
-	
-	buffer[0x20] = 0; 
-	buffer[0x21] = 0; 
-	buffer[0x22] = 0; 
-	buffer[0x23] = 0; 
+    buffer[0x10] = filesize & 0xff;
+    buffer[0x11] = (filesize >> 8) & 0xff;
+    buffer[0x12] = (filesize >> 16) & 0xff;
+    buffer[0x13] = (filesize >> 24) & 0xff;
+
+    buffer[0x18] = 0;
+    buffer[0x19] = 0;
+    buffer[0x1a] = 0;
+    buffer[0x1b] = 0;
+    buffer[0x1c] = 0;
+    buffer[0x1d] = 0;
+    buffer[0x1e] = 0;
+    buffer[0x1f] = 0;
+
+    buffer[0x20] = 0;
+    buffer[0x21] = 0;
+    buffer[0x22] = 0;
+    buffer[0x23] = 0;
 
 
-	//command.reportFCB(&buffer[0]);
-    
+    //command.reportFCB(&buffer[0]);
+
     if (bdosfile->fail())
     {
-		blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
-		findOpenFile = BDOSCMD_READY;
+        blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
+        findOpenFile = BDOSCMD_READY;
     }
     else
     {
-		blockRead.init(command.getDE(), buffer.size(), buffer);
-		findOpenFile = BDOSCMD_EXECUTING;
-		found = true;
+        blockRead.init(command.getDE(), buffer.size(), buffer);
+        findOpenFile = BDOSCMD_EXECUTING;
+        found = true;
     }
-	return found;
+    return found;
 }
 
 void BDOSProxy::getVectorFromFileName(vector<byte>& buffer, string filename)
@@ -186,73 +186,71 @@ void BDOSProxy::getVectorFromFileName(vector<byte>& buffer, string filename)
     buffer.resize(12);
     string file = filename;
     string ext;
-    
+
     if (filename == "." || filename == "..")
     {
-    
     }
     else
     {
-        int point = filename.find('.');   
+        int point = filename.find('.');
         if (point != -1)
         {
             file = filename.substr(0, point);
-            ext = filename.substr(point+1);
+            ext = filename.substr(point + 1);
         }
     }
 
     if (file.size() > 8) file.resize(8);
     if (ext.size() > 3) ext.resize(3);
-    for (size_t i=1; i< buffer.size(); i++)
+    for (size_t i = 1; i < buffer.size(); i++)
     {
         buffer[i] = 32;
     }
-        
-    buffer[0] = 0;
-    for (size_t i=0; i < file.size() ;i++)
-    {
-        buffer[i+1] = file[i];
-    }
-    for (size_t i=0; i < ext.size(); i++)
-    {
-        buffer[i+9] = ext[i];
-    }
 
+    buffer[0] = 0;
+    for (size_t i = 0; i < file.size(); i++)
+    {
+        buffer[i + 1] = file[i];
+    }
+    for (size_t i = 0; i < ext.size(); i++)
+    {
+        buffer[i + 9] = ext[i];
+    }
 }
 
 bool BDOSProxy::FindFileResponse(const Command& command, Response& response, size_t bufferSize)
 {
-	bool found = false;
-	std::filesystem::directory_iterator noMoreFiles; // past the end
-	if (findFirstIterator != noMoreFiles)
-	{
-		std::filesystem::path dirEntry = findFirstIterator->path();
-		std::string filename = dirEntry.filename().string();
-		std::string stem = dirEntry.filename().stem().string();
-		std::string ext = dirEntry.filename().extension().string();
+    bool found = false;
+    std::filesystem::directory_iterator noMoreFiles; // past the end
+    if (findFirstIterator != noMoreFiles)
+    {
+        std::filesystem::path dirEntry = findFirstIterator->path();
+        std::string filename = dirEntry.filename().string();
+        std::string stem = dirEntry.filename().stem().string();
+        std::string ext = dirEntry.filename().extension().string();
 
-		std::uintmax_t filesize = 0;
-		if (!std::filesystem::is_directory(dirEntry))
-		{
-			// todo filter directories, and add masks *.*
-			filesize = std::filesystem::file_size(dirEntry);
-		}
+        std::uintmax_t filesize = 0;
+        if (!std::filesystem::is_directory(dirEntry))
+        {
+            // todo filter directories, and add masks *.*
+            filesize = std::filesystem::file_size(dirEntry);
+        }
 
-		ToUpper(filename);
-		vector<byte> buffer;
-		getVectorFromFileName(buffer, filename);
-		buffer.resize(bufferSize);
+        ToUpper(filename);
+        vector<byte> buffer;
+        getVectorFromFileName(buffer, filename);
+        buffer.resize(bufferSize);
 
-		buffer[0x1d] = filesize & 0xff;
-		buffer[0x1e] = (filesize >> 8) & 0xff;
-		buffer[0x1f] = (filesize >> 16) & 0xff;
-		buffer[0x20] = (filesize >> 24) & 0xff;
+        buffer[0x1d] = filesize & 0xff;
+        buffer[0x1e] = (filesize >> 8) & 0xff;
+        buffer[0x1f] = (filesize >> 16) & 0xff;
+        buffer[0x20] = (filesize >> 24) & 0xff;
 
-		blockRead.init(command.getHL(), buffer.size(), buffer);
-		found = true;
-		DBERR("file: %s size: %u\n", filename.c_str(), filesize);
-	}
-	return found;
+        blockRead.init(command.getHL(), buffer.size(), buffer);
+        found = true;
+        DBERR("file: %s size: %u\n", filename.c_str(), filesize);
+    }
+    return found;
 }
 
 // todo: load "thexder.bas" does not return to state_sync1!
@@ -260,115 +258,115 @@ bool BDOSProxy::FindFileResponse(const Command& command, Response& response, siz
 // returns true when the command is still executing.
 bool BDOSProxy::FindFirst(const Command& command, Response& response)
 {
-	static BdosState findFirstState = BDOSCMD_READY;
+    static BdosState findFirstState = BDOSCMD_READY;
 
-	// this is true when the FindFirst response is being sent
-	if (findFirstState == BDOSCMD_EXECUTING)
-	{
-		blockRead.ack(command.data);
-		if (blockRead.isDone())
-		{
-			findFirstState = BDOSCMD_READY;
-			return false;
-		}
-		return true;
-	}
+    // this is true when the FindFirst response is being sent
+    if (findFirstState == BDOSCMD_EXECUTING)
+    {
+        blockRead.ack(command.data);
+        if (blockRead.isDone())
+        {
+            findFirstState = BDOSCMD_READY;
+            return false;
+        }
+        return true;
+    }
 
-	bool found = false;
+    bool found = false;
     DBERR("%s\n", __FUNCTION__);
     string filename = command.getFilenameFromExtraData();
-    
-		const std::string targetPath = ".";
-		findFirstIterator = std::filesystem::directory_iterator(targetPath);
-		found = FindFileResponse(command, response, 36);
-		if (found) 
-		{
-			findFirstState = BDOSCMD_EXECUTING;
-		}
-		else
-		{
-			blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
-			findFirstState = BDOSCMD_READY;
-		}
-	return found;
+
+    const std::string targetPath = ".";
+    findFirstIterator = std::filesystem::directory_iterator(targetPath);
+    found = FindFileResponse(command, response, 36);
+    if (found)
+    {
+        findFirstState = BDOSCMD_EXECUTING;
+    }
+    else
+    {
+        blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
+        findFirstState = BDOSCMD_READY;
+    }
+    return found;
 }
 
 bool BDOSProxy::FindNext(const Command& command, Response& response)
 {
-	static BdosState findNextState = BDOSCMD_READY;
+    static BdosState findNextState = BDOSCMD_READY;
 
-	// this is true when the FindNext result is being sent
-	if (findNextState == BDOSCMD_EXECUTING)
-	{
-		blockRead.ack(command.data);
-		if (blockRead.isDone())
-		{
-			findNextState = BDOSCMD_READY;
-			return false;
-		}
-		return true;
-	}
+    // this is true when the FindNext result is being sent
+    if (findNextState == BDOSCMD_EXECUTING)
+    {
+        blockRead.ack(command.data);
+        if (blockRead.isDone())
+        {
+            findNextState = BDOSCMD_READY;
+            return false;
+        }
+        return true;
+    }
 
-	bool found = false;
+    bool found = false;
 
-		++findFirstIterator;
-		found = FindFileResponse(command, response, 64);
-		if (found) 
-		{
-			findNextState = BDOSCMD_EXECUTING;
-		}
-		else
-		{
-			blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
-			findNextState = BDOSCMD_READY;
-		}
-	return found;
+    ++findFirstIterator;
+    found = FindFileResponse(command, response, 64);
+    if (found)
+    {
+        findNextState = BDOSCMD_EXECUTING;
+    }
+    else
+    {
+        blockRead.cancelWithCode(BlockRead::BLOCKREAD_ERROR);
+        findNextState = BDOSCMD_READY;
+    }
+    return found;
 }
 
 bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
 {
-    static word dmaAddress = 0;         // BC
-    static word fcbAddress = 0;         // DE 
-    static word recordsRequested = 0;   // HL
-    static word recordSize = 0;         // from FCB
+    static word dmaAddress = 0;       // BC
+    static word fcbAddress = 0;       // DE
+    static word recordsRequested = 0; // HL
+    static word recordSize = 0;       // from FCB
 
     static word recordsToSend = 0;
-	static BdosState RandomBlockReadState = BDOSCMD_READY;      //todo: figure out how to reset if timeout occurs in command
-	static bool endOfFileReached = false;
+    static BdosState RandomBlockReadState = BDOSCMD_READY; //todo: figure out how to reset if timeout occurs in command
+    static bool endOfFileReached = false;
 
-	// this is true when the RandomBlockRead response (the data) is being sent
-	if (RandomBlockReadState == BDOSCMD_EXECUTING)
-	{
-		blockRead.ack(command.data);
-		
-		// the block data is done, continue to execute 'ReceiveRegisters'
-		if (blockRead.isDone())
-		{
-		    DBERR("receiveRegisters, endOfFileReached: %u\n", endOfFileReached ? 1:0);
-			RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS;
-			receiveRegisters.clear();
-    	    receiveRegisters.setA(endOfFileReached ? 1:0);
-			receiveRegisters.setF(0);
-			receiveRegisters.setBC(0);
-			receiveRegisters.setDE(fcbAddress);
-			receiveRegisters.setHL(recordsToSend);
-			receiveRegisters.setIX(fcbAddress);
-			receiveRegisters.setIY(0);
-			receiveRegisters.send();
+    // this is true when the RandomBlockRead response (the data) is being sent
+    if (RandomBlockReadState == BDOSCMD_EXECUTING)
+    {
+        blockRead.ack(command.data);
+
+        // the block data is done, continue to execute 'ReceiveRegisters'
+        if (blockRead.isDone())
+        {
+            DBERR("receiveRegisters, endOfFileReached: %u\n", endOfFileReached ? 1 : 0);
+            RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS;
+            receiveRegisters.clear();
+            receiveRegisters.setA(endOfFileReached ? 1 : 0);
+            receiveRegisters.setF(0);
+            receiveRegisters.setBC(0);
+            receiveRegisters.setDE(fcbAddress);
+            receiveRegisters.setHL(recordsToSend);
+            receiveRegisters.setIX(fcbAddress);
+            receiveRegisters.setIY(0);
+            receiveRegisters.send();
         }
-		return true; // true means the command is not done, so call me again when data arrives
-	}
-	else if (RandomBlockReadState == BDOSCMD_RECEIVE_REGISTERS)
-	{
-	    DBERR("getting receiveRegisters.ACK\n");
-	    receiveRegisters.ack(command.data);
-	    if (receiveRegisters.isDone())
-	    {
-	        RandomBlockReadState = BDOSCMD_READY;
-	        return false; // false means the command is done, so dont call me again.
-	    }
-	    return true;
-	}
+        return true; // true means the command is not done, so call me again when data arrives
+    }
+    else if (RandomBlockReadState == BDOSCMD_RECEIVE_REGISTERS)
+    {
+        DBERR("getting receiveRegisters.ACK\n");
+        receiveRegisters.ack(command.data);
+        if (receiveRegisters.isDone())
+        {
+            RandomBlockReadState = BDOSCMD_READY;
+            return false; // false means the command is done, so dont call me again.
+        }
+        return true;
+    }
 
     DBERR("BDOSProxy::RandomBlockRead()\n");
 
@@ -377,117 +375,117 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
     fcbAddress = command.getDE();
     recordsRequested = command.getHL();
     recordSize = command.getFCBrecordSize();
-    word offset = recordSize*command.getRandomAccessRecord();
+    word offset = recordSize * command.getRandomAccessRecord();
 
     string file = command.getFilenameFromExtraData();
     if (file.find("SOURCE.TXT") != string::npos)
     {
         //DBERR("CMD_INSTR_ON");
     }
-    
+
     DBERR("> FCB address: 0x%04X, offset: %u, recordsRequested: %u, recordSize: %u\n", fcbAddress, offset, recordsRequested, recordSize);
 
     std::vector<byte> buffer;
-	size_t actuallyRead = 0;
-    int amount = recordsRequested*recordSize;
-	if (amount > 0)
-	{
-		buffer.resize(amount); 
-		bdosfile->seekg(offset);
-		bdosfile->read((char*)&buffer[0], amount);
-		endOfFileReached = bdosfile->eof();
-		actuallyRead = bdosfile->gcount();
-		recordsToSend = actuallyRead / recordSize;   
-		int paddingBytes = actuallyRead % recordSize;
+    size_t actuallyRead = 0;
+    int amount = recordsRequested * recordSize;
+    if (amount > 0)
+    {
+        buffer.resize(amount);
+        bdosfile->seekg(offset);
+        bdosfile->read((char*)&buffer[0], amount);
+        endOfFileReached = bdosfile->eof();
+        actuallyRead = bdosfile->gcount();
+        recordsToSend = actuallyRead / recordSize;
+        int paddingBytes = actuallyRead % recordSize;
         if (paddingBytes != 0)
         {
             recordsToSend++;
         }
-        
+
         // add zero padding to partial record
         DBERR("padding: %u\n", paddingBytes);
-        for (int i=0; i<paddingBytes; ++i)
+        for (int i = 0; i < paddingBytes; ++i)
         {
-            buffer[actuallyRead+i] = 0;
+            buffer[actuallyRead + i] = 0;
         }
-	}
-	DBERR(" >> requested: %u records (%u bytes), actuallyRead: %u bytes\n", recordsRequested, amount, actuallyRead);
-    
+    }
+    DBERR(" >> requested: %u records (%u bytes), actuallyRead: %u bytes\n", recordsRequested, amount, actuallyRead);
+
     if (actuallyRead == 0)
     {
         DBERR("actuallyRead == 0, cancel tranfer\n");
-        // requesting more data after EOF is reached is legal, 
+        // requesting more data after EOF is reached is legal,
         // but we dont have anything to transfer, so let the blockRead exit.
         blockRead.cancelWithCode(BlockRead::BLOCKREAD_EXIT);
-        
-		RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS;
-		DBERR(" * RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS\n");
-		
-		receiveRegisters.clear();
-		receiveRegisters.setA(1);
-		receiveRegisters.setF(0);
+
+        RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS;
+        DBERR(" * RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS\n");
+
+        receiveRegisters.clear();
+        receiveRegisters.setA(1);
+        receiveRegisters.setF(0);
         receiveRegisters.setBC(0);
-		receiveRegisters.setDE(fcbAddress);
-		receiveRegisters.setHL(0);  // recordsToSend
-		receiveRegisters.setIX(fcbAddress);
-		receiveRegisters.setIY(0);
-		receiveRegisters.send();
-		return true;
+        receiveRegisters.setDE(fcbAddress);
+        receiveRegisters.setHL(0); // recordsToSend
+        receiveRegisters.setIX(fcbAddress);
+        receiveRegisters.setIY(0);
+        receiveRegisters.send();
+        return true;
     }
     else
     {
-        DBERR(" * RandomBlockReadState = BDOSCMD_EXECUTING, send back %u bytes\n", recordsToSend*recordSize);
+        DBERR(" * RandomBlockReadState = BDOSCMD_EXECUTING, send back %u bytes\n", recordsToSend * recordSize);
         dmaAddress = command.getBC();
-        blockRead.init(dmaAddress, recordsToSend*recordSize, buffer);
-		RandomBlockReadState = BDOSCMD_EXECUTING;
+        blockRead.init(dmaAddress, recordsToSend * recordSize, buffer);
+        RandomBlockReadState = BDOSCMD_EXECUTING;
     }
-	return true;
+    return true;
 }
 
 bool BDOSProxy::RandomBlockWrite(const Command& command, Response& response)
 {
-    static word dmaAddress = 0;         // BC
-    static word fcbAddress = 0;         // DE 
-    static word recordsRequested = 0;   // HL
-    static word recordSize = 0;         // from FCB
+    static word dmaAddress = 0;       // BC
+    static word fcbAddress = 0;       // DE
+    static word recordsRequested = 0; // HL
+    static word recordSize = 0;       // from FCB
 
     static word recordsToSend = 0;
-	static BdosState RandomBlockReadState = BDOSCMD_READY;      //todo: figure out how to reset if timeout occurs in command
-	static bool endOfFileReached = false;
+    static BdosState RandomBlockReadState = BDOSCMD_READY; //todo: figure out how to reset if timeout occurs in command
+    static bool endOfFileReached = false;
 
-	// this is true when the RandomBlockRead response (the data) is being sent
-	if (RandomBlockReadState == BDOSCMD_EXECUTING)
-	{
-		blockRead.ack(command.data);
-		
-		// the block data is done, continue to execute 'ReceiveRegisters'
-		if (blockRead.isDone())
-		{
-		    DBERR("receiveRegisters, endOfFileReached: %u\n", endOfFileReached ? 1:0);
-			RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS;
-			receiveRegisters.clear();
-    	    receiveRegisters.setA(endOfFileReached ? 1:0);
-			receiveRegisters.setF(0);
-			receiveRegisters.setBC(0);
-			receiveRegisters.setDE(fcbAddress);
-			receiveRegisters.setHL(recordsToSend);
-			receiveRegisters.setIX(fcbAddress);
-			receiveRegisters.setIY(0);
-			receiveRegisters.send();
+    // this is true when the RandomBlockRead response (the data) is being sent
+    if (RandomBlockReadState == BDOSCMD_EXECUTING)
+    {
+        blockRead.ack(command.data);
+
+        // the block data is done, continue to execute 'ReceiveRegisters'
+        if (blockRead.isDone())
+        {
+            DBERR("receiveRegisters, endOfFileReached: %u\n", endOfFileReached ? 1 : 0);
+            RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS;
+            receiveRegisters.clear();
+            receiveRegisters.setA(endOfFileReached ? 1 : 0);
+            receiveRegisters.setF(0);
+            receiveRegisters.setBC(0);
+            receiveRegisters.setDE(fcbAddress);
+            receiveRegisters.setHL(recordsToSend);
+            receiveRegisters.setIX(fcbAddress);
+            receiveRegisters.setIY(0);
+            receiveRegisters.send();
         }
-		return true; // true means the command is not done, so call me again when data arrives
-	}
-	else if (RandomBlockReadState == BDOSCMD_RECEIVE_REGISTERS)
-	{
-	    DBERR("getting receiveRegisters.ACK\n");
-	    receiveRegisters.ack(command.data);
-	    if (receiveRegisters.isDone())
-	    {
-	        RandomBlockReadState = BDOSCMD_READY;
-	        return false; // false means the command is done, so dont call me again.
-	    }
-	    return true;
-	}
+        return true; // true means the command is not done, so call me again when data arrives
+    }
+    else if (RandomBlockReadState == BDOSCMD_RECEIVE_REGISTERS)
+    {
+        DBERR("getting receiveRegisters.ACK\n");
+        receiveRegisters.ack(command.data);
+        if (receiveRegisters.isDone())
+        {
+            RandomBlockReadState = BDOSCMD_READY;
+            return false; // false means the command is done, so dont call me again.
+        }
+        return true;
+    }
 
     DBERR("BDOSProxy::RandomBlockRead()\n");
 
@@ -496,71 +494,71 @@ bool BDOSProxy::RandomBlockWrite(const Command& command, Response& response)
     fcbAddress = command.getDE();
     recordsRequested = command.getHL();
     recordSize = command.getFCBrecordSize();
-    word offset = recordSize*command.getRandomAccessRecord();
+    word offset = recordSize * command.getRandomAccessRecord();
 
     string file = command.getFilenameFromExtraData();
     if (file.find("SOURCE.TXT") != string::npos)
     {
         //DBERR("CMD_INSTR_ON");
     }
-    
+
     DBERR("> FCB address: 0x%04X, offset: %u, recordsRequested: %u, recordSize: %u\n", fcbAddress, offset, recordsRequested, recordSize);
 
     std::vector<byte> buffer;
-	size_t actuallyRead = 0;
-    int amount = recordsRequested*recordSize;
-	if (amount > 0)
-	{
-		buffer.resize(amount); 
-		bdosfile->seekg(offset);
-		bdosfile->read((char*)&buffer[0], amount);
-		endOfFileReached = bdosfile->eof();
-		actuallyRead = bdosfile->gcount();
-		recordsToSend = actuallyRead / recordSize;   
-		int paddingBytes = actuallyRead % recordSize;
+    size_t actuallyRead = 0;
+    int amount = recordsRequested * recordSize;
+    if (amount > 0)
+    {
+        buffer.resize(amount);
+        bdosfile->seekg(offset);
+        bdosfile->read((char*)&buffer[0], amount);
+        endOfFileReached = bdosfile->eof();
+        actuallyRead = bdosfile->gcount();
+        recordsToSend = actuallyRead / recordSize;
+        int paddingBytes = actuallyRead % recordSize;
         if (paddingBytes != 0)
         {
             recordsToSend++;
         }
-        
+
         // add zero padding to partial record
         DBERR("padding: %u\n", paddingBytes);
-        for (int i=0; i<paddingBytes; ++i)
+        for (int i = 0; i < paddingBytes; ++i)
         {
-            buffer[actuallyRead+i] = 0;
+            buffer[actuallyRead + i] = 0;
         }
-	}
-	DBERR(" >> requested: %u records (%u bytes), actuallyRead: %u bytes\n", recordsRequested, amount, actuallyRead);
-    
+    }
+    DBERR(" >> requested: %u records (%u bytes), actuallyRead: %u bytes\n", recordsRequested, amount, actuallyRead);
+
     if (actuallyRead == 0)
     {
         DBERR("actuallyRead == 0, cancel tranfer\n");
-        // requesting more data after EOF is reached is legal, 
+        // requesting more data after EOF is reached is legal,
         // but we dont have anything to transfer, so let the blockRead exit.
         blockRead.cancelWithCode(BlockRead::BLOCKREAD_EXIT);
-        
-		RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS;
-		DBERR(" * RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS\n");
-		
-		receiveRegisters.clear();
-		receiveRegisters.setA(1);
-		receiveRegisters.setF(0);
+
+        RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS;
+        DBERR(" * RandomBlockReadState = BDOSCMD_RECEIVE_REGISTERS\n");
+
+        receiveRegisters.clear();
+        receiveRegisters.setA(1);
+        receiveRegisters.setF(0);
         receiveRegisters.setBC(0);
-		receiveRegisters.setDE(fcbAddress);
-		receiveRegisters.setHL(0);  // recordsToSend
-		receiveRegisters.setIX(fcbAddress);
-		receiveRegisters.setIY(0);
-		receiveRegisters.send();
-		return true;
+        receiveRegisters.setDE(fcbAddress);
+        receiveRegisters.setHL(0); // recordsToSend
+        receiveRegisters.setIX(fcbAddress);
+        receiveRegisters.setIY(0);
+        receiveRegisters.send();
+        return true;
     }
     else
     {
-        DBERR(" * RandomBlockReadState = BDOSCMD_EXECUTING, send back %u bytes\n", recordsToSend*recordSize);
+        DBERR(" * RandomBlockReadState = BDOSCMD_EXECUTING, send back %u bytes\n", recordsToSend * recordSize);
         dmaAddress = command.getBC();
-        blockRead.init(dmaAddress, recordsToSend*recordSize, buffer);
-		RandomBlockReadState = BDOSCMD_EXECUTING;
+        blockRead.init(dmaAddress, recordsToSend * recordSize, buffer);
+        RandomBlockReadState = BDOSCMD_EXECUTING;
     }
-	return true;
+    return true;
 }
 
 

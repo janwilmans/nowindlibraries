@@ -23,214 +23,212 @@ class SectorMedium;
 
 // first and last 2 bytes and not send (never used anyway)
 struct dpbType {
-	byte ID;
-	byte SECSIZ_L;
-	byte SECSIZ_H;
-	byte DIRMSK;
-	byte DIRSHFT;
-	byte CLUSMSK;
-	byte CLUSSHFT;
-	byte FIRFAT_L;
-	byte FIRFAT_H;
-	byte FATCNT;
-	byte MAXENT;
-	byte FIRREC_L;
-	byte FIRREC_H;
-	byte MAXCLUS_L;
-	byte MAXCLUS_H;
-	byte FATSIZ;
-	byte FIRDIR_L;
-	byte FIRDIR_H;
-	byte FATADR_L;
-	byte FATADR_H;
+    byte ID;
+    byte SECSIZ_L;
+    byte SECSIZ_H;
+    byte DIRMSK;
+    byte DIRSHFT;
+    byte CLUSMSK;
+    byte CLUSSHFT;
+    byte FIRFAT_L;
+    byte FIRFAT_H;
+    byte FATCNT;
+    byte MAXENT;
+    byte FIRREC_L;
+    byte FIRREC_H;
+    byte MAXCLUS_L;
+    byte MAXCLUS_H;
+    byte FATSIZ;
+    byte FIRDIR_L;
+    byte FIRDIR_H;
+    byte FATADR_L;
+    byte FATADR_H;
 };
 
 // although this enum is used in only one place
 // it allows easy searching/matching between host and rom code.
 enum {
-    C_DSKIO       = 0x80,
-    C_DSKCHG      = 0x81,
-    C_GETDPB      = 0x82,
-    C_CHOICE      = 0x83,
-    C_DSKFMT      = 0x84,
-    C_DRIVES      = 0x85,
-    C_INIENV      = 0x86,
-    C_GETDATE     = 0x87,
-    C_DEVICEOPEN  = 0x88,
+    C_DSKIO = 0x80,
+    C_DSKCHG = 0x81,
+    C_GETDPB = 0x82,
+    C_CHOICE = 0x83,
+    C_DSKFMT = 0x84,
+    C_DRIVES = 0x85,
+    C_INIENV = 0x86,
+    C_GETDATE = 0x87,
+    C_DEVICEOPEN = 0x88,
     C_DEVICECLOSE = 0x89,
     C_DEVICERNDIO = 0x8a,
     C_DEVICEWRITE = 0x8b,
-    C_DEVICEREAD  = 0x8c,
-    C_DEVICEEOF   = 0x8d,
-    C_AUXIN       = 0x8e,
-    C_AUXOUT      = 0x8f,
-    C_MESSAGE     = 0x90,
-    C_CHANGEIMAGE  = 0x91,
+    C_DEVICEREAD = 0x8c,
+    C_DEVICEEOF = 0x8d,
+    C_AUXIN = 0x8e,
+    C_AUXOUT = 0x8f,
+    C_MESSAGE = 0x90,
+    C_CHANGEIMAGE = 0x91,
     C_GETDOSVERSION = 0x92,
-    C_CMDREQUEST  = 0x93,
-    C_BLOCKREAD   = 0x94,
-    C_BLOCKWRITE  = 0x95,
-    C_CPUINFO     = 0x96,
-    C_COMMAND     = 0x97,
-    C_STDOUT      = 0x98
+    C_CMDREQUEST = 0x93,
+    C_BLOCKREAD = 0x94,
+    C_BLOCKWRITE = 0x95,
+    C_CPUINFO = 0x96,
+    C_COMMAND = 0x97,
+    C_STDOUT = 0x98
 };
 
-class NWHOST_API NowindHost
-{
+class NWHOST_API NowindHost {
 public:
-	NowindHost(const std::vector<DiskHandler*>& drives);
-	virtual ~NowindHost();
+    NowindHost(const std::vector<DiskHandler*>& drives);
+    virtual ~NowindHost();
     virtual void initialize();
 
-	// public for usb-host implementation
-	bool isDataAvailable() const;
+    // public for usb-host implementation
+    bool isDataAvailable() const;
 
-	// read one byte of response-data from the host (msx <- pc)
-	byte read();
+    // read one byte of response-data from the host (msx <- pc)
+    byte read();
 
-	// like read(), but without side effects (doesn't consume the data)
-	byte peek() const;
+    // like read(), but without side effects (doesn't consume the data)
+    byte peek() const;
 
-	// Write one byte of command-data to the host   (msx -> pc)
-	// Time parameter is in milliseconds. Emulators pass emulation time
-	// nwhostapp passed real time.
-	void write(byte value, unsigned int time);
+    // Write one byte of command-data to the host   (msx -> pc)
+    // Time parameter is in milliseconds. Emulators pass emulation time
+    // nwhostapp passed real time.
+    void write(byte value, unsigned int time);
 
-	void setAllowOtherDiskroms(bool allow);
-	bool getAllowOtherDiskroms() const;
+    void setAllowOtherDiskroms(bool allow);
+    bool getAllowOtherDiskroms() const;
 
-	void setEnablePhantomDrives(bool enable);
-	bool getEnablePhantomDrives() const;
-	void setEnableMSXDOS2(bool enable);
+    void setEnablePhantomDrives(bool enable);
+    bool getEnablePhantomDrives() const;
+    void setEnableMSXDOS2(bool enable);
 
     // commands that need to execute more then one command should get their own state here
     // and maintain an internal state to know what command is being executed.
 
-    // 1) having STATE_BLOCKREAD and STATE_BLOCKWRITE at this level is an exception 
+    // 1) having STATE_BLOCKREAD and STATE_BLOCKWRITE at this level is an exception
     // their are re-usabled states for commands that do just 1 transfer.
-    // it might be cleaner to add STATE_DSKIOREAD and STATE_DSKIOWRITE (and other commands that use these state) 
+    // it might be cleaner to add STATE_DSKIOREAD and STATE_DSKIOWRITE (and other commands that use these state)
     // at some point and remove STATE_BLOCKREAD and STATE_BLOCKWRITE entirely.
 
     // 2) Every command should probably have its own class, so it can be re-initialized, and the existance of
     // the instance of the class is state by itself. [notice: think about how this will effect compatibility with
     // openMSX/serialization, every command call should have serialization]
 
-	// public for serialization
-	enum State {
-		STATE_SYNC1,     // waiting for AF
-		STATE_SYNC2,     // waiting for 05
-		STATE_RECEIVE_COMMAND,   // waiting for command (9 bytes)
-		STATE_RECEIVE_PARAMETERS,   // waiting for parameters (n bytes)
-		STATE_EXECUTING_COMMAND,
-		STATE_DISKWRITE, // waiting for AA<data>AA (depricate once STATE_BLOCKWRITE is completed )
-		STATE_DEVOPEN,   // waiting for filename (11 bytes)
-		STATE_IMAGE,     // waiting for filename
-		STATE_MESSAGE,   // waiting for null-terminated message (for debugging)
-		STATE_BLOCKREAD, // in blockread-transfer
-		STATE_BLOCKWRITE, // in blockwrite-transfer
-		STATE_CPUINFO,   // receiving slot/stack info
-		STATE_RECEIVE_DATA,    // receive data for API command     (depricate once STATE_BLOCKWRITE is completed)
-		STATE_RECEIVE_STRING,  // receive string for API command   (depricate once STATE_BLOCKWRITE is completed)
-		STATE_BDOS_OPEN_FILE,  // receive FCB
-		STATE_BDOS_FIND_FIRST, // receive FCB
-	};
-	
-	enum ApiCommands {
-		API_NOWMAP = 0
-	};
+    // public for serialization
+    enum State {
+        STATE_SYNC1,              // waiting for AF
+        STATE_SYNC2,              // waiting for 05
+        STATE_RECEIVE_COMMAND,    // waiting for command (9 bytes)
+        STATE_RECEIVE_PARAMETERS, // waiting for parameters (n bytes)
+        STATE_EXECUTING_COMMAND,
+        STATE_DISKWRITE,       // waiting for AA<data>AA (depricate once STATE_BLOCKWRITE is completed )
+        STATE_DEVOPEN,         // waiting for filename (11 bytes)
+        STATE_IMAGE,           // waiting for filename
+        STATE_MESSAGE,         // waiting for null-terminated message (for debugging)
+        STATE_BLOCKREAD,       // in blockread-transfer
+        STATE_BLOCKWRITE,      // in blockwrite-transfer
+        STATE_CPUINFO,         // receiving slot/stack info
+        STATE_RECEIVE_DATA,    // receive data for API command     (depricate once STATE_BLOCKWRITE is completed)
+        STATE_RECEIVE_STRING,  // receive string for API command   (depricate once STATE_BLOCKWRITE is completed)
+        STATE_BDOS_OPEN_FILE,  // receive FCB
+        STATE_BDOS_FIND_FIRST, // receive FCB
+    };
 
-	// EXTBIO sendCommandWithData (extendedBios.asm) sends at most this many bytes
-	static const unsigned MAX_COMMAND_DATA = 240;
-	
+    enum ApiCommands {
+        API_NOWMAP = 0
+    };
 
-	virtual void debugMessage(const char *cFormat, ...) const;
+    // EXTBIO sendCommandWithData (extendedBios.asm) sends at most this many bytes
+    static const unsigned MAX_COMMAND_DATA = 240;
+
+
+    virtual void debugMessage(const char* cFormat, ...) const;
 
     void clearStartupRequests();
     void addStartupRequest(std::vector<byte> command);
     void clearRequests();
     void addRequest(std::vector<byte> command);
-	void getDosVersion();
-	std::string nowMap(std::string arguments);
+    void getDosVersion();
+    std::string nowMap(std::string arguments);
 
 private:
-	void setState(State aState);
+    void setState(State aState);
     void receiveExtraData(); // remove
-	void msxReset();
-	SectorMedium* getDisk();
-	void executeCommand();
-	void prepareCommand();
-	
-	void apiCommand();
-	void apiReceiveData(byte data);
-	void apiReceiveString(byte data);
+    void msxReset();
+    SectorMedium* getDisk();
+    void executeCommand();
+    void prepareCommand();
 
-	void DRIVES();
-	void DSKCHG();
-	void GETDPB();
-	void CHOICE();
-	void INIENV();
-	void getDate();
-	
-	void stdOutCatch();
+    void apiCommand();
+    void apiReceiveData(byte data);
+    void apiReceiveString(byte data);
 
-	unsigned int getSectorAmount() const;
-	unsigned int  getStartSector() const;
-	unsigned int  getStartAddress() const;
-	unsigned int  getCurrentAddress() const;
+    void DRIVES();
+    void DSKCHG();
+    void GETDPB();
+    void CHOICE();
+    void INIENV();
+    void getDate();
 
-	bool diskReadInit(SectorMedium& disk);
-	bool diskWriteInit(SectorMedium& disk);
-	bool diskWriteInit_old(SectorMedium& disk);
-	void doDiskWrite1();
-	void doDiskWrite2();
+    void stdOutCatch();
 
-	void auxIn();
-	void auxOut();
-	void dumpRegisters();
+    unsigned int getSectorAmount() const;
+    unsigned int getStartSector() const;
+    unsigned int getStartAddress() const;
+    unsigned int getCurrentAddress() const;
+
+    bool diskReadInit(SectorMedium& disk);
+    bool diskWriteInit(SectorMedium& disk);
+    bool diskWriteInit_old(SectorMedium& disk);
+    void doDiskWrite1();
+    void doDiskWrite2();
+
+    void auxIn();
+    void auxOut();
+    void dumpRegisters();
 
     void commandRequested();
     void commandRequestedAtStartup(byte reset);
     void commandRequestedAnytime();
-	std::deque< std::vector<byte> > startupRequestQueue;   // queue for commandRequest() at startup
-	std::deque< std::vector<byte> > requestQueue;   // queue for commandRequest()
+    std::deque<std::vector<byte>> startupRequestQueue; // queue for commandRequest() at startup
+    std::deque<std::vector<byte>> requestQueue;        // queue for commandRequest()
 
-	void callImage(const std::string& filename);
-	const std::vector<DiskHandler*>& drives;
+    void callImage(const std::string& filename);
+    const std::vector<DiskHandler*>& drives;
 
     // state-machine
-	unsigned lastTime;       // last time a byte was received from MSX
-	State state;
-	unsigned recvCount;      // how many bytes recv in this state
-	std::vector<byte> buffer;// work buffer for sector read/write
-	unsigned transferred;    // progress within diskwrite
-	unsigned transferSize;   // size of current diskwrite chunk
+    unsigned lastTime; // last time a byte was received from MSX
+    State state;
+    unsigned recvCount;       // how many bytes recv in this state
+    std::vector<byte> buffer; // work buffer for sector read/write
+    unsigned transferred;     // progress within diskwrite
+    unsigned transferSize;    // size of current diskwrite chunk
 
-	byte romdisk;            // index of romdisk (255 = no romdisk)
-	byte driveOffset;
-	bool allowOtherDiskroms;
-	bool enablePhantomDrives;
-	bool enableMSXDOS2;
-    bool transferingToPage01;   // used to known in which state the MSX is during block-tranfers
-    
+    byte romdisk; // index of romdisk (255 = no romdisk)
+    byte driveOffset;
+    bool allowOtherDiskroms;
+    bool enablePhantomDrives;
+    bool enableMSXDOS2;
+    bool transferingToPage01; // used to known in which state the MSX is during block-tranfers
+
     BlockRead blockRead;
     BlockWrite blockWrite;
-	BDOSProxy bdosProxy;
-	Command command;
-	Response* response;
+    BDOSProxy bdosProxy;
+    Command command;
+    Response* response;
     Device device;
 
-	unsigned int parameterLength;
-	unsigned int activeCommand;
+    unsigned int parameterLength;
+    unsigned int activeCommand;
 
     /* temp */
     unsigned int writeStartTime;
     unsigned int writeEndTime;
     unsigned int readStartTime;
     unsigned int readEndTime;
-    
+
 protected:
-    NowindHostSupport* nwhSupport;          // pointer to the NowindHostSupport instance that is actually used (can be subclassed to provide implemenation specific debug-support)
-    
+    NowindHostSupport* nwhSupport; // pointer to the NowindHostSupport instance that is actually used (can be subclassed to provide implemenation specific debug-support)
 };
 
 } // namespace nowind

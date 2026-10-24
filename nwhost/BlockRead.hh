@@ -7,20 +7,19 @@
 
 namespace nwhost {
 
-static const byte HARDCODED_READ_DATABLOCK_SIZE = 128;	// hardcoded in nowind-roms blockRead (common.asm)
+static const byte HARDCODED_READ_DATABLOCK_SIZE = 128; // hardcoded in nowind-roms blockRead (common.asm)
 static const word TWOBANKLIMIT = 0x8000;
 
 class NowindHostSupport;
 class DataBlock;
 
-class BlockRead
-{
+class BlockRead {
 public:
-	BlockRead();
-	virtual ~BlockRead();
-	void initialize(NowindHostSupport* aSupport);
+    BlockRead();
+    virtual ~BlockRead();
+    void initialize(NowindHostSupport* aSupport);
 
-    void init(word startAddress, word size, const std::vector <byte >& data, byte returnCode = BLOCKREAD_EXIT);  // just wraps the the first blockRead() and initializes some vars
+    void init(word startAddress, word size, const std::vector<byte>& data, byte returnCode = BLOCKREAD_EXIT); // just wraps the the first blockRead() and initializes some vars
     void ack(byte tail);
     void blockRead(word startAddress, word size);
     void blockReadHelper(word startAddress, word size);
@@ -31,28 +30,25 @@ public:
     void cancelWithCode(byte);
     word getTransferSize() { return transferSize; }
 
-	enum {
-		BLOCKREAD_EXIT_MORE_DATE_AHEAD,
-		BLOCKREAD_FASTTRANSFER,
-		BLOCKREAD_SLOWTRANSFER,
-		BLOCKREAD_EXIT,
-		BLOCKREAD_ERROR = 128,
-	};
-    
+    enum {
+        BLOCKREAD_EXIT_MORE_DATE_AHEAD,
+        BLOCKREAD_FASTTRANSFER,
+        BLOCKREAD_SLOWTRANSFER,
+        BLOCKREAD_EXIT,
+        BLOCKREAD_ERROR = 128,
+    };
+
 private:
-
-
-	word startAddress;
-	word processedData;
-	word transferSize;
+    word startAddress;
+    word processedData;
+    word transferSize;
 
     bool transferingToPage01;
     NowindHostSupport* nwhSupport;
-    std::vector<byte> buffer;                   // work buffer for current tranfer
-	std::deque< DataBlock* > dataBlockQueue;    // contains transmitted blocks that are waiting to be acknowledged
-	bool done;
-	byte returnCode;
-    
+    std::vector<byte> buffer;              // work buffer for current tranfer
+    std::deque<DataBlock*> dataBlockQueue; // contains transmitted blocks that are waiting to be acknowledged
+    bool done;
+    byte returnCode;
 };
 
 } // namespace nwhost

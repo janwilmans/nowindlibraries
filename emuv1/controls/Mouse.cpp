@@ -6,55 +6,57 @@
 
 using namespace std;
 
-Mouse::Mouse() {
+Mouse::Mouse()
+{
+    DBERR("Mouse constructor...\n");
 
-	DBERR("Mouse constructor...\n");
+    mouseStatus1 = 0;
+    mouseStatus2 = 0;
 
-	mouseStatus1 = 0;
-	mouseStatus2 = 0;
-
-	DBERR("Mouse constructor...finished\n");
-
+    DBERR("Mouse constructor...finished\n");
 }
 
-Mouse *Mouse::Instance() {
-
-	// implies singleton class
-	static Mouse deInstantie;
-	return &deInstantie;
+Mouse* Mouse::Instance()
+{
+    // implies singleton class
+    static Mouse deInstantie;
+    return &deInstantie;
 }
 
-Mouse::~Mouse() {
-    
-	DBERR("Mouse destroyed.\n");
+Mouse::~Mouse()
+{
+    DBERR("Mouse destroyed.\n");
 }
 
-void Mouse::motion(SDL_Event *event) {
-	signed int coordinate;
+void Mouse::motion(SDL_Event* event)
+{
+    signed int coordinate;
 
-	coordinate = (event->motion.xrel) / -1; // TODO: hiervoor straks de scalefactor gebruiken
-	if (coordinate > 127) coordinate = 127;
-	if (coordinate < -127) coordinate = -127;
-	relativeMouseX = coordinate;
+    coordinate = (event->motion.xrel) / -1; // TODO: hiervoor straks de scalefactor gebruiken
+    if (coordinate > 127) coordinate = 127;
+    if (coordinate < -127) coordinate = -127;
+    relativeMouseX = coordinate;
 
-	coordinate = (event->motion.yrel) / -1;
-	if (coordinate > 127) coordinate = 127;
-	if (coordinate < -127) coordinate = -127;
-	relativeMouseY = coordinate;
+    coordinate = (event->motion.yrel) / -1;
+    if (coordinate > 127) coordinate = 127;
+    if (coordinate < -127) coordinate = -127;
+    relativeMouseY = coordinate;
 }
 
-void Mouse::buttonDown(SDL_Event *event) {
-//	switch (event->button.button) {
-//	case SDL_BUTTON_LEFT: MSXJoystickPort[1] &= ~BUTTONA; break;
-//	default: MSXJoystickPort[1] &= ~BUTTONB; break;
-//	}
+void Mouse::buttonDown(SDL_Event* event)
+{
+    //	switch (event->button.button) {
+    //	case SDL_BUTTON_LEFT: MSXJoystickPort[1] &= ~BUTTONA; break;
+    //	default: MSXJoystickPort[1] &= ~BUTTONB; break;
+    //	}
 }
 
-void Mouse::buttonUp(SDL_Event *event) {
-//	switch (event->button.button) {
-//	case SDL_BUTTON_LEFT: MSXJoystickPort[1] |= BUTTONA; break;
-//	default: MSXJoystickPort[1] |= BUTTONB; break;
-//	}
+void Mouse::buttonUp(SDL_Event* event)
+{
+    //	switch (event->button.button) {
+    //	case SDL_BUTTON_LEFT: MSXJoystickPort[1] |= BUTTONA; break;
+    //	default: MSXJoystickPort[1] |= BUTTONB; break;
+    //	}
 }
 
 /* COPIED FROM CONSOLE.CPP

@@ -15,9 +15,9 @@
 
 void general::initialize()
 {
-	static bool lInitialized = false;
-	if (lInitialized) return;
-	lInitialized = true;
+    static bool lInitialized = false;
+    if (lInitialized) return;
+    lInitialized = true;
     Util::_startTicks();
 }
 
@@ -30,7 +30,7 @@ void general::beep(unsigned long freq, unsigned long duration)
     Beep(freq, duration);
 }
 
-#endif 
+#endif
 
 /*
 

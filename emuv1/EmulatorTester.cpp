@@ -10,37 +10,37 @@
 
 using namespace std;
 
-EmulatorTester * EmulatorTester::Instance() {
-
-		/* implies singleton class */
-		static EmulatorTester deInstantie;
-		return &deInstantie;
+EmulatorTester* EmulatorTester::Instance()
+{
+    /* implies singleton class */
+    static EmulatorTester deInstantie;
+    return &deInstantie;
 }
 
-void EmulatorTester::start() {    
-
-	cpu = Z80::Instance();
-	vdp = V9938::Instance();
+void EmulatorTester::start()
+{
+    cpu = Z80::Instance();
+    vdp = V9938::Instance();
 
     z80Tests();
     vdpTests();
 }
 
-void EmulatorTester::z80Tests() {    
+void EmulatorTester::z80Tests()
+{
+    // A*100h  LD (xx),A               ;xx=BC,DE,nn
 
-// A*100h  LD (xx),A               ;xx=BC,DE,nn
-	
-	initTest();
+    initTest();
     DBERR("reg_wz: LD (bc),a\n");
     cpu->reg_a = 255;
-    cpu->writeMemPublic(0xc000,0x02);
-	cpu->executeInstructions();
-	DBERR("reg_a: 0x%02X\n", cpu->reg_a);
-	DBERR("reg_pc: 0x%02X\n", cpu->reg_pc);
-	DBERR("reg_wz: 0x%02X\n", cpu->reg_wz);
-	assert(cpu->reg_wz == 0xff00);
-	
-	initTest();
+    cpu->writeMemPublic(0xc000, 0x02);
+    cpu->executeInstructions();
+    DBERR("reg_a: 0x%02X\n", cpu->reg_a);
+    DBERR("reg_pc: 0x%02X\n", cpu->reg_pc);
+    DBERR("reg_wz: 0x%02X\n", cpu->reg_wz);
+    assert(cpu->reg_wz == 0xff00);
+
+    initTest();
     DBERR("reg_wz: LD (de),a\n");
     cpu->reg_a = 0xaa;
     cpu->writeMemPublic(0xc000, 0x12);
@@ -55,7 +55,7 @@ void EmulatorTester::z80Tests() {
     assert(cpu->reg_wz == 0x2800);
 
 
-// xx+1    LD A,(xx)               ;xx=BC,DE,nn
+    // xx+1    LD A,(xx)               ;xx=BC,DE,nn
 
     initTest();
     DBERR("reg_wz: LD a,(bc)\n");
@@ -81,7 +81,7 @@ void EmulatorTester::z80Tests() {
     assert(cpu->reg_wz == 0x1235);
 
 
-// nn+1    LD (nn),rr; LD rr,(nn)  ;rr=BC,DE,HL,IX,IY
+    // nn+1    LD (nn),rr; LD rr,(nn)  ;rr=BC,DE,HL,IX,IY
 
     initTest();
     DBERR("reg_wz: LD (nn),bc\n");
@@ -158,7 +158,7 @@ void EmulatorTester::z80Tests() {
     assert(cpu->reg_wz == 0x1235);
 
 
-// rr      EX (SP),rr              ;rr=HL,IX,IY (MEMPTR=new value of rr)
+    // rr      EX (SP),rr              ;rr=HL,IX,IY (MEMPTR=new value of rr)
 
     initTest();
     DBERR("reg_wz: EX (sp),hl\n");
@@ -186,7 +186,7 @@ void EmulatorTester::z80Tests() {
     assert(cpu->reg_wz == 0xabcd);
 
 
-// rr+1    ADD/ADC/SBC rr,xx       ;rr=HL,IX,IY (MEMPTR=old value of rr+1)
+    // rr+1    ADD/ADC/SBC rr,xx       ;rr=HL,IX,IY (MEMPTR=old value of rr+1)
 
     initTest();
     DBERR("reg_wz: ADD hl,bc\n");
@@ -195,8 +195,8 @@ void EmulatorTester::z80Tests() {
     cpu->reg_c = 0x12;
     cpu->writeMemPublic(0xc000, 0x09);
     cpu->executeInstructions();
-    assert(cpu->reg_wz == (0xabcd+1));
-    assert(cpu->reg_hl == (0xabcd+0x12));
+    assert(cpu->reg_wz == (0xabcd + 1));
+    assert(cpu->reg_hl == (0xabcd + 0x12));
 
     initTest();
     DBERR("reg_wz: ADD ix,bc\n");
@@ -206,8 +206,8 @@ void EmulatorTester::z80Tests() {
     cpu->writeMemPublic(0xc000, 0xdd);
     cpu->writeMemPublic(0xc001, 0x09);
     cpu->executeInstructions();
-    assert(cpu->reg_wz == (0xabcd+1));
-    assert(cpu->reg_ix == (0xabcd+0x1234));
+    assert(cpu->reg_wz == (0xabcd + 1));
+    assert(cpu->reg_ix == (0xabcd + 0x1234));
 
     initTest();
     DBERR("reg_wz: ADD iy,iy\n");
@@ -215,7 +215,7 @@ void EmulatorTester::z80Tests() {
     cpu->writeMemPublic(0xc000, 0xfd);
     cpu->writeMemPublic(0xc001, 0x29);
     cpu->executeInstructions();
-    assert(cpu->reg_wz == (0xabcd+1));
+    assert(cpu->reg_wz == (0xabcd + 1));
     assert(cpu->reg_iy == ((0xabcd + 0xabcd) & 0xffff));
 
     initTest();
@@ -225,8 +225,8 @@ void EmulatorTester::z80Tests() {
     cpu->writeMemPublic(0xc000, 0xed);
     cpu->writeMemPublic(0xc001, 0x7a);
     cpu->executeInstructions();
-    assert(cpu->reg_wz == (0xabcd+1));
-    assert(cpu->reg_hl == (0xabcd+0x4321));
+    assert(cpu->reg_wz == (0xabcd + 1));
+    assert(cpu->reg_hl == (0xabcd + 0x4321));
 
     initTest();
     DBERR("reg_wz: SBC hl,de\n");
@@ -235,10 +235,10 @@ void EmulatorTester::z80Tests() {
     cpu->writeMemPublic(0xc000, 0xed);
     cpu->writeMemPublic(0xc001, 0x52);
     cpu->executeInstructions();
-    assert(cpu->reg_wz == (0xabcd+1));
+    assert(cpu->reg_wz == (0xabcd + 1));
     assert(cpu->reg_hl == (0xabcd - 0x4321));
 
-//  dest    JP nn; CALL nn; JR nn   ;dest=nn
+    //  dest    JP nn; CALL nn; JR nn   ;dest=nn
 
     initTest();
     DBERR("reg_wz: JP\n");
@@ -264,7 +264,7 @@ void EmulatorTester::z80Tests() {
     assert(cpu->reg_wz == 0xc007);
 
 
-//  dest    JP f,nn; CALL f,nn      ;regardless of condition true/false
+    //  dest    JP f,nn; CALL f,nn      ;regardless of condition true/false
 
     initTest();
     DBERR("reg_wz: JP C,xxxx\n");
@@ -299,89 +299,93 @@ void EmulatorTester::z80Tests() {
     assert(cpu->reg_wz == 0xc007);
 
 
-//
+    //
 
     DBERR("reg_wz: 0x%02X\n", cpu->reg_wz);
-    DBERR("eind Test\n");	
-	cpu->reset();
+    DBERR("eind Test\n");
+    cpu->reset();
 }
 
-void EmulatorTester::initTest() {
+void EmulatorTester::initTest()
+{
+    cpu->writeIo(0xa8, 255);
+    cpu->writeMemPublic(0xffff, 0xaa);
 
-	cpu->writeIo(0xa8, 255);
-	cpu->writeMemPublic(0xffff, 0xaa);
-
-	cpu->reg_a = 0; 	cpu->reg_f = 0;
-	cpu->reg_b = 0; 	cpu->reg_c = 0;
-	cpu->reg_hl = 0; 	cpu->reg_de = 0;
-	cpu->reg_ix = 0; 	cpu->reg_iy = 0;
-	cpu->reg_sp = 0xf000; 
+    cpu->reg_a = 0;
+    cpu->reg_f = 0;
+    cpu->reg_b = 0;
+    cpu->reg_c = 0;
+    cpu->reg_hl = 0;
+    cpu->reg_de = 0;
+    cpu->reg_ix = 0;
+    cpu->reg_iy = 0;
+    cpu->reg_sp = 0xf000;
     cpu->reg_pc = 0xc000;
-    
-	for (int i=0;i<16;i++) cpu->writeMemPublic(0xc000 + i, 0);
+
+    for (int i = 0; i < 16; i++) cpu->writeMemPublic(0xc000 + i, 0);
     cpu->writeMemPublic(0xc010, 0xed);
     cpu->writeMemPublic(0xc011, 0x03);
     cpu->emuTime = 0;
     cpu->nextInterrupt = 1000000;
 }
 
-void EmulatorTester::vdpTests() {    
-
+void EmulatorTester::vdpTests()
+{
     nw_byte dummy = 0;
 
     vdp->port1DataLatched = true;
     vdp->port2DataLatched = true;
-    dummy = vdp->readVram();                    // result untested (but msx would not do much AT ALL if this failed)
-    assert(vdp->port1DataLatched == false);     // should reset
-    assert(vdp->port2DataLatched == true);      // should not change
+    dummy = vdp->readVram();                // result untested (but msx would not do much AT ALL if this failed)
+    assert(vdp->port1DataLatched == false); // should reset
+    assert(vdp->port2DataLatched == true);  // should not change
 
     vdp->port1DataLatched = true;
     vdp->port2DataLatched = true;
-    vdp->writeVram(0);                          // result untested (but msx would not do much AT ALL if this failed)
-    assert(vdp->port1DataLatched == false);     // should reset
-    assert(vdp->port2DataLatched == true);      // should not change
-    
+    vdp->writeVram(0);                      // result untested (but msx would not do much AT ALL if this failed)
+    assert(vdp->port1DataLatched == false); // should reset
+    assert(vdp->port2DataLatched == true);  // should not change
+
     vdp->port1DataLatched = true;
     dummy = vdp->readStatusRegister();
-    assert(vdp->port1DataLatched == false);     // should reset
+    assert(vdp->port1DataLatched == false); // should reset
 
     vdp->port1DataLatched = false;
     vdp->dataLatch = 1;
     vdp->writeControlRegister(0);
-    assert(vdp->port1DataLatched == true);      // should invert
-    assert(vdp->dataLatch == 0);                // should contains the latched '0'
-     
+    assert(vdp->port1DataLatched == true); // should invert
+    assert(vdp->dataLatch == 0);           // should contains the latched '0'
+
     vdp->vdpReg[23] = 170;
     vdp->dataLatch = 0;
-    vdp->writeControlRegister(0x80+23);
-    assert(vdp->port1DataLatched == false);     // should invert
-    assert(vdp->dataLatch == 0);                // should be unchanged
-    assert(vdp->vdpReg[23] == 0);               // should be '0'
+    vdp->writeControlRegister(0x80 + 23);
+    assert(vdp->port1DataLatched == false); // should invert
+    assert(vdp->dataLatch == 0);            // should be unchanged
+    assert(vdp->vdpReg[23] == 0);           // should be '0'
 
     vdp->port2DataLatched = false;
     vdp->dataLatch = 1;
     vdp->writePaletteRegister(0);
-    assert(vdp->port2DataLatched == true);      // should invert
-    assert(vdp->dataLatch == 0);                // should contains the latched '0'
+    assert(vdp->port2DataLatched == true); // should invert
+    assert(vdp->dataLatch == 0);           // should contains the latched '0'
 
     vdp->vdpReg[16] = 15;
     vdp->dataLatch = 2;
     vdp->writePaletteRegister(0);
-    assert(vdp->port2DataLatched == false);     // should invert
-    assert(vdp->dataLatch == 2);                // should be unchanged
-    assert(vdp->vdpReg[16] == 0);               // should be back to '0'
-    
+    assert(vdp->port2DataLatched == false); // should invert
+    assert(vdp->dataLatch == 2);            // should be unchanged
+    assert(vdp->vdpReg[16] == 0);           // should be back to '0'
+
     vdp->dataLatch = 2;
     vdp->vdpReg[23] = 4;
     vdp->vdpReg[17] = 23;
     vdp->writeRegisterIndirect(0);
-    assert(vdp->dataLatch == 0);                // should be '0'
-    assert(vdp->vdpReg[23] == 0);               // should be '0'
+    assert(vdp->dataLatch == 0);  // should be '0'
+    assert(vdp->vdpReg[23] == 0); // should be '0'
 
-    vdp->vdpReg[17] = 0x80+23;
+    vdp->vdpReg[17] = 0x80 + 23;
     vdp->writeRegisterIndirect(0);
-    assert(vdp->vdpReg[17] == 0x80+23);         // reg17 should not be incremented
+    assert(vdp->vdpReg[17] == 0x80 + 23); // reg17 should not be incremented
     vdp->vdpReg[17] = 23;
     vdp->writeRegisterIndirect(0);
-    assert(vdp->vdpReg[17] == 24);               // reg17 SHOULD be incremented
+    assert(vdp->vdpReg[17] == 24); // reg17 SHOULD be incremented
 }

@@ -19,11 +19,11 @@
 
 //#define inline  __forceinline
 //#define inline_after __attribute__((always_inline))
-#define inline_after ;//
+#define inline_after ; //
 // class functies nooit inline ?
-// mogelijke speed-up: readmem etc. uit de class halen? 
+// mogelijke speed-up: readmem etc. uit de class halen?
 
-typedef fastdelegate::FastDelegate2<nw_word, nw_byte> writeDelegate;   // returns void 
+typedef fastdelegate::FastDelegate2<nw_word, nw_byte> writeDelegate; // returns void
 
 class Debug;
 class Mapper;
@@ -72,143 +72,141 @@ class Profiler;
 #define WRITEMEM16 writeMem16
 
 class Z80 {
+    friend class EmulatorTester;
+    friend class Disassembler;
+    friend class Profiler;
+    friend class DiskInterface;
+    friend class Debugger;
+    friend class SlotSelector;
+    friend class Media;
 
-friend class EmulatorTester;
-friend class Disassembler;
-friend class Profiler;
-friend class DiskInterface;
-friend class Debugger;
-friend class SlotSelector;
-friend class Media;
-
-// solve this by creating public functions
-friend class Mapper;
-friend class RamBlock;
-friend class RomBlock;
-friend class MapperKonami4;
-friend class MapperKonami5;
-friend class MapperMsxDos2;
-friend class MapperFMPAC;
-friend class NowindInterface;
-friend class SCC;
-friend class EmptyPage;
-friend class WD279X;
+    // solve this by creating public functions
+    friend class Mapper;
+    friend class RamBlock;
+    friend class RomBlock;
+    friend class MapperKonami4;
+    friend class MapperKonami5;
+    friend class MapperMsxDos2;
+    friend class MapperFMPAC;
+    friend class NowindInterface;
+    friend class SCC;
+    friend class EmptyPage;
+    friend class WD279X;
 
 private:
+    Z80();
 
-		Z80();
+    float opcodeCounter[256];
+    float opcodeCounterCB[256];
+    float opcodeCounterDD[256];
+    float opcodeCounterED[256];
+    float opcodeCounterFD[256];
 
-        float opcodeCounter[256];
-        float opcodeCounterCB[256];
-        float opcodeCounterDD[256];
-        float opcodeCounterED[256];
-        float opcodeCounterFD[256];
-        
-        /* new memory layout */
-        const nw_byte   *readBlock[8];
-        writeDelegate   writeFunc[8];
+    /* new memory layout */
+    const nw_byte* readBlock[8];
+    writeDelegate writeFunc[8];
 
-        SlotSelector    *slotSelector;
-        
-		/* things that do not actually belong inside the z80 */
-		Mapper          *mapper;
-		Mapper  		*mapperCartride;
-		DiskInterface   *disk;
+    SlotSelector* slotSelector;
 
-		/* interne z80 registers */
-		nw_word			reg_a;
-		nw_word			reg_f;
-		nw_word			reg_b;
-		nw_word			reg_c;
-		
-		nw_word		    reg_i;
-		nw_word    		reg_r;
-		nw_word			reg_de;		// TODO: uitzoeken of DE vaker als 8 bits registers wordt gebruikt
-		nw_word			reg_hl;
-		nw_word    		reg_pc;
-		nw_word    		reg_sp;
-		nw_word    		reg_ix;
-        nw_word    		reg_iy;
-		nw_word			reg_wz;
+    /* things that do not actually belong inside the z80 */
+    Mapper* mapper;
+    Mapper* mapperCartride;
+    DiskInterface* disk;
 
-		nw_word    		shadow_af;
-		nw_word   		shadow_b;
-		nw_word			shadow_c;
-		nw_word    		shadow_de;
-		nw_word    		shadow_hl;
+    /* interne z80 registers */
+    nw_word reg_a;
+    nw_word reg_f;
+    nw_word reg_b;
+    nw_word reg_c;
 
-		bool            IFF1;
-		bool            IFF2;
-		nw_word    		interruptMode;
-		nw_word			refreshCounter;
+    nw_word reg_i;
+    nw_word reg_r;
+    nw_word reg_de; // TODO: uitzoeken of DE vaker als 8 bits registers wordt gebruikt
+    nw_word reg_hl;
+    nw_word reg_pc;
+    nw_word reg_sp;
+    nw_word reg_ix;
+    nw_word reg_iy;
+    nw_word reg_wz;
 
-		nw_word    		flagSZ[256];
-		nw_word    		flagSZsub[256];
-		nw_word    		flagSZP[256];
-		nw_word    		flagInc[256];
-		nw_word    		flagDec[256];
+    nw_word shadow_af;
+    nw_word shadow_b;
+    nw_word shadow_c;
+    nw_word shadow_de;
+    nw_word shadow_hl;
 
-		inline nw_byte	opcodeFetch(nw_word) inline_after;
-		void            debugInstuctionCounter();
+    bool IFF1;
+    bool IFF2;
+    nw_word interruptMode;
+    nw_word refreshCounter;
 
-		void            writeIo(nw_word, nw_byte);
-		nw_byte         readIo(nw_word);
- 
-		V9938           *vdp;
-		RP5C01          *realTimeClock;
-		AY38910         *psg;
-		YM2413			*fmpac;
-		SCC				*scc;
-		MSXAudio        *msxaudio;
-		I8255			*ppi;
-		Kanji			*kanji;
-		SwitchedPorts	*switchedPorts;
-		DebugDevice		*debugDevice;
-		F4Device		*f4Device;
-        Profiler        *profiler;
+    nw_word flagSZ[256];
+    nw_word flagSZsub[256];
+    nw_word flagSZP[256];
+    nw_word flagInc[256];
+    nw_word flagDec[256];
 
-		inline nw_byte	readMem(nw_word) inline_after;
-		inline nw_word	readMem16(nw_word) inline_after;
-		inline void     writeMem(nw_word,nw_byte) inline_after;
-		inline void     writeMem16(nw_word,nw_word) inline_after;	
-		
+    inline nw_byte opcodeFetch(nw_word) inline_after;
+    void debugInstuctionCounter();
+
+    void writeIo(nw_word, nw_byte);
+    nw_byte readIo(nw_word);
+
+    V9938* vdp;
+    RP5C01* realTimeClock;
+    AY38910* psg;
+    YM2413* fmpac;
+    SCC* scc;
+    MSXAudio* msxaudio;
+    I8255* ppi;
+    Kanji* kanji;
+    SwitchedPorts* switchedPorts;
+    DebugDevice* debugDevice;
+    F4Device* f4Device;
+    Profiler* profiler;
+
+    inline nw_byte readMem(nw_word) inline_after;
+    inline nw_word readMem16(nw_word) inline_after;
+    inline void writeMem(nw_word, nw_byte) inline_after;
+    inline void writeMem16(nw_word, nw_word) inline_after;
+
 public:
-        void            setupBdosEnv(const char* filename);
-		nw_byte			readMemPublic(nw_word address);
-		nw_word			readMem16Public(nw_word address);
-		void 			writeMemPublic(nw_word address, nw_byte value);
-		void 			writeMem16Public(nw_word address, nw_word value);
+    void setupBdosEnv(const char* filename);
+    nw_byte readMemPublic(nw_word address);
+    nw_word readMem16Public(nw_word address);
+    void writeMemPublic(nw_word address, nw_byte value);
+    void writeMem16Public(nw_word address, nw_word value);
 
-        emuTimeType     nextInterrupt;
-		unsigned long   cpuFrequency;
+    emuTimeType nextInterrupt;
+    unsigned long cpuFrequency;
 
-		nw_word         start_test_nr;
+    nw_word start_test_nr;
 
-		static          Z80 * Instance();
-						~Z80();
-		void            initialize();
+    static Z80* Instance();
+    ~Z80();
+    void initialize();
 
-		void            reset();
-		void            hardReset();
-		void            nmiCPU();
-		bool			getIFF1();
-		void            intCPU(nw_byte);
-		void            start(nw_word);
+    void reset();
+    void hardReset();
+    void nmiCPU();
+    bool getIFF1();
+    void intCPU(nw_byte);
+    void start(nw_word);
 
-		void            executeInstructions();
+    void executeInstructions();
 
-		void            saveState();
-		void            loadState();
+    void saveState();
+    void loadState();
 
-		emuTimeType     emuTime;
+    emuTimeType emuTime;
 
-		void            hijackBdos();
-		unsigned long   bdosCount;
-		void            dumpPages();
-		void            dumpSlotSelection();
-		void            dumpCpuInfo();		
-        void            abortEmulator();
-		nw_word         getSP();
+    void hijackBdos();
+    unsigned long bdosCount;
+    void dumpPages();
+    void dumpSlotSelection();
+    void dumpCpuInfo();
+    void abortEmulator();
+    nw_word getSP();
 };
 
 #endif

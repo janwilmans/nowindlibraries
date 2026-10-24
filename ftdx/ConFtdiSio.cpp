@@ -10,8 +10,8 @@
  */
 
 #include "ConFtdiSio.h"
-#include <fcntl.h> 	// for open() and O_RDRW
-#include <unistd.h>	
+#include <fcntl.h> // for open() and O_RDRW
+#include <unistd.h>
 
 // POSIX portable methods to control tty devices
 #include <termios.h>
@@ -20,19 +20,17 @@ using namespace ftdx;
 
 ConFtdiSio::ConFtdiSio()
 {
-
 }
 
 ConFtdiSio::~ConFtdiSio()
 {
-
 }
 
 bool ConFtdiSio::open()
 {
-   struct termios lTermios;
+    struct termios lTermios;
 
-	mHandle = ::open("/dev/ttyUSB0", O_RDWR);  //O_NONBLOCK
+    mHandle = ::open("/dev/ttyUSB0", O_RDWR); //O_NONBLOCK
 
     // don't respond to escape characters and what not
     // system("stty -F /dev/ttyUSB0 raw");
@@ -40,33 +38,35 @@ bool ConFtdiSio::open()
     ::cfmakeraw(&lTermios);
     ::tcsetattr(mHandle, TCSANOW, &lTermios);
 
-	return (mHandle != -1);
+    return (mHandle != -1);
 }
 
 void ConFtdiSio::close()
 {
-	::close(mHandle);
+    ::close(mHandle);
 }
 
-int ConFtdiSio::readExact(unsigned char * aBuffer, unsigned long aBytesToRead)
+int ConFtdiSio::readExact(unsigned char* aBuffer, unsigned long aBytesToRead)
 {
-	int ret = ::read(mHandle, aBuffer, aBytesToRead);
-	if (ret == -1) return 0;
-	return ret;
+    int ret = ::read(mHandle, aBuffer, aBytesToRead);
+    if (ret == -1) return 0;
+    return ret;
 }
 
-int ConFtdiSio::readBlocking(unsigned char * aBuffer, unsigned long aMaxBytesToRead)
+int ConFtdiSio::readBlocking(unsigned char* aBuffer, unsigned long aMaxBytesToRead)
 {
-	int ret = ::read(mHandle, aBuffer, aMaxBytesToRead);
-	if (ret == -1) return 0;
-	return ret;
+    int ret = ::read(mHandle, aBuffer, aMaxBytesToRead);
+    if (ret == -1) return 0;
+    return ret;
 }
 
-void ConFtdiSio::write(unsigned char * aBuffer, unsigned long aBtesToWrite, unsigned long *aBytesWritten)
+void ConFtdiSio::write(unsigned char* aBuffer, unsigned long aBtesToWrite, unsigned long* aBytesWritten)
 {
-	int ret = ::write(mHandle, aBuffer, aBtesToWrite);
-	if (ret == -1) *aBytesWritten = 0;
-	else *aBytesWritten = ret;
+    int ret = ::write(mHandle, aBuffer, aBtesToWrite);
+    if (ret == -1)
+        *aBytesWritten = 0;
+    else
+        *aBytesWritten = ret;
 }
 
 void ConFtdiSio::reset()

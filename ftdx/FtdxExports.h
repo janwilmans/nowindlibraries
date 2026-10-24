@@ -9,28 +9,27 @@
 #define LIBFTDX_EXPORTS_H
 
 #ifdef __cplusplus
-# define DECORATE extern "C"
+#define DECORATE extern "C"
 
 #ifdef WIN32
-# define CCALL __cdecl
+#define CCALL __cdecl
 #else
-# define CCALL
+#define CCALL
 #endif
 
 #else
-# define DECORATE
-# define CCALL
-#endif 
+#define DECORATE
+#define CCALL
+#endif
 
 #if defined(_MSC_VER) && !defined(NOWIND_STATIC_LIBS)
-    #ifdef FTDX_API_EXPORT
-        #define FTDX_API __declspec(dllexport)
-    #else
-        #define FTDX_API __declspec(dllimport)
-    #endif
+#ifdef FTDX_API_EXPORT
+#define FTDX_API __declspec(dllexport)
 #else
-    #define FTDX_API 
+#define FTDX_API __declspec(dllimport)
+#endif
+#else
+#define FTDX_API
 #endif // _MSC_VER
 
 #endif // LIBFTDX_EXPORTS_H
-

@@ -27,7 +27,7 @@
 #include "stdio.h"
 
 #ifdef WIN32
-	#include "shellapi.h"		// define HDROP and DragQueryFile / DragQueryPoint prototypes
+#include "shellapi.h" // define HDROP and DragQueryFile / DragQueryPoint prototypes
 #endif
 
 // when OFF disables sound altogether
@@ -43,115 +43,121 @@ using namespace std;
 
 #include "Emulator.h"
 
-unsigned int    Emulator::interruptType = 0;
-bool            Emulator::notPaused = 0;
-bool            Emulator::commandMode = false;
-bool            Emulator::osdVisible = false;
-bool            Emulator::running = 0;
-bool            Emulator::mouseDragging = 0;
-msTimeType      Emulator::startPauseTime = 0;
-bool            Emulator::autoPause = 0;
+unsigned int Emulator::interruptType = 0;
+bool Emulator::notPaused = 0;
+bool Emulator::commandMode = false;
+bool Emulator::osdVisible = false;
+bool Emulator::running = 0;
+bool Emulator::mouseDragging = 0;
+msTimeType Emulator::startPauseTime = 0;
+bool Emulator::autoPause = 0;
 
 
-Emulator * Emulator::Instance() {
-
-		/* implies singleton class */
-		static Emulator deInstantie;
-		return &deInstantie;
+Emulator* Emulator::Instance()
+{
+    /* implies singleton class */
+    static Emulator deInstantie;
+    return &deInstantie;
 }
 
 static unsigned long starttime = 0;
 
-Emulator::Emulator() {
+Emulator::Emulator()
+{
+    DBERR("Emulator constructor...\n");
+    running = true;
 
-	DBERR("Emulator constructor...\n");
-	running = true;
+    /* here a reference to the emuTime kept in de z80 is initialized */
 
-	/* here a reference to the emuTime kept in de z80 is initialized */
+    newVDPInterruptTime = starttime; // first interrupt ever
+    newScreenChangeInterruptTime = starttime;
+    newRenderScreenInterruptTime = starttime; // sync this on the bottom of the screen
+    newDebuggerInterruptTime = starttime;
+    newMsxAudioInterruptTime = starttime;
+    newAudioInterruptTime = starttime;
+    cpuInterrupt = false;
 
-	newVDPInterruptTime = starttime;                 // first interrupt ever
-	newScreenChangeInterruptTime = starttime;
-	newRenderScreenInterruptTime = starttime;      // sync this on the bottom of the screen
-	newDebuggerInterruptTime = starttime;
-	newMsxAudioInterruptTime = starttime;
-	newAudioInterruptTime = starttime;
-	cpuInterrupt = false;
-	
-	VDPInterruptEnable = true;
-	screenChangeInterruptEnable = false;
-	debuggerInterruptEnable = false;
-	msxAudioInterruptEnable = false;
-	
-	clipboardStream = "";
+    VDPInterruptEnable = true;
+    screenChangeInterruptEnable = false;
+    debuggerInterruptEnable = false;
+    msxAudioInterruptEnable = false;
+
+    clipboardStream = "";
     clipboardTimer = 0;
 
-	DBERR("Emulator constructor...finished\n");
+    DBERR("Emulator constructor...finished\n");
 }
 
-void Emulator::quit() {
-
+void Emulator::quit()
+{
     notPaused = false;
-	running = false;
+    running = false;
 }
 
 
-emuTimeType Emulator::getNextCPUInterruptTime() {
-		return newVDPInterruptTime;	
+emuTimeType Emulator::getNextCPUInterruptTime()
+{
+    return newVDPInterruptTime;
 }
 
-void Emulator::scheduleVDPInterrupt(bool enable, emuTimeType interruptTime) {
-    
-        //DBERR("  Emulator::scheduleVDPInterrupt, enable: %i op %u\n", enable, interruptTime);
-        //DBERR("  Emulator::cpuInterrupt: %u\n");
-        
-        VDPInterruptEnable = enable;
-    	newVDPInterruptTime = interruptTime;
-		scheduleNextInterrupt();
+void Emulator::scheduleVDPInterrupt(bool enable, emuTimeType interruptTime)
+{
+    //DBERR("  Emulator::scheduleVDPInterrupt, enable: %i op %u\n", enable, interruptTime);
+    //DBERR("  Emulator::cpuInterrupt: %u\n");
+
+    VDPInterruptEnable = enable;
+    newVDPInterruptTime = interruptTime;
+    scheduleNextInterrupt();
 }
 
-void Emulator::scheduleScreenChangeInterrupt(bool enable, emuTimeType interruptTime) {
-        screenChangeInterruptEnable = enable;
-  		newScreenChangeInterruptTime = interruptTime;
-//  		DBERR("scheduleScreenChangeInterrupt: " << newScreenChangeInterruptTime << endl);
-		scheduleNextInterrupt();
+void Emulator::scheduleScreenChangeInterrupt(bool enable, emuTimeType interruptTime)
+{
+    screenChangeInterruptEnable = enable;
+    newScreenChangeInterruptTime = interruptTime;
+    //  		DBERR("scheduleScreenChangeInterrupt: " << newScreenChangeInterruptTime << endl);
+    scheduleNextInterrupt();
 }
 
-void Emulator::scheduleDebuggerInterrupt(bool enable, emuTimeType interruptTime) {
-        debuggerInterruptEnable = enable;
-  		newDebuggerInterruptTime = interruptTime;
-//  		DBERR("newDebuggerInterruptTime: " << newDebuggerInterruptTime << endl);
-		scheduleNextInterrupt();
+void Emulator::scheduleDebuggerInterrupt(bool enable, emuTimeType interruptTime)
+{
+    debuggerInterruptEnable = enable;
+    newDebuggerInterruptTime = interruptTime;
+    //  		DBERR("newDebuggerInterruptTime: " << newDebuggerInterruptTime << endl);
+    scheduleNextInterrupt();
 }
 
-void Emulator::scheduleRenderScreenInterrupt(emuTimeType interruptTime) {
-  		newRenderScreenInterruptTime = interruptTime;
-//  		DBERR("scheduleRenderScreenInterrupt: " << newRenderScreenInterruptTime << endl);
-		scheduleNextInterrupt();
+void Emulator::scheduleRenderScreenInterrupt(emuTimeType interruptTime)
+{
+    newRenderScreenInterruptTime = interruptTime;
+    //  		DBERR("scheduleRenderScreenInterrupt: " << newRenderScreenInterruptTime << endl);
+    scheduleNextInterrupt();
 }
 
-void Emulator::scheduleMsxAudioInterrupt(bool enable, emuTimeType interruptTime) {
-        msxAudioInterruptEnable = enable;
-  		newMsxAudioInterruptTime = interruptTime;
-//  		DBERR("scheduleRenderScreenInterrupt: " << newRenderScreenInterruptTime << endl);
-		scheduleNextInterrupt();
+void Emulator::scheduleMsxAudioInterrupt(bool enable, emuTimeType interruptTime)
+{
+    msxAudioInterruptEnable = enable;
+    newMsxAudioInterruptTime = interruptTime;
+    //  		DBERR("scheduleRenderScreenInterrupt: " << newRenderScreenInterruptTime << endl);
+    scheduleNextInterrupt();
 }
 
-void Emulator::scheduleAudioInterrupt(bool enable, emuTimeType interruptTime) {
-  		newAudioInterruptTime = interruptTime;
-//  		DBERR("scheduleAudioInterrupt: " << newAudioInterruptTime << endl);
-		scheduleNextInterrupt();
+void Emulator::scheduleAudioInterrupt(bool enable, emuTimeType interruptTime)
+{
+    newAudioInterruptTime = interruptTime;
+    //  		DBERR("scheduleAudioInterrupt: " << newAudioInterruptTime << endl);
+    scheduleNextInterrupt();
 }
 
 
+void Emulator::setCPUInterrupt(bool enable)
+{
+    cpuInterrupt = enable;
 
-void Emulator::setCPUInterrupt(bool enable) {
-        cpuInterrupt = enable;
-        
-        if (cpuInterrupt) { // first VDP interrupt can not occur NOW, but after 1 instruction
-            if (newVDPInterruptTime <= cpu->emuTime) newVDPInterruptTime = cpu->emuTime + 1;
-        }
-        scheduleNextInterrupt(); 
-      
+    if (cpuInterrupt)
+    { // first VDP interrupt can not occur NOW, but after 1 instruction
+        if (newVDPInterruptTime <= cpu->emuTime) newVDPInterruptTime = cpu->emuTime + 1;
+    }
+    scheduleNextInterrupt();
 }
 
 unsigned long long OUR_SDL_GetTicks()
@@ -160,11 +166,11 @@ unsigned long long OUR_SDL_GetTicks()
     offset *= 1000;
     offset /= Z80::Instance()->cpuFrequency;
 
-    return SDL_GetTicks()+offset;
+    return SDL_GetTicks() + offset;
 }
 
-inline void Emulator::scheduleNextInterrupt() {
-
+inline void Emulator::scheduleNextInterrupt()
+{
     // Is is important to use signed types here, and compare offsets, not absolute times.
     // this way when emutime wraps, the comparisons are still valid.
 
@@ -172,74 +178,82 @@ inline void Emulator::scheduleNextInterrupt() {
     if (lastEmutime > cpu->emuTime)
     {
         unsigned long lTicks = OUR_SDL_GetTicks() & 0xffffffff;
-        DBERR("Emutime WRAPPPED at %i ms (%i min).", lTicks, lTicks / 60000);        
+        DBERR("Emutime WRAPPPED at %i ms (%i min).", lTicks, lTicks / 60000);
     }
     lastEmutime = cpu->emuTime;
 
-	cpu->nextInterrupt = newRenderScreenInterruptTime;
-	interruptType = INT_RENDERSCREEN;
-	int offset = int(newRenderScreenInterruptTime - cpu->emuTime);
-	
-    if (cpuInterrupt && VDPInterruptEnable) {
-	    int newOffset = int(newVDPInterruptTime - cpu->emuTime);
-		if (newOffset < offset) {
-			cpu->nextInterrupt = newVDPInterruptTime;
-			offset = newOffset;
-			//DBERR("VDPInterruptEnabled and scheduled at: " << newVDPInterruptTime << endl);
-			interruptType = INT_VDP;
-		}
+    cpu->nextInterrupt = newRenderScreenInterruptTime;
+    interruptType = INT_RENDERSCREEN;
+    int offset = int(newRenderScreenInterruptTime - cpu->emuTime);
+
+    if (cpuInterrupt && VDPInterruptEnable)
+    {
+        int newOffset = int(newVDPInterruptTime - cpu->emuTime);
+        if (newOffset < offset)
+        {
+            cpu->nextInterrupt = newVDPInterruptTime;
+            offset = newOffset;
+            //DBERR("VDPInterruptEnabled and scheduled at: " << newVDPInterruptTime << endl);
+            interruptType = INT_VDP;
+        }
     }
 
-    if (screenChangeInterruptEnable) {
-		int newOffset = int(newScreenChangeInterruptTime - cpu->emuTime);
-		if (newOffset < offset) {
-			cpu->nextInterrupt = newScreenChangeInterruptTime;
-			offset = newOffset;
-			interruptType = INT_SCREENCHANGE;
-		}
+    if (screenChangeInterruptEnable)
+    {
+        int newOffset = int(newScreenChangeInterruptTime - cpu->emuTime);
+        if (newOffset < offset)
+        {
+            cpu->nextInterrupt = newScreenChangeInterruptTime;
+            offset = newOffset;
+            interruptType = INT_SCREENCHANGE;
+        }
     }
 
-    if (debuggerInterruptEnable) {
-		int newOffset = int(newDebuggerInterruptTime - cpu->emuTime);
-		if (newOffset < offset) {
-			cpu->nextInterrupt = newDebuggerInterruptTime;
-			offset = newOffset;
-			interruptType = INT_DEBUGGER;
-		}
-    }
-    
-    if (msxAudioInterruptEnable) {
-		int newOffset = int(newMsxAudioInterruptTime - cpu->emuTime);
-		if (newOffset < offset) {
-			cpu->nextInterrupt = newMsxAudioInterruptTime;
-			offset = newOffset;
-			//DBERR("MSXAUDIOInterruptEnabled and scheduled at: " << newMsxAudioInterruptTime << endl);
-			interruptType = INT_MSXAUDIO;
-		}
+    if (debuggerInterruptEnable)
+    {
+        int newOffset = int(newDebuggerInterruptTime - cpu->emuTime);
+        if (newOffset < offset)
+        {
+            cpu->nextInterrupt = newDebuggerInterruptTime;
+            offset = newOffset;
+            interruptType = INT_DEBUGGER;
+        }
     }
 
-	int newOffset = int(newAudioInterruptTime - cpu->emuTime);
-	if (newOffset < offset) {
-		cpu->nextInterrupt = newAudioInterruptTime;
-		offset = newOffset;
-		//DBERR("MSXAUDIOInterruptEnabled and scheduled at: " << newMsxAudioInterruptTime << endl);
-		interruptType = INT_AUDIO;
-	}
+    if (msxAudioInterruptEnable)
+    {
+        int newOffset = int(newMsxAudioInterruptTime - cpu->emuTime);
+        if (newOffset < offset)
+        {
+            cpu->nextInterrupt = newMsxAudioInterruptTime;
+            offset = newOffset;
+            //DBERR("MSXAUDIOInterruptEnabled and scheduled at: " << newMsxAudioInterruptTime << endl);
+            interruptType = INT_MSXAUDIO;
+        }
+    }
 
+    int newOffset = int(newAudioInterruptTime - cpu->emuTime);
+    if (newOffset < offset)
+    {
+        cpu->nextInterrupt = newAudioInterruptTime;
+        offset = newOffset;
+        //DBERR("MSXAUDIOInterruptEnabled and scheduled at: " << newMsxAudioInterruptTime << endl);
+        interruptType = INT_AUDIO;
+    }
 }
 
-void Emulator::initialize() {
-   
-	/* to allow converting unicode codes to key-names */
-	SDL_EnableUNICODE(1);
-	SDL_EnableKeyRepeat(0, SDL_DEFAULT_REPEAT_INTERVAL);
-	
+void Emulator::initialize()
+{
+    /* to allow converting unicode codes to key-names */
+    SDL_EnableUNICODE(1);
+    SDL_EnableKeyRepeat(0, SDL_DEFAULT_REPEAT_INTERVAL);
+
 #ifdef WIN32
     DBERR("WIN32 Drag&Drop support enabled.\n");
     SDL_SysWMinfo wminfo;
     SDL_VERSION(&wminfo.version);
     SDL_GetWMInfo(&wminfo);
-    
+
     HWND hwnd = wminfo.window;
     SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
     DragAcceptFiles(hwnd, TRUE);
@@ -247,59 +261,60 @@ void Emulator::initialize() {
 #endif
 #ifndef WIN32
     DBERR("Drag and Drop not implemented for this platform!\n");
-#endif    
+#endif
 
-	notPaused = true;
-	commandMode = false;
-	osdVisible = false;
-    
+    notPaused = true;
+    commandMode = false;
+    osdVisible = false;
+
     cpu = Z80::Instance();
     cpu->emuTime = starttime;
 
-	vdp = V9938::Instance();
+    vdp = V9938::Instance();
     AudioMixer::Instance()->initialize();
-    
-#ifdef PSG_SOUND_ON	
-	AY38910 *psg = AY38910::Instance();
-	AudioMixer::Instance()->addDevice(psg);        // TODO: do this in the device constructor?
+
+#ifdef PSG_SOUND_ON
+    AY38910* psg = AY38910::Instance();
+    AudioMixer::Instance()->addDevice(psg); // TODO: do this in the device constructor?
 #endif
 
 #ifdef PPI_SOUND_ON
-	PPISound *ppiSound = PPISound::Instance();
-	AudioMixer::Instance()->addDevice(ppiSound);
+    PPISound* ppiSound = PPISound::Instance();
+    AudioMixer::Instance()->addDevice(ppiSound);
 #endif
 
-#ifdef SCC_SOUND_ON	
-	SCC *scc = SCC::Instance();
-	AudioMixer::Instance()->addDevice(scc);
+#ifdef SCC_SOUND_ON
+    SCC* scc = SCC::Instance();
+    AudioMixer::Instance()->addDevice(scc);
 #endif
 
-#ifdef MSXMUSIC_SOUND_ON	
-	YM2413 *msxMusic = YM2413::Instance();
-	AudioMixer::Instance()->addDevice(msxMusic);
+#ifdef MSXMUSIC_SOUND_ON
+    YM2413* msxMusic = YM2413::Instance();
+    AudioMixer::Instance()->addDevice(msxMusic);
 #endif
 
-#ifdef MSXAUDIO_SOUND_ON	
-	MSXAudio *msxAudio = MSXAudio::Instance();
-	AudioMixer::Instance()->addDevice(msxAudio);
+#ifdef MSXAUDIO_SOUND_ON
+    MSXAudio* msxAudio = MSXAudio::Instance();
+    AudioMixer::Instance()->addDevice(msxAudio);
 #endif
 
-    SDL_WM_SetCaption("Nowind MSX",0);  	
-    
+    SDL_WM_SetCaption("Nowind MSX", 0);
+
     Keyboard* keyboard = Keyboard::Instance();
     PPISound* ppisound = PPISound::Instance();
     Disassembler* disasm = Disassembler::Instance();
 
-	cpu->initialize();
+    cpu->initialize();
     reset();
 }
 
-void Emulator::reset() {
-	cpu->reset();
-    vdp->reset();       // zet de lastNormalInterruptTime op emuTime
+void Emulator::reset()
+{
+    cpu->reset();
+    vdp->reset(); // zet de lastNormalInterruptTime op emuTime
 }
 
-ofstream ofs("timereport.txt"); 
+ofstream ofs("timereport.txt");
 
 void reportCyclesInit()
 {
@@ -312,112 +327,114 @@ void reportCycles(emuTimeType emuTime, unsigned long long msRunning)
     point++;
 }
 
-void Emulator::start() {
-
+void Emulator::start()
+{
     DBERR("entering main loop\n");
-//	SDL_WM_SetCaption("Nowind MSX",0);
-	
-	/* calculate the amount of T-states per millisecond the cpu should run at */
-   	statesPerMilliSecond = cpu->cpuFrequency / 1000;	
+    //	SDL_WM_SetCaption("Nowind MSX",0);
+
+    /* calculate the amount of T-states per millisecond the cpu should run at */
+    statesPerMilliSecond = cpu->cpuFrequency / 1000;
 
     startTime = SDL_GetTicks();
 
-	// todo: execute one instruction before we really start, so emuTime will not be zero and
-	// we still won't need extra checks to prevent "division by zero"
+    // todo: execute one instruction before we really start, so emuTime will not be zero and
+    // we still won't need extra checks to prevent "division by zero"
 
-//Debug::Instance()->INSTRUCTION_TRACING = true;
+    //Debug::Instance()->INSTRUCTION_TRACING = true;
 
 #ifdef ZEXALL_ON
     cpu->setupBdosEnv("zexall/zexdoc.com");
-    while(1)
+    while (1)
     {
         cpu->executeInstructions();
     }
 #endif
 
-    SDL_PauseAudio(0);	// start audio
+    SDL_PauseAudio(0); // start audio
 
-	while(running) {
-		while(notPaused) {
+    while (running)
+    {
+        while (notPaused)
+        {
+            scheduleNextInterrupt();
+            cpu->executeInstructions();
+            /* Interrupt reached, find out which one */
 
-		scheduleNextInterrupt();
-        cpu->executeInstructions();
-		/* Interrupt reached, find out which one */
-
-		/* neem de VALUE waarin het type interrupt staat */
-		switch (interruptType) {
-		case INT_VDP:
-
-            switch (clipboardTimer) {
-            case 0:
+            /* neem de VALUE waarin het type interrupt staat */
+            switch (interruptType)
             {
-        		int i = clipboardStream.length();
-        		if (i > 0) {
-        			clipboardKey = clipboardStream[0];
-        			clipboardStream = clipboardStream.substr(1,i-1);
-        			Keyboard::Instance()->modifyMatrixAscii(clipboardKey,true);
-        			clipboardTimer = 1;
-        		} 
-        		break;
-            }
-            case 1:
-                Keyboard::Instance()->modifyMatrixAscii(clipboardKey,false);
-                clipboardTimer--;
+            case INT_VDP:
+
+                switch (clipboardTimer)
+                {
+                case 0: {
+                    int i = clipboardStream.length();
+                    if (i > 0)
+                    {
+                        clipboardKey = clipboardStream[0];
+                        clipboardStream = clipboardStream.substr(1, i - 1);
+                        Keyboard::Instance()->modifyMatrixAscii(clipboardKey, true);
+                        clipboardTimer = 1;
+                    }
+                    break;
+                }
+                case 1:
+                    Keyboard::Instance()->modifyMatrixAscii(clipboardKey, false);
+                    clipboardTimer--;
+                    break;
+                default:
+                    clipboardTimer--;
+                }
+
+
+                // DBERR("execute INT_VDP\n");
+                cpu->intCPU(0xff);
+
+                // TODO: misschien ergens anders neerzetten, voor fmpac logging
+                // YM2413::Instance()->dumpChannelsBeat();
                 break;
-            default:
-                clipboardTimer--;
-            }
 
-
-            // DBERR("execute INT_VDP\n");
-            cpu->intCPU(0xff);
-
-			// TODO: misschien ergens anders neerzetten, voor fmpac logging
-			// YM2413::Instance()->dumpChannelsBeat();
-			break;
-
-		case INT_RENDERSCREEN:
-	 	{
-
+            case INT_RENDERSCREEN: {
 #ifndef CONSOLE_DEBUGGING_ON
-			/* handle key/sdl events */
-			handle_key_and_sdl_events();
+                /* handle key/sdl events */
+                handle_key_and_sdl_events();
 
-            //DBERR("execute INT_RENDERSCREEN\n");
-            vdp->renderScreen(cpu->nextInterrupt);
+                //DBERR("execute INT_RENDERSCREEN\n");
+                vdp->renderScreen(cpu->nextInterrupt);
 #endif
-			/* check if we're not going to fast */
-            speedCheck();
-            
-            if (autoPause) notPaused = false;           
-            break;
-	    }
-		case INT_SCREENCHANGE:
-            //DBERR("execute INT_SCREENCHANGE\n");
-        	vdp->doScreenChange(cpu->nextInterrupt);   
-			break;
-		case INT_AUDIO:
-            AudioMixer::Instance()->AudioInterrupt(cpu->nextInterrupt);
-			break;
+                /* check if we're not going to fast */
+                speedCheck();
 
-		default: 
-            assert(false);
-		}
-	} // end of while(notPaused)
+                if (autoPause) notPaused = false;
+                break;
+            }
+            case INT_SCREENCHANGE:
+                //DBERR("execute INT_SCREENCHANGE\n");
+                vdp->doScreenChange(cpu->nextInterrupt);
+                break;
+            case INT_AUDIO:
+                AudioMixer::Instance()->AudioInterrupt(cpu->nextInterrupt);
+                break;
 
-    DBERR("pause pressed!\n");
-	while(!notPaused) {
-		handle_key_and_sdl_events();
-		if (!running) break;
-  		SDL_Delay(17);
-	}
+            default:
+                assert(false);
+            }
+        } // end of while(notPaused)
 
-    DBERR("unpause pressed!\n");
+        DBERR("pause pressed!\n");
+        while (!notPaused)
+        {
+            handle_key_and_sdl_events();
+            if (!running) break;
+            SDL_Delay(17);
+        }
 
-	} // end of while(running)
+        DBERR("unpause pressed!\n");
 
-	/* classes Z80, VDP, AY38910 etc... will die on their own, they're singletons ;) */
-	SDL_Quit();
+    } // end of while(running)
+
+    /* classes Z80, VDP, AY38910 etc... will die on their own, they're singletons ;) */
+    SDL_Quit();
 }
 
 /* release time-slices until the average is back in range 
@@ -425,11 +442,10 @@ void Emulator::start() {
  */
 void Emulator::speedCheck()
 {
-
 #ifndef ZEXALL_ON
-	int slicesReleased = 0;
+    int slicesReleased = 0;
     msTimeType passedTime = OUR_SDL_GetTicks();
-	reportCycles(cpu->emuTime, passedTime);  // log time+emutime for analysis
+    reportCycles(cpu->emuTime, passedTime); // log time+emutime for analysis
 
     /*
     Comparisons against emuTimeType are always done using a subtraction and conversion to int (signed type)
@@ -464,204 +480,226 @@ void Emulator::speedCheck()
       cause the emulator to run at full speed until it catches up. This situation is very simular to the cputime-starvarion
       scenario.
     */
-   
-	while(cpu->emuTime > (statesPerMilliSecond * passedTime)) {
-		SDL_Delay(1);
-		passedTime = OUR_SDL_GetTicks();
-		slicesReleased++;
-	}
-//	if (slicesReleased > 0) DBERR("[%u]", slicesReleased);
-	reportCycles(cpu->emuTime, passedTime);
-	#endif      
+
+    while (cpu->emuTime > (statesPerMilliSecond * passedTime))
+    {
+        SDL_Delay(1);
+        passedTime = OUR_SDL_GetTicks();
+        slicesReleased++;
+    }
+    //	if (slicesReleased > 0) DBERR("[%u]", slicesReleased);
+    reportCycles(cpu->emuTime, passedTime);
+#endif
 }
 
-void Emulator::handle_key_and_sdl_events() {
-
-	SDL_Event event;
-	while (SDL_PollEvent(&event)) {
-
-		/* GLOBAL KEYS / EVENTS */
-		switch (event.type) {
-		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym) {
-
-			case SDLK_F6:
-                if (osdVisible) {
+void Emulator::handle_key_and_sdl_events()
+{
+    SDL_Event event;
+    while (SDL_PollEvent(&event))
+    {
+        /* GLOBAL KEYS / EVENTS */
+        switch (event.type)
+        {
+        case SDL_KEYDOWN:
+            switch (event.key.keysym.sym)
+            {
+            case SDLK_F6:
+                if (osdVisible)
+                {
                     // F6 = OSD uit, command-mode uit
                     commandMode = false;
                     osdVisible = false;
-                } else {
+                }
+                else
+                {
                     // osd is niet aan en F6 wordt ingedrukt
                     osdVisible = true;
-                    if ((event.key.keysym.mod & KMOD_SHIFT) == 0) {
+                    if ((event.key.keysym.mod & KMOD_SHIFT) == 0)
+                    {
                         // shift is niet ingedrukt
                         commandMode = true;
-                    }    
-                }  		
+                    }
+                }
                 OnScreenDisplay::Instance()->toggleOSD(osdVisible);
-    			break;
-			case SDLK_F7: {
+                break;
+            case SDLK_F7: {
                 // PASTE clipboard
 #ifdef WIN32
-                if (!IsClipboardFormatAvailable(CF_TEXT)) {
-  				    DBERR("No data on clipboard!\n");
+                if (!IsClipboardFormatAvailable(CF_TEXT))
+                {
+                    DBERR("No data on clipboard!\n");
                     break;
                 }
-                if (!OpenClipboard(NULL)) {
-  				    DBERR("Failed to open clipboard!\n");
+                if (!OpenClipboard(NULL))
+                {
+                    DBERR("Failed to open clipboard!\n");
                     break;
                 }
-                    
-                HGLOBAL clipboardHandle = GetClipboardData(CF_TEXT); 
-                if (clipboardHandle != NULL) 
-                { 
-                    LPSTR data = (LPSTR) GlobalLock(clipboardHandle); 
-                    if (data != NULL) 
-                    { 
-			   		 	Emulator::Instance()->clipboardStream = string(data);
+
+                HGLOBAL clipboardHandle = GetClipboardData(CF_TEXT);
+                if (clipboardHandle != NULL)
+                {
+                    LPSTR data = (LPSTR)GlobalLock(clipboardHandle);
+                    if (data != NULL)
+                    {
+                        Emulator::Instance()->clipboardStream = string(data);
                         //DBERR("data pasted: %s\n", data);
-                        GlobalUnlock(clipboardHandle); 
-                    } else {
+                        GlobalUnlock(clipboardHandle);
+                    }
+                    else
+                    {
                         DBERR("failed to obtain clipboard lock, no data pasted.\n");
                     }
-
-                } else {
+                }
+                else
+                {
                     DBERR("GetClipboardData failed, no data pasted.\n");
-                }                    
-                CloseClipboard();  
+                }
+                CloseClipboard();
 #else
                 DBERR("Paste from clipboard not supported on this platform!\n");
-#endif                              
-                }
-                break;
-                
-			case SDLK_F8:
-				 notPaused = !notPaused;
-				 if (notPaused) {
+#endif
+            }
+            break;
+
+            case SDLK_F8:
+                notPaused = !notPaused;
+                if (notPaused)
+                {
                     Emulator::Instance()->startTime += (SDL_GetTicks() - startPauseTime);
-                    autoPause = false;              // TODO: jan, dit heb ik erbij gezet, anders werkt het unpausen niet meer, maar is dit jouw bedoeling van autopause?
-                 } else {
+                    autoPause = false; // TODO: jan, dit heb ik erbij gezet, anders werkt het unpausen niet meer, maar is dit jouw bedoeling van autopause?
+                }
+                else
+                {
                     Emulator::Instance()->startPauseTime = SDL_GetTicks();
                     autoPause = true;
                 }
-    			break;
-    			
-			case SDLK_F9:
-    			Emulator::Instance()->cpu->abortEmulator();
                 break;
-			case SDLK_F10:
-				quit();
-    			break;
-   			case SDLK_F11:
-    			Emulator::Instance()->reset();
-    			break;
-   			case SDLK_F12:
-   				if (SDL_WM_GrabInput(SDL_GRAB_QUERY)==SDL_GRAB_ON) {
-   					SDL_ShowCursor(SDL_ENABLE);
-   					SDL_WM_GrabInput(SDL_GRAB_OFF);
-   				} else {
-   					SDL_ShowCursor(SDL_DISABLE);
-   					SDL_WM_GrabInput(SDL_GRAB_ON);
-   				}
-   				break;
-			default: 
+
+            case SDLK_F9:
+                Emulator::Instance()->cpu->abortEmulator();
                 break;
-			}
-			break;
-   		case SDL_QUIT:
-   			quit();
-			break;
+            case SDLK_F10:
+                quit();
+                break;
+            case SDLK_F11:
+                Emulator::Instance()->reset();
+                break;
+            case SDLK_F12:
+                if (SDL_WM_GrabInput(SDL_GRAB_QUERY) == SDL_GRAB_ON)
+                {
+                    SDL_ShowCursor(SDL_ENABLE);
+                    SDL_WM_GrabInput(SDL_GRAB_OFF);
+                }
+                else
+                {
+                    SDL_ShowCursor(SDL_DISABLE);
+                    SDL_WM_GrabInput(SDL_GRAB_ON);
+                }
+                break;
+            default:
+                break;
+            }
+            break;
+        case SDL_QUIT:
+            quit();
+            break;
         case SDL_MOUSEMOTION:
-            if (mouseDragging) {
-                GUI::Instance()->updateSelection(event.motion.x,event.motion.y);
+            if (mouseDragging)
+            {
+                GUI::Instance()->updateSelection(event.motion.x, event.motion.y);
                 //DBERR("SDL_MOUSEMOTION\n");
             }
             break;
         case SDL_MOUSEBUTTONDOWN:
-            GUI::Instance()->startSelection(event.motion.x,event.motion.y);
+            GUI::Instance()->startSelection(event.motion.x, event.motion.y);
             mouseDragging = true;
             //DBERR("SDL_MOUSEBUTTONDOWN\n");
             break;
-        case SDL_MOUSEBUTTONUP:
-            {
-            GUI::Instance()->endSelection(event.motion.x,event.motion.y);
+        case SDL_MOUSEBUTTONUP: {
+            GUI::Instance()->endSelection(event.motion.x, event.motion.y);
             mouseDragging = false;
-            //DBERR("SDL_MOUSEBUTTONUP\n");      
+            //DBERR("SDL_MOUSEBUTTONUP\n");
             break;
         }
 
 #ifdef WIN32
-   		case SDL_SYSWMEVENT: 
-            switch(event.syswm.msg->msg) {
-                
-                case WM_DROPFILES:
+        case SDL_SYSWMEVENT:
+            switch (event.syswm.msg->msg)
+            {
+            case WM_DROPFILES: {
+                char fileName[512];
+                HDROP hDrop = (HDROP)event.syswm.msg->wParam;
+                int cnt = DragQueryFile(hDrop, 0xFFFFFFFF, 0, 0);
+
+                if (cnt != -1)
                 {
-                    char fileName[512];
-                    HDROP hDrop = (HDROP) event.syswm.msg->wParam;
-                    int cnt = DragQueryFile(hDrop, 0xFFFFFFFF, 0, 0);
-            
-                    if (cnt != -1) {
-                        POINT pt;
-                        DragQueryPoint(hDrop, &pt);
-                        // DBERR("dropping on x,y: " << pt.x << ", " << pt.y << endl); 
-                        DBERR("DragQueryFile count: %i\n", cnt);
-                        for(int i = 0; i < cnt; i++) {
-                            DragQueryFileA(hDrop, i, fileName, 512);
-                            // DBERR("file "<< (i + 1)<< ": " << fileName<< endl);
-                        }
-                        DragFinish(hDrop);
-                        if (pt.y < 228) {    
-                            Media::Instance()->insertMedia(fileName,0);
-                        } else {
-                            SlotSelector::Instance()->usbInterface->insertDisk(0, fileName);
-                            char caption[250];
-                    		sprintf(caption, "Nowind MSX - USB - last inserted: %s", fileName);
-                            SDL_WM_SetCaption(caption,0);
-                            // Media::Instance()->insertMedia(fileName,1);
-                        }                        
-                    }   
-                } 
-                break;  
+                    POINT pt;
+                    DragQueryPoint(hDrop, &pt);
+                    // DBERR("dropping on x,y: " << pt.x << ", " << pt.y << endl);
+                    DBERR("DragQueryFile count: %i\n", cnt);
+                    for (int i = 0; i < cnt; i++)
+                    {
+                        DragQueryFileA(hDrop, i, fileName, 512);
+                        // DBERR("file "<< (i + 1)<< ": " << fileName<< endl);
+                    }
+                    DragFinish(hDrop);
+                    if (pt.y < 228)
+                    {
+                        Media::Instance()->insertMedia(fileName, 0);
+                    }
+                    else
+                    {
+                        SlotSelector::Instance()->usbInterface->insertDisk(0, fileName);
+                        char caption[250];
+                        sprintf(caption, "Nowind MSX - USB - last inserted: %s", fileName);
+                        SDL_WM_SetCaption(caption, 0);
+                        // Media::Instance()->insertMedia(fileName,1);
+                    }
+                }
+            }
+            break;
 
-                default:
-                      // DBERR("SDL_SYSWMEVENT,event.syswm.msg->msg: " << dec << event.syswm.msg->msg << endl);
-                      break;
-            }    
-	       	break;
+            default:
+                // DBERR("SDL_SYSWMEVENT,event.syswm.msg->msg: " << dec << event.syswm.msg->msg << endl);
+                break;
+            }
+            break;
 #endif
-		default:
-        	 //DBERR("SDL_EVENT,event.type: " << dec << (int) event.type << endl);
-			break;
-		}
+        default:
+            //DBERR("SDL_EVENT,event.type: " << dec << (int) event.type << endl);
+            break;
+        }
 
-		if (commandMode) {
-
-    		// Handle keys and events in commandmode
-			Command::Instance()->handleKeyEvent(&event);
-
-		} else {
-
-    		// Not in commandmode, so MSX has to handle this key or event
-    		switch (event.type) {
-      		case SDL_KEYDOWN:
-	    	case SDL_KEYUP:
-		 	     Keyboard::Instance()->modifyMatrix(event.key);
-			     break;
+        if (commandMode)
+        {
+            // Handle keys and events in commandmode
+            Command::Instance()->handleKeyEvent(&event);
+        }
+        else
+        {
+            // Not in commandmode, so MSX has to handle this key or event
+            switch (event.type)
+            {
+            case SDL_KEYDOWN:
+            case SDL_KEYUP:
+                Keyboard::Instance()->modifyMatrix(event.key);
+                break;
             case SDL_JOYAXISMOTION:
-			     Joystick::Instance()->axisMotion(&event);
-			     break;
+                Joystick::Instance()->axisMotion(&event);
+                break;
             case SDL_JOYBUTTONDOWN:
-			     Joystick::Instance()->buttonDown(&event);
-			     break;
-	        case SDL_JOYBUTTONUP:
-                 Joystick::Instance()->buttonUp(&event);
-                 break;
-		
+                Joystick::Instance()->buttonDown(&event);
+                break;
+            case SDL_JOYBUTTONUP:
+                Joystick::Instance()->buttonUp(&event);
+                break;
+
             // TODO: gaat dit wel goed samen met het selecteren van text op het scherm???
             case SDL_MOUSEMOTION:
-                 // even tijdelijk een break hier, anders komen er veel meldingen van events not handled.
-                 break;
-/*
+                // even tijdelijk een break hier, anders komen er veel meldingen van events not handled.
+                break;
+                /*
 			     mouseMotion(event);
 			     break;
             case SDL_MOUSEBUTTONDOWN:
@@ -672,15 +710,16 @@ void Emulator::handle_key_and_sdl_events() {
                  mouseButtonUp(event);
                  DBERR("--SDL_MOUSEBUTTONUP--\n");
                  break;
-*/                                     
-			default:
-//				 DBERR("Event not handled by MSX!\n");
-    			 break;
-			}
-    	}
+*/
+            default:
+                //				 DBERR("Event not handled by MSX!\n");
+                break;
+            }
+        }
     }
 }
 
-Emulator::~Emulator() {
-	   DBERR("Emulator destroyed.\n");
+Emulator::~Emulator()
+{
+    DBERR("Emulator destroyed.\n");
 }

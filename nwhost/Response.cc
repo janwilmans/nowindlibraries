@@ -15,41 +15,42 @@ Response::~Response()
 // send:  pc -> msx
 void Response::send(byte value)
 {
-	push_back(value);
+    push_back(value);
 }
 
 void Response::send16(word value)
 {
-	push_back(value & 255);
-	push_back(value >> 8);
+    push_back(value & 255);
+    push_back(value >> 8);
 }
 
 void Response::purge()
 {
-	clear();
+    clear();
 }
 
 void Response::sendHeader()
 {
-	send(0xFF); // needed because first read might fail (hardware design choise)!
-	send(0xAF);
-	send(0x05);
+    send(0xFF); // needed because first read might fail (hardware design choise)!
+    send(0xAF);
+    send(0x05);
 }
 
 byte Response::peek() const
 {
-	return isDataAvailable() ? front() : 0xFF;
+    return isDataAvailable() ? front() : 0xFF;
 }
 
 // receive:  msx <- pc
 byte Response::read()
 {
-	if (!isDataAvailable()) {
-		return 0xff;
-	}
-	byte result = front();
-	pop_front();
-	return result;
+    if (!isDataAvailable())
+    {
+        return 0xff;
+    }
+    byte result = front();
+    pop_front();
+    return result;
 }
 
 size_t Response::getSize()
@@ -59,7 +60,7 @@ size_t Response::getSize()
 
 bool Response::isDataAvailable() const
 {
-	return !empty();
+    return !empty();
 }
 
 } // namespace nwhost

@@ -9,28 +9,27 @@
 #define NWHOST_EXPORTS_H
 
 #ifdef __cplusplus
-# define DECORATE extern "C"
+#define DECORATE extern "C"
 
 #ifdef WIN32
-# define CCALL __cdecl
+#define CCALL __cdecl
 #else
-# define CCALL
+#define CCALL
 #endif
 
 #else
-# define DECORATE
-# define CCALL
-#endif 
+#define DECORATE
+#define CCALL
+#endif
 
 #if defined(_MSC_VER) && !defined(NOWIND_STATIC_LIBS)
-    #ifdef NWHOST_API_EXPORT
-        #define NWHOST_API __declspec(dllexport)
-    #else
-        #define NWHOST_API __declspec(dllimport)
-    #endif
+#ifdef NWHOST_API_EXPORT
+#define NWHOST_API __declspec(dllexport)
 #else
-    #define NWHOST_API 
+#define NWHOST_API __declspec(dllimport)
+#endif
+#else
+#define NWHOST_API
 #endif // _MSC_VER
 
 #endif //NWHOST_EXPORTS_H
-
