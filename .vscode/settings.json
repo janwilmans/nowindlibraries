@@ -5,7 +5,7 @@
   },
   "asm-code-lens.excludeFiles": "**/emuv1/**",
 
-  // format with the clang-format bundled with the C/C++ extension, it is recent
+  // format with the clang-format that comes with Visual Studio 2022 (19.x), it is recent
   // enough for .clang-format; language-specific so it beats a user-level [cpp] setting
   "[cpp]": {
     "editor.defaultFormatter": "ms-vscode.cpptools",
@@ -16,6 +16,7 @@
     "editor.formatOnSave": true
   },
   "C_Cpp.formatting": "clangFormat",
+  "C_Cpp.clang_format_path": "D:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\Llvm\\x64\\bin\\clang-format.exe",
   "C_Cpp.clang_format_style": "file",
   "C_Cpp.clang_format_fallbackStyle": "none"
 }
