@@ -482,7 +482,7 @@ void NowindHost::executeCommand()
 	case C_CMDREQUEST: commandRequested(); break;
 	//case 0xFF: vramDump();
     case C_CPUINFO: receiveExtraData(); nextState = STATE_CPUINFO; break;
-    case C_COMMAND: apiCommand();  break;
+    case C_COMMAND: apiCommand(); return;  // apiCommand sets the next state (STATE_RECEIVE_DATA) itself
     case C_STDOUT: stdOutCatch();  nextState = STATE_SYNC1; break;
     
 	default:
