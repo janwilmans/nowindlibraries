@@ -13,13 +13,15 @@ The external dependencies:
   - Linux and macOS: libftdi1 (the open source libusb based library),
     including its headers.
 - optional, for emuv1 and the tests: SDL 1.2, SDL_ttf 2.0 and googletest
-  - Windows: downloaded by CMake during the configure step (FetchContent,
-    the official SDL 1.2.15 / SDL_ttf 2.0.11 Visual C++ packages and
-    googletest 1.15.2), nothing to install; needs an internet connection the
-    first time.
+  - Windows (x64): a prebuilt copy is included in thirdparty/windows-x64
+    (SDL 1.2.15, SDL_ttf 2.0.11, googletest 1.15.2 for Debug and Release),
+    nothing to install or download. -DNOWIND_FETCH_DEPENDENCIES=ON downloads
+    them instead (FetchContent) and refreshes that copy; commit it when
+    'git status' shows a change you want to keep (see
+    thirdparty/windows-x64/README.txt).
   - Linux and macOS: the installed packages (see below), without them emuv1
     and/or the tests are skipped. -DNOWIND_FETCH_DEPENDENCIES=ON downloads
-    googletest there too (SDL is only downloaded for Windows).
+    googletest there.
 
 
 Windows
@@ -86,7 +88,7 @@ Tests
 -----
 The build also assembles the nowind ROM and NOWMAP.COM from msxsrc, with the
 Sjasm 0.42c in sjasm/, the tests use those. With googletest (and SDL for the
-emuv1 tests; both downloaded on Windows) ctest runs them from a build tree:
+emuv1 tests; both included for Windows) ctest runs them from a build tree:
   cd build/debug && ctest --output-on-failure
 or one group, by label:
   ctest -L unit          nwhost and emuv1 unit tests
