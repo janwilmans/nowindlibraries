@@ -52,8 +52,6 @@ protected:
     static void TearDownTestSuite()
     {
         nowindusb_cleanup();
-        // cleanup leaves the deleted drives in the vector (see DISABLED_CleanupForgetsTheDrives below)
-        drives.clear();
         nowindusb_set_debug_callback(nullptr);
     }
     TempDir dir;
@@ -146,13 +144,18 @@ TEST_F(NowindUsbApiTest, HarddiskAutodetectInsertsTheBootablePartitionFirst)
     EXPECT_EQ(nowindusb_set_harddisk_image(4, 5, false, path.c_str()), 0u) << "no such partition";
 }
 
-// DISABLED: nowindusb_cleanup() deletes the drives but leaves the pointers in the global 'drives' vector, a
-// nowindusb_startup() after it adds a new drive behind the dangling ones. Host: nwhost/nowindusb.cpp
-// nowindusb_cleanup(). (No ROM side; nwhostapp and emuv1 call startup once.)
-TEST(NowindUsbApiLifetime, DISABLED_CleanupForgetsTheDrives)
+TEST(NowindUsbApiLifetime, CleanupForgetsTheDrives)
 {
+    // nowindusb_cleanup() used to delete the drives but keep the pointers, the next startup used them
     nowindusb_startup();
+    nowindusb_set_romdisk(3); // drives 0..3
     nowindusb_cleanup();
-    EXPECT_TRUE(drives.empty()) << drives.size() << " dangling drive pointers";
-    drives.clear(); // so the next startup in this process does not use them
+    EXPECT_TRUE(drives.empty()) << drives.size() << " drive pointers left";
+
+    nowindusb_startup();
+    sendCommand(0, 0, 0, 0x85); // C_DRIVES
+    std::vector<byte> reply = readReply();
+    ASSERT_EQ(reply.size(), 6u);
+    EXPECT_EQ(reply[5], 1) << "a fresh start has one drive";
+    nowindusb_cleanup();
 }

@@ -90,10 +90,12 @@ void nowindusb_cleanup(void)
 {
     nowindusb_debug("nowindusb_cleanup\n");
     delete nowindHost;
+    nowindHost = nullptr;
     for (Drives::iterator it = drives.begin(); it != drives.end(); ++it)
     {
         delete *it;
     }
+    drives.clear(); // a next nowindusb_startup() must not use the deleted drives
 }
 
 unsigned int NowindHost_InsertPartition(unsigned int driveNr, unsigned int partitionNumber, std::string aHarddiskimage)
