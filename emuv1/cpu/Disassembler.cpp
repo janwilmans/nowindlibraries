@@ -240,7 +240,7 @@ void Disassembler::setDisassemblyPreview(emuTimeType emuTime)
     if (disassembling)
     {
         ++lineNumber;
-        DBERR("Disassembler line: %u\n", lineNumber);
+        DBERR("Disassembler line: %lu\n", lineNumber);
     }
 }
 

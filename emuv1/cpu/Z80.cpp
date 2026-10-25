@@ -860,7 +860,7 @@ void Z80::dumpPages()
 
     for (unsigned int b = 0; b < 8; b++)
     {
-        DBERR("readBlock[%u]: %u\n", b, readBlock[b]);
+        DBERR("readBlock[%u]: %p\n", b, readBlock[b]);
         ofs.write((char*)readBlock[b], 8 * 1024);
     }
     ofs.close();
@@ -901,7 +901,7 @@ void Z80::hijackBdos()
             nw_byte c = READMEM(de++);
             if (c == 0x0A)
             {
-                DBERR(" (time: %us)\n", seconds);
+                DBERR(" (time: %lds)\n", seconds);
                 continue;
             }
             if (c == 0x24) break;

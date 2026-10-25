@@ -221,10 +221,10 @@ void YM2413::updateUserInstrument()
     periodC = (unsigned int)(cpuFrequency / freqC); /* converting double to unsigned int ?! */
     if (periodC == 0) periodC = 1;                  // TODO: check!
 
-    DBERR("FREQ: %u\n", freqC);
-    DBERR("multiC: %u\n", multiC);
+    DBERR("FREQ: %g\n", freqC);
+    DBERR("multiC: %g\n", multiC);
     DBERR("FN: %u\n", FNumber[0]);
-    DBERR("oct: %u\n", octave[0]);
+    DBERR("oct: %g\n", octave[0]);
 
     /*
     // TODO: check of R=0, dan is RATE ook 0

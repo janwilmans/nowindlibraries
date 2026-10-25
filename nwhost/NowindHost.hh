@@ -8,6 +8,7 @@
 #include <iosfwd>
 
 #include "NwhostExports.h"
+#include "PrintfFormat.h"
 #include "DataBlock.hh"
 #include "BlockRead.hh"
 #include "BlockWrite.hh"
@@ -142,7 +143,7 @@ public:
     static const unsigned MAX_COMMAND_DATA = 240;
 
 
-    virtual void debugMessage(const char* cFormat, ...) const;
+    virtual void debugMessage(const char* cFormat, ...) const NW_PRINTF_FORMAT(2, 3);
 
     void clearStartupRequests();
     void addStartupRequest(std::vector<byte> command);

@@ -11,13 +11,14 @@
 #include <stdarg.h> // for va_list
 #include <stdio.h>  // for size_t
 #include "GeneralExports.h"
+#include "PrintfFormat.h"
 
 namespace general {
 
 class GEN_API Util {
 public:
-    static int vsnprintf(char* str, size_t size, const char* format, va_list ap);
-    static int snprintf(char* str, size_t size, const char* format, ...);
+    static int vsnprintf(char* str, size_t size, const char* format, va_list ap) NW_PRINTF_FORMAT(3, 0);
+    static int snprintf(char* str, size_t size, const char* format, ...) NW_PRINTF_FORMAT(3, 4);
 
     static void initialize();
     static void debug(const char* cFormat, ...);

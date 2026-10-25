@@ -39,7 +39,7 @@ void DebugDevice::writeData(nw_byte value)
         if (modeRegister & 4) printDecimal(value);
         if (modeRegister & 8) printAscii(value);
 
-        DBERR("emuTime: %u\n", Z80::Instance()->emuTime);
+        DBERR("emuTime: %llu\n", Z80::Instance()->emuTime);
         break;
     case 2:
         // multi byte mode

@@ -178,7 +178,7 @@ inline void Emulator::scheduleNextInterrupt()
     if (lastEmutime > cpu->emuTime)
     {
         unsigned long lTicks = OUR_SDL_GetTicks() & 0xffffffff;
-        DBERR("Emutime WRAPPPED at %i ms (%i min).", lTicks, lTicks / 60000);
+        DBERR("Emutime WRAPPPED at %lu ms (%lu min).", lTicks, lTicks / 60000);
     }
     lastEmutime = cpu->emuTime;
 

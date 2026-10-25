@@ -148,7 +148,7 @@ fstream* Media::openfile(string filename, NW_OPENMODE mode)
     fstream* fs = new fstream(fullpath.c_str(), mode);
     if (fs->fail())
     {
-        DBERR("%s not found!\n", fullpath);
+        DBERR("%s not found!\n", fullpath.c_str());
         assert(false);
     }
     return fs;

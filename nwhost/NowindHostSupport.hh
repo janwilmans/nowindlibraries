@@ -3,6 +3,7 @@
 
 #include "NowindTypes.hh"
 #include "Response.hh"
+#include "PrintfFormat.h"
 
 #include <deque>
 
@@ -12,7 +13,7 @@ class NowindHostSupport {
 public:
     NowindHostSupport();
     virtual ~NowindHostSupport();
-    virtual void debugMessage(const char* cFormat, ...) const;
+    virtual void debugMessage(const char* cFormat, ...) const NW_PRINTF_FORMAT(2, 3);
 
     // public for usb-host implementation
     bool isDataAvailable() const;

@@ -3,6 +3,7 @@
 #define DEBUG_H
 
 #include "msxtypes.h"
+#include "PrintfFormat.h"
 
 #include <iostream>
 #include <fstream>
@@ -102,8 +103,8 @@ public:
 
     void debugError(const char*, const char*, int);
 
-    static void debug_wrap_sprintf_erl(const char* file, int line, const char* cFormat, ...);
-    static void debug_wrap_sprintf(const char* cFormat, ...);
+    static void debug_wrap_sprintf_erl(const char* file, int line, const char* cFormat, ...) NW_PRINTF_FORMAT(3, 4);
+    static void debug_wrap_sprintf(const char* cFormat, ...) NW_PRINTF_FORMAT(1, 2);
 
     ~Debug();
 };

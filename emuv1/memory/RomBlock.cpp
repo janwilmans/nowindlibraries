@@ -13,7 +13,7 @@ RomBlock::RomBlock(string filename)
     deviceSize = fileSize / BLOCKSIZE;
     for (unsigned int i = 0; i < deviceSize; i++)
     {
-        DBERR("memory: 0x%08X\n", memory + (i * BLOCKSIZE));
+        DBERR("memory: %p\n", memory + (i * BLOCKSIZE));
     }
 }
 

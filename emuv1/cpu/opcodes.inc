@@ -39,7 +39,7 @@ case 0x52: {                                                         // ld d,d
             char text[255];
             for (int i=0;i<len;i++) text[i] = readMem(reg_pc+i+2);
             text[len] = 0;
-            DBERR("[LDD,D ^ 0x%08X] %s\n", Z80::Instance()->emuTime, text);
+            DBERR("[LDD,D ^ 0x%08llX] %s\n", Z80::Instance()->emuTime, text);
         }
     }
     break;
@@ -575,7 +575,7 @@ case 0x10: // djnz e
     if (Debug::Instance()->STACK_TRACING) { Debug::Instance()->fill(reg_sp); } \
     reg_sp -= 2; reg_sp &= 0xffff; \
     WRITEMEM16(reg_sp, reg_pc+2); \
-    if (Debug::Instance()->STACK_TRACING) { DBERR("0x%08x CALL: from 0x%04x", emuTime, reg_pc-1); } \
+    if (Debug::Instance()->STACK_TRACING) { DBERR("0x%08llx CALL: from 0x%04x", emuTime, reg_pc-1); } \
     reg_pc = reg_wz = READMEM16(reg_pc); \
     if (Debug::Instance()->STACK_TRACING) { DBERR(" -> 0x%04x\n", reg_pc); } \
     }

@@ -282,7 +282,7 @@ void GUI::setResolution(unsigned int res)
 #endif
         if (screen == 0)
         {
-            DBERR("GUI error: unable to set %ux%uz videomode: ", res * 256, res * 212 + (res * 16), SDL_GetError());
+            DBERR("GUI error: unable to set %ux%uz videomode: %s", res * 256, res * 212 + (res * 16), SDL_GetError());
         }
 
         screenBase = (Uint32*)screen->pixels;

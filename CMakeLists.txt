@@ -42,6 +42,12 @@ if(NOWIND_SANITIZE)
   endif()
 endif()
 
+# check the arguments of the printf-style logging functions (NW_PRINTF_FORMAT in general/PrintfFormat.h), the only
+# place left where 32-bit assumptions (pointers or sizes printed as unsigned int) would go unnoticed
+if(NOT MSVC)
+  add_compile_options(-Wformat)
+endif()
+
 add_subdirectory(general)
 add_subdirectory(nwhost)
 add_subdirectory(ftdx)

@@ -16,7 +16,7 @@ class NowindHostSupportDebug : public NowindHostSupport {
 public:
     NowindHostSupportDebug();
     virtual ~NowindHostSupportDebug();
-    virtual void debugMessage(const char* cFormat, ...) const;
+    virtual void debugMessage(const char* cFormat, ...) const NW_PRINTF_FORMAT(2, 3);
 };
 
 } // namespace nowind

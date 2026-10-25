@@ -248,7 +248,7 @@ bool BDOSProxy::FindFileResponse(const Command& command, Response& response, siz
 
         blockRead.init(command.getHL(), buffer.size(), buffer);
         found = true;
-        DBERR("file: %s size: %u\n", filename.c_str(), filesize);
+        DBERR("file: %s size: %ju\n", filename.c_str(), filesize);
     }
     return found;
 }
@@ -409,7 +409,7 @@ bool BDOSProxy::RandomBlockRead(const Command& command, Response& response)
             buffer[actuallyRead + i] = 0;
         }
     }
-    DBERR(" >> requested: %u records (%u bytes), actuallyRead: %u bytes\n", recordsRequested, amount, actuallyRead);
+    DBERR(" >> requested: %u records (%u bytes), actuallyRead: %zu bytes\n", recordsRequested, amount, actuallyRead);
 
     if (actuallyRead == 0)
     {
@@ -528,7 +528,7 @@ bool BDOSProxy::RandomBlockWrite(const Command& command, Response& response)
             buffer[actuallyRead + i] = 0;
         }
     }
-    DBERR(" >> requested: %u records (%u bytes), actuallyRead: %u bytes\n", recordsRequested, amount, actuallyRead);
+    DBERR(" >> requested: %u records (%u bytes), actuallyRead: %zu bytes\n", recordsRequested, amount, actuallyRead);
 
     if (actuallyRead == 0)
     {

@@ -48,7 +48,7 @@ ConFTD2XX::ConFTD2XX()
     ftStatus = FT_GetLibraryVersion(&dwLibraryVer);
     if (ftStatus == FT_OK)
     {
-        printf("FTD2xx library version = 0x%x\n", dwLibraryVer);
+        printf("FTD2xx library version = 0x%lx\n", dwLibraryVer);
     }
     else
     {

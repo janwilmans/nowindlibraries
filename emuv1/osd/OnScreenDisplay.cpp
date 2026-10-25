@@ -65,7 +65,7 @@ void OnScreenDisplay::initializeFont()
 {
     if (TTF_Init() == -1)
     {
-        DBERR("TTF_Init: %i", TTF_GetError());
+        DBERR("TTF_Init: %s", TTF_GetError());
         assert(false);
     }
 
@@ -76,7 +76,7 @@ void OnScreenDisplay::initializeFont()
     TTF_Font* font = TTF_OpenFont(filename.c_str(), 11);
     if (!font)
     {
-        DBERR("TTF_OpenFont: %i", TTF_GetError());
+        DBERR("TTF_OpenFont: %s", TTF_GetError());
         assert(false);
     }
 

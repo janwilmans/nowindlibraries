@@ -15,7 +15,7 @@ MapperKonami4::MapperKonami4(string filename)
     deviceSize = 4;
     for (unsigned int i = 0; i < deviceSize; i++)
     {
-        DBERR("memory: 0x%08X\n", memory + (i * BLOCKSIZE));
+        DBERR("memory: %p\n", memory + (i * BLOCKSIZE));
     }
 
     for (unsigned int i = 0; i < 4; i++)

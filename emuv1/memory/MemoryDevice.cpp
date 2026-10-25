@@ -40,14 +40,14 @@ void MemoryDevice::loadRom(string theFilename)
     romfile.seekg(0, ios::end);
     fileSize = romfile.tellg();
 
-    DBERR(" fileSize: %u\n", fileSize);
+    DBERR(" fileSize: %lu\n", fileSize);
 
     romfile.seekg(0);
 
     char* newmemChars = new char[fileSize];
 
-    DBERR("  created rom at 0x%08X\n", newmemChars);
-    DBERR("  reading %u bytes.\n", fileSize);
+    DBERR("  created rom at %p\n", newmemChars);
+    DBERR("  reading %lu bytes.\n", fileSize);
 
     romfile.read(newmemChars, fileSize);
     romfile.close();
@@ -75,7 +75,7 @@ MemoryDevice::~MemoryDevice()
 
     if (releaseMemory)
     {
-        DBERR("I will destroy: 0x%08X\n", memory);
+        DBERR("I will destroy: %p\n", memory);
         delete[] memory;
     }
 

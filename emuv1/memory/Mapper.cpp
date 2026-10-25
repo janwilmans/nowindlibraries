@@ -24,8 +24,8 @@ Mapper::Mapper(nw_byte memBanks)
     memory = new nw_byte[memBanks * 16 * 1024]; // inherited from MemoryDevice
     memset((void*)memory, 0xff, memBanks * 16 * 1024);
 
-    DBERR("Mapper start: %u\n", memory);
-    DBERR("Mapper ends : %u\n", memory + (memBanks * 16 * 1024));
+    DBERR("Mapper start: %p\n", memory);
+    DBERR("Mapper ends : %p\n", memory + (memBanks * 16 * 1024));
 
     /* masker voor ioports 0x0FCh - 0x0FFh
        dit simuleert niet-aangesloten memory, dit wordt soms door programma's gebruikt voor memory-grootte-detectie
@@ -41,7 +41,7 @@ Mapper::Mapper(nw_byte memBanks)
         p--;
         mapPage[p] = (nw_byte*)memory + (bank * 16 * 1024);
         bankOfPage[p] = bank;
-        DBERR("bank init: 0x%08x bank: %u p: %u\n", mapPage[p], bank, p);
+        DBERR("bank init: %p bank: %u p: %u\n", mapPage[p], bank, p);
         if (bank == maxBank)
             bank = 0;
         else

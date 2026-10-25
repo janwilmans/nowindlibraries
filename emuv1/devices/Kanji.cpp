@@ -44,7 +44,7 @@ void Kanji::loadKanjiRom()
     {
         ifs->seekg(0, ios::end);
         long size = ifs->tellg();
-        DBERR("Found KANJI.ROM (%ukB)\n", size / 1024);
+        DBERR("Found KANJI.ROM (%ldkB)\n", size / 1024);
 
         if ((size == 131072) || (size == 262144))
         {

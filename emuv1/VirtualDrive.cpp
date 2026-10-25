@@ -44,13 +44,13 @@ VirtualDrive::VirtualDrive()
 
     unsigned char* boot = newMem;
 
-    DBERR("boot: 0x%04X\n", boot);
+    DBERR("boot: %p\n", boot);
     writeLEinc(&boot, 1, 0xEB); // initial JMP ?! (not an opcode?)  [EX DE,HL] [CP $90]
     writeLEinc(&boot, 1, 0xFE);
     writeLEinc(&boot, 1, 0x90);
 
     writeStr(&boot, "SOMENAME");
-    DBERR("boot: 0x%04X\n", boot);
+    DBERR("boot: %p\n", boot);
     writeLEinc(&boot, 2, bytesPerSector);    // bytes/sector
     writeLEinc(&boot, 1, sectorsPerCluster); // sectors/cluster
     writeLEinc(&boot, 2, reservedSectors);   // reserved sectors
@@ -62,7 +62,7 @@ VirtualDrive::VirtualDrive()
     writeLEinc(&boot, 2, 9);                 // sectors/TRACK
     writeLEinc(&boot, 2, 2);                 // heads
     writeLEinc(&boot, 2, 0);                 // hidden sectors ? unused ?
-    DBERR("boot-routine at: 0x%04X\n", boot - newMem);
+    DBERR("boot-routine at: 0x%04tX\n", boot - newMem);
     //    writeLE(&boot,1,0xd0);              // RET NC
     writeLEinc(&boot, 1, 0xed); // boot-routine... (ED 04 RET)
     writeLEinc(&boot, 1, 0x04);

@@ -112,7 +112,7 @@ void Debug::memDump(const nw_byte* mem)
 
 */
 
-    DBERR("(address: 0x%08X\n", mem);
+    DBERR("(address: %p\n", mem);
     //memset(&temp[0],0,250);
 
     int index = 0;
@@ -175,7 +175,7 @@ void Debug::memDump(nw_byte* mem[4], nw_word address, nw_word marker)
     nw_word page = address >> 14;
     nw_word pageOffset = address & 0x3FF0;
 
-    DBERR("(pysical start of page at address: $%04X)\n", (unsigned long)mem[page]);
+    DBERR("(pysical start of page at address: %p)\n", mem[page]);
     DBERR("Dump of address: $%04X, address %#04X is marked.\n", realAddress, marker);
 
     char temp[250];
