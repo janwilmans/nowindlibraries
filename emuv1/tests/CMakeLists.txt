@@ -8,8 +8,8 @@ if(NOT GTest_FOUND)
   return()
 endif()
 
-ADD_EXECUTABLE(emuv1tests RamBlockTest.cpp)
+ADD_EXECUTABLE(emuv1tests RamBlockTest.cpp Z80Test.cpp DisassemblerTest.cpp)
 target_link_libraries(emuv1tests emuv1lib GTest::gtest_main)
 
 include(GoogleTest)
-gtest_discover_tests(emuv1tests)
+gtest_discover_tests(emuv1tests PROPERTIES LABELS unit)

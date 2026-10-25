@@ -73,6 +73,7 @@ class Profiler;
 
 class Z80 {
     friend class EmulatorTester;
+    friend class Z80TestAccess; // emuv1/tests
     friend class Disassembler;
     friend class Profiler;
     friend class DiskInterface;
