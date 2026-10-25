@@ -1,5 +1,5 @@
-Building the nowind libraries and nwhostapp
-===========================================
+Building the nowind libraries, nwhostapp and emuv1
+=================================================
 
 The build uses CMake (3.23 or newer) and needs a C++23 compiler.
 Two build trees are created, build/debug and build/release (RelWithDebInfo);
@@ -42,6 +42,10 @@ Prerequisites (Fedora):
 Note: the runtime package (libftdi1-2 on Debian) is not enough, the -dev /
 -devel package provides libftdi1.so and libftdi1/ftdi.h that are needed to
 build.
+
+Optional, for emuv1 (the SDL based MSX emulator, it is skipped when SDL 1.2
+or SDL_ttf is not found):
+  sudo apt install libsdl1.2-dev libsdl-ttf2.0-dev
 
 Build:
   ./build.sh
