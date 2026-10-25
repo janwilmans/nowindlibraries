@@ -3,14 +3,14 @@
 ; Main code by : Marcel delorme
 ; Suport code  : BiFi
 ; Bitbust      : Arjan Bakker
-	
+
 		include "g9klib.inc"
 		MODULE	G9k
-		  
+
 ;----------------------------------------------------------------------------;
 ; Gfx9000 general functions                                                  ;
 ;----------------------------------------------------------------------------;
-		
+
 Reset:
 ; Function :    Resets v9990, Deletes Palette, Sprites off,stops current blit operation, puts V9990 in correct RAM config and disables display
 ; Input    :    None
@@ -114,7 +114,7 @@ G9K_MODE_TABLE
 
 
 SetAdjust:
-; Function: Adjustment of Gfx9000 display 
+; Function: Adjustment of Gfx9000 display
 ;                                                   L/T   C   R/B
 ; Input   :      BC =>   B -> Horizontal adjustment (-7 -> 0 -> 8)
 ;                        C -> Vertical adjustment   (-7 -> 0 -> 8)
@@ -218,7 +218,7 @@ SpritesDisable:
                   G9kReadReg G9K_CTRL+G9K_DIS_INC_READ
                   OR      A,G9K_CTRL_DIS_SPD
                   OUT     (G9K_REG_DATA),A
-                  RET        
+                  RET
 
 SetScrollX:
 ; Set Horizontal scroll
@@ -240,14 +240,14 @@ SetScrollX:
 		RET
 
 SetScrollY:
-; Function :    Sets Scroll Y 
+; Function :    Sets Scroll Y
 ; Input    : 	HL = Y
 ; Output   : 	none
 ; Modifies : 	A
 		G9kWriteReg G9K_SCROLL_LOW_Y,L
 		LD	A,(SCROLL_MODE)
 		OR	A,H
-		OUT	(G9K_REG_DATA),A		
+		OUT	(G9K_REG_DATA),A
 		RET
 
 		IFNDEF G9K_DISABLE_PATTERN
@@ -271,7 +271,7 @@ SetScrollXB:
 		OUT     (G9K_REG_DATA),A
 		RET
 
-		
+
 SetScrollYB:
 ; Function :    Sets Scroll Y Layer B
 ; Input    : 	HL = Y
@@ -279,9 +279,9 @@ SetScrollYB:
 ; Modifies : 	A
 		G9kWriteReg G9K_SCROLL_LOW_Y_B,L
 		LD	A,H
-		OUT	(G9K_REG_DATA),A		
-		RET		
-		
+		OUT	(G9K_REG_DATA),A
+		RET
+
 		ENDIF
 
 SetScrollMode:
@@ -296,13 +296,13 @@ SetScrollMode:
 		RRCA
 		LD	(SCROLL_MODE),A
 		RET
-		
+
 SCROLL_MODE	DB	0
-		
-		
+
+
 
 SetBackDropColor:
-; Change back drop color on Gfx9000 
+; Change back drop color on Gfx9000
 ; In:         AF =>   A -> Back drop color
 ; Uses:       AF
 ;
@@ -313,7 +313,7 @@ SetBackDropColor:
 		AND	A,63
 		OUT	(G9K_REG_DATA),A
 		RET
-                  
+
 ;----------------------------------------------------------------------------;
 ; Gfx9000 pallete functions                                                  ;
 ;----------------------------------------------------------------------------;
@@ -322,8 +322,8 @@ WritePalette:
  ;   C=Palette pointer offset
  ;   B=Number of bytes to write
  ;  Modifies : AF,BC,HL
-		G9kWriteReg G9K_PALETTE_PTR,C  
-		LD	C,G9K_PALETTE     
+		G9kWriteReg G9K_PALETTE_PTR,C
+		LD	C,G9K_PALETTE
 		OTIR
 		RET
 
@@ -332,8 +332,8 @@ ReadPalette:
  ;   C=Palette pointer offset
  ;   B=Number of bytes to read
  ;
-		G9kWriteReg G9K_PALETTE_PTR,C    
-		LD	C,G9K_PALETTE      
+		G9kWriteReg G9K_PALETTE_PTR,C
+		LD	C,G9K_PALETTE
 		INIR
 		RET
 
@@ -355,10 +355,10 @@ DrawFilledBox:
 		OUT     (C),D   ; Set color
 		G9kWriteReg G9K_OPCODE,G9K_OPCODE_LMMV
 		RET
-		
-DrawLine:	
+
+DrawLine:
 ; HL = pointer to parameters
-; DE = Color	
+; DE = Color
 		LD      A,G9K_DS_X
 		OUT     (G9K_REG_SELECT),A
 		LD      BC,8*256+G9K_REG_DATA
@@ -368,9 +368,9 @@ DrawLine:
 		OUT     (G9K_REG_SELECT),A
 		OUT     (C),E
 		OUT     (C),D   ; Set color
-		G9kWriteReg G9K_OPCODE,G9K_OPCODE_LINE	
-		RET	
-DrawBox:		
+		G9kWriteReg G9K_OPCODE,G9K_OPCODE_LINE
+		RET
+DrawBox:
 ; HL = pointer to parameters (format: left,top,width,height)
 		PUSH	HL
 		LD      A,G9K_ARG
@@ -379,29 +379,29 @@ DrawBox:
 		G9kCmdWait
 		XOR	A,A
 		OUT	(G9K_REG_DATA),A  ; Clear argument register
-		
+
 		LD      A,G9K_DS_X
 		OUT     (G9K_REG_SELECT),A
-		OTIR	
+		OTIR
 		XOR	A,A
 		OUT	(G9K_REG_DATA),A
 		OUT	(G9K_REG_DATA),A  ; Write MI
 		G9kWriteReg G9K_OPCODE,G9K_OPCODE_LINE	; Draw upper line
 		POP	HL
-				
-		
+
+
 		PUSH	HL
 		LD      A,G9K_ARG
 		OUT     (G9K_REG_SELECT),A
-		LD	B,4	
+		LD	B,4
 		G9kCmdWait
 		LD	A,G9K_ARG_MAJ
-		OUT	(G9K_REG_DATA),A  
+		OUT	(G9K_REG_DATA),A
 
 		LD      A,G9K_DS_X
 		OUT     (G9K_REG_SELECT),A
 		OTIR
-		
+
 		INC	HL
 		INC	HL
 		OUTI
@@ -409,50 +409,50 @@ DrawBox:
 		; MI stays the same
 		G9kWriteReg G9K_OPCODE,G9K_OPCODE_LINE	; Draw left line
 		POP	HL
-		
-		
+
+
 		PUSH	HL
 		LD      A,G9K_ARG
-		OUT     (G9K_REG_SELECT),A	
+		OUT     (G9K_REG_SELECT),A
 		G9kCmdWait
-		
+
 		XOR	A,A
 		OUT	(G9K_REG_DATA),A  ; Clear argument register
-		
+
 		LD	A,G9K_DS_X
-		OUT	(G9K_REG_SELECT),A  
-		
+		OUT	(G9K_REG_SELECT),A
+
 		OUTI
-		OUTI	; Write left 
-					
+		OUTI	; Write left
+
 		LD	C,(HL)
 		INC	HL
 		LD	B,(HL)
 		INC	HL	; top
-		
+
 		LD	E,(HL)
 		INC	HL
 		LD	D,(HL)
 		INC	HL	; Width
-				
+
 		LD	A,(HL)
 		INC	HL
 		LD	H,(HL)  ; Height
-		LD	L,A	
+		LD	L,A
 		ADD	HL,BC	; Calc top+height
 		LD	C,G9K_REG_DATA
-	
+
 		OUT     (C),L
 		OUT     (C),H   ; Write Y
-		
+
 		OUT     (C),E
 		OUT     (C),D   ; Write MJ
-		
+
 		G9kWriteReg G9K_OPCODE,G9K_OPCODE_LINE	; Draw bottom line
-		POP	HL   
-		
+		POP	HL
+
 		LD      A,G9K_ARG
-		OUT     (G9K_REG_SELECT),A		
+		OUT     (G9K_REG_SELECT),A
 		;DE = width
 		LD	A,(HL)
 		INC	HL
@@ -461,13 +461,13 @@ DrawBox:
 		LD	L,A   ; Left
 		ADD	HL,DE ; Left+width
 		G9kCmdWait
-	
+
 		LD	A,G9K_ARG_MAJ
-		OUT	(G9K_REG_DATA),A  
-		
+		OUT	(G9K_REG_DATA),A
+
 		LD      A,G9K_DS_X
 		OUT     (G9K_REG_SELECT),A
-		
+
 		OUT     (C),L
 		OUT     (C),H   ; Write X
 		POP	HL
@@ -475,13 +475,13 @@ DrawBox:
 		OUTI
 		OUTI	        ; Write Y
 		INC	HL
-		INC	HL	
+		INC	HL
 		OUTI
-		OUTI		; Height (MJ)	
+		OUTI		; Height (MJ)
 		G9kWriteReg G9K_OPCODE,G9K_OPCODE_LINE	; Draw right line
-		RET	
-		
-		
+		RET
+
+
 SetupCopyRamToXY:
 ; Input   : HL = pointer to parameters (format: left,top,width,height)
 ; Modifies: A,BC,HL
@@ -539,7 +539,7 @@ CopyXYToRam:
 
 CopyXYToXY:
 ; HL = Pointer to data  (format: SourceX,SourceY,DestX,DestY,Width,height)
-		
+
 		LD      A,G9K_SC_X
 		OUT     (G9K_REG_SELECT),A
 		LD      BC,12*256+G9K_REG_DATA
@@ -552,7 +552,7 @@ CopyXYToRegisterXY
 ; HL = Pointer to G9B_BOX struct
 ; IX = Dest X
 ; IY = Dest Y
-		
+
 		LD      A,G9K_SC_X
 		OUT     (G9K_REG_SELECT),A
 		LD      C,G9K_REG_DATA
@@ -570,7 +570,7 @@ CopyXYToRegisterXY
 		LD	A,IYH
 		OUT	(G9K_REG_DATA),A; DestY
 		OUTI
-		OUTI	; Width 
+		OUTI	; Width
 		OUTI
 		OUTI	; Height
 		G9kWriteReg G9K_OPCODE,G9K_OPCODE_LMMM
@@ -615,7 +615,7 @@ SetPoint:
 		OUT     (C),H
 		OUT     (C),E
 		OUT     (C),D
-		
+
 		G9kCmdWait
 		RET
 
@@ -632,17 +632,17 @@ SetCmdColor:
 		LD      A,H
 		OUT     (G9K_REG_DATA),A
 		RET
-		
-SetCmdBackColor:		
+
+SetCmdBackColor:
 ; HL = color value
 		G9kWriteReg G9K_BC,L
 		LD      A,H
 		OUT     (G9K_REG_DATA),A
 		RET
-		
+
 
 CopyRamToVram:
-; Function :    Data transfer from CPU to VRAM 
+; Function :    Data transfer from CPU to VRAM
 ; Input    :    HL = pointer to buffer, BC=number of bytes to send
 ; Output   : 	none
 ; Modifies :    A,B,C,HL
@@ -656,9 +656,9 @@ CopyRamToVram:
 .a
                 OTIR
                 DEC     A
-                JP      NZ,.a            
+                JP      NZ,.a
 		RET
-		
+
 
 ;----------------------------------------------------------------------------;
 ; Gfx9000 font functions                                                     ;
@@ -668,14 +668,14 @@ OpenVff:
 ; Input 	  A = ram or vram.  0 = load data in vram, 1 = load font data in ram
 ;		 DE = Pointer to Font file name
 ;                IX = Pointer to VFF object
-                
+
                 LD	(IX+VFF_OBJECT.ramFont),A
 		PUSH	IX
-		XOR	A,A	
+		XOR	A,A
 		CALL	File.FileOpen
 		POP	IX
 		RET	NZ		; Error opening
-		
+
 		PUSH	IX
 		LD	HL,3		; ID
 		LD	DE,VFF_DATA_ID
@@ -683,7 +683,7 @@ OpenVff:
 		POP	IX
 		RET	NZ		; Error reading
 
-		PUSH	IX		
+		PUSH	IX
 		PUSH	BC		; Save file handle
 		LD	B,3
 		LD	HL,VFF_DATA_ID
@@ -699,23 +699,23 @@ OpenVff:
 		INC	DE
 		LD	HL,21		; Load header
 		JP	File.FileRead
-		
+
 VFF_ID      	DB      "VFF"
 VFF_DATA_ID	DS	3,0
-		
+
 LoadFont:
-; Function	: Loads VFF font data 
+; Function	: Loads VFF font data
 ; Input         : IX = Pointer to VFF object
 ;  	        : IY = Pointer to font offset table, if it's zero it's not loaded
 ; 	        : HL = Pointer to buffer for loading, or if it's a ram font the destination address
-;               : BC = Vram low word font data offset. If it's a ram font the pointer for buffer loading is used as font data offset  
+;               : BC = Vram low word font data offset. If it's a ram font the pointer for buffer loading is used as font data offset
 ; Output        : Z = succeded NZ= not succeded, A = error number
-		
-		LD	A,(IX+VFF_OBJECT.ramFont)	
+
+		LD	A,(IX+VFF_OBJECT.ramFont)
 		OR	A,A
 		JR	Z,.noRamFont
-		LD	BC,HL	
-.noRamFont		
+		LD	BC,HL
+.noRamFont
 		PUSH	IX
 		PUSH	HL
 		LD	(IX+VFF_OBJECT.vramOffset),BC     ; Store Vram font offset
@@ -727,7 +727,7 @@ LoadFont:
 		POP	DE          			  ; Pointer to buffer
 		POP	IX
 		RET	NZ	    			  ; Return if loading failed
-		
+
 		LD	HL,(IX+VFF_OBJECT.dataSize)
 		PUSH	HL
 		PUSH	DE           ; Pointer to buffer
@@ -735,14 +735,14 @@ LoadFont:
 		POP	DE
 		POP	HL
 		RET	NZ	     ; Loading failed
-		
+
 		; If it is ram font then copy to vram is skipped
 		LD	A,(IX+VFF_OBJECT.ramFont)
 		DEC	A
 		RET	Z
-		
+
 		PUSH	DE           ; Pointer to buffer
-		PUSH	HL           ; data size    
+		PUSH	HL           ; data size
                 LD	HL,(IX+VFF_OBJECT.vramOffset)
                 LD	E,7	     ; High byte font address always 7
 		CALL    SetVramWrite
@@ -750,14 +750,14 @@ LoadFont:
 		POP	HL	     ; Pointer to buffer
 		CALL    CopyRamToVram
 		XOR	A,A
-		RET		
+		RET
 
 SetFont:
 ; Input IX = Pointer to VFF object
 		PUSH	AF
 		PUSH	HL
 		PUSH	DE
-		
+
 		LD 	A,(IX + VFF_OBJECT.width)
 		LD 	(currentFont.width),A
 		LD 	A,(IX + VFF_OBJECT.height)
@@ -769,68 +769,68 @@ SetFont:
 		LD	(PrintStringVram.fontTablePtr+1),HL
 		LD	(PutCharVram.fontTablePtr+1),HL
 		ENDIF
-		
+
 		IFNDEF G9K_DISABLE_VFF_RAM
-		LD	(PrintStringRam.fontTablePtr+1),HL	
+		LD	(PrintStringRam.fontTablePtr+1),HL
 		LD	(PutCharRam.fontTablePtr+1),HL
 		ENDIF
-		
+
 		INC	HL
 		INC	HL
 		LD	A,(HL)	; offset to second char is also the character size
 		LD	(currentFont.charSize),A
-			
+
 		LD	A,(IX+VFF_OBJECT.vramOffset+0)
 		IFNDEF G9K_DISABLE_VFF_VRAM
 		LD	(PrintStringVram.fontVramOffset+1),A
 		LD	(PutCharVram.fontVramOffset+1),A
 		ENDIF
-		
+
 		IFNDEF G9K_DISABLE_VFF_RAM
-		LD	(PrintStringRam.fontRamOffset+1),A	
+		LD	(PrintStringRam.fontRamOffset+1),A
 		LD	(PutCharRam.fontRamOffset+1),A
 		ENDIF
-		
+
 		LD	A,(IX+VFF_OBJECT.vramOffset+1)
 		IFNDEF G9K_DISABLE_VFF_VRAM
 		LD	(PrintStringVram.fontVramOffset+2),A
 		LD	(PutCharVram.fontVramOffset+2),A
-		ENDIF	
-		
+		ENDIF
+
 		IFNDEF G9K_DISABLE_VFF_RAM
 		LD	(PrintStringRam.fontRamOffset+2),A
 		LD	(PutCharRam.fontRamOffset+2),A
 		ENDIF
-		
+
 		LD	A,(IX+VFF_OBJECT.ramFont)
 		IFNDEF G9K_DISABLE_VFF_VRAM
 		LD	HL,PrintStringVram
 		LD	DE,PutCharVram
 		ENDIF
-		
+
 		OR	A,A
 		JR	Z,.end
-		
+
 		IFNDEF G9K_DISABLE_VFF_RAM
 		LD	HL,PrintStringRam
 		LD	DE,PutCharRam
 		ENDIF
-.end:				
+.end:
 		LD	(PrintString+1),HL
 		LD	(PutChar+1),DE
-		
+
 		POP	DE
 		POP	HL
 		POP	AF
 		RET
-		
-PrintString:	
+
+PrintString:
 		JP 	0
-PutChar:	
-		JP 	0	
-	
+PutChar:
+		JP 	0
+
 		IFNDEF G9K_DISABLE_VFF_VRAM
-PrintStringVram:	
+PrintStringVram:
 ; Function	: Print ASCIIZ String
 ; Input 	: IX = X
 ;  		: IY = Y
@@ -840,15 +840,15 @@ PrintStringVram:
 ; Modifies      ; AF,BC,DE,HL,IX
                 LD	(currentFont.x),IX
                 LD	(currentFont.y),IY
-                    
+
 .loop
 		LD	A,G9K_SC_X
 		OUT	(G9K_REG_SELECT),A
 		LD	A,(DE)
 		INC	DE
 		OR	A,A	; End of ASCIIZ string
-		RET	Z 	
-		  
+		RET	Z
+
 .fontTablePtr	LD	BC,0	;VFF.FONT_TABLE
 		LD	L,A
 		LD	H,0
@@ -859,20 +859,20 @@ PrintStringVram:
 		LD	C,A
 		LD	B,0
 		ADD	IX,BC		; Precalculation
-		
+
 		LD	C,(HL)
 		INC	HL
-		LD	B,(HL)  ; vram offset of character  
+		LD	B,(HL)  ; vram offset of character
 .fontVramOffset LD	HL,0    ; vram font base address offset low word
-                ADD	HL,BC   
-                
+                ADD	HL,BC
+
                 LD	C,G9K_REG_DATA
         	G9kCmdWait
 
-		OUT	(C),L   ; Vram address Low byte  
+		OUT	(C),L   ; Vram address Low byte
 		LD	A,0
-		OUT	(C),A   ; Looks stuppid but else it doens't work on turbo r             
-		OUT	(C),H	; Vram addres Mid byte   
+		OUT	(C),A   ; Looks stuppid but else it doens't work on turbo r
+		OUT	(C),H	; Vram addres Mid byte
 		LD	HL,currentFont.vramAddress
 		OUTI            ; Vram high address
 		OUTI            ; X low byte
@@ -884,45 +884,45 @@ PrintStringVram:
 		OUT	(C),A   ; Width High byte always 0
 		OUTI            ; Height
 		LD	A,0     ; Height High byte always 0
-		OUT	(C),A   ; Looks stuppid but else it doens't work in turbo r  
+		OUT	(C),A   ; Looks stuppid but else it doens't work in turbo r
 		G9kWriteReg G9K_OPCODE,G9K_OPCODE_CMMM
 		LD	(currentFont.x),IX
 		JP	.loop
 
-PutCharVram:	
+PutCharVram:
 ; Function	: Print a character
 ; Input 	: E  = Character
 ; Output        ; IX = modified to x after printed character
 ; Modifies      ; AF,BC,DE,HL,IX
-                    		
-                            	  
-.fontTablePtr	LD	BC,0	
+
+
+.fontTablePtr	LD	BC,0
 		LD	L,A
 		LD	H,0
 		ADD	HL,HL
 		ADD	HL,BC
-		
+
 		LD	A,G9K_SC_X
-		OUT	(G9K_REG_SELECT),A 
+		OUT	(G9K_REG_SELECT),A
 
 		LD	A,(currentFont.width)	; Next Char
 		LD	C,A
 		LD	B,0
 		ADD	IX,BC		; Precalculation
-		
+
 		LD	C,(HL)
 		INC	HL
-		LD	B,(HL)  ; vram offset of character  
+		LD	B,(HL)  ; vram offset of character
 .fontVramOffset LD	HL,0    ; vram font base address offset low word
-                ADD	HL,BC   
-                
+                ADD	HL,BC
+
                 LD	C,G9K_REG_DATA
         	G9kCmdWait
 
-		OUT	(C),L    ; Vram address Low byte  
+		OUT	(C),L    ; Vram address Low byte
 		LD	A,0
-		OUT	(C),A   ; Looks stuppid but else it doens't work on turbo r             
-		OUT	(C),H	; Vram addres Mid byte   
+		OUT	(C),A   ; Looks stuppid but else it doens't work on turbo r
+		OUT	(C),H	; Vram addres Mid byte
 		LD	HL,currentFont.vramAddress
 		OUTI            ; Vram high address
 		OUTI            ; X low byte
@@ -934,12 +934,12 @@ PutCharVram:
 		OUT	(C),A   ; Width High byte always 0
 		OUTI            ; Height
 		LD	A,0     ; Height High byte always 0
-		OUT	(C),A   ; Looks stuppid but else it doens't work in turbo r  
+		OUT	(C),A   ; Looks stuppid but else it doens't work in turbo r
 		G9kWriteReg G9K_OPCODE,G9K_OPCODE_CMMM
 		LD	(currentFont.x),IX
 		RET
 		ENDIF
-		
+
 		IFNDEF G9K_DISABLE_VFF_RAM
 PrintStringRam:
 ; Function	: Print ASCIIZ String
@@ -959,8 +959,8 @@ PrintStringRam:
 		LD	A,(DE)
 		INC	DE
 		OR	A,A	; End of ASCIIZ string
-		RET	Z 	
-		 
+		RET	Z
+
 		; Calculate the font data pointer address in ram
 .fontTablePtr	LD	BC,0
 		LD	L,A
@@ -978,10 +978,10 @@ PrintStringRam:
 		; Get the address of the character data in ram
 		LD	C,(HL)
 		INC	HL
-		LD	B,(HL)  ; ram offset of character  
+		LD	B,(HL)  ; ram offset of character
 .fontRamOffset  LD	HL,0    ; ram font base address offset low word
-                ADD	HL,BC   
-                PUSH	HL	
+                ADD	HL,BC
+                PUSH	HL
                 LD	C,G9K_REG_DATA
         	G9kCmdWait
 		LD	HL,currentFont.x
@@ -994,14 +994,14 @@ PrintStringRam:
 		OUT	(C),A   ; Width High byte always 0
 		OUTI            ; Height
 		LD	A,0     ; Height High byte always 0
-		OUT	(C),A   ; Looks stuppid but else it doens't work in turbo r  
+		OUT	(C),A   ; Looks stuppid but else it doens't work in turbo r
 		G9kWriteReg G9K_OPCODE,G9K_OPCODE_CMMC
 		; Store addres of next X position
 		LD	(currentFont.x),IX
-		
+
 		; Wait for v9990 to recieve data
 		G9kWaitComReady
-		
+
 		; Send character data to vdp
 		POP	HL	; Pointer to font data in ram
 		LD	A,(currentFont.charSize)
@@ -1009,12 +1009,12 @@ PrintStringRam:
 		LD	C,G9K_CMD_DATA
 		OTIR
 		JP	.loop
-		
+
 PutCharRam:
 ; Function	: Print a character
 ; Input 	: A  = Character
 ; Output        ; IX = modified to x after printed character
-; Modifies      ; AF,BC,DE,HL,IX		
+; Modifies      ; AF,BC,DE,HL,IX
 		; Calculate the font data pointer address in ram
 .fontTablePtr	LD	BC,0
 		LD	L,A
@@ -1024,7 +1024,7 @@ PutCharRam:
 
 		LD	A,G9K_DS_X
 		OUT	(G9K_REG_SELECT),A
-		 
+
 		; Precalculate next character offset
 		; This is done here to minimize wasted time on waiting for the v9990 to finish
 		LD	A,(currentFont.width)	; Next Char
@@ -1035,10 +1035,10 @@ PutCharRam:
 		; Get the address of the character data in ram
 		LD	C,(HL)
 		INC	HL
-		LD	B,(HL)  ; ram offset of character  
+		LD	B,(HL)  ; ram offset of character
 .fontRamOffset  LD	HL,0    ; ram font base address offset low word
-                ADD	HL,BC   
-                PUSH	HL	
+                ADD	HL,BC
+                PUSH	HL
                 LD	C,G9K_REG_DATA
         	G9kCmdWait
 		LD	HL,currentFont.x
@@ -1051,14 +1051,14 @@ PutCharRam:
 		OUT	(C),A   ; Width High byte always 0
 		OUTI            ; Height
 		LD	A,0     ; Height High byte always 0
-		OUT	(C),A   ; Looks stuppid but else it doens't work in turbo r  
+		OUT	(C),A   ; Looks stuppid but else it doens't work in turbo r
 		G9kWriteReg G9K_OPCODE,G9K_OPCODE_CMMC
 		; Store addres of next X position
 		LD	(currentFont.x),IX
-		
+
 		; Wait for v9990 to recieve data
 		G9kWaitComReady
-		
+
 		; Send character data to vdp
 		POP	HL	; Pointer to font data in ram
 		LD	A,(currentFont.charSize)
@@ -1067,48 +1067,48 @@ PutCharRam:
 		OTIR
 		RET
 		ENDIF
-		
-Locate:		
+
+Locate:
 ; Set X and Y position for putchar
 ; Value in IX is also needed for the putchar so don't overwrite it
 		LD	(currentFont.x),IX
-                LD	(currentFont.y),IY	
+                LD	(currentFont.y),IY
 		RET
-		
-		
+
+
 currentFont
 .vramAddress	DB	7		; High Byte
 .x		DW	0
 .y		DW	0
 .width		DB	8		; Font Size
-.height		DB	8		;	
+.height		DB	8		;
 .charSize	DB	0		; Char size in bytes.
 
 		ENDIF
-	
+
 ;----------------------------------------------------------------------------;
 ; Gfx9000 bitmap functions                                                   ;
 ;----------------------------------------------------------------------------;
-		IFNDEF G9K_DISABLE_G9B	
-			
+		IFNDEF G9K_DISABLE_G9B
+
 OpenG9B:
 ; Input  : DE = Pointer to file name
 ; Output : HL = Pointer to G9B header data, NZ = error , Error code in A
-; Modifies: 		
+; Modifies:
 		PUSH	HL
-		XOR	A,A	
+		XOR	A,A
 		CALL	File.FileOpen
 		POP	HL
 		RET	NZ		; Error opening
-		
+
 		PUSH	HL
 		LD	HL,5		; ID + HEADER LENGTH
 		LD	DE,G9B_DATA_ID
 		CALL	File.FileRead
 		POP	HL
 		RET	NZ		; Error reading
-		
-		PUSH	HL		
+
+		PUSH	HL
 		PUSH	BC		; Save file handle
 		LD	B,3
 		LD	HL,G9B_DATA_ID
@@ -1118,7 +1118,7 @@ OpenG9B:
 		POP	BC
 		POP	HL
 		RET	NZ		; Not a G9B file
-		
+
 		LD	(HL),B		; Save handle in G9B struct
 		INC	HL
 		INC	HL
@@ -1132,74 +1132,74 @@ ReadG9B:
 ; BC = Size of load buffer
 ; HL = Destination X
 ; IY = Destination Y
-;  A = Palette offset in bytes. Only valid with palette modes 	
-		
+;  A = Palette offset in bytes. Only valid with palette modes
+
 		PUSH	AF	; Palette pointer
-		LD	(G9B_COPY_PARMS),HL	
-		LD	(G9B_COPY_PARMS+2),IY	
-		
+		LD	(G9B_COPY_PARMS),HL
+		LD	(G9B_COPY_PARMS+2),IY
+
 		LD	A,(IX+G9B_OBJECT.width+0)
 		LD	(G9B_COPY_PARMS+4),A
-		LD	A,(IX+G9B_OBJECT.width+1)		
+		LD	A,(IX+G9B_OBJECT.width+1)
 		LD	(G9B_COPY_PARMS+5),A		; Copy X
-		
+
 		LD	A,(IX+G9B_OBJECT.height+0)
 		LD	(G9B_COPY_PARMS+6),A
-		LD	A,(IX+G9B_OBJECT.height+1)		
-		LD	(G9B_COPY_PARMS+7),A		; Copy Y	
-		
+		LD	A,(IX+G9B_OBJECT.height+1)
+		LD	(G9B_COPY_PARMS+7),A		; Copy Y
+
 		LD	HL,G9B_COPY_PARMS
 		POP	AF    ; Palette pointer
 		PUSH	BC
 		PUSH	DE
 		PUSH 	AF     ; Palette pointer
-		CALL	SetupCopyRamToXY	
+		CALL	SetupCopyRamToXY
 		POP	BC
 		LD	C,B    ; C = palette pointer
-		LD	A,(IX+G9B_OBJECT.nrColors) 
-		OR	A,A		
+		LD	A,(IX+G9B_OBJECT.nrColors)
+		OR	A,A
 		CALL	NZ,G9BLoadPalette
-		POP	DE		
+		POP	DE
 		POP	BC
 		RET	NZ	      ; Error Loading palette
-		
+
 		LD	HL,CopyRamToXY
 		LD	(ReadToG9K.copyMode+1),HL ; Set copy mode
-		
+
 		IFNDEF G9K_DISABLE_BITBUST
 		  LD	  A,(IX + G9B_OBJECT.compression)
 		  AND	  A,07FH
 		  CP	  A,G9B_COMPRESSION_BITBUST
 		  JP	  Z,G9kBitBustXY
 		ENDIF
-		
-ReadG9B.Load		
+
+ReadG9B.Load
 		LD	A, (IX+G9B_OBJECT.dataSize+2)
 		LD	HL,(IX+G9B_OBJECT.dataSize)
-ReadG9B.0	
+ReadG9B.0
 		PUSH	HL
-		POP	IY	       ; Save low word, because this is the last block 
+		POP	IY	       ; Save low word, because this is the last block
 		OR	A,A
 		SBC	HL,BC
 		SBC	A,0	       ; Calculate block size
 		JR	C,ReadG9B.1    ; Jumps when last block is reached
-		PUSH	AF 	       ; Size still to read high byte 
-		PUSH	HL     	       ; Size still to read low word	
-		PUSH	BC	       ; buffer size	
-		LD	HL,BC	       ; Block size is buffer size     
+		PUSH	AF 	       ; Size still to read high byte
+		PUSH	HL     	       ; Size still to read low word
+		PUSH	BC	       ; buffer size
+		LD	HL,BC	       ; Block size is buffer size
 		LD	B,(IX + G9B_OBJECT.fileHandle) ; Get file handle
 		CALL	ReadToG9K
 		POP	BC	       ; buffer size
-		POP	HL             ; Size still to read low word 
-		POP	AF	       ; Size still to read high byte  
+		POP	HL             ; Size still to read low word
+		POP	AF	       ; Size still to read high byte
 		JP 	ReadG9B.0
-		
-ReadG9B.1	
+
+ReadG9B.1
 		PUSH	IY
 		POP	HL
-		LD	B,(IX)	; Get file handle	
+		LD	B,(IX)	; Get file handle
 		JP	ReadToG9K
-		
+
 
 
 ReadG9BLinear:
@@ -1207,8 +1207,8 @@ ReadG9BLinear:
 ; DE   = Pointer to load buffer
 ; BC   = Size of load buffer
 ; IYL:HL = Vram destination address
-;    A = Palette offset in bytes. Only valid with in palette modes 	
-		
+;    A = Palette offset in bytes. Only valid with in palette modes
+
 		PUSH	AF
 		PUSH	BC
 		PUSH	DE ; Pointer to buffer
@@ -1217,53 +1217,53 @@ ReadG9BLinear:
 		POP	DE
 		POP	BC
 		POP	AF
-		
+
 		PUSH	DE
 		PUSH	BC
 		LD	C,A    ; C = palette pointer
 		LD	A,(IX+G9B_OBJECT.nrColors)
-		OR	A,A		
+		OR	A,A
 		CALL	NZ,G9BLoadPalette
 		POP	BC
-		POP	DE		
+		POP	DE
 		RET	NZ	      ; Error Loading palette
-		
+
 		LD	HL,CopyRamToVram
 		LD	(ReadToG9K.copyMode+1),HL
-		
+
 		IFNDEF G9K_DISABLE_BITBUST
 		  LD	  A,(IX + G9B_OBJECT.compression)
 		  AND	  A,07FH
 		  CP	  A,G9B_COMPRESSION_BITBUST
 		  JP	  Z,G9kBitBustLinear
 		ENDIF
-		JP	ReadG9B.Load	
-		
-ReadToG9K:	
-; Input B = FileHandle	
+		JP	ReadG9B.Load
+
+ReadToG9K:
+; Input B = FileHandle
 ;      DE = Pointer to buffer
-;      HL = Bytes to read	 	
-		
+;      HL = Bytes to read
+
 		PUSH	DE
 		PUSH	IX
-		
+
 		PUSH	DE  ; Pointer to buffer
 		PUSH	HL  ; Bytes to read
 		CALL	File.FileRead
 		POP	BC  ; Bytes to read
 		POP	HL  ; Pointer to buffer
-		
+
 .copyMode	CALL	CopyRamToXY
 
 		POP	IX
 		POP	DE
-		RET	
-		
+		RET
+
 G9BLoadPalette:
 ; A = Number of colors
 ; DE = Pointer to buffer
 ;  C = Palette pointer
-		
+
 		LD	B,A
 		ADD	A,A
 		ADD	A,B	; Number of colors * 3 = size on disk
@@ -1273,16 +1273,16 @@ G9BLoadPalette:
 		PUSH	DE      ; Pointer to buffer
 		LD	B,(IX + G9B_OBJECT.fileHandle)
 		CALL	File.FileRead ; Saves BC
-		POP	HL      ; Pointer to buffer 
+		POP	HL      ; Pointer to buffer
 		POP	DE      ; Bytes to read
-		RET	NZ	; Error reading palette	
+		RET	NZ	; Error reading palette
 		LD	B,E
 		JP	WritePalette
-		
-		
-G9B_ID		DB	"G9B"	
+
+
+G9B_ID		DB	"G9B"
 G9B_DATA_ID	DS	3,0
-G9B_HEADER_SIZE DW	0	
+G9B_HEADER_SIZE DW	0
 G9B_COPY_PARMS	DW	0
 		DW	0
 		DW	0
@@ -1291,66 +1291,66 @@ G9B_COPY_PARMS	DW	0
 		IFNDEF G9K_DISABLE_BITBUST
 
 G9kBitBustXY:
-		LD	HL,CopyRamToXY	
+		LD	HL,CopyRamToXY
 		JR	G9kBitBust
-			
+
 G9kBitBustLinear:
 		LD	HL,CopyRamToVram
-		
-G9kBitBust:		
+
+G9kBitBust:
 		LD	(.copyFunction+1),HL
-		
+
 		PUSH	DE
 		LD	B,(IX + G9B_OBJECT.fileHandle) ; Get file handle
 		LD	DE,.BLOCKS
 		LD	HL,1
 		CALL	File.FileRead
 		POP	DE
-		RET	NZ	; Read error		
-.loop		
+		RET	NZ	; Read error
+.loop
 		PUSH	DE
 		LD	DE,.BLOCK_SIZE
 		LD	HL,2
 		CALL	File.FileRead
 		POP	DE	; pointer to buffer
 		RET	NZ	; Read error
-		
+
 		PUSH	DE      ; pointer to buffer
 		LD	HL,(.BLOCK_SIZE)
-		CALL	File.FileRead	
+		CALL	File.FileRead
 		POP	DE      ; pointer to buffer
 		RET	NZ       ; Read error
-				
+
 		PUSH	BC
 		LD	HL,(.BLOCK_SIZE) ; bytes
 		ADD	HL,DE    ; Calculate Address to depack to
-		PUSH	DE       ; pointer to buffer 
-		
-		PUSH	HL	 ; Pointer to decompress to 	
+		PUSH	DE       ; pointer to buffer
+
+		PUSH	HL	 ; Pointer to decompress to
 		EX	DE,HL    ; HL =  Address of packed data
 		CALL	bitbuster.depack_raw
 		; DE = Address of first byte after decompressed data
 		POP	HL       ; Pointer to decompressed data
-				
+
 		PUSH	HL
 		EX	DE,HL
-		OR	A,A		
+		OR	A,A
 		SBC	HL,DE    ; Calculate bytes to send to the vdp
 		LD	B,H
-		LD	C,L	 ; Bytes to send 
+		LD	C,L	 ; Bytes to send
 		POP	HL	 ; Pointer to decompressed data
-		
+
 .copyFunction	CALL	CopyRamToVram
-		POP	DE       ; pointer to buffer 
+		POP	DE       ; pointer to buffer
 		POP	BC
-		
+
 		LD	A,(.BLOCKS)
 		DEC	A
 		LD	(.BLOCKS),A
 		JP	NZ,.loop
 		RET
-	
-		
+
+
 .BLOCKS		DB	0
 .BLOCK_SIZE	DW	0
 
@@ -1367,7 +1367,7 @@ Close:
 		POP	IX
 		LD	(IX),0 ; clear handle
 		RET
-		
+
 ;----------------------------------------------------------------------------;
 ; Gfx9000 Mouse cursor functions                                             ;
 ;----------------------------------------------------------------------------;
@@ -1388,26 +1388,26 @@ SetCursorXY:
 		LD	A,0FEh
 		OUT	(G9K_REG_DATA),A
 		LD	A,7
-		OUT	(G9K_REG_DATA),A 
-		
+		OUT	(G9K_REG_DATA),A
+
 		; "First" cursor
 		LD	C,G9K_VRAM
 		OUT	(C),E        ; Y cordinate low byte
-		OUT	(C),E        ; Dummy		       
+		OUT	(C),E        ; Dummy
 		OUT	(C),D        ; Y cordinate high byte
 		OUT	(C),D        ; Dummy
-		
+
                 OUT     (C),L        ; X cordinate low byte
                 OUT     (C),L        ; Dummy
                 LD      A,(CURSOR0_ATTRIB)
                 OR	A,H	     ; Set color atributes
                 OUT     (G9K_VRAM),A ; X cordinate High byte and color
-                OUT     (G9K_VRAM),A ; Dummy	
-                      
+                OUT     (G9K_VRAM),A ; Dummy
+
                 ; "Second" cursor
                 OUT     (C),E        ; Y cordinate low byte
                 OUT     (C),E        ; Dummy
-                OUT     (C),D        ; Y cordinate high byte 
+                OUT     (C),D        ; Y cordinate high byte
                 OUT     (C),D        ; Dummy
                 OUT     (C),L        ; X cordinate low byte
                 OUT     (C),L        ; Dummy
@@ -1417,19 +1417,19 @@ SetCursorXY:
 		RET
 
 SetCursorPattern:
-		
+
 
 		RET
 
 SetCursorAttrib:
-; Input A = Cursor Number ( 0 or 1)		
+; Input A = Cursor Number ( 0 or 1)
 		LD    	HL,CURSOR0_ATTRIB
 		OR	A,A
 		JR	Z,$+3
-		 INC	HL 
+		 INC	HL
 		LD	(HL),A
 		RET
-		
+
 CURSOR0_ATTRIB   DB  	0
 CURSOR1_ATTRIB   DB  	0
 
@@ -1448,24 +1448,24 @@ SetPatternData:
 		PUSH	DE
 		ADD	A,A
 		LD	(PAT.LAYER_SEL_SC),A
-		LD	(PAT.LAYER_SEL_DS),A		
+		LD	(PAT.LAYER_SEL_DS),A
 		ADD	HL,HL
 		ADD	HL,HL
 		ADD	HL,HL
 		LD	A,L
-		LD	(PAT.X),A 
+		LD	(PAT.X),A
 		LD	A,H
 		ADD	A,A
 		ADD	A,A
 		ADD	A,A
-		LD	(PAT.Y),A 
-		LD	HL,PAT.X		
+		LD	(PAT.Y),A
+		LD	HL,PAT.X
 		CALL 	SetupCopyRamToXY
 		POP	HL
 		LD	BC,8*8
 		JP	CopyRamToXY
-		  
-		 
+
+
 
 GetPatternData:
 ; DE = Ptr to buffer to write pattern data in
@@ -1475,35 +1475,35 @@ GetPatternData:
 		PUSH	DE
 		ADD	A,A
 		LD	(PAT.LAYER_SEL_SC),A
-		LD	(PAT.LAYER_SEL_DS),A		
+		LD	(PAT.LAYER_SEL_DS),A
 		ADD	HL,HL
 		ADD	HL,HL
 		ADD	HL,HL
 		LD	A,L
-		LD	(PAT.X),A 
+		LD	(PAT.X),A
 		LD	A,H
 		ADD	A,A
 		ADD	A,A
 		ADD	A,A
-		LD	(PAT.Y),A 
-		LD	HL,PAT.X		
+		LD	(PAT.Y),A
+		LD	HL,PAT.X
 		CALL 	SetupCopyXYToRam
 		POP	HL
 		LD	BC,8*8
 		JP	CopyXYToRam
-		  
-		 
+
+
 PAT.X			DB	0
 PAT.LAYER_SEL_SC	DB	0
 PAT.Y			DB	0,0
 PAT.WIDTH		DB	8
 PAT.LAYER_SEL_DS	DB	0
 PAT.HEIGHT		DB	8,0
-	
+
 SetPattern:
 ; HL = Pattern number in generator table (on screen patterns 0 to A=8159,B=7679)
 ; DE = Pattern number in name table (on screen patterns 0 to 4095)
-;  A = Layer number (0=A,1=B)			
+;  A = Layer number (0=A,1=B)
 		PUSH	DE
 		ADD	HL,HL
 		LD	DE,0C000h
@@ -1511,19 +1511,19 @@ SetPattern:
 		JR	Z,$+5
 		  LD	  DE,0E000h
 		ADD	HL,DE
-		LD	E,7		
+		LD	E,7
 		CALL	SetVramWrite
 		POP	DE
 		LD	A,E
 		OUT	(G9K_VRAM),A
 		LD	A,D
 		OUT	(G9K_VRAM),A
-		RET     
-		
+		RET
+
 GetPattern:
 ; Input  DE = Pattern number in name table (on screen patterns 0 to 4095)
 ; Output HL = Pattern number in generator table (on screen patterns 0 to A=8159,B=7679)
-;  A = Layer number (0=A,1=B)		
+;  A = Layer number (0=A,1=B)
 		PUSH	DE
 		ADD	HL,HL
 		LD	DE,0C000h
@@ -1531,14 +1531,14 @@ GetPattern:
 		JR	Z,$+5
 		  LD	  DE,0E000h
 		ADD	HL,DE
-		LD	E,7		
+		LD	E,7
 		CALL	SetVramRead
 		POP	DE
 		IN	A,(G9K_VRAM)
 		LD	A,E
 		IN	A,(G9K_VRAM)
 		LD	A,D
-		RET         	            
+		RET
 		ENDIF
 
 
@@ -1559,14 +1559,14 @@ SetSprite:
 		OUT	(G9K_REG_DATA),A  ; Low address
 		RL	B
 		LD	A,0FEh
-		ADD	A,B               
+		ADD	A,B
 		OUT	(G9K_REG_DATA),A  ; Mid
-		LD	A,03h 
-		OUT	(G9K_REG_DATA),A  ; High 
-		
+		LD	A,03h
+		OUT	(G9K_REG_DATA),A  ; High
+
 		RET
-             	
-             	
+
+
              	ENDIF
-             	
-         
+
+

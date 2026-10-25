@@ -43,7 +43,7 @@ class TopPanel(wx.Panel):
     def OnStart(self, event):
        mainPanel = self.GetParent().GetParent()
        mainPanel.logBox.write("Start...")
-       
+
 
     def OnExit(self, event):
         os._exit(1)
@@ -53,18 +53,18 @@ class BottomPanel(wx.Panel):
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, style=wx.BORDER_NONE)
         #self.text = wx.StaticText(self, -1, '0', (40, 60))
-        
+
         self.logBox = wx.TextCtrl(self, style=wx.TE_MULTILINE)
         #self.logBox.IsEditable = 0
-        
+
         hbox = wx.BoxSizer(wx.VERTICAL)
         hbox.Add(self.logBox, 1, wx.EXPAND | wx.ALL, 0)
         self.SetSizer(hbox)
-        
+
         dt = FileDrop(self.logBox)
         self.logBox.SetDropTarget(dt)
 
-    
+
 class MainWindow(wx.Frame):
     def __init__(self, filename='noname.txt'):
         super(MainWindow, self).__init__(None, size=(600,400))
@@ -174,6 +174,6 @@ app = wx.App(redirect=0)
 frame = MainWindow()
 # frame.Show()
 # app.MainLoop()
-  
+
 pynowind.start()
 

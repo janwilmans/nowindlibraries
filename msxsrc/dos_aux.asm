@@ -2,7 +2,7 @@
 
 beginCodeAux:
         if MSXDOSVER = 1
-        
+
         code ! $595d
         ld hl,newAUX                    ; redirect AUX to host
         ld de,$f327
@@ -12,9 +12,9 @@ beginCodeAux:
         nop
         nop
         nop                             ; do not remove!
-        
-        else    
-        
+
+        else
+
         ; MSXDOSVER = 2
         code ! $49a3
         ld hl,newAUX                    ; redirect AUX to host

@@ -1,6 +1,6 @@
 		ifndef DRIVEINFO_INC
 		define DRIVEINFO_INC
- 		 		
+
 NOT_CONNECTED	EQU	0
 HDD_DEVICE	EQU	1
 FDD_DEVICE	EQU	2
@@ -10,7 +10,7 @@ UNKOWN_DEVICE	EQU	5
 
 		 STRUCT DISK_INFO
 deviceType	 BYTE
-name		 BLOCK	13,0		
-		 ENDS	
-		 
+name		 BLOCK	13,0
+		 ENDS
+
 		endif

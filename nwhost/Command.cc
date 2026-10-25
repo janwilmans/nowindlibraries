@@ -83,7 +83,7 @@ void Command::reportCpuInfo() const
           reg_pc, reg_af, reg_bc, reg_de, reg_hl, reg_ix, reg_iy, reg_sp);
 
     /*
-    // stack dump    
+    // stack dump
     for (int i=0; i<16; i++)
     {
         DBERR("  0x%04X: 0x%04x\n", reg_sp, extraData[13+(i*2)] + 256*extraData[14+(i*2)]);

@@ -1,10 +1,10 @@
 			MODULE	Opl4
-			
+
 			include "opl4.inc"
 ;----------------------------------------------------------------------------;
 ; Opl4 general purpose functions (7.16Mhz and R800 compatible)               ;
-;----------------------------------------------------------------------------;				
-			
+;----------------------------------------------------------------------------;
+
 ReadRegister:
 ; Input  C = register
 ; Output A = Value
@@ -14,8 +14,8 @@ ReadRegister:
 			POP	BC
 			IN	A,(OPL4_WAVE_REG_DATA)
 			RET
-			
-WriteRegister:	
+
+WriteRegister:
 ; Input C = register
 ;       A = Value
 			EX	AF,AF
@@ -29,7 +29,7 @@ WriteRegister:
 			OUT	(OPL4_WAVE_REG_DATA),A
 			RET
 
-SetSramAddress:		
+SetSramAddress:
 ; Input : EHL - Opl4 ram addres
 			LD	C,2	; ENABLE SRAM ACCESS
 			LD	A,10001B
@@ -48,7 +48,7 @@ SetSramAddress:
 			OUT	(OPL4_WAVE_REG_SELECT),A
 			LD	C,OPL4_WAVE_REG_DATA
 			RET
-			
+
 Detect:
 ; Output NZ = No opl4 detected, Z = opl4 found and put in opl4 mode
 			LD	A,OPL4_REG_EXPANSION
@@ -61,15 +61,15 @@ Detect:
 			POP	BC
 			IN	A,(OPL4_FM1_REG_DATA)
 			CP	A,OPL4_ENABLE_OPL3_REG|OPL4_ENABLE_OPL4_REG
-			RET	
-			
- 
+			RET
+
+
 
 GetSramSize:
 ; Output HL = Size of sram in KB
 			LD	HL,0			; Loop door SRAM heen in blokken van 64kB
 			LD	B,020h			; Maximaal 32 blokken van 64kB aanwezig (=2MB)
-.writeLoop		
+.writeLoop
 			LD	A,B			; B loopt van 32 tot 1
 			ADD	A,01Fh
 			LD	E,A			; E loopt van 32 tot 63 (sla eerste 2MB ROM over)
@@ -78,10 +78,10 @@ GetSramSize:
 			LD	A,B
 			CALL	Opl4.WriteRegister	; Schrijf waarde B (32 - 1) in 1e byte van SRAM
 			DJNZ	.writeLoop		; Volgende 64kB SRAM blok
-			
+
 			LD	D,B			; D=0 (is maximaal aantal aanwezige 64kB blokken)
 			LD	B,020h			; Controleer alle 32 SRAM blokken
-.readLoop	
+.readLoop
 			LD	A,B
 			ADD	A,01Fh
 			LD	E,A			; Zie boven
@@ -92,20 +92,20 @@ GetSramSize:
 			JR	Z,.valueEqual
 			LD	D,0			; Nee, dan maak D weer nul
 			JR	.nextBlock		; Controleer volgende blok
-.valueEqual		
+.valueEqual
 			LD	A,D			; Wel de juiste waarde? Dan:
 			OR	A			; Als het VORIGE blok een foute waarde teruggaf...
 			JR	NZ,.nextBlock		; ...dan is het huidige blok het eerst mogelijke
 			LD	D,B			; juiste SRAM blok; in D
-.nextBlock	
+.nextBlock
 			DJNZ	.readLoop			; Controleer volgende SRAM blok
-			
+
 			SRL	D			; Minimale blok eenheid is 128kB
 			LD	L,0
 			LD	H,D
 			SRL	H
 			RR	L
 			RET
-			
-			
+
+
 			ENDMODULE

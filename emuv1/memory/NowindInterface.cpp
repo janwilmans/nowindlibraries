@@ -61,7 +61,7 @@ nw_byte NowindInterface::read(nw_word address)
     //DBERR(" USBInterface read addr: 0x%02x value: 0x%02x\n", address, val);
     return val;
 
-    /*    
+    /*
     // emulate-latency test
     // een waarde van 1000 voor numberOfLatencyReads lijkt goed te werken.
     if (numberOfLatencyReads == 1000) return nowindusb_read();

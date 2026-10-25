@@ -164,12 +164,12 @@ ERROR
 USER_SEGMENT	   	EQU     0	; Register A
 SYSTEM_SEGMENT     	EQU     1    ;   "         "
 
-PRIMARY_MAPPER     	EQU     0    ; Register B 
+PRIMARY_MAPPER     	EQU     0    ; Register B
 
 ; Open/create file flags (_OPEN)
 OPEN_NO_WRITE	   	EQU     1
 OPEN_NO_READ       	EQU     2
-OPEN_INHERITABLE   	EQU     4 
+OPEN_INHERITABLE   	EQU     4
 
 ; Seek flags  (_SEEK)
 SEEK_REL_BEGINING    	EQU 	0   ; Relative to the beginning of the file
@@ -180,20 +180,20 @@ SEEK_REL_END		EQU	2   ; Relative to the end of the file.
 CREATE_NEW	   	EQU     128
 
 ; File attributes
-FILE_READ_ONLY	   	EQU     1   ; 
+FILE_READ_ONLY	   	EQU     1   ;
 FILE_HIDDEN	   	EQU     2   ;
-FILE_SYSTEM	   	EQU     4   ; 
-FILE_VOLUME_NAME   	EQU     8   ; 
-FILE_DIRECTORY     	EQU     16  ; 
-FILE_ARCHIVE	   	EQU     32  ; 
-FILE_RESERVED      	EQU     64  ; 
+FILE_SYSTEM	   	EQU     4   ;
+FILE_VOLUME_NAME   	EQU     8   ;
+FILE_DIRECTORY     	EQU     16  ;
+FILE_ARCHIVE	   	EQU     32  ;
+FILE_RESERVED      	EQU     64  ;
 FILE_DEVICE	   	EQU    128  ;
 
 ; Disk error handler routine parameters in register C
 ERROR_WRITING	   	EQU	1  ; Set if writing
 ERROR_NO_IGNORE    	EQU     2  ; Set if ignore not recommended
 ERROR_AUTO_ABORT   	EQU     4  ; Set if auto-abort suggested
-ERROR_VALID_SECTOR 	EQU     8  ; Set if sector number is valid 
+ERROR_VALID_SECTOR 	EQU     8  ; Set if sector number is valid
 
 
 ; Disk error handler routine return codes
@@ -228,7 +228,7 @@ CMD_LINE		EQU	082h
 COM_START_ADDR  	EQU     0100h
 /*
 		STRUCT	FIB
-ff		BYTE          ; 0 - Always 0FFh		
+ff		BYTE          ; 0 - Always 0FFh
 fileName	BLOCK   13,0  ; Filename as an ASCIIZ string
 fileAttrib	BYTE	      ; File attributes byte
 lastModTime	WORD	      ; Time of last modification
@@ -268,9 +268,9 @@ DPR_PTR_DRIVE_E EQU	0f35dh
 DPR_PTR_DRIVE_F EQU	0f35fh
 DPR_PTR_DRIVE_G EQU	0f361h
 DPR_PTR_DRIVE_H EQU	0f363h
-  
 
-/*                
+
+/*
 		STRUCT DPR
 driveNumber	BYTE	; Drive nummer
 mediaId     	BYTE    ; Media ID byte
@@ -302,13 +302,13 @@ SLOT_DRV_CNTRL_4 EQU 	0FB28h ; slotcode of the 4th interface
 
 SLTWORK_BASE	 EQU    0FD09h
 /*
-		STRUCT DISK_WORK_AREA	
+		STRUCT DISK_WORK_AREA
 diskStopCount	BYTE ; Diskstop counter
-readyFlagA	BYTE ; Ready-flag drive A: (=counter after diskstop)   
+readyFlagA	BYTE ; Ready-flag drive A: (=counter after diskstop)
 readyFlagB      BYTE ; Ready-flag drive B: (=counter after diskstop)
 activePhysDrive BYTE ; Active physical drive
-lastTrackVirDrA BYTE ; Last track position for virtual drive A: 
-lastTrackVirDrB BYTE ; Last track position for virtual drive B: 
+lastTrackVirDrA BYTE ; Last track position for virtual drive A:
+lastTrackVirDrB BYTE ; Last track position for virtual drive B:
 activeLogDrive  BYTE ; Active logical drive
 nrPhysDrives    BYTE ; number of connected physical drives
 		ENDS
@@ -316,12 +316,12 @@ nrPhysDrives    BYTE ; number of connected physical drives
 
 		STRUCT MAPPER_TABLE
 slotAddress	BYTE	    ; Slot address of the mapper slot.
-nrSegments	BYTE	    ; Total number of 16k RAM segments. 1...255 (8...255 for the primary)		
+nrSegments	BYTE	    ; Total number of 16k RAM segments. 1...255 (8...255 for the primary)
 freeSegments    BYTE        ; Number of free 16k RAM segments.
 sysAllocated    BYTE        ; Number of 16k RAM segments allocated to the system (at least 6 for the primay)
 userAllocated   BYTE        ; Number of 16k RAM segments allocated to the user
-		ENDS	
-		   
+		ENDS
+
 ; Entries for other mapper slots. If there is none, MAPPER_TABLE+8 will be zero.
 
 		STRUCT MAPPER_FUNCTIONS
@@ -344,15 +344,15 @@ GetSeg3		BLOCK	3,0	;   Get current segment for page 3.
 		ENDS
 
 		 STRUCT	MAPPER
-nrSegments	 BYTE			
+nrSegments	 BYTE
 priMapperSlot  	 BYTE
 freeSegments	 BYTE
 mapperSupport    WORD          ; mapper support routine address
 AllocateSegment  BLOCK 3,0     ;  Allocate a 16k segment.
-FreeSegment	 BLOCK 3,0     ;  Free a 16k segment.	
+FreeSegment	 BLOCK 3,0     ;  Free a 16k segment.
 ReadSegmentByte  BLOCK 3,0     ;  Read byte from address A HL to A.
 WriteSegmentByte BLOCK 3,0     ;  Write byte from E to address A HL.
-InterSegCallReg  BLOCK 3,0     ;  Inter-segment call.     Address in IYh IX 	
+InterSegCallReg  BLOCK 3,0     ;  Inter-segment call.     Address in IYh IX
 InterSegCall     BLOCK 3,0     ;  Inter-segment call.     Address in line after the call instruction.
 PutSegmentHL     BLOCK 3,0     ;  Put segment into page (HL).
 GetSegmentHL     BLOCK 3,0     ;  Get current segment for page (HL)
@@ -365,16 +365,16 @@ GetSegment2      BLOCK 3,0     ;  Get current segment for page 2.
 PutSegment3      BLOCK 3,0     ;  Not supported since page-3 must never be changed. Acts like a "NOP" if called.
 GetSegment3      BLOCK 3,0     ;  Get current segment for page 3.
 	 	 ENDS
-*/			   
+*/
 	        MACRO   BdosCall function
                 LD      C,function
                 CALL    BDOS
                 ENDM
 /*
-		MACRO	CallSegment segment,address	
-		LD      IY,(segment-1)       
-		LD      IX,address            
-		CALL    mapper.InterSegCallReg      
+		MACRO	CallSegment segment,address
+		LD      IY,(segment-1)
+		LD      IX,address
+		CALL    mapper.InterSegCallReg
 		ENDM
 */
 		endif

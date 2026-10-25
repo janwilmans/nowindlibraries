@@ -1,5 +1,5 @@
-/*  
- * Media.cpp: Insert media (disks/roms etc... into Nowind 
+/*
+ * Media.cpp: Insert media (disks/roms etc... into Nowind
  *
  * Copyright (C) 2004 Jan Wilmans <jw@dds.nl>
  *                    Aaldert Dekker <a.dekker@student.tue.nl>
@@ -32,12 +32,12 @@ Media::~Media()
 {
 }
 
-/* 
+/*
  * Loads a file, this method try's to "guess" what to do with this file :)
  *  *.dsk => load as disk-image
  *  *.rom => load as rom
  *  A full pathname should be specified!
- * 
+ *
  *  The priority gives a clue about where to load the media (
  *  (for disks priority 0 = A:, 1 = B:)
  *  (for roms priority 0 = start adress 0, 1 = $4000, etc...
@@ -71,7 +71,7 @@ void Media::insertMedia(string filename, unsigned int priority)
 
         delete fs;
 
-        /*              
+        /*
         unsigned int thePages = fileSize/(16*1024);
         if (thePages > 3)
            Z80::Instance()->loadRom(filename,1+priority,0,0,4);
@@ -79,7 +79,7 @@ void Media::insertMedia(string filename, unsigned int priority)
             if (thePages == 0) {
                 DBERR("Warning: rom to small, might be incomplete..\n");
                 thePages = 1;
-            }           
+            }
             Z80::Instance()->loadRom(filename,1+priority,0,1,thePages);
         }
         */
@@ -132,14 +132,14 @@ void Media::insertNowindImage(string filename, Uint32 size)
     //DiskInterface::Instance()->insertDisk(0, filename);
 }
 
-/* 
+/*
  */
 void Media::loadRom(Uint32 diskNumber, string filename)
 {
     assert(false);
 }
 
-/* 
+/*
  * Opens a file (readonly) in a path relative to the nowind-executable
  */
 fstream* Media::openfile(string filename, NW_OPENMODE mode)

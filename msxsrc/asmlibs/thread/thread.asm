@@ -4,7 +4,7 @@
 ;---------------------------------------------------------------------------------
 ;--- Thread interrupt routines
 ;---------------------------------------------------------------------------------
-				
+
 Init:
 		DI
            	LD	HL,038h
@@ -15,23 +15,23 @@ Init:
              	LD	DE,038h
              	LD	BC,3
              	LDIR
-             	
+
              	; Store Int SP
              	LD	HL,0
              	ADD 	HL,SP
              	INC	HL
              	INC	HL	; sub ret adress from calling this function
              	LD	(threadEngine.oldSP),HL
-        
+
         	; Default 1 thread is running (main)
              	LD	A,1
-             	LD	(threadEngine.nrThreads),A 
+             	LD	(threadEngine.nrThreads),A
              	LD	(threadEngine.threads + THREAD.ID),A  ; Thread ID
-           	LD	(threadEngine.lastID),A  	
-             	
+           	LD	(threadEngine.lastID),A
+
              	;  Thread pointer for main thread
-             	LD	HL,threadEngine.threads  
-             	LD	(threadEngine.threadPtr),HL 
+             	LD	HL,threadEngine.threads
+             	LD	(threadEngine.threadPtr),HL
              	; The threads list is defragemented when threads are removed.
              	; An extra pointer is stored which is updated to point to the current
              	; position in the thread list (thread handle)
@@ -39,16 +39,16 @@ Init:
              	; Pointer to the handle
              	LD	HL,threadEngine.handles
              	LD	(threadEngine.threads + THREAD.handlePtr),HL
-             	
+
              	LD	HL,threadEngine.idleThrdContext
              	LD	(threadEngine.idleThread.SP),HL
              	LD	HL,IdleThread
              	LD	(threadEngine.idleThrdContext.PC),HL
-             	
-             	EI 	
+
+             	EI
 		RET
 
-IntHook:	
+IntHook:
 		JP	IntHandler
 
 Shutdown:
@@ -62,12 +62,12 @@ Shutdown:
 		SET	6,A
 		OUT	(0AAh),A
 		EI
-		RET	
+		RET
 
-oldInt		DS	3			
+oldInt		DS	3
 
-		
-		
+
+
 IntHandler:
 		DI
 		; Store registers in the stack of the current thread
@@ -75,14 +75,14 @@ IntHandler:
 		PUSH	BC
 		PUSH	DE
 		PUSH	HL
-		
+
 		IN	A,(99h) ;  clear int
-		
+
 		; If the context switch is not called directly don't update sleeps
 		LD	A,(threadEngine.notCalledFromInt)
 		OR	A,A
-		CALL	Z,UpdateSleeps	
-			
+		CALL	Z,UpdateSleeps
+
 		; If bdos is active don't do a tread switch
 		LD	A,(threadEngine.bdosActive)
 		OR	A,A
@@ -96,70 +96,70 @@ IntHandler:
 		PUSH	HL
 		PUSH	IX
 		PUSH	IY
-		
+
 		; store current SP which belongs to the thread
 		LD	HL,0
              	ADD 	HL,SP
 		LD	DE,HL
-		LD	HL,(threadEngine.threadPtr) 
+		LD	HL,(threadEngine.threadPtr)
 
 		INC	HL ; Skip objectID
-		
+
 		LDI	(HL),DE	; Store SP in thread struct
 		; Pointer is now on state of a thread struct
-		
+
 		; Turn on caps light
 		IN	A,(0AAh)
 		RES	6,A
 		OUT	(0AAh),A
-		
-.getThread	
+
+.getThread
 		XOR	A,A
-		LD	(threadEngine.notCalledFromInt),A	
-		LD	BC,(threadEngine.currentThread); B = nrThreads, C = currentThread		
-.loop		
+		LD	(threadEngine.notCalledFromInt),A
+		LD	BC,(threadEngine.currentThread); B = nrThreads, C = currentThread
+.loop
 		LD	DE,THREAD
 		ADD	HL,DE
-		INC	C	; Update current Thread		
+		INC	C	; Update current Thread
 		; Check if max is reached
 		LD	A,(threadEngine.nrThreads)
 		CP	A,C	; Index equal to number of threads?
 		JP	NZ,.getThreadState
-		LD	C,0	
+		LD	C,0
 		LD	HL,threadEngine.threads + THREAD.state	; Begin of thread list
-.getThreadState		
+.getThreadState
 		LD	A,(HL)
 		OR	A,A
  		JP	NZ,.next		; Is the thread active? 0 is active, other is idle,busy_waiting,suspended
- 		
+
  		LD	A,C
  		LD	(threadEngine.currentThread),A
  		; Get start of thread. (3 bytes back)
- 		DEC	HL		; SPL 
+ 		DEC	HL		; SPL
  		DEC	HL		; SPH
- 		DEC	HL		; objectID 
+ 		DEC	HL		; objectID
  		LD	(threadEngine.threadPtr),HL
  		INC	HL		;  HL points to location SP in thread struct
 
-.getSP 		
+.getSP
  		LD	E,(HL)
 		INC	HL
 		LD	D,(HL)	; Get SP from struct
 		EX	DE,HL
 		LD	SP,HL
 		JP	.restoreContext
-.next		 
+.next
 		DJNZ	.loop
 		; Nothing to schedule
 		; Schedule idle process
 		LD	HL,threadEngine.idleThread
 		LD	(threadEngine.threadPtr),HL
 		LD	A,-1
-		LD	(threadEngine.currentThread),A	
-		INC	HL	; Skip object ID	
-		JP	.getSP 		
+		LD	(threadEngine.currentThread),A
+		INC	HL	; Skip object ID
+		JP	.getSP
 
-.restoreContext		
+.restoreContext
 		POP	IY
 		POP	IX
 		POP	HL
@@ -168,28 +168,28 @@ IntHandler:
 		POP	AF
 		EX	AF,AF
 		EXX
-.skipThreadSwitch			
+.skipThreadSwitch
 		POP	HL
 		POP	DE
 		POP	BC
-		POP	AF				
-		EI	
+		POP	AF
+		EI
 		RET		; return to thread
 
 
 IdleThread:
-; Don't push or pop in the idle thread, stack of idle 
-; thread only has space for 24 values (Z80_CONTEXT)	
-		
+; Don't push or pop in the idle thread, stack of idle
+; thread only has space for 24 values (Z80_CONTEXT)
+
 		DI
 		IN	A,(0AAh)
 		SET	6,A
 		OUT	(0AAh),A
-		EI		 
-		HALT 
+		EI
+		HALT
 		JP	IdleThread
 
-		
+
 UpdateSleeps:
 ; Modifies AF,B,DE,HL
 
@@ -203,23 +203,23 @@ UpdateSleeps:
 
 		; Update sleep counter
 		LD	DE,HL
-		
+
 		INC	HL	; Set to THREAD.SLEEP_TIMER
 		DEC	(HL)
 		JP	NZ,.skip
-		INC	HL		
+		INC	HL
 		DEC	(HL)
 		JP	NZ,.skip
 		XOR	A,A ; Sleep time passed, set state ACTIVE
-.skip	
-		LD	HL,DE	
-		LD	(HL),A	
+.skip
+		LD	HL,DE
+		LD	(HL),A
 .noChange
 		LD	DE,THREAD
 		ADD	HL,DE
 		DJNZ	.next
 		RET
-		
+
 threadEngine	THREAD_ENGINE   ; Contains all thread paramaters
 events 		EVENTS		; area for events, max events set by MAX_EVENTS
 
@@ -227,20 +227,20 @@ events 		EVENTS		; area for events, max events set by MAX_EVENTS
 ;--- Internal functions
 ;---------------------------------------------------------------------------------
 
-		
+
 EndThread:
 		; Remove thread from threads struct
-		DI	
-		LD	DE,(threadEngine.threadPtr) ; get context ptr from the thread list		 
+		DI
+		LD	DE,(threadEngine.threadPtr) ; get context ptr from the thread list
 		LD	A,(threadEngine.currentThread)
 		CALL	RemoveThread
-	
-		LD	A,(threadEngine.currentThread)		
+
+		LD	A,(threadEngine.currentThread)
 		DEC	A
 		LD	(threadEngine.currentThread),A
-		
-		; Get current thread pointer	
-		LD	HL,(threadEngine.threadPtr)	
+
+		; Get current thread pointer
+		LD	HL,(threadEngine.threadPtr)
 		LD	DE,-THREAD
 		ADD	HL,DE		; Calculate previous pointer. There is always one thread in the list (main)
 		; select next thread from list to excecute
@@ -254,7 +254,7 @@ EndThread:
 RemoveThread:
 ; Input A = thread index of thread to remove
 ;       DE = pointer to thread struct in list
-		
+
 		; First notify all clients that thread is ended
 		LD	HL,THREAD.closingEvent
 		ADD	HL,DE
@@ -262,34 +262,34 @@ RemoveThread:
 		CALL	NotifyClients
 		POP	AF
 
-		LD	HL,THREAD	
+		LD	HL,THREAD
 		ADD	HL,DE		; Calculate offset to next thread entry
 		LD	B,A
-		LD	A,(threadEngine.nrThreads)	
-		DEC	A	
+		LD	A,(threadEngine.nrThreads)
+		DEC	A
 		SUB	A,B		; Calculate number of entries to move in thread list
 
 		PUSH	AF
 		PUSH	BC
 		JR	Z,.NoMove
-		
+
 		LD	B,A     ; "*8"
 		XOR	A,A
-		
+
 		SRL	B	; shift 3 times left, so it's multiplied with 32
-		RRA		
+		RRA
 		SRL	B
 		RRA
 		SRL	B
 		RRA		; * THREAD
-								
+
 		LD	C,A
 		LDIR		; Move threads
-		
-.NoMove	
+
+.NoMove
 		POP	AF	; A =  thread index of thread to remove
 		POP	BC      ; B = number of handles to modify
-	
+
 		LD	HL,threadEngine.handles
 		ADD	A,A
 		ADD_HL_A
@@ -299,38 +299,38 @@ RemoveThread:
 		INC	HL
 		LD	A,B ; B = number of handles to modify
 		OR	A,A
-		JR	Z,.noModify	
-		
+		JR	Z,.noModify
+
 		LD	BC,-THREAD
-.nextHandle	
-		; Modify thread handles	
+.nextHandle
+		; Modify thread handles
 		LDI	DE,(HL)
 		INC	D
 		DEC	D	; Check if handles is unused
 		JR	Z,.nextHandle
-			
+
 		DEC	HL
 		DEC	HL
 		EX	DE,HL
 		ADD	HL,BC
 		EX	DE,HL
 		LDI	(HL),DE
-		
+
 		DEC	A
 		JR	NZ,.nextHandle
-		
-.noModify:		
-		LD	A,(threadEngine.nrThreads)	
+
+.noModify:
+		LD	A,(threadEngine.nrThreads)
 		DEC	A
 		LD	(threadEngine.nrThreads),A
 		RET
 
-	
+
 
 
 SetThreadState:
 ; In A = state
-;   HL = handle  
+;   HL = handle
 		PUSH	HL
 		DI
 		LD	E,(HL) ; Get pointer to the thread in the thread list
@@ -343,20 +343,20 @@ SetThreadState:
 		INC	HL	; Skip object type
 		INC	HL
 		INC	HL	; Skip SP, pointer to THREAD.state
-		LD	(HL),A	
-.error	
+		LD	(HL),A
+.error
 		EI
 		POP	HL
 		RET
-		
+
 GetFreeHandle:
 ; Input  HL = handles list
 ;         B = number of total handles
-; Output HL = free handle position	
+; Output HL = free handle position
 ;         Z = Found
 ;        NZ = Not found
 		XOR	A,A
-.loop		
+.loop
 		INC	HL	; Don't care about low byte
 		CP	A,(HL)
 		JR	Z,.found
@@ -365,10 +365,10 @@ GetFreeHandle:
 		; Not found
 		OR	A,A
 		RET
-.found		
+.found
 		DEC	HL
 		RET
-			
+
 ;---------------------------------------------------------------------------------
 ;--- User functions
 ;---------------------------------------------------------------------------------
@@ -382,37 +382,37 @@ Create:
 ; Output
 ;  A = Thread ID
 ; HL = Thread Handle
-		DI	
+		DI
 		PUSH	HL
 		; Set endthread function on the stack
 		DEC	HL
 		LD	(HL),EndThread / 256
-		DEC	HL	
-		LD	(HL),EndThread and 255		
-				
-		; Set start address on the thread stack	
+		DEC	HL
+		LD	(HL),EndThread and 255
+
+		; Set start address on the thread stack
 		DEC	HL
 		LD	(HL),D
 		DEC	HL
-		LD	(HL),E  ; 
+		LD	(HL),E  ;
 		DEC	HL
-		
-		LD	(HL),A  ; 8 bit param 
+
+		LD	(HL),A  ; 8 bit param
 		DEC	HL
 		LD	(HL),0  ; flags on zero
 		DEC	HL
 
-		LD	(HL),B  ; 16 bit param 
+		LD	(HL),B  ; 16 bit param
 		DEC	HL
-		LD	(HL),C  ;  
+		LD	(HL),C  ;
 		DEC	HL
 		POP	HL
-		
+
 		; default stack offset
-		LD	DE,-Z80_CONTEXT	
+		LD	DE,-Z80_CONTEXT
 		ADD	HL,DE
 		EX	DE,HL
-		
+
 		LD	A,(threadEngine.nrThreads)
 		LD	L,A
 		LD	H,0
@@ -423,17 +423,17 @@ Create:
 		ADD	HL,HL ; * THREAD
 
 		LD	BC,threadEngine.threads
-		ADD	HL,BC 		; Calculate offset in thread struct 	
+		ADD	HL,BC 		; Calculate offset in thread struct
 		PUSH	HL
 		LD	(HL),OBJECT_THREAD
-		INC	HL		; skip objectID		
+		INC	HL		; skip objectID
 		LDI     (HL),DE		; Store thread start stack address in the threads table
 		LD	(HL),STATE_ACTIVE
-		
+
 		LD	A,(threadEngine.nrThreads)
 		INC	A
 		LD	(threadEngine.nrThreads),A
-		
+
 		INC	HL	; Sleep counter
 		INC	HL	; Sleep counter
 		INC	HL	; ID
@@ -441,7 +441,7 @@ Create:
 		CALL	GetUniqueId
 		LD	(HL),A
 		LD	(threadEngine.lastID),A
-		
+
 		LD	HL,threadEngine.handles+2 ; First thread can't be terminated, so handle is never free
 		LD	B,MAX_THREADS-1
 		CALL	GetFreeHandle
@@ -455,10 +455,10 @@ Create:
 		LD	A,(threadEngine.lastID)
 .error
 		EI
-		RET	
-		
+		RET
+
 GetUniqueId:
-; Output 
+; Output
 ; A = Unique ID
 		PUSH	HL
 		; Get the last set ID, this ID is the best quess for a free ID
@@ -467,26 +467,26 @@ GetUniqueId:
 		JR	NZ,.checkID
 		INC	A	; ID can't be zero
 		LD	DE,THREAD
-.checkID	
+.checkID
 		LD	BC,(threadEngine.nrThreads-1)	; B = number of threads
 		LD	HL,threadEngine.threads + THREAD.ID
 .loop
 		CP	A,(HL)
 		JP	Z,.idInUse
 		ADD	HL,DE	; Next
-		DJNZ	.loop	
+		DJNZ	.loop
 		; Unique ID found
 		POP	HL
-		RET		
-		
-.idInUse	
+		RET
+
+.idInUse
 		INC	A
 		JR	NZ,.checkID
 		INC	A	; ID can't be zero
 		JP	.checkID
 
-		
-Sleep:		
+
+Sleep:
 ; Input DE = Sleep time in intterupts
 ; Modifies A
 		PUSH	HL
@@ -495,10 +495,10 @@ Sleep:
 		LD	A,D
 		OR	A,E	; if time is zero skip it
 		JR	Z,.skip
-		
+
 		INC	E
 		INC	D
-		
+
 		DI
 		LD	HL,(threadEngine.threadPtr)
 		INC	HL ; Object ID
@@ -511,26 +511,26 @@ Sleep:
 		LD	(HL),D
 		LD	A,1
 		LD	(threadEngine.notCalledFromInt),A
-		
+
 		CALL	IntHandler	; Switch context
-.skip		
+.skip
 		POP	DE
 		POP	HL
 		RET
-		
+
 
 Suspend:
 ; Input
 ; HL = Thread handle
 		LD	A,STATE_SUSPENDED
 		JP	SetThreadState
-		
+
 Resume:
-; Input	
+; Input
 ; HL = Thread handle
-	
+
 		XOR	A,A ; STATE_ACTIVE
-		JP	SetThreadState		
+		JP	SetThreadState
 
 Terminate:
 ; Input
@@ -543,30 +543,30 @@ Terminate:
 		DEC	D
 		INC	D
 		JR	Z,.error
-		PUSH	DE   
+		PUSH	DE
 		LD	HL,threadEngine.threads
 		EX	DE,HL
 		OR	A,A
 		SBC	HL,DE 	; Calculate index of thread to terminate
-		
+
 		SRL	HL
 		SRL	HL
 		SRL	HL
 		SRL	HL
 		SRL	HL	; / THREAD
-		
+
 		LD	A,L	; Thread index
 		POP	DE	; Pointer to thread struct
 		CALL	RemoveThread
-.error		
+.error
 		POP	HL
-		EI	
+		EI
 		RET
-		
+
 GetId:
 ; Input
 ; HL = Thread handle
-; Output 
+; Output
 ; A  = Thread ID
 		PUSH	HL
 		DI
@@ -579,14 +579,14 @@ GetId:
 		EX	DE,HL
 		LD	DE,THREAD.ID
 		ADD	HL,DE
-		LD	A,(HL)	
-.error	
+		LD	A,(HL)
+.error
 		EI
 		POP	HL
 		RET
 
 Open:
-; Input 
+; Input
 ; A = Thread ID
 ; Output
 ;    Z = Found, NZ = Not found
@@ -597,10 +597,10 @@ Open:
 		LD	A,(threadEngine.nrThreads)
 		LD	B,A
 		LD	DE,THREAD
-.loop		
+.loop
 		CP	A,(HL)
 		JP	Z,.found
-		ADD	HL,DE	; Next thread	
+		ADD	HL,DE	; Next thread
 		DJNZ	.loop
 		; Not found, Zero flag cleared
 		LD	A,-1
@@ -618,7 +618,7 @@ Open:
 		EI
 		POP	AF
 		RET
-					
+
 
 GetCurrentHandle:
 ; Returns current thread handle in HL
@@ -626,33 +626,33 @@ GetCurrentHandle:
 		LD	IX,(threadEngine.threadPtr)
 		LD	HL,(IX + THREAD.handlePtr)
 		EI
-		RET	
+		RET
 
 SwitchTo:
 		DI
 		LD	A,1
 		LD	(threadEngine.notCalledFromInt),A
 		JP	IntHandler	; Switch context
-		 
-		
-				
+
+
+
 MutexedBdosCall:
 ; C = bdoscall
 		; Set bdos used flag
 		PUSH	AF
 		DI
 		LD	A,1
-		LD	(threadEngine.bdosActive),A			
+		LD	(threadEngine.bdosActive),A
 		EI
 		POP	AF
-		
-		CALL	BDOS		
-	
+
+		CALL	BDOS
+
 		; Clear flag
 		PUSH	AF
 		XOR	A,A
 		LD	(threadEngine.bdosActive),A
-		POP	AF 
+		POP	AF
 		RET
 
 
@@ -666,9 +666,9 @@ PrintThreads:
 		INC	HL
 		LD	(HL),LF
 		INC	HL
-.loop	
+.loop
 		LD	IXL,8
-.next	
+.next
 		LD	A,(DE)
 		INC	DE
 		CALL	String.ByteToHex
@@ -680,10 +680,10 @@ PrintThreads:
 		INC	HL
 		DEC	C
 		JP	NZ,.loop
-		
-		LD	DE,threadEngine.handles		
+
+		LD	DE,threadEngine.handles
 		LD	C,10
-.next2		
+.next2
 		LD	A,(DE)
 		INC	DE
 		CALL	String.ByteToHex
@@ -694,12 +694,12 @@ PrintThreads:
 		INC	HL
 		DEC	C
 		JP	NZ,.next2
-		
+
 		LD	(HL),CR
 		INC	HL
 		LD	(HL),LF
 		INC	HL
-		LD	(HL),LE		
+		LD	(HL),LE
 		EI
 		RET
 
@@ -709,7 +709,7 @@ NotifyClients:
 		LD	A,1
 		LD	(HL),A	; Set signaled
 		INC	HL
-		
+
 		LD	A,(HL) ; Number of waiting threads
 		OR	A,A
 		RET	Z      ; No waiting threads
@@ -717,7 +717,7 @@ NotifyClients:
 		INC	HL
 		LD	B,A
 		PUSH	DE
-.loop		
+.loop
 		LDI	DE,(HL)	; Get Handle from list
 		PUSH	HL
 		EX	DE,HL
@@ -732,7 +732,7 @@ NotifyClients:
 		LD	(HL),STATE_ACTIVE
 		POP	HL
 		DJNZ	.loop
-		POP	DE	
+		POP	DE
 		RET
 
 CloseHandle:
@@ -769,11 +769,11 @@ CreateEvent:
 		ADD	HL,HL
 		ADD	HL,HL ; * 8
 		LD	DE,HL
-		ADD	HL,HL ;* 16		
+		ADD	HL,HL ;* 16
 		ADD	HL,DE ;* 24
 		LD	E,A
 		LD	D,0
-		SBC	HL,DE;*23  
+		SBC	HL,DE;*23
 		LD	DE,events.events
 		ADD	HL,DE
 		EX	DE,HL
@@ -790,13 +790,13 @@ CreateEvent:
 		LD	(HL),0
  		LD	BC,EVENT-2  ; minus to because objectID doesn't need to be cleared
 		LDIR
-		
+
 		POP	HL ; Handle
 		LD	A,1
 		OR	A,A
-.error		
+.error
 		EI
-		RET	
+		RET
 SetEvent:
 ; Input HL = event handle
 		DI
@@ -812,10 +812,10 @@ SetEvent:
 		CP	A,OBJECT_EVENT
 		JR	NZ,.invalidHandle
 		CALL	NotifyClients
-.invalidHandle		
+.invalidHandle
 		EI
 		RET
-		
+
 WaitForSingleObject:
 ; Input HL = Handle
 		DI
@@ -826,42 +826,42 @@ WaitForSingleObject:
 		DEC	D
 		INC	D
 		JR	Z,.invalidHandle
-		
+
 		; Check object type
 		LD	A,(DE)
 		OR	A,A	; OBJECT_THREAD
 		JR	NZ,.event
-		
+
 		; Get number of registered from thread events
 		LD	HL,THREAD.closingEvent.signaled
 		ADD	HL,DE		; DE = thread pointer
-		JP	.checkSignaled	
-.event		
+		JP	.checkSignaled
+.event
 		; Object is an event
 		EX	DE,HL
 		INC	HL	; skip objectId
-.checkSignaled		
+.checkSignaled
 		LD	A,(HL)	; Get signaled state
 		OR	A,A	; Signaled?
 		LD	(HL),0	; Clear flag
 		JP	NZ,.exit
-		INC	HL	
-.addHandle		
+		INC	HL
+.addHandle
 		LD	A,(HL)		; Get number of events in list
 		INC	(HL)		; handles++
 		INC	HL		; event.handles
-		ADD	A,A		
+		ADD	A,A
 		ADD_HL_A		; Pointer to empty event list entry
-		
+
 		LD	IX,(threadEngine.threadPtr)
 		LD	(IX + THREAD.state),STATE_BUSY_WAITING
-		
+
 		; Store handle in Event handles list
 		LD	DE,(IX + THREAD.handlePtr)
 		LD	(HL),E
 		INC	HL
 		LD	(HL),D
-	
+
 		LD	A,1
 		LD	(threadEngine.notCalledFromInt),A
 		CALL	IntHandler	; Switch context
@@ -874,7 +874,7 @@ AllocateStackSpace:
 ; Input
 ; 		BC = Allocate size
 ; Output :	HL = Pointer to allocated stack space
-;	
+;
 ; Mofifies BC,HL,IX
 		POP	IX			; Get return address
 		LD	HL,0
@@ -886,15 +886,14 @@ AllocateStackSpace:
 		LD	BC,FreeStackSpace
 		PUSH 	BC			; Free stack function on stack
 		JP	(IX)
-		
+
 FreeStackSpace:
 		POP	HL	; Get object size
 		ADD	HL,SP
 		LD	SP,HL	; Restore Stack
 		RET
-		
-				
+
+
 		ENDMODULE
-		
-				
-			
+
+

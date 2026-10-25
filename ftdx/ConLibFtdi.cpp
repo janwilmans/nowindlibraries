@@ -1,7 +1,7 @@
 /**
  * @file ConLibFtdi.cpp
  *
- * @brief libusb based FTDI communication 
+ * @brief libusb based FTDI communication
  * @author Jan Wilmans <jw@dds.nl>  Copyright (C) 2009 Nowind
  *
  */

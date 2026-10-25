@@ -3,7 +3,7 @@
 
 beginCodeDevice:
         PATCH $4006, device
-        
+
         code @ beginCodeDevice
 
 device:

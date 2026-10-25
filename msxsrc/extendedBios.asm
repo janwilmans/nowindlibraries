@@ -49,7 +49,7 @@ determineFunction:
         pop af                          ; this interface?
         dec a
         jp p,exit2                      ; other Nowind interface is requested
-        
+
         add e
         jr z,getNowindSlot              ; function 1
         dec a
@@ -81,11 +81,11 @@ numberOfDevices:
         pop af
         inc a                           ; increment number of devices
         jr exit2
-        
+
 getNowindSlot:
         DEBUGMESSAGE "getNowindSlot"
         call getSlotPage1
-        scf                             ; can be used to detect Nowind interface 
+        scf                             ; can be used to detect Nowind interface
         ret
 
 debugMessage:
@@ -105,7 +105,7 @@ debugMessage:
 ;           B   argument for commmand
 ;           HL  argument for command
 ;           other registers cannot be used
-            
+
 sendCommand:
         DEBUGMESSAGE "EXTBIO sendCmd"
         call sendRegisters
@@ -124,7 +124,7 @@ sendCommandWithData:
         DEBUGDUMPREGISTERS
         ld a,e
         push iy
-        pop de        
+        pop de
         push hl
         call sendRegisters
         ld (hl),C_COMMAND
@@ -134,8 +134,8 @@ sendCommandWithData:
         ld b,0
         ldir
         ret
-        
-        
+
+
 ; Input:    C   command
 ;           B   string terminator
 ;           HL  pointer to string

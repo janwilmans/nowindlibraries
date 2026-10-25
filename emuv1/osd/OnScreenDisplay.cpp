@@ -23,7 +23,7 @@ OnScreenDisplay::OnScreenDisplay()
     initOSD_Surface(osdWidth, osdHeight);
     initializeFont();
 
-    /*    
+    /*
     string backgroundImage = Debug::Instance()->getPath() + "osd/BrushedMetal.bmp";
 
     SDL_RWops *rwop = SDL_RWFromFile(backgroundImage.c_str(), "rb");
@@ -34,7 +34,7 @@ OnScreenDisplay::OnScreenDisplay()
         DBERR("filename: %s\n", backgroundImage.c_str());
         exit(1);
     }
-    
+
     background = SDL_DisplayFormat(image);
     SDL_FreeSurface(image);
 */

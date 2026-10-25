@@ -1,4 +1,4 @@
-/* 
+/*
  * EmulatorTester.cpp: Emulation test class.
  *
  * Copyright (C) 2004 Jan Wilmans <jw@dds.nl>

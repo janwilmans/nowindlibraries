@@ -64,19 +64,19 @@ void DiskInterface::insertDisk(unsigned int diskNumber, string filename)
 
 /*! \brief method is called by an added z80-instruction ED 00
  *
- *  Several DiskInterface-io calls in Main-rom are patched with ED 00 C9 so this method 
+ *  Several DiskInterface-io calls in Main-rom are patched with ED 00 C9 so this method
  *  will be called instead of the real DiskInterface-rom
- * 
+ *
  *  (reg_pc-2) indicates which call was actually made:
- * 
+ *
  * DiskInterface calls:
- * 
- * 0x4010, DSKIO:  read/write sectors 
+ *
+ * 0x4010, DSKIO:  read/write sectors
  * 0x4013, CHGDSK: change DiskInterface
  * 0x4016, GETDPB: DiskInterface parameter block
  * 0x401C, DRVFMT: DiskInterface format
  * 0x401F, DRVOFF: DiskInterface stop
- * 
+ *
  */
 void DiskInterface::diskIO()
 {
@@ -180,7 +180,7 @@ void DiskInterface::diskIO()
             A  = drive number (relative)
             B  = 1st byte of FAT (media descriptor)
             C  = Media descriptor?
-            HL = Base address of DPB                
+            HL = Base address of DPB
         */
         assert(false);
         break;

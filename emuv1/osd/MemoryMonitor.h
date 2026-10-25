@@ -8,7 +8,7 @@
 #include <string>
 
 /*!
- * The MemoryMonitor class 
+ * The MemoryMonitor class
  */
 class MemoryMonitor {
 private:

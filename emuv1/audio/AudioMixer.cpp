@@ -36,11 +36,11 @@ void AudioMixer::initialize()
 
     /*
 
-44100 Hz * 16 Bit audio = 82,2 Kbps 
+44100 Hz * 16 Bit audio = 82,2 Kbps
 this means 16kb/82200 = 0,2 seconds of audiobuffer (and so 0,2 latency!)
 
-It would be good to have about a 1024 bytes buffer 
-L = B / O) 
+It would be good to have about a 1024 bytes buffer
+L = B / O)
 L = 1024 / 82200 = 0,0125 seconds (100th of a second delay)
 -
 */

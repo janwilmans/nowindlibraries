@@ -125,7 +125,7 @@ void V9938commands::executeCommand()
     bool debuggenkreng = true;
 
     switch (command>>4) {
-    
+
     case 0x00: DBERR("vdpCommand: STOP "); break;
     case 0x04: DBERR("vdpCommand: POIN "); break;
     case 0x05: DBERR("vdpCommand: PSET "); break;

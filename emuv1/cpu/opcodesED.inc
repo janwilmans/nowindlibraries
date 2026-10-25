@@ -13,7 +13,7 @@ case 0x00:
         }
     }
     break;
-        
+
 case 0x01:
     {
         DBERR("0x%04X: ", reg_hl);
@@ -41,13 +41,13 @@ case 0x05:
         Debug::Instance()->memFileDump(readBlock,tmp);
     }
     break;
-    
-case 0x06: 
+
+case 0x06:
     DBERR("Deprecated, use blueMSX style debug info!\n");
     assert(false);
     break;
 
-case 0x07: 
+case 0x07:
     DBERR("PC:%04X ", reg_pc-1);
     dumpCpuInfo();
     break;
@@ -73,7 +73,7 @@ case 0x0b:
 case 0x0c:
     Debug::Instance()->INSTRUCTION_TRACING = false;
     break;
-    
+
 case 0x0d:{
     Uint32 address = reg_de;
     Uint8 count = readMem(reg_pc++);
@@ -130,9 +130,9 @@ case 0x5B: TS(20); reg_wz = READMEM16(reg_pc); reg_de = READMEM16(reg_wz++); reg
 case 0x6B: TS(20); reg_wz = READMEM16(reg_pc); reg_hl = READMEM16(reg_wz++); reg_pc += 2; break;   // ld hl,(nn)
 
 case 0x7B: TS(20); // ld sp,(nn)
-    reg_sp = READMEM16(READMEM16(reg_pc)); reg_pc += 2; 
+    reg_sp = READMEM16(READMEM16(reg_pc)); reg_pc += 2;
 //  DBERR("ld sp,(nn) sp = 0x%04X\n", reg_sp);
-    break;   
+    break;
 
 case 0x43: TS(20); reg_wz = READMEM16(reg_pc); WRITEMEM16(reg_wz++, reg_bc); reg_pc += 2; break;   // ld (nn),bc
 case 0x53: TS(20); reg_wz = READMEM16(reg_pc); WRITEMEM16(reg_wz++, reg_de); reg_pc += 2; break;   // ld (nn),de
@@ -204,14 +204,14 @@ case 0xB8:      // LDDR
         reg2 -= (reg_f&HFLAG)>>4;                   \
         reg_f |= (reg2&XFLAG) | ((reg2&0x02)<<4);   \
         reg_c &= 255
-        
+
 case 0xA1:      // CPI
         TS(16);
         SCPF;
         ++reg_hl &= 0xFFFF;
         break;
 case 0xB1:      // CPIR
-        SCPF; 
+        SCPF;
         if ((reg1 != reg_a) && (reg_bc != 0)) {
             reg_pc -= 2;
             TS(21);
@@ -222,7 +222,7 @@ case 0xB1:      // CPIR
         break;
 case 0xA9:      // CPD
         TS(16);
-        SCPF; 
+        SCPF;
         --reg_hl &= 0xFFFF;
         break;
 case 0xB9:      // CPDR
@@ -245,14 +245,14 @@ case 0x64:
 case 0x6c:
 case 0x74:
 case 0x7c:  //assert(false); // TODO: test maken, daarna kan de assert weg!
-case 0x44:  
+case 0x44:
         TS(8);
         reg1 = (0 - reg_a) & 255;
         reg_f = flagSZsub[reg1] | (reg_a^reg1)&HFLAG | \
                 ((reg_a!=0)?CFLAG:0) | ((reg_a==0x80)?PFLAG:0);
         reg_a = reg1;
         break;
-        
+
 case 0x4e:
 case 0x66:
 case 0x6e: assert(false); // TODO: test maken, daarna kan de assert weg!
@@ -273,7 +273,7 @@ case 0x5e: TS(8); interruptMode = 2; break;     // IM 2
         reg_f = (reg1>>16) | (((reg_hl^r^reg1)>>8)&HFLAG) | \
                 (~(reg_hl^r)&(reg_hl^reg1)&0x8000)>>13 | ((reg1>>8)&(YFLAG|XFLAG)) | \
                 ((reg1>>8)&SFLAG) | ((reg1==0)?ZFLAG:0); \
-        reg_hl = reg1 & 0xFFFF; 
+        reg_hl = reg1 & 0xFFFF;
 
 case 0x4A: TS(15); ADCHL(reg_bc); break;        //adc hl,bc
 case 0x5A: TS(15); ADCHL(reg_de); break;        //adc hl,de
@@ -288,17 +288,17 @@ case 0x7A: TS(15); ADCHL(reg_sp); break;        //adc hl,sp
                 ((reg_hl^r)&(reg_hl^reg1)&0x8000)>>13 | ((reg1>>8)&(YFLAG|XFLAG)) | \
                 ((reg1>>8)&SFLAG) | ((reg1==0)?ZFLAG:0); \
         reg_hl = reg1 & 0xFFFF; \
-    
+
 case 0x42: TS(15); SBCHL(reg_bc); break;        //sbc hl,bc
 case 0x52: TS(15); SBCHL(reg_de); break;        //sbc hl,de
 case 0x62:                                      //sbc hl,hl
         TS(15);
-        if (reg_f & CFLAG) { 
+        if (reg_f & CFLAG) {
             reg_f = 0xbb; reg_hl = 0xffff;
         } else {
             reg_f = 0x42; reg_hl = 0;
         }
-        break;  
+        break;
 case 0x72: TS(15); SBCHL(reg_sp); break;        //sbc hl,sp
 
 // rotate and shift group
@@ -314,7 +314,7 @@ case 0x6F:      // RLD
         reg_wz = reg_hl + 1;
         break;
 case 0x67:      // RRD
-        
+
         // TODO: test reg_wz! (reg_wz & 0xffff lijkt me niet nodig)
         TS(18);
         reg1 = READMEM(reg_hl) | ((reg_a & 0x0F)<<8);
@@ -361,7 +361,7 @@ case 0x71: TS(10); reg_wz = reg_bc + 1; writeIo(reg_c, 0); TS(2); break;        
 case 0x79: TS(10); reg_wz = reg_bc + 1; writeIo(reg_c, reg_a); TS(2); break;        // out (c),a
 
 // TODO: alle block I/O functies moeten gechecked worden op het aantal states.
-// dus rekening houden met het aantal states voor en na de werkelijke I/O actie 
+// dus rekening houden met het aantal states voor en na de werkelijke I/O actie
 // en de M1 cycle die door opcodeFetch wordt toegevoegd.
 
 #define BLOCKIN \
@@ -431,10 +431,10 @@ case 0xBA:      // INDR
         reg2 += reg_l; \
         if (reg2>255) reg_f |= (HFLAG|CFLAG); \
         reg_f |= flagSZP[(reg2&7)^reg_b]&PFLAG        /* should 'b' of before the decrement be used? */
-                                                      /* shouldn't this be: reg_f |= ((reg2&7)^reg_b)&PFLAG 
+                                                      /* shouldn't this be: reg_f |= ((reg2&7)^reg_b)&PFLAG
                                                        *
-                                                       * is parity the P-bit or the "real" partity of ((reg2&7)^reg_b) */  
-                                                       
+                                                       * is parity the P-bit or the "real" partity of ((reg2&7)^reg_b) */
+
 
 case 0xA3:      // OUTI
 #ifdef OUT_INSTRUCTIONS_ON
@@ -474,9 +474,9 @@ case 0xBB:      // OTDR
         break;
 
 // undocumented instructions (nop)
-        
+
 case 0x77: case 0x7f:
-    
+
 case 0xa4: case 0xb4:
 case 0xa5: case 0xb5:
 case 0xa6: case 0xb6:

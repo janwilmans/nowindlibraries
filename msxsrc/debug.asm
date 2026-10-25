@@ -1,12 +1,12 @@
 ; debug.asm contains macros to support debugging the Nowind Interface firmware.
- 
+
 ; DEBUGMESSAGE
         macro DEBUGMESSAGE string
         ifdef DEBUG
         ld d,d
         jr .skip
         db string
-.skip:  
+.skip:
         endif
         endmacro
 
@@ -18,7 +18,7 @@
 .skip2: nop
         endif
         endmacro
-        
+
 ; SAFE_CALL
         macro SAFE_CALL address
         push af
@@ -30,16 +30,16 @@
         push de
         push bc
         push af
-        endmacro        
-        
+        endmacro
+
 ; USB_SENDCPUINFO
         macro USB_SENDCPUINFO
         ifdef USBDEBUG
-        call sendCpuInfo        ; modifing this macro will affect the stack-unwind requirements, 
+        call sendCpuInfo        ; modifing this macro will affect the stack-unwind requirements,
         endif                   ; do not change it unless you know what your doing, see sendCpuInfo
-        endmacro       
+        endmacro
 
-; these macros have no effect on real hardware 
+; these macros have no effect on real hardware
 ; but provide extra debug information/functionality in the Nowind Emulator
 
 ; DEBUGDUMPREGISTERS
@@ -53,36 +53,36 @@
         macro DEBUGDISASM
         ifdef DEBUG
         db $ed, $0b
-        endif        
+        endif
         endmacro
-        
+
 ; DEBUGDISASMOFF
         macro DEBUGDISASMOFF
         ifdef DEBUG
         db $ed, $0c
-        endif        
-        endmacro        
+        endif
+        endmacro
 
 ; BREAKPOINT
         macro BREAKPOINT
         ifdef DEBUG
         ld b,b
         jr $+2
-        endif        
+        endif
         endmacro
-        
+
 ; EMU_DUMPSLOTSELECTION
         macro DEBUGDUMPSLOTSELECTION
         ifdef DEBUG
         db $ed,8
-        endif        
+        endif
         endmacro
 
 ; EMU_ASSERT
         macro EMU_ASSERT
         ifdef DEBUG
         db $ed, $0a
-        endif        
+        endif
         endmacro
 
 ; EMU_DUMPMEMHL
@@ -90,7 +90,7 @@
         ifdef DEBUG
         db $ed,1,len
 .skip:  nop
-        endif        
+        endif
         endmacro
 
 ; EMU_DUMPMEM
@@ -100,7 +100,7 @@
         dw addr
         db len
 .skip:  nop
-        endif        
+        endif
         endmacro
 
 ; BLUEMSX_SETBREAKPOINT
@@ -109,5 +109,5 @@
         ld b,b
         jr $+4
         dw address
-        endif        
-        endmacro   
+        endif
+        endmacro

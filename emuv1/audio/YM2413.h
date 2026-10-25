@@ -10,7 +10,7 @@
 
 class AudioMixer;
 
-/*! 
+/*!
  * The YM2413 class emulates the MSX-MUSIC
  */
 class YM2413 : public AudioDevice {

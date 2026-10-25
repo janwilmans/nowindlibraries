@@ -1,13 +1,13 @@
-; init.asm contains initialization and startup code 
+; init.asm contains initialization and startup code
 
 ; todo:
-; - let '1' disable DOS2 even if 
+; - let '1' disable DOS2 even if
 
         include "tracer.asm"
 
 @nowindInit:                            ; this label should be accessible from others banks as well, hence the @
         DEBUGMESSAGE "nowindInit"
-       
+
 ; first thing we do is check for flashWriter request
         call flashWriter
         call installTracer
@@ -27,17 +27,17 @@
         endif
         db 0
 
-CHK_6:              
-        LD    HL,$FBE5          ; '6' pressed ?       
-        BIT   6,(HL)                      
-        JR    NZ,defaultHz                    
+CHK_6:
+        LD    HL,$FBE5          ; '6' pressed ?
+        BIT   6,(HL)
+        JR    NZ,defaultHz
         LD    A,($FFE8)         ; read the default frequency
         XOR   2                 ; change it (switch 50 <=> 60hz)
-        LD    ($FFE8),A                            
-        OUT   ($99),A                     
+        LD    ($FFE8),A
+        OUT   ($99),A
         LD    A,$80+9
-        OUT   ($99),A                     
-defaultHz:    
+        OUT   ($99),A
+defaultHz:
 
         call enableNowindPage0          ; clear hostToMSXFifo by reading 4Kb of random data
         ld bc,4096
@@ -47,7 +47,7 @@ defaultHz:
         or c
         jr nz,.loop
         call restorePage0
-        
+
 getBootArgs:
         DEBUGMESSAGE "Any commands?"
         call enableNowindPage0
@@ -85,28 +85,28 @@ noNextCommand:
         call getHeaderInPage0
 
         call restorePage0
-        jp nc,gotHostReply                
+        jp nc,gotHostReply
 
         ; no reply (host not connected?)
         ld a,(IDBYTE_2D)
         or a
         jr z, bootMSXDOS1           ; on MSX1 boot DOS1
         cp 3
-        jr z, bootMSXDOS1           ; on MSX Turbo R disable DOS2 because it has its own DOS2.xx roms        
+        jr z, bootMSXDOS1           ; on MSX Turbo R disable DOS2 because it has its own DOS2.xx roms
                                     ; otherwise requested DOS version in A (1 = dos1, 2, = dos2)
 
-        LD    HL,$FBE5				; '1' pressed?   
-        BIT   1,(HL)     
-        jr z, bootMSXDOS1             
-                                    
-bootMSXDOS2:            
-        DEBUGMESSAGE "Booting DOS2"            
+        LD    HL,$FBE5				; '1' pressed?
+        BIT   1,(HL)
+        jr z, bootMSXDOS1
+
+bootMSXDOS2:
+        DEBUGMESSAGE "Booting DOS2"
         ld hl,$47d6                 ; address of ROMINIT in DOS2
         push hl
         xor a
         jp switchBank
-        
-gotHostReply:                                        
+
+gotHostReply:
         cp 1                        ; A=1 means DOS1, A=2 means DOS2
         jr nz,bootMSXDOS2
 
@@ -123,14 +123,14 @@ flashWriter:
         call SNSMAT
         and 8
         ret nz              ; 'f' pressed?
-        
+
         xor a
         call CHGMOD         ; screen 0
 
         ld a,8
         ld ($f3ea),a        ; red background
-        
-        xor a               ; clear screen / activate background color (width unchanged)        
+
+        xor a               ; clear screen / activate background color (width unchanged)
         call CHGCLR
 
         call PrintText
@@ -157,7 +157,6 @@ PrintText:
         inc hl
         jr .loop
 .exit:
-        inc hl        
+        inc hl
         push hl     ; set return address
         ret
-        

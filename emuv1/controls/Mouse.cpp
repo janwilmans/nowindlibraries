@@ -67,7 +67,7 @@ nw_byte Console::readPSGPortA() {
 
   //      DBERR("mouseStatus1:"<<mouseStatus1<<endl);
   //      DBERR("mouseStatus2:"<<mouseStatus2<<endl);
-        
+
         switch (mouseStatus2) {
         case 0: rval = 0xFF; break;
         case 1:

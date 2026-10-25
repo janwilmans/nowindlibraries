@@ -1,29 +1,29 @@
 		ifndef FILE_ASM
 		define FILE_ASM
-		
-		
+
+
 		MODULE File
 
 		define	MAXFILES	50
 
-; Function: Open	
+; Function: Open
 ; Purpose: Opens a library file
 ; Parameters: DE: pointer to filename (ASCIIZ)
 ; Result: A: error code
 ;	  IX: pointer to LIBFILE structure to use
 ; Modifies: all
 InitLibrary:	ld	ix,Library
-		ld	hl,Directory		
+		ld	hl,Directory
 		call	Libfile.Open
 		ret
-		
+
 
 KillLibrary:	ld	ix,Library
 		call	Libfile.Close
 		ret
 
 
-FileLoad:	
+FileLoad:
 ; Function :   Load a file
 ; input    :   HL = Pointer to file name
 ;          :   DE = Address to load to
@@ -37,21 +37,21 @@ FileLoad:
 		call	FileOpen	; open the file
 		pop	de		; retrieve address to load to
 		ret	nz		; exit if error occurred
-		
+
 		ld	l,(iy + Libfile.FILE_ENTRY.fileSize + 0)
-		ld	h,(iy + Libfile.FILE_ENTRY.fileSize + 1)	;load size of file		
+		ld	h,(iy + Libfile.FILE_ENTRY.fileSize + 1)	;load size of file
 		call	FileRead	; read file
 		ret	nz		; exit if error occurred
-		
+
 		call	FileClose	; close file
-		
+
 		ret			; done!
 
-	
+
 FileOpen:
 ; Function :   Open file
 ; input    :   DE = Pointer to file name
-;          :    A = 
+;          :    A =
 ; output   :   A = Error Number
 ;          :   B = File Handle
 ;          :   STRING_BUFFER filled with error txt
@@ -99,18 +99,18 @@ ExplainError:
                 PUSH    HL
                 PUSH    BC
 		LD	B,A
-                LD      DE,ERROR_STRING	       
+                LD      DE,ERROR_STRING
                 BdosCall _EXPLAIN
                 POP     BC
                 POP     HL
                 POP     AF
                 RET
-                        
+
 ERROR_STRING   	DS	64,0
 
 Library:	ds	Libfile.LIBFILE
 Directory:	ds	MAXFILES * Libfile.FILE_ENTRY
-    
+
     		ENDMODULE
-    
+
 		endif

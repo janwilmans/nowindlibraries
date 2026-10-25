@@ -10,13 +10,13 @@ MAPPER23        equ $6000
 
         include "labels.asm"
         include "debug.asm"
-              
+
         defpage 0, $4000, $4000
         defpage 1, $4000, $4000
         defpage 2, $4000, $4000
         defpage 3, $4000, $4000
 
-        
+
         incbin "..\roms\MSXDOS23.ROM", 0, $4000
 
         org $4000
@@ -58,7 +58,7 @@ DRIVES: DEBUGMESSAGE "DRIVES23"
 INIENV: DEBUGMESSAGE "INIENV23"
         ;DEBUGDISASM
         ret
-        
+
 DSKIO:  DEBUGMESSAGE "DSKIO23"
         ld a,2
         scf
@@ -85,9 +85,9 @@ noCHGCPU_bank0:
         MAKEDPB $f8, 2, 112, 1 * 80 * 9, 2, 2      ; 360 kB (1 side * 80 tracks * 9 tracks/sector)
 DEFDPB: MAKEDPB $f9, 2, 112, 2 * 80 * 9, 3, 2      ; 720 kB
 
-       
-        
-        page 1        
+
+
+        page 1
 
         org $4000
         incbin "..\roms\MSXDOS23.ROM", $4000, $4000
@@ -150,7 +150,7 @@ DRIVES: DEBUGMESSAGE "DRIVES23dos1"
 INIENV: DEBUGMESSAGE "INIENV23dos1"
         ;DEBUGDISASM
         ret
-        
+
 DSKIO:  DEBUGMESSAGE "DSKIO23dos1"
         DEBUGDISASM
         ld a,2

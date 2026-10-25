@@ -1,8 +1,8 @@
 			include "opl4.inc"
-			
+
 			output "detect.bin"
 
-; Puyo check on address 5DC2  
+; Puyo check on address 5DC2
 ; insert this code 	CALL	&h5DDC
 ;			10  nops
 

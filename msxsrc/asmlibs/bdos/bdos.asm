@@ -1,8 +1,8 @@
 		ifndef BDOS_ASM
 		define BDOS_ASM
-		
+
 		include bdos.inc
-		
+
 		MODULE Bdos
 
 FileCreate:
@@ -19,7 +19,7 @@ FileCreate:
 		BdosCall _CREATE
 		JP	NZ,ExplainError
                 RET
-		
+
 FileOpen:
 ; Function :   Open file
 ; input    :   DE = Pointer to file name
@@ -40,7 +40,7 @@ FileRead:
 ;          :    B = File Handle
 ; output   :   A = Error Number
 ;          :   ERROR_STRING filled with error txt
-;          :   nz = Error 
+;          :   nz = Error
 ;          :   HL=Bytes read
 ; Modifies :   AF,HL,DE
 		PUSH	DE
@@ -69,7 +69,7 @@ FileWrite:
 ;          :    B = File Handle
 ; output   :   A = Error Number
 ;          :   ERROR_STRING filled with error txt
-;          :   nz = Error 
+;          :   nz = Error
 ;          :   HL=Bytes read
 ; Modifies :   AF,HL,DE
                 PUSH    BC
@@ -86,28 +86,28 @@ ExplainError:
                 PUSH    HL
                 PUSH    BC
 		LD	B,A
-                LD      DE,ERROR_STRING	       
+                LD      DE,ERROR_STRING
                 BdosCall _EXPLAIN
                 POP     BC
                 POP     HL
                 POP     AF
                 RET
-                        
+
 ERROR_STRING:   	DS	64,0
-    
- 
+
+
 SetDrivePath:
  ; Input     :  DE = Pointer to ASCIIZ string containing drive\path
  ; Output    :  none
  ; Modifies  :  AF,BC,DE,HL
-    
+
    		PUSH	  DE
 		BdosCall  _CHDIR
 		POP	  HL
 		LD	  A,(HL)
 		SUB	  A,'A'
 		LD	  E,A
-		BdosCall  _SELDSK 
+		BdosCall  _SELDSK
 		RET
 
 FindFirst:
@@ -117,20 +117,20 @@ FindFirst:
 ;            IX = Pointer to new fileinfo block
 ; Output :    A = Error code
 ;        :   NZ = Error
-;        : (IX) = Filled in with matching entry 
+;        : (IX) = Filled in with matching entry
 ;        : ERROR_STRING, string explaining error
 		BdosCall _FFIRST
 		JP	NZ,ExplainError
-		RET	
-FindNext:	
-; Input  :   IX = Pointer to fileinfo block from  previous find first function	
+		RET
+FindNext:
+; Input  :   IX = Pointer to fileinfo block from  previous find first function
 ; Output :    A = Error code
 ;        :   NZ = Error
-;        : (IX) = Filled in with next matching entry 
+;        : (IX) = Filled in with next matching entry
 ;        : ERROR_STRING, string explaining error
 		BdosCall _FNEXT
 		JP	NZ,ExplainError
-		RET	
-			
+		RET
+
 		ENDMODULE
 		endif

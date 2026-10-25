@@ -12,12 +12,12 @@ reg2 = READMEM(reg_wz);
 opcode = READMEM(reg_pc++);
 
 switch (opcode >> 3) {
-case 0x00: RLC(reg2); break;    
-case 0x01: RRC(reg2); break;    
-case 0x02: RL(reg2); break; 
-case 0x03: RR(reg2); break; 
-case 0x04: SLA(reg2); break;    
-case 0x05: SRA(reg2); break;    
+case 0x00: RLC(reg2); break;
+case 0x01: RRC(reg2); break;
+case 0x02: RL(reg2); break;
+case 0x03: RR(reg2); break;
+case 0x04: SLA(reg2); break;
+case 0x05: SRA(reg2); break;
 case 0x06: SLL(reg2); break;    // undocumented
 case 0x07: SRL(reg2); break;
 
@@ -29,8 +29,8 @@ case 0x0b: TS(20); BITIX(0x08); break;  // bit 3,(ix+d)
 case 0x0c: TS(20); BITIX(0x10); break;  // bit 4,(ix+d)
 case 0x0d: TS(20); BITIX(0x20); break;  // bit 5,(ix+d)
 case 0x0e: TS(20); BITIX(0x40); break;  // bit 6,(ix+d)
-case 0x0f: 
-    TS(20); 
+case 0x0f:
+    TS(20);
     reg_f = (reg_f&CFLAG) | ((reg_wz>>8)&0x28) | ((reg2&0x80) ? SFLAG|HFLAG:PFLAG|ZFLAG|HFLAG);
     break;  // bit 7,(ix+d)
 

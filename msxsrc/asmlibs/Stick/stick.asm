@@ -18,7 +18,7 @@ GetStick:	xor	a
 		ld	a,b
 		or	c
 		jr	nz,.triggers
-	
+
 	        ld	a,1
 		call	get_stick
 		or	a
@@ -26,7 +26,7 @@ GetStick:	xor	a
 		ld	a,b
 		or	c
 		jr	nz,.triggers
-	
+
 		ld	a,2
 		call	get_stick
 		or	a
@@ -34,10 +34,10 @@ GetStick:	xor	a
 		ld	a,b
 		or	c
 		jr	nz,.triggers
-	        		
+
 .triggers:	xor	a
 		ret
-				
+
 
 
 
@@ -56,7 +56,7 @@ joystick_type:
 		defw	get_stick0,joy_player,joy_player,get_stick3
 
 
-joy_player:     
+joy_player:
 ;joystick 1/2
 		cpl
 		and	%00000001
@@ -166,7 +166,7 @@ get_stick3:	in	a,(PPIPRC)
 		cpl
 		and	%01000000
 		ld	c,a
-		
+
 		ld	a,l
 		or	4
 		out	(PPIPRC),a
@@ -210,7 +210,7 @@ get_stick3:	in	a,(PPIPRC)
 		cp	128
 		jr	c,.skip
 		ld	a,16
-.skip:		
+.skip:
 		rrca
 		rrca
 		rrca
@@ -229,7 +229,7 @@ get_stick3:	in	a,(PPIPRC)
 DIRTBC:	defb	0,3,5,4,1,2,0,3,7,0,6,5,8,1,7,0
 
 
-                
+
 		ENDMODULE
-		
-		
+
+

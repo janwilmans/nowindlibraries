@@ -22,19 +22,19 @@ loop:
         ld d,a
         ld a,r
         ld e,a
-        
+
         ld a,r          ; 'random' number of sectors
         and %00111111
         add 40
         ld h,a
-        
+
         ld l,0          ; drive number
         ld c,$2f
         call BDOS
-        
+
         jp loop
 
-        
+
 welcomemessage:
         db "Nowind Interface test running...$"
 

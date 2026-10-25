@@ -50,7 +50,7 @@ GUI::GUI()
         if (temp == NULL) {
             DBERR("GUI: LoadBmp: " << disksImage << " not found!\n");
             exit(1);
-        }    
+        }
         bmpdisk = SDL_DisplayFormat(temp);
         SDL_FreeSurface(temp);
 
@@ -109,9 +109,9 @@ void GUI::reset()
 
 void GUI::fullscreenToggle()
 {
-    /* The semantics of SDL_WM_ToggleFullScreen() are that switching between fullscreen and windowed mode is transprent to the application. The display pixels pointer does not change, the display depth does not change, etc. This cannot be guaranteed on Windows. However, there is a simple method you can use to change between fullscreen and windowed mode: 
+    /* The semantics of SDL_WM_ToggleFullScreen() are that switching between fullscreen and windowed mode is transprent to the application. The display pixels pointer does not change, the display depth does not change, etc. This cannot be guaranteed on Windows. However, there is a simple method you can use to change between fullscreen and windowed mode:
         flags ^= SDL_FULLSCREEN;
-        screen = SDL_SetVideoMode(..., flags); 
+        screen = SDL_SetVideoMode(..., flags);
     */
 
     //  SDL_FillRect(screen,0,0);
@@ -305,23 +305,23 @@ SDL_Surface* GUI::getFakeSDL_Surface(unsigned int width, unsigned int height)
 
         fake_pixelFormat->BitsPerPixel = 32;
         fake_pixelFormat->BytesPerPixel = 4;
-        fake_pixelFormat->Rmask = 255;  
-        fake_pixelFormat->Gmask = 255;  
-        fake_pixelFormat->Bmask = 255;  
-        fake_pixelFormat->Amask = 255;  
+        fake_pixelFormat->Rmask = 255;
+        fake_pixelFormat->Gmask = 255;
+        fake_pixelFormat->Bmask = 255;
+        fake_pixelFormat->Amask = 255;
 
-        fake_pixelFormat->Rshift = 0;   
-        fake_pixelFormat->Gshift = 0;   
-        fake_pixelFormat->Bshift = 0;   
-        fake_pixelFormat->Ashift = 0;   
+        fake_pixelFormat->Rshift = 0;
+        fake_pixelFormat->Gshift = 0;
+        fake_pixelFormat->Bshift = 0;
+        fake_pixelFormat->Ashift = 0;
 
-        fake_pixelFormat->Rloss = 0;    
-        fake_pixelFormat->Gloss = 0;    
-        fake_pixelFormat->Bloss = 0;    
-        fake_pixelFormat->Aloss = 0;    
+        fake_pixelFormat->Rloss = 0;
+        fake_pixelFormat->Gloss = 0;
+        fake_pixelFormat->Bloss = 0;
+        fake_pixelFormat->Aloss = 0;
 
-        fake_pixelFormat->colorkey = 0; 
-        fake_pixelFormat->alpha = 0;    
+        fake_pixelFormat->colorkey = 0;
+        fake_pixelFormat->alpha = 0;
 
         SDL_Surface *fake_surface = new SDL_Surface();
         fake_surface->flags = 0;
@@ -433,7 +433,7 @@ __asm ("mov %eax, _time1a");
 __asm ("mov %edx, _time1d");
 __asm ("popl %edx");
 __asm ("popl %eax");
-    
+
     // initialize
     __asm ("pushal;                     \
             pushf;                      \
@@ -444,7 +444,7 @@ __asm ("popl %eax");
             movl (_asmborder), %ebx;    \
             movl (_asmcount), %edx;     \
             ");
-        
+
     // draw border
     __asm ("movl (_asmhadjust), %ecx;   \
             shll %ecx;                  \
@@ -452,7 +452,7 @@ __asm ("popl %eax");
             drawborder:                 \
             rep stosl;                  \
             ");
-    
+
     // draw screenline (move van esi edi en edi+544)
     __asm ("movw $512, %cx;             \
             drawline:                   \
@@ -461,7 +461,7 @@ __asm ("popl %eax");
             stosl;                      \
             loop drawline;              \
             ");
-            
+
     // draw border even line and determine last line
     __asm ("movb $32, %cl;              \
             movl %ebx, %eax;            \
@@ -472,7 +472,7 @@ __asm ("popl %eax");
             decl %edx;                  \
             jnz drawborder;             \
             ");
-            
+
     // draw last piece of border
     __asm ("movl $16, %ecx;             \
             subl (_asmhadjust), %ecx;   \
@@ -482,7 +482,7 @@ __asm ("popl %eax");
             popf;                       \
             popal;                      \
             ");
-              
+
           currentMSXscreenPosition += 256 * count;
           bufp1 += 544 * count;
 
@@ -568,7 +568,7 @@ __asm ("popl %eax");
         speedaverage += (time2-time1);
         speedcounter++;
         DBERR("S5: " << dec << (speedaverage/speedcounter) << endl);
-    }    
+    }
 */
 
     if (selecting)

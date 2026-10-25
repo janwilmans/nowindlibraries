@@ -1,20 +1,20 @@
 ; Product      : Math routines
-; Version      : 0.1 
+; Version      : 0.1
 ; Main code by : Arjan
 
 
 		ifndef MATH_ASM
 		define MATH_ASM
-		
+
 		MODULE	Math
 
-; Function: MultiplyDEA	
+; Function: MultiplyDEA
 ; Purpose: Multiplies A with DE
 ; Parameters: A: multiplier
 ;	     DE: multiplicant
 ; Result: HL: 16 bit result
-; Modifies: all		
-MultiplyDEA:  
+; Modifies: all
+MultiplyDEA:
 	 	ld	hl,0
 .loop:		srl	a
 		jr	z,.end
@@ -22,19 +22,19 @@ MultiplyDEA:
 		add	hl,de
 .skip:		sla	e
 		rl	d
-		jr	.loop		
-		
+		jr	.loop
+
 .end:		ret	nc
 		add	hl,de
-		ret	
-			
-; Function: HLDivDE	
+		ret
+
+; Function: HLDivDE
 ; Purpose: Divides HL by DE
-; Result HL = 
+; Result HL =
 ;        DE = Remainder
-; 				
+;
 HLDivDE:
-		LD	B,D	 
+		LD	B,D
 		LD	C,E
 		LD	DE,0
 		LD	A,16
@@ -52,11 +52,11 @@ HLDivDE.1:
 		EX	DE,HL
 		DEC	A
 		JR	NZ,HLDivDE.0
-		RET		
+		RET
 
-; Function: HLMulDE	
+; Function: HLMulDE
 ; Purpose: Multiplies HL with DE
-; Result HL 
+; Result HL
 ; Modfies AF,BC,DE,HL
 HLMulDE:
 		LD	B,16
@@ -65,9 +65,9 @@ HLMulDE:
 
 		EX	DE,HL
 		LD	HL,0
-HLMulDE.0	
+HLMulDE.0
 		SRL	C
-		RRA	
+		RRA
 		JR	NC,HLMulDE.1
 		ADD	HL,DE
 HLMulDE.1
@@ -77,12 +77,12 @@ HLMulDE.1
 		RET
 
 
-; Function: BCMulDE32	
+; Function: BCMulDE32
 ; Purpose:  Multiply 16-bit values (with 32-bit result)
 ; In: Multiply BC with DE
-; Result BC:HL 
-; Modfies AF,BC,HL 
- 
+; Result BC:HL
+; Modfies AF,BC,HL
+
 BCMulDE32:
 		LD A,C
 		LD C,B
@@ -113,10 +113,10 @@ CPHLDE
 		LD	A,L
 		CP	A,E
 		RET
-		
 
-	
+
+
 		ENDMODULE
-		
+
 		endif
-		
+

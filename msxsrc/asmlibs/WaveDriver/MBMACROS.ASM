@@ -1,4 +1,4 @@
-	
+
 
 ; --- Nic macro's ---
 
@@ -34,13 +34,13 @@
 	endm
 
 
-	macro opl4_wait	
+	macro opl4_wait
 	IF	R800ASM
 	push	bc
 	pop	bc
 	ENDIF
 	endm
-	macro opl4_7mhz	
+	macro opl4_7mhz
 	IF	Z80HASM
 	nop
 	ENDIF

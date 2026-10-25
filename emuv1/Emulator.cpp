@@ -1,4 +1,4 @@
-/* 
+/*
  * Emulator.cpp: Emulation main class.
  *
  * Copyright (C) 2004 Jan Wilmans <jw@dds.nl>
@@ -465,7 +465,7 @@ void Emulator::typeText(const std::string& text)
     clipboardStream += text;
 }
 
-/* release time-slices until the average is back in range 
+/* release time-slices until the average is back in range
  * on very fast machines this can be 100s of slices
  */
 void Emulator::speedCheck()
@@ -483,7 +483,7 @@ void Emulator::speedCheck()
     also, at startup and when the emutime wraps, the emulator will temporarily at full speed?
     re-think this.
 
-    2^64 == 18446744073709551616  
+    2^64 == 18446744073709551616
 
     z80 @ 3.57Mhz == 3579545 cycles/second
 
@@ -497,9 +497,9 @@ void Emulator::speedCheck()
     - emuTimeType is now a 'unsigned long long' and will not wrap any time soon (~163.412 years)
 
     there are two problems still to be solved:
-    - when cpu is loaded 100%, and emulator is not given cpu executions time, real time passes 
+    - when cpu is loaded 100%, and emulator is not given cpu executions time, real time passes
       and the emulator seems to be running behind _a lot_, so it will run at full speed until it catches up.
-      notice: i know of no way to detect this, I dont think there is a good solution for this, but a workaround, 
+      notice: i know of no way to detect this, I dont think there is a good solution for this, but a workaround,
       might be to let the emulator run at max. 101% (or something) so the 'catching up' is not noticable by the user.
       we should also consider what happens when fail to provide an audiobuffer in time.
       ideally, the emulator should stop producing sound and resume when enough time has passed to fill a buffer again?

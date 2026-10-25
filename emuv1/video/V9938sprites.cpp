@@ -7,7 +7,7 @@
 using namespace std;
 
 /* TODO:
-    
+
     - sprite maginificatie
     - what happens exactly when TP=1 (collision and display of color 0???)
     - what happens when sprite priority is cancelled and when 2 sprites are
@@ -17,7 +17,7 @@ using namespace std;
     - in stead of one big spriteOverlay: store only and array of addresses which
     contain a sprite line (list of max 32 sprites x 32 lines (in case of 16x16)
      = 1024 addresses and spritelines of 8 pixels)
-    
+
 */
 
 
@@ -169,7 +169,7 @@ void V9938sprites::updateSpriteOverlayMode1(nw_byte vdpModeRegister1) {
             sx = vram[attr++];
             patternColumn = patternGeneratorTable + 8 * vram[attr];
             color = vram[attr++];
-            
+
             for (int y=0;y<8;y++) {
                 ++sy &= 255;
                 p1 = vram[patternColumn++];

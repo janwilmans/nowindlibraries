@@ -5,7 +5,7 @@ class MainWindow(wx.Frame):
         wx.Frame.__init__(self, parent, id, title, size=(200,100))
         self.control = wx.TextCtrl(self, 1, style=wx.TE_MULTILINE)
         self.Show(True)
-        
+
 app = wx.PySimpleApp()
 frame=MainWindow(None, wx.ID_ANY, 'Small editor')
 app.MainLoop()

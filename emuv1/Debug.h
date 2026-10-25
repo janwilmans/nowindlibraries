@@ -10,7 +10,7 @@
 #include <string>
 
 
-/* when ON enables writing of debugging info to stdout/stderr 
+/* when ON enables writing of debugging info to stdout/stderr
 (or stdout.txt and stderr.txt) */
 #define DEBUGGING_ON
 

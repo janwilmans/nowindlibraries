@@ -3,29 +3,29 @@
 
 ; assumptions:
 ; mainrom must available in page 0 when flasherStart is called
-            
+
 ; this label is before the _PHASE_ so it's address refers to the actual rom location
-; not the 'copied' $c000 location            
+; not the 'copied' $c000 location
 waitForFlashCommand:
 
-        PHASE $c000  
+        PHASE $c000
 
-flasherStart:     
+flasherStart:
         di
-        
+
         in a,($aa)
         and $f0
-        out ($aa),a     ; select keyboard row 0 
-        
+        out ($aa),a     ; select keyboard row 0
+
         ld a,(IDBYTE_2D)
         cp 3                ; MSX Turbo-R?
         jr nz,no_r800
-        
-        ld a,$80            ; A = LED 0 0 0 0 0 x x 
+
+        ld a,$80            ; A = LED 0 0 0 0 0 x x
                             ;      \ 1 = LED off, 0 = LED on, 0 0 = Z80 (ROM) mode
-        call CHGCPU         ; switch to z80 mode for flashing 
-no_r800:        
-        
+        call CHGCPU         ; switch to z80 mode for flashing
+no_r800:
+
 .loop
         in a,($a9)
         bit 1,a
@@ -36,7 +36,7 @@ no_r800:
         jr z,.switchSlot            ; '2' pressed?
         bit 3,a
         jr z,testmode               ; '3' pressed?
-        
+
         ld h,HIGH usbReadPage0
         ld a,(hl)                   ; header $BB ?
 .chkbb: cp $bb
@@ -44,11 +44,11 @@ no_r800:
         ld a,(hl)
         cp $55
         call z,.cmd
-        jr .loop  
+        jr .loop
 
 .switchSlot:
         call enableFlashMainslot
-        jr .loop  
+        jr .loop
 
 .cmd:
         ld a,(hl)
@@ -61,19 +61,19 @@ no_r800:
         cp $a5
         jr z,eraseSector
         cp $a6
-        jr z,autoselectMode     
+        jr z,autoselectMode
 
         ; unknown command, just go back
         jr .loop
-     
-; in: b = main slot to enable for page 0 and 1   
-enableFlashMainslot: 
+
+; in: b = main slot to enable for page 0 and 1
+enableFlashMainslot:
         ld a,(currectSlot)
         cp b
         ret z               ; do nothing if already selected
         ld a,b
         ld (currectSlot),a
-        
+
         push bc
         and 3
         ld b,a
@@ -85,18 +85,18 @@ enableFlashMainslot:
   		in a,($a8)
 		and $f0
 		or c
-		out ($a8),a         ; switch mainslot of page 0 and 1 
+		out ($a8),a         ; switch mainslot of page 0 and 1
 		pop bc
-		
+
 		ld a,48
 		add b
-		out ($98),a         ; print "1"/"2"	
-		ret  
-		
+		out ($98),a         ; print "1"/"2"
+		ret
+
 testmode:
 		ld a,"T"
 		out ($98),a         ; print "T"
-		
+
         ld h,HIGH usbReadPage0
 .lp2:   ld b,255
 .loop   ld a,(hl)                   ; read
@@ -105,7 +105,7 @@ testmode:
         xor 64
         out ($aa),a
         jr .lp2
-    
+
 ; 'autoselect' is a flashrom feature and has nothing to do with 'selectSlot'
 ; the 'autoselect' feature is used to identify the type of flashrom
 autoselectMode:
@@ -135,12 +135,12 @@ eraseSector:
 
         ld a,$80
         call writeCommandSequence
-        ld a,$30        
+        ld a,$30
         call writeCommandSequence
 
         call checkCommandExecution
         jp acknowledge
-        
+
 
 chipErase:
         ;DEBUGMESSAGE "chip erase"
@@ -167,7 +167,7 @@ writeFlash:
 
         ld a,(hl)                       ; bank
         ld (mapper),a
-        
+
         ld b,128                        ; data is written in blocks of 128 bytes
 .loop:  ld a,$a0
         call writeCommandSequence
@@ -176,10 +176,10 @@ writeFlash:
         inc de
         call checkCommandExecution
         djnz .loop
-        
+
         ld a,2
-        jr acknowledge        
-        
+        jr acknowledge
+
 verifyFlash:
         ;DEBUGMESSAGE "verify"
         ld hl,usbReadPage0
@@ -196,7 +196,7 @@ verifyFlash:
 
         ld a,3
 
-acknowledge:        
+acknowledge:
         ld h,HIGH usbWritePage1
         ld (hl),$aa
         ld (hl),$55
@@ -204,7 +204,7 @@ acknowledge:
         ret
 
 updateBar:
-        ld a,"w"  
+        ld a,"w"
         out ($98),a
         ret
 
@@ -233,14 +233,14 @@ checkCommandExecution:
         and %01000000
         ret z                           ; command complete
 
-resetFlashDevice:        
+resetFlashDevice:
         ld a,$f0                        ; write RESET command
         ld (0),a
         ret
-           
+
 currectSlot:
         db $ff
-                      
+
 flasherEnd:
         DEPHASE
 

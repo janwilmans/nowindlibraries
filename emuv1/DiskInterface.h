@@ -12,7 +12,7 @@ class Z80;
 
 /*!
  * The DiskInterface class emulates the disk-interface on a high level, this means
- * that bios-calls 0x4010 -> 0x401F are patched (see z80) with non-existing opcode (ED 00) 
+ * that bios-calls 0x4010 -> 0x401F are patched (see z80) with non-existing opcode (ED 00)
  * and RET (C9) and the z80 calls functions in this class to replace them.
  */
 class DiskInterface {

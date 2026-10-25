@@ -8,11 +8,11 @@ __version__ = '2.0'
 
 import sys
 
-#if module "makelib" cannot be found, add there path here 
+#if module "makelib" cannot be found, add there path here
 sys.path.append("/home/jan/src/genmake2/")
 
 import makelib
-from makelib import *	
+from makelib import *
 
 if __name__ == '__main__':
     print "GenMake v2.0 by Jan Wilmans"

@@ -10,7 +10,7 @@
 GetDirectKey:
 		PUSH	BC
 		DI
-		IN	A,(#AA) 
+		IN	A,(#AA)
 		LD	B,A
 		AND	A,#F0
 		ADD	A,C
@@ -24,8 +24,8 @@ GetDirectKey:
 		LD	A,C
 		POP	BC
 		RET
-	
-		IN	A,(#AA) 
-				
+
+		IN	A,(#AA)
+
 		ENDMODULE
-		
+

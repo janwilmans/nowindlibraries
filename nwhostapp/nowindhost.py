@@ -22,7 +22,7 @@ class FileDrop(wx.FileDropTarget):
                 #file = open(name, 'r')
                 #text = file.read()
                 self.window.SetValue(name)
-                
+
                 # insert image
                 nwhost.setImage(0, name.encode("utf-8"))
 
@@ -66,7 +66,7 @@ class TopPanel(wx.Panel):
             # insert image
             nwhost.setImage(0, fullname.encode("utf-8"))
 
-    
+
 class MainWindow(wx.Frame):
     def __init__(self, filename='noname.txt'):
         super(MainWindow, self).__init__(None, size=(350,100))
@@ -89,13 +89,13 @@ class MainWindow(wx.Frame):
         ''' Create "exterior" window components, such as menu and status
             bar. '''
         self.SetTitle('Nowind Host')
-  
+
 
 # redirect=0 causes exceptions to be printed on the commandline (as usual)
 app = wx.App(redirect=0)
 
 #nwhost.initialize()
-   
+
 print "Start hosting..."
 # start the hosting thread
 nwhost.start()
@@ -105,4 +105,4 @@ frame = MainWindow()
 frame.Show()
 
 app.MainLoop()
-   
+

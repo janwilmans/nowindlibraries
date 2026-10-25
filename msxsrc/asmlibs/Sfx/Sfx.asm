@@ -1,8 +1,8 @@
 		ifndef Sfx_ASM
 		define Sfx_ASM
-		
-		include "Sfx.inc" 
-		 
+
+		include "Sfx.inc"
+
 		MODULE Sfx
 
 Play:
@@ -10,21 +10,21 @@ Play:
 ; B  = Panning
 ; C  = Volume
 ; D  = continuous
-		
-		
+
+
 		LD	C,OPL4_CHN_CONTROL
 		ADD	A,C
 		LD	C,A
 		LD	A,KEY_ON
 		DI
-		CALL	Opl4.WriteRegister		
+		CALL	Opl4.WriteRegister
 		EI
 		RET
 
-		
+
 Load:
 		RET
-				
+
 
 Stop:
 
@@ -34,9 +34,9 @@ Stop:
 		LD	C,A
 		LD	A,DAMP
 		DI
-		CALL	Opl4.WriteRegister		
+		CALL	Opl4.WriteRegister
 		EI
 		RET
 		ENDMODULE
-		
+
 		endif

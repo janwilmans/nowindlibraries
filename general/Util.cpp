@@ -20,7 +20,7 @@ using namespace general;
 #endif
 
 /*
-// for the MSVC compiler sprintf_s (and also _snprintf_s, vsnprintf, vsprintf_s) are not c99 compliant, 
+// for the MSVC compiler sprintf_s (and also _snprintf_s, vsnprintf, vsprintf_s) are not c99 compliant,
 // their return value is -1 if the string does not fit, in stead of the amount of characters that would
 // have been written if the it had fitted.
 

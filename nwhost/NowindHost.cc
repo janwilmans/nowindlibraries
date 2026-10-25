@@ -14,7 +14,7 @@
 #include <vector>
 
 /*
-Coding Guidelines for NwHost project 
+Coding Guidelines for NwHost project
 
 - prefix member variables with 'm' and start with a Capital, ie. mMemberVariable
 - use any name for arguments, local variables etc. but use camelCase not C unix_style

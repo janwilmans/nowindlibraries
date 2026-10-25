@@ -1,12 +1,12 @@
 
 		ifndef STRING_ASM
 		define STRING_ASM
-		
+
 		MODULE String
 
 
-                
-                        
+
+
 ByteToHex:
 ; HL = Pointer to buffer
 ;  A = number to convert to hex
@@ -28,25 +28,25 @@ ByteToHex:
 		DAA
 		LD	(HL),A
 		INC	HL
-		RET      
-	
-	
-PrintDebug:	
+		RET
+
+
+PrintDebug:
 ; DE = Pointer to data
-; B  = Bytes to print	
+; B  = Bytes to print
 		PUSH	BC
 		LD	A,(DE)
                 INC	DE
                 PUSH	DE
                 LD	HL,.HEX_OUT
-                CALL	ByteToHex                
+                CALL	ByteToHex
     		LD	DE,.HEX_OUT
                 BdosCall _STROUT
                 POP	DE
                 POP	BC
-                DJNZ	PrintDebug 
-                RET	
-                
+                DJNZ	PrintDebug
+                RET
+
 .HEX_OUT:	DS	2,0
 		DB	"$"
 
@@ -57,17 +57,17 @@ PrintDebug:
 ;     	      HL: pointer to second string
 ; Result: flags: Z: strings are equal
 ;		 NZ: strings are not equal
-;			C: first string < second string  
+;			C: first string < second string
 ;			NC: first string > second string
 ; Modifies: all
-StringCompareZ:	
+StringCompareZ:
 		ld	a,(de)		; get character from second string
 		cp	(hl)
 		ret	nz		; exit if strings not equal
-		
+
 		or	a               ; end of string?
 		ret	z		; quit if string is terminated
-		
+
 		inc	hl
 		inc	de
 		jr	StringCompareZ	; check next characters
@@ -85,12 +85,12 @@ StringCompare:
                 INC     DE
                 INC     HL
                 DJNZ    StringCompare
-                RET             
-		
+                RET
+
 ; Function: PrintAsciiz
 ; Purpose: Prints a zero terminated string
 ; Parameters: DE: pointer to string
-; Result: flags: 
+; Result: flags:
 ; Modifies: AF,HL,DE
 
 PrintAsciiz:
@@ -106,8 +106,8 @@ PrintAsciiz:
 		POP	HL
 		INC	HL
 		JP 	.loop
-				
+
 		ENDMODULE
-		
+
 		endif
-		    
+

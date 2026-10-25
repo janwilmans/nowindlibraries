@@ -1,11 +1,11 @@
 		ifndef FILE_ASM
 		define FILE_ASM
-		
-		
-		
+
+
+
 		MODULE File
 
-FileLoad:	
+FileLoad:
 ; Function :   Load a file
 ; input    :   HL = Pointer to file name
 ;          :   DE = Address to load to
@@ -21,14 +21,14 @@ FileLoad:
 		ret	nz		; exit if error occurred
 		LD	HL,256
 	;	ld	l,(iy + Libfile.FILE_ENTRY.fileSize + 0)
-	;	ld	h,(iy + Libfile.FILE_ENTRY.fileSize + 1)	;load size of file		
+	;	ld	h,(iy + Libfile.FILE_ENTRY.fileSize + 1)	;load size of file
 		call	FileRead	; read file
 		ret	nz		; exit if error occurred
-		
+
 		call	FileClose	; close file
-		
+
 		ret			; done!
-		
+
 FileOpen
 		JP	Bdos.FileOpen
 FileRead
@@ -37,5 +37,5 @@ FileClose
 		JP	Bdos.FileClose
 
 		ENDMODULE
-    
+
 		endif

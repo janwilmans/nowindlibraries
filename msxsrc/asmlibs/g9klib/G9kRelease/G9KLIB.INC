@@ -1,6 +1,6 @@
 		ifndef G9KLIB_INC
 		define G9KLIB_INC
-		
+
 		ifndef G9K_DISABLE_DIRECT_EXPORT
 ;----------------------------------------------------------------------------;
 ; General Functions overview                                                 ;
@@ -16,7 +16,7 @@
 		EXPORT G9k.SpritesDisable  ; Disable sprites/mouse cursor
 		EXPORT G9k.WritePalette    ; Write palette data to the Gfx9000
 		EXPORT G9k.ReadPalette     ; Read palette data from the Gfx9000
-		EXPORT G9k.SetAdjust       ; Adjust Gfx9000 display 
+		EXPORT G9k.SetAdjust       ; Adjust Gfx9000 display
 		EXPORT G9k.SetBackDropColor; Set backdrop color
 		EXPORT G9k.SetScrollX      ; Set scroll X Layer A
 		EXPORT G9k.SetScrollY      ; Set scroll Y Layer A
@@ -53,7 +53,7 @@
 		EXPORT G9k.OpenVff            ; Open a VFF file
 		EXPORT G9k.LoadFont	      ; Loads a VFF(V9990 font format) file from disk
 		EXPORT G9k.SetFont            ; Set a font as default
-		EXPORT G9k.PrintString        ; Print a zero terminated string 
+		EXPORT G9k.PrintString        ; Print a zero terminated string
 		EXPORT G9k.PutChar	      ; Print a character
 		EXPORT G9k.Locate	      ; Set X and Y coordinates for putchar
 		ENDIF
@@ -66,7 +66,7 @@
 		EXPORT G9k.ReadG9B            ; Read data from disk to Gfx9000 VRAM X,Y
 		EXPORT G9k.ReadG9BLinear      ; Read data from disk to Gfx9000 Linear VRAM Address
 		ENDIF
-		
+
 ;----------------------------------------------------------------------------;
 ; Gfx9000 pattern functions                                                  ;
 ;----------------------------------------------------------------------------;
@@ -77,8 +77,8 @@
 		EXPORT G9k.SetPattern         ; Set pattern
 		EXPORT G9k.GetPattern         ; Get pattern
 		ENDIF
-		
-		
+
+
 ;----------------------------------------------------------------------------;
 ; Macro overview    	                                                     ;
 ;----------------------------------------------------------------------------;
@@ -115,9 +115,9 @@ G9K_SCREEN_MODE0	EQU	6	; R/W
 G9K_SCREEN_MODE1	EQU	7	; R/W
 G9K_CTRL		EQU	8	; R/W
 G9K_INT_ENABLE          EQU     9       ; R/W
-G9K_INT_V_LINE_LO	EQU	10	; R/W	
+G9K_INT_V_LINE_LO	EQU	10	; R/W
 G9K_INT_V_LINE_HI	EQU	11	; R/W
-G9K_INT_H_LINE		EQU	12	; R/W	
+G9K_INT_H_LINE		EQU	12	; R/W
 G9K_PALETTE_CTRL	EQU	13	; W
 G9K_PALETTE_PTR		EQU	14	; W
 G9K_BACK_DROP_COLOR 	EQU     15      ; R/W
@@ -215,17 +215,17 @@ G9K_ARG_DIX		EQU	4
 G9K_ARG_DIY		EQU	8
 
 ; Blitter Commands G9K_OPCODE    (Register 52)
-G9K_OPCODE_STOP		EQU	00h	; Command being excuted is stopped 
+G9K_OPCODE_STOP		EQU	00h	; Command being excuted is stopped
 G9K_OPCODE_LMMC		EQU	10h     ; Data is transferred from CPU to VRAM rectangle area
 G9K_OPCODE_LMMV		EQU	20h     ; VRAM rectangle area is painted out
 G9K_OPCODE_LMCM		EQU	30h     ; VRAM rectangle area is transferred to CPU
 G9K_OPCODE_LMMM		EQU	40h     ; Rectangle area os transferred from VRAM to VRAM
 G9K_OPCODE_CMMC		EQU	050h    ; CPU character data is color-developed and transferred to VRAM rectangle area
 G9K_OPCODE_CMMK		EQU	060h    ; Kanji ROM data is is color-developed and transferred to VRAM rectangle area
-G9K_OPCODE_CMMM		EQU	070h    ; VRAM character data is color-developed and transferred to VRAM rectangle area 
+G9K_OPCODE_CMMM		EQU	070h    ; VRAM character data is color-developed and transferred to VRAM rectangle area
 G9K_OPCODE_BMXL		EQU	080h    ; Data on VRAM linear address is transferred to VRAM rectangle area
-G9K_OPCODE_BMLX		EQU	090h    ; VRAM rectangle area is transferred to VRAM linear address 
-G9K_OPCODE_BMLL		EQU	0A0h    ; Data on VRAM linear address is transferred to VRAM linear address 
+G9K_OPCODE_BMLX		EQU	090h    ; VRAM rectangle area is transferred to VRAM linear address
+G9K_OPCODE_BMLL		EQU	0A0h    ; Data on VRAM linear address is transferred to VRAM linear address
 G9K_OPCODE_LINE		EQU	0B0h    ; Straight line is drawer on X-Y co-ordinates
 G9K_OPCODE_SRCH		EQU	0C0h    ; Border color co-ordinates on X-Y are detected
 G9K_OPCODE_POINT	EQU	0D0h    ; Color code on specified point on X-Y is read out
@@ -280,34 +280,34 @@ nrColors	BYTE        ; Number of colors in palette mode
 width		WORD	    ; Width
 height	        WORD        ; Height
 compression	BYTE        ; 0 = no compression, other value = compression used
-dataSize	D24         ; 24 bit data size	
+dataSize	D24         ; 24 bit data size
 		ENDS
 
 G9B_COMPRESSION_BITBUST EQU	1
 
 ; struct VFF object
 		STRUCT VFF_OBJECT
-fileHandle	WORD    	    ; Dos2 file handle of the openend VFF file	
-name		BLOCK	16,0	    ; vff font name	
-width		BYTE                ; width 
+fileHandle	WORD    	    ; Dos2 file handle of the openend VFF file
+name		BLOCK	16,0	    ; vff font name
+width		BYTE                ; width
 height		BYTE                ; height
 pitch		BYTE 		    ; 0 = Fixed : 1 = Variable  (Still unsused)
 dataSize	WORD		    ; Data size
 ptrOffsetTable  WORD		    ; Pointer to a font offset table
-vramOffset	WORD	            ; Pointer to base address of font in vram starting at #70000 
+vramOffset	WORD	            ; Pointer to base address of font in vram starting at #70000
 ramFont		BYTE		    ; 0 font data in vram, 1 font data in ram
 		ENDS
 
                 STRUCT G9K_BOX
 left            WORD
-top	        WORD    
+top	        WORD
 width           WORD
 height          WORD
                 ENDS
 
                 STRUCT G9K_COPY_XY_XY
 sourceX         WORD
-sourceY         WORD    
+sourceY         WORD
 destX           WORD
 destY           WORD
 width           WORD
@@ -319,21 +319,21 @@ sourceAddress   D24
 destX		WORD
 destY		WORD
 width		WORD
-height		WORD		
+height		WORD
 		ENDS
 
 		STRUCT G9K_COPY_XY_VRAM
 sourceX         WORD
-sourceY         WORD    		
+sourceY         WORD
 destAddress     D24
 width		WORD
-height		WORD		
+height		WORD
 		ENDS
 
 ;----------------------------------------------------------------------------;
 ; ;G9k Error codes                                                           ;
 ;----------------------------------------------------------------------------;
-			
+
 ; Error codes
 _NOVFF          EQU     1       ;  Input file is not a VFF file
 _NOG9B		EQU	2 	;  Input file is not a G9B file
@@ -379,13 +379,13 @@ _NOG9B		EQU	2 	;  Input file is not a G9B file
                 AND     A,G9K_STATUS_VR
 		JR	Z,$-4
                 ENDM
-		
 
-		MACRO G9kWaitComReady	
-; Wait for Command data ready	
+
+		MACRO G9kWaitComReady
+; Wait for Command data ready
 		IN      A,(G9K_STATUS)
 		RLA
 		JR	NC,$-3
 		ENDM
-		
+
 		endif

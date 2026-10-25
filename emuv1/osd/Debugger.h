@@ -8,7 +8,7 @@
 #include <string>
 
 /*!
- * The Debugger class 
+ * The Debugger class
  */
 class Debugger {
 private:

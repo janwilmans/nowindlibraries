@@ -1,26 +1,26 @@
 
-        
+
 define  DEBUG
-        
+
         output "msxdostools\nowmap.com"
 
         include "..\debug.asm"
-        include "..\labels.asm"        
+        include "..\labels.asm"
         include "..\asmlibs\bdos\bdos.inc"
-                        
+
         org $0100
-       
+
         DEBUGMESSAGE "NOWMAP.COM"
         ld a,(CMD_LENGTH)
         ld b,a
         ld hl,CMD_LINE
-        
+
         or a
         jr nz,nowmap
         ld hl,list
         ld b,2                          ; length of "/L", the host gets exactly B bytes
-        
-nowmap:        
+
+nowmap:
         xor a                           ; first Nowind interface
         ld c,API_NOWMAP
         ld iy,message
@@ -31,13 +31,13 @@ nowmap:
         ld hl,message
         ld de,$4e06
         call EXTBIO
-        
+
         DEBUGDUMPREGISTERS
         ld de,error
         jr c,exit
-      
+
         ld de,message
-exit:   jp String.PrintAsciiz      
+exit:   jp String.PrintAsciiz
 
 error:  db "No connection with host!",0
 list:   db "/L",0
@@ -46,6 +46,5 @@ list:   db "/L",0
 
 message:
         db 0
-                
 
-        
+

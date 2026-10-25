@@ -7,7 +7,7 @@
 #include <string>
 
 /*!
- * The AudioDevice class is an abstract class that all audio-devices should inherit from 
+ * The AudioDevice class is an abstract class that all audio-devices should inherit from
  */
 class AudioDevice {
 protected:
@@ -25,7 +25,7 @@ public:
     virtual void initialize();
     /*! Requests buffer from the AudioMixer and clears it */
     virtual void startup() = 0;
-    /*! Called by AudioDevice just before the channel buffers are mixed 
+    /*! Called by AudioDevice just before the channel buffers are mixed
          *
          * \param offset Position in an audiobuffer to sync to
          */

@@ -17,7 +17,7 @@ enableSlotPage0:
         ;DEBUGMESSAGE "enasltP0"
         ld e,a                          ; store slotcode for further use
         and 3
-        ld c,a                          ; new primary slot in c  
+        ld c,a                          ; new primary slot in c
         bit 7,e
         di
         jr nz,.expanded
@@ -27,10 +27,10 @@ enableSlotPage0:
         or c                            ; enable new primary slot in page 0
         out ($a8),a
         ret
-        
+
 .expanded:
         ld a,e                          ; store secondary slot in e
-        and %00001100     
+        and %00001100
         rrca
         rrca
         ld e,a
@@ -95,7 +95,7 @@ getSlotPage0:
         and %00001100           ; keep subSlot
         or c                    ; add mainSlot and expanded bit
         ret
-                
+
 ; function: get current slot and subslot of page 1
 ; in: none
 ; out: register A contains: E...SSMM where E = expanded, SS = subslot, MM = mainslot
@@ -110,14 +110,14 @@ getSlotPage1:
         call expanded
         and %00001100           ; keep subSlot
         or c                    ; add mainSlot and expanded bit
-        ret    
+        ret
 
 ; function: get current slot and subslot of page 2
 ; in: none
 ; out: register A contains: E...SSMM where E = expanded, SS = subslot, MM = mainslot
 ; changed: bc, hl
-; requirements: stack available            
-                
+; requirements: stack available
+
 getSlotPage2:
 ;        DEBUGMESSAGE "getsltP2"
         in a,($a8)
@@ -132,7 +132,7 @@ getSlotPage2:
         or c                    ; add mainSlot and expanded bit
         ret
 
-expanded:        
+expanded:
         ld hl,EXPTBL - $0300
         ld b,3
         and b
@@ -147,7 +147,7 @@ expanded:
         inc l
         inc l
         ld a,(hl)
-        ret        
+        ret
 
 notExpanded:
         pop bc

@@ -8,7 +8,7 @@
 #include <string>
 
 /*!
- * The LogWatcher class 
+ * The LogWatcher class
  */
 class LogWatcher {
 private:

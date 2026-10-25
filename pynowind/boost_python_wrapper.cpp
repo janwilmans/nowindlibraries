@@ -12,7 +12,7 @@ BOOST_PYTHON_MODULE(pynowind)
     class_<NwhostService>("NwhostService")
         .def("setImage", &NwhostService::setImage)
     ;
-    
+
 
     class_<PyNwhostService, bases<NwhostService> >("PyNwhostService")
         .def("start", &PyNwhostService::start)

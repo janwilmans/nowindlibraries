@@ -248,7 +248,7 @@ void SlotSelector::configure(unsigned int msxVersion)
         installDiskRom(3,2,1); // ander diskrom misschien???
         loadRomRel("../roms/XBASIC2.ROM",3,3,1,1);
     }
-    //loadRomRel("../roms/FMPAC.ROM",2,0,1,3);    
+    //loadRomRel("../roms/FMPAC.ROM",2,0,1,3);
 */
 
     if (msxVersion == 99)
@@ -357,8 +357,8 @@ void SlotSelector::updateSelection(unsigned int block)
     layout[ms][ss][block](block);
 }
 
-/* 
- * called by readMem(0xffff) from the z80 to found out if reading of 0xFFFF should 
+/*
+ * called by readMem(0xffff) from the z80 to found out if reading of 0xFFFF should
  * return a subSlotSelection or the content of the device in page 3
  */
 bool SlotSelector::possibleSubslotRead()

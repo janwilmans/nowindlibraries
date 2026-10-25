@@ -61,7 +61,7 @@ void AudioDummy::createOneBuffer()
 {
     /*
     startupFase:
-     0 = first audio callback did not occur yet 
+     0 = first audio callback did not occur yet
      1 = first audio callback occurred, initialize buffers (1ms)
      2 = playing...
 */

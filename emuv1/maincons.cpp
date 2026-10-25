@@ -30,31 +30,31 @@ using namespace std;
 #endif
 */
 
-/* 
+/*
     ==MacOS==
     It is vital to use SDLmain on MacOS because it initializes the Foundation and AppKit frameworks
     also, the -ffunction-sections compiler flag should not be used on MacOs,
-    because it triggers a bug or unsupported feature of darwin's gcc 3.3 
+    because it triggers a bug or unsupported feature of darwin's gcc 3.3
     finally -lobjc -framework Foundation -framework AppKit should be added to the linker options.
 
    ==WINDOWS==
-    At run time, sdl.dll and sdl_image.dll will need to be available. 
+    At run time, sdl.dll and sdl_image.dll will need to be available.
     Windows will search directories in the following order for these dll's:
-    
-    The directory from which the application loaded. 
-    The current directory. 
-    The Windows system directory. 
-    The directories that are listed in the PATH environment variable. 
-    
+
+    The directory from which the application loaded.
+    The current directory.
+    The Windows system directory.
+    The directories that are listed in the PATH environment variable.
+
     ==PORTABILITY==
-    
+
     use -funsigned-char/-fsigned-char to test portability (char is signed by default on some system
     and unsigned on others)
-    
+
     for the gcc (and derivitives like darwin gcc for macOS) the following precompiler directived are available:
     __GNUC__ contains the gcc (major) version number (so it will equal 4 for gcc v4.xx)
     __APPLE__ will be 1 on MacOS
-    
+
     #if _MSC_VER >= 1400 // this is Visual C++ 2005 or above
     #elif _MSC_VER >= 1310 // this is Visual C++ .NET 2003
     #elif _MSC_VER > 1300 // this is Visual C++ .NET 2002
@@ -195,15 +195,15 @@ int main(int argc, char* argv[])
     int index, c;
 
 
-    /* by default getopt will permute the contents of argv while scanning it so 
-     * that eventually all the non-options are at the end. This allows options to 
+    /* by default getopt will permute the contents of argv while scanning it so
+     * that eventually all the non-options are at the end. This allows options to
      * be given in any order, even with programs that were not written to expect this.
      */
 
-    /* option string: characters in the represent valid options, a trailing : 
+    /* option string: characters in the represent valid options, a trailing :
      * means the option also takes na argument so:
-     * "a" allows -a  
-     * "a:" allows -a <somearg> 
+     * "a" allows -a
+     * "a:" allows -a <somearg>
      * "a::" means -a [<somearg>] (so the argument is optional)
      */
 

@@ -32,9 +32,8 @@ MSX_TURBO_R	EQU	3
 H.TIMI          EQU     0FD9Fh
 
 
-		macro	BIOS adres	
+		macro	BIOS adres
 		ld      iy,(EXPTBL0-1)       ;BIOS slot in iyh
 		ld      ix,adres             ;address of BIOS routine
 		call    CALSLT               ;interslot call
 		endm
-

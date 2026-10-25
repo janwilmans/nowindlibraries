@@ -90,15 +90,15 @@ int HostApp::execute()
     int c;
     int driveNr = 0;
 
-    /* by default getopt will permute the contents of argv while scanning it so 
-     * that eventually all the non-options are at the end. This allows options to 
+    /* by default getopt will permute the contents of argv while scanning it so
+     * that eventually all the non-options are at the end. This allows options to
      * be given in any order, even with programs that were not written to expect this.
      */
 
-    /* option string: characters in the represent valid options, a trailing : 
+    /* option string: characters in the represent valid options, a trailing :
      * means the option also takes na argument so:
-     * "a" allows -a  
-     * "a:" allows -a <somearg> 
+     * "a" allows -a
+     * "a:" allows -a <somearg>
      * "a::" means -a [<somearg>] (so the argument is optional)
      */
 
@@ -110,7 +110,7 @@ int HostApp::execute()
     {
         int option_index = 0;
 
-        /*        
+        /*
  *  if needsArgument is 1, the option (--dos2 <foo>) requires the <foo> argument
  *  if storeFlag is not NULL the <foo> value is stored in *storeFlag
  *  (note: this also changes the getopt_long return value!)
@@ -118,7 +118,7 @@ int HostApp::execute()
  *  the specified short option was given instead of the long option.
  */
 
-        /*   "optionname", needsArgument, storeFlag, 'corresponding short option'  
+        /*   "optionname", needsArgument, storeFlag, 'corresponding short option'
     needsArgument: 0= no argument, 1=requires argument, 2=optional argument
 */
         static struct option long_options[] =
@@ -169,11 +169,11 @@ int HostApp::execute()
             break;
 
             /*
-In Windows NT/2K/XP the CreateFile function can be used to open a disk drive or a partition on it. 
-After getting a handle to the disk drive using CreateFile function the ReadFile function can be used 
-to read sectors and the WriteFile function can be used to write to the drive. If you want to open 
-a logical drive give the filename param of the CreateFile function as "\\\\.\\a:" or "\\\\.\\c:" ... etc. 
-and if you want to open a physical drive for raw reading/writing give the filename 
+In Windows NT/2K/XP the CreateFile function can be used to open a disk drive or a partition on it.
+After getting a handle to the disk drive using CreateFile function the ReadFile function can be used
+to read sectors and the WriteFile function can be used to write to the drive. If you want to open
+a logical drive give the filename param of the CreateFile function as "\\\\.\\a:" or "\\\\.\\c:" ... etc.
+and if you want to open a physical drive for raw reading/writing give the filename
 param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
 */
         case 'y':
@@ -279,7 +279,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
             string first = "";
             string second = "";
             size_t pos = lFlashArg.find(",");
-            if (pos != string::npos) 
+            if (pos != string::npos)
             {
                 first = lFlashArg.substr(0,pos);
                 second = lFlashArg.substr(pos+1);
@@ -289,7 +289,7 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
                 printf(" flash syntax error\n");
             }
             printf("Firmware update for Nowind interface romimage: %s, romdisk: %s\n", first.c_str(), second.c_str());
-           
+
             return 0;
         }
             */
@@ -320,13 +320,13 @@ param as "\\\\.\\PhysicalDrive0" or "\\\\.\\PhysicalDrive1" ... etc
             driveNr++;
             break;
             /*
-        case 'p':       
-            //todo: implement 
-            
+        case 'p':
+            //todo: implement
+
             nowindusb_cmd(cmd_putmem_clear, 0, 0, 0 ,0, 0);
             // filename, start-adres, mainslot, subslot, exec-adres
             nowindusb_cmd(cmd_putmem, optarg, 0x0000, 3, 2, 0x100);
-            break;        
+            break;
             */
         case '?':
             hasErrors = true;

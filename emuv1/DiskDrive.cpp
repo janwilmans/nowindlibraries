@@ -62,8 +62,8 @@ bool DiskDrive::reOpenDiskImage()
                             DBERR("Error opening file %s read/write !\n", image);
                     } else {
                         containsDisk = true;
-                        readOnly = false;    
-                    }    
+                        readOnly = false;
+                    }
 */
         }
         else
@@ -122,7 +122,7 @@ void DiskDrive::readSectors(nw_byte* buffer, unsigned int startSector, unsigned 
     stream->seekg(source);
     stream->read((char*)buffer, count);
 
-    /*    
+    /*
     char *buf = buffer;
     for(unsigned int sector=startSector;sector<sectorCount;sector++) {
         // write sector to disk for debugging

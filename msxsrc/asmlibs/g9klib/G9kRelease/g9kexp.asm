@@ -1,48 +1,48 @@
 ; Define The start address of the g9k lib here
-G9K_START_ADDRESS	equ	01000h 
+G9K_START_ADDRESS	equ	01000h
 
 			;DEFINE  ENABLE_JUMP_TABLE
-			
+
 ; Note: remove bitbust export labels from the exp file when you assemble this file
-	
+
 	  		; Disable specific cursor functions
 	        	;DEFINE	 G9K_DISABLE_CURSOR
-	        	
+
 	        	; Disable vff support
 			;DEFINE  G9K_DISABLE_VFF
-			
+
 		        ; Disable routines for vram fonts
-			;DEFINE  G9K_DISABLE_VFF_VRAM 
+			;DEFINE  G9K_DISABLE_VFF_VRAM
 
 	 		; Disable routines for ram fonts
-			;DEFINE  G9K_DISABLE_VFF_RAM 
+			;DEFINE  G9K_DISABLE_VFF_RAM
 
-			
+
 			; Disable specific pattern mode functions
 			;DEFINE  G9K_DISABLE_PATTERN
-			
+
 			; Optimize bitbuster code, bigger but faster
 			DEFINE  BITBUSTER_OPTIMIZE_SPEED
-			
+
 			; disable the direct export of internal labels in de g9klib.exp file
 			DEFINE  G9K_DISABLE_DIRECT_EXPORT
-	         	
-	         	
+
+
 	         	OUTPUT g9klib.lib
-	         	
+
 	                include	"g9klib.inc"
 	                include "bdos.inc"
-			include "macros.inc"			
-		
+			include "macros.inc"
+
 			org	G9K_START_ADDRESS
 			IFDEF   ENABLE_JUMP_TABLE
 ;----------------------------------------------------------------------------;
 ; General Functions overview                                                 ;
 ;----------------------------------------------------------------------------;
-		
-							
-			EXPORT  G9kReset				
-G9kReset:		JP      G9k.Reset    	    ; Reset and initialize the Gfx9000	
+
+
+			EXPORT  G9kReset
+G9kReset:		JP      G9k.Reset    	    ; Reset and initialize the Gfx9000
 
 			EXPORT  G9kSetScreenMode
 G9kSetScreenMode:	JP      G9k.SetScreenMode   ; Set screen mode
@@ -75,7 +75,7 @@ G9kWritePalette:	JP      G9k.WritePalette    ; Write palette data to the Gfx9000
 G9kReadPalette:		JP      G9k.ReadPalette     ; Read palette data from the Gfx9000
 
 			EXPORT  G9kSetAdjust
-G9kSetAdjust:		JP      G9k.SetAdjust       ; Adjust Gfx9000 display 
+G9kSetAdjust:		JP      G9k.SetAdjust       ; Adjust Gfx9000 display
 
 			EXPORT  G9kSetBackDropColor
 G9kSetBackDropColor:	JP      G9k.SetBackDropColor; Set backdrop color
@@ -98,8 +98,8 @@ G9kSetScrollYB:		JP      G9k.SetScrollYB     ; Set scroll Y Layer B
 G9kSetScrollMode:	JP      G9k.SetScrollMode   ; Set scroll mode
 
 			EXPORT  G9kClose
-G9kClose:		JP      G9k.Close           ; Closes a G9B or VFF file	
-	
+G9kClose:		JP      G9k.Close           ; Closes a G9B or VFF file
+
 
 ;----------------------------------------------------------------------------;
 ; Blitter Function overview                                                  ;
@@ -154,10 +154,10 @@ G9kCopyRamToVram:	JP 	G9k.CopyRamToVram     ; Copy data from ram to Linear vram 
 ; ---------------------------------------------------------------------------;
 ; DEFINE G9K_DISABLE_VFF to disable inclution of vff functions
 			IFNDEF G9K_DISABLE_VFF
-			
+
 			EXPORT   G9kOpenVff
 G9kOpenVff:		JP	 G9k.OpenVff            ; Open a VFF file
-			
+
 			EXPORT   G9kLoadFont
 G9kLoadFont:		JP	 G9k.LoadFont	      ; Loads a VFF(V9990 font format) file from disk
 
@@ -165,21 +165,21 @@ G9kLoadFont:		JP	 G9k.LoadFont	      ; Loads a VFF(V9990 font format) file from 
 G9kSetFont:		JP	 G9k.SetFont            ; Set a font as default
 
 			EXPORT   G9kPrintString
-G9kPrintString:		JP	 G9k.PrintString        ; Print a zero terminated string 
-			
+G9kPrintString:		JP	 G9k.PrintString        ; Print a zero terminated string
+
 			EXPORT   G9kPutChar
 G9kPutChar:		JP 	 G9k.PutChar	      ; Print a character
-	
+
 			EXPORT   G9kLocate	      ; Set X and Y coordinates for putchar
 G9kLocate:		JP	 G9k.Locate
-			
+
 			ENDIF
 ;----------------------------------------------------------------------------;
 ; Gfx9000 bitmap functions                                                   ;
 ;----------------------------------------------------------------------------;
 ; DEFINE G9K_DISABLE_G9B to disable inclution of G9B functions
 			IFNDEF G9K_DISABLE_G9B
-			
+
 			EXPORT   G9kOpenG9B
 G9kOpenG9B:		JP	 G9k.OpenG9B            ; Open a G9B file
 
@@ -188,16 +188,16 @@ G9kReadG9B:		JP	 G9k.ReadG9B            ; Read data from disk to Gfx9000 VRAM X,
 
 			EXPORT   G9kReadG9BLinear
 G9kReadG9BLinear:	JP	 G9k.ReadG9BLinear      ; Read data from disk to Gfx9000 Linear VRAM Address
-		
+
 			ENDIF
-		
-		
+
+
 ;----------------------------------------------------------------------------;
 ; Gfx9000 pattern functions                                                  ;
 ;----------------------------------------------------------------------------;
 ; DEFINE G9K_DISABLE_PATTERN to disable inclution of pattern functions
 			IFNDEF G9K_DISABLE_PATTERN
-			
+
 			EXPORT   G9kSetPatternData
 G9kSetPatternData:	JP 	 G9k.SetPatternData     ; Set pattern data
 
@@ -209,31 +209,31 @@ G9kSetPattern:		JP	 G9k.SetPattern         ; Set pattern
 
 			EXPORT   G9kGetPattern
 G9kGetPattern:		JP	 G9k.GetPattern         ; Get pattern
-						
+
 			include "g9klib.asm"
 			include "file.asm"
 			include "string.asm"
-			include "bitbuster.asm"	
-			include "bdos.asm"	
-			
+			include "bitbuster.asm"
+			include "bdos.asm"
+
 			ENDIF
 
 
 			ELSE
-						
+
 			include "g9klib.asm"
 			include "file.asm"
 			include "string.asm"
-			include "bitbuster.asm"	
-			include "bdos.asm"	
-			
+			include "bitbuster.asm"
+			include "bdos.asm"
+
 ;----------------------------------------------------------------------------;
 ; General Functions overview                                                 ;
 ;----------------------------------------------------------------------------;
 
 
-			EXPORT  G9kReset				
-G9kReset:		equ      G9k.Reset    	    ; Reset and initialize the Gfx9000	
+			EXPORT  G9kReset
+G9kReset:		equ      G9k.Reset    	    ; Reset and initialize the Gfx9000
 
 			EXPORT  G9kSetScreenMode
 G9kSetScreenMode:	equ      G9k.SetScreenMode   ; Set screen mode
@@ -266,7 +266,7 @@ G9kWritePalette:	equ      G9k.WritePalette    ; Write palette data to the Gfx900
 G9kReadPalette:		equ      G9k.ReadPalette     ; Read palette data from the Gfx9000
 
 			EXPORT  G9kSetAdjust
-G9kSetAdjust:		equ      G9k.SetAdjust       ; Adjust Gfx9000 display 
+G9kSetAdjust:		equ      G9k.SetAdjust       ; Adjust Gfx9000 display
 
 			EXPORT  G9kSetBackDropColor
 G9kSetBackDropColor:	equ      G9k.SetBackDropColor; Set backdrop color
@@ -289,8 +289,8 @@ G9kSetScrollYB:		equ      G9k.SetScrollYB     ; Set scroll Y Layer B
 G9kSetScrollMode:	equ      G9k.SetScrollMode   ; Set scroll mode
 
 			EXPORT  G9kClose
-G9kClose:		equ      G9k.Close           ; Closes a G9B or VFF file	
-	
+G9kClose:		equ      G9k.Close           ; Closes a G9B or VFF file
+
 
 ;----------------------------------------------------------------------------;
 ; Blitter Function overview                                                  ;
@@ -345,10 +345,10 @@ G9kCopyRamToVram:	equ 	G9k.CopyRamToVram     ; Copy data from ram to Linear vram
 ; ---------------------------------------------------------------------------;
 ; DEFINE G9K_DISABLE_VFF to disable inclution of vff functions
 			IFNDEF G9K_DISABLE_VFF
-			
+
 			EXPORT   G9kOpenVff
 G9kOpenVff:		equ	 G9k.OpenVff            ; Open a VFF file
-			
+
 			EXPORT   G9kLoadFont
 G9kLoadFont:		equ	 G9k.LoadFont	      ; Loads a VFF(V9990 font format) file from disk
 
@@ -356,21 +356,21 @@ G9kLoadFont:		equ	 G9k.LoadFont	      ; Loads a VFF(V9990 font format) file from
 G9kSetFont:		equ	 G9k.SetFont            ; Set a font as default
 
 			EXPORT   G9kPrintString
-G9kPrintString:		equ	 G9k.PrintString        ; Print a zero terminated string 
-			
+G9kPrintString:		equ	 G9k.PrintString        ; Print a zero terminated string
+
 			EXPORT   G9kPutChar
 G9kPutChar:		equ 	 G9k.PutChar	      ; Print a character
-	
+
 			EXPORT   G9kLocate	      ; Set X and Y coordinates for putchar
 G9kLocate:		equ	 G9k.Locate
-			
+
 			ENDIF
 ;----------------------------------------------------------------------------;
 ; Gfx9000 bitmap functions                                                   ;
 ;----------------------------------------------------------------------------;
 ; DEFINE G9K_DISABLE_G9B to disable inclution of G9B functions
 			IFNDEF G9K_DISABLE_G9B
-			
+
 			EXPORT   G9kOpenG9B
 G9kOpenG9B:		equ	 G9k.OpenG9B            ; Open a G9B file
 
@@ -379,15 +379,15 @@ G9kReadG9B:		equ	 G9k.ReadG9B            ; Read data from disk to Gfx9000 VRAM X
 
 			EXPORT   G9kReadG9BLinear
 G9kReadG9BLinear:	equ	 G9k.ReadG9BLinear      ; Read data from disk to Gfx9000 Linear VRAM Address
-		
+
 			ENDIF
-		
+
 ;----------------------------------------------------------------------------;
 ; Gfx9000 pattern functions                                                  ;
 ;----------------------------------------------------------------------------;
 ; DEFINE G9K_DISABLE_PATTERN to disable inclution of pattern functions
 			IFNDEF G9K_DISABLE_PATTERN
-			
+
 			EXPORT   G9kSetPatternData
 G9kSetPatternData:	equ 	 G9k.SetPatternData     ; Set pattern data
 
@@ -400,9 +400,8 @@ G9kSetPattern:		equ	 G9k.SetPattern         ; Set pattern
 			EXPORT   G9kGetPattern
 G9kGetPattern:		equ	 G9k.GetPattern         ; Get pattern
 			ENDIF
-			
+
 			ENDIF
-	
-		
-		
-		
+
+
+

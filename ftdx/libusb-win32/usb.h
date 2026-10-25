@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <windows.h>
 
-/* 
- * 'interface' is defined somewhere in the Windows header files. This macro 
+/*
+ * 'interface' is defined somewhere in the Windows header files. This macro
  * is deleted here to avoid conflicts and compile errors.
  */
 
@@ -15,7 +15,7 @@
 
 /*
  * PATH_MAX from limits.h can't be used on Windows if the dll and
- * import libraries are build/used by different compilers 
+ * import libraries are build/used by different compilers
  */
 
 #define LIBUSB_PATH_MAX 512

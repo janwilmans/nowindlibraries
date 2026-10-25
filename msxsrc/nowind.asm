@@ -1,19 +1,19 @@
-        
+
         ; enabled bdos patches, this is an experimental new mode
-        ; which allows direct access to the host harddisk through patch BDOS calls 
+        ; which allows direct access to the host harddisk through patch BDOS calls
         ; this is potentially much faster and eliminates the need for disk-images.
         ;define BDOS_NOWIND
-        
-        ; enables messages that can only be viewed in emulation, 
+
+        ; enables messages that can only be viewed in emulation,
         ; are harmless on real hardware but cause small delays
         ; recommened: turn off for releases
-        ;define DEBUG      
-        
-        ; enables messages for debugging can be logged even on real hardware 
+        ;define DEBUG
+
+        ; enables messages for debugging can be logged even on real hardware
         ; by sending them to the host over USB, causes somewhat larger delays
-        ; but can be used to diagnose problems that are otherwise hard to debug        
+        ; but can be used to diagnose problems that are otherwise hard to debug
         ;define USBDEBUG
-        
+
         ;define NOWINDVERSION_FIRSTBATCH   ; our handmade first batch
         define NOWINDVERSION_FIRSTBATCH    ; sunrise first batch
 
@@ -30,17 +30,17 @@
         include "debug.asm"
 
         ; bank 0..3     MSXDOS2
-        ; bank 4        MSXDOS1 
+        ; bank 4        MSXDOS1
         ; bank 5        Nowind functions
         ; bank 6..7     empty
         ; bank 8..31    reserved
-       
+
 pageNumber := 0
         repeat 32
         defpage pageNumber, $4000, $4000
-pageNumber := pageNumber + 1        
+pageNumber := pageNumber + 1
         endrepeat
-         
+
         ; insert MSXDOS2
 
         page 0
@@ -72,7 +72,7 @@ pageNumber := pageNumber + 1
         PATCH $5797, OEMSTA
 
         PATCH $4093, mapper
-        
+
         code ! $4881
         db LOW initDiskBasic
         code ! $4884
@@ -92,20 +92,20 @@ pageNumber := pageNumber + 1
 
         page 1
         incbin "..\roms\MSXDOS22.ROM", $4000, $4000
-        PATCH $4002, bankInit 
-        PATCH $4093, mapper        
+        PATCH $4002, bankInit
+        PATCH $4093, mapper
         BANKSWITCHING 1
 
         page 2
         incbin "..\roms\MSXDOS22.ROM", $8000, $4000
-        PATCH $4002, bankInit 
-        PATCH $4093, mapper        
+        PATCH $4002, bankInit
+        PATCH $4093, mapper
         BANKSWITCHING 2
-        
+
         page 3
         incbin "..\roms\MSXDOS22.ROM", $c000, $4000
-        PATCH $4002, bankInit 
-        PATCH $4093, mapper        
+        PATCH $4002, bankInit
+        PATCH $4093, mapper
         BANKSWITCHING 3
 
         ; areas not used in MSXDOS22.ROM
@@ -121,7 +121,7 @@ pageNumber := pageNumber + 1
 
         define MSXDOSVER 1
         define ORIGINAL_HOOK_RUNC $5897
-        
+
         incbin "..\roms\DISK.ROM", 0, $7405-$4000
 
         PATCH $4002,bankInit
@@ -151,20 +151,20 @@ pageNumber := pageNumber + 1
         code @ $7405
 
         include "common.asm"
-        include "extendedBios.asm"        
+        include "extendedBios.asm"
         include "slotRoutines.asm"
         include "nowindDriver.asm"
         include "romdisk.asm"
         include "device.asm"
         include "dos_aux.asm"
-        
+
         ifdef BDOS_NOWIND
         include "nowindbdos.asm"
         endif
-    
+
         BANKSWITCHING 4
         endmodule MSXDOS1_MODULE
-        
+
         page 5
         module NOWIND_MODULE
         MSXROMHEADER
@@ -173,8 +173,8 @@ pageNumber := pageNumber + 1
         include "slotRoutines.asm"
         include "common.asm"
         BANKSWITCHING 5
-        endmodule NOWIND_MODULE        
-        
+        endmodule NOWIND_MODULE
+
         page 6
         code @ $4000
         MSXROMHEADER
@@ -184,9 +184,9 @@ pageNumber := pageNumber + 1
         code @ $4000
         MSXROMHEADER
         BANKSWITCHING 7
-        
+
         module REMAINING_ROM_MODULE
-                       
+
         INCLUDE_ROMDISK_360KB "..\disks\dos2.dsk"
-    
+
         endmodule REMAINING_ROM_MODULE

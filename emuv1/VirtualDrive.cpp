@@ -332,9 +332,9 @@ void VirtualDrive::readSector(char* buffer, unsigned int sector)
     DBERR("VirtualDrive::readSector: %u ends\n", sector);
 }
 
-/*   
+/*
 char * VirtualDrive::getSector(unsigned int sector) {
-    
+
     DBERR("VirtualDrive::getSector: " << sector << endl);
 
     if (sector > 1440) {
@@ -345,12 +345,12 @@ char * VirtualDrive::getSector(unsigned int sector) {
     if (i != sectorMap.end()) {
         // sector is in the sectorMap
         memcpy(buffer, i->second, 512);
-            
+
     } else {
         // sector is in not the sectorMap
         memset(buffer, 0xc9,512);       // return empty sector
     }
-    
+
 
         // write sector to disk for debugging
         char filename[250];
@@ -363,7 +363,7 @@ char * VirtualDrive::getSector(unsigned int sector) {
         ofs.close();
 
         delete [] buffer;
-    
+
     DBERR("VirtualDrive::readSector: " << sector << " ends \n");
 }
     */

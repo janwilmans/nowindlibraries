@@ -1,7 +1,7 @@
 /**
  * @file ConFTD2XX.cpp
  *
- * @brief FTD2xx based FTDI communication (binary drivers from www.ftdichip.com) 
+ * @brief FTD2xx based FTDI communication (binary drivers from www.ftdichip.com)
  * @author Jan Wilmans <jw@dds.nl>  Copyright (C) 2009 Nowind
  *
  * this code is portable but requires binary drivers to be installed.

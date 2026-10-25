@@ -1,4 +1,4 @@
-; labels.asm doesn't generate any code 
+; labels.asm doesn't generate any code
 ; it provides names for several memory addresses and some macros
 
 ; BIOS addresses in mainrom
@@ -15,11 +15,11 @@ EXTROM          equ $015f
 SDFSCR          equ $0185               ; restore screen parameters from clockchip (in SUBROM)
 CHGCPU          equ $0180
 
-; variables 
+; variables
 LASTDRV         equ $f33f               ; stores CTRL-key status during boot
 RAMAD1          equ $f342
 XFER            equ $f36e
- 
+
 VALTYP          equ $f663
 DAC             equ $f7f6
 PTRFIL          equ $f864
@@ -35,7 +35,7 @@ EXTBIO          equ $ffca
 
 ; Diskrom routines
 GETSLT          equ $402d
-         
+
 ; Hooks
 H.RUNC          equ $fecb               ; Intercepted by diskrom
 
@@ -77,7 +77,7 @@ API_NOWMAP      equ 0
 
 ; BDOS commands 0x0F - 0x37 can just use their original command code in register C
 
-; PATCH       
+; PATCH
         macro PATCH address, word
 currentFilePosition := $
         code ! address
@@ -94,12 +94,12 @@ currentFilePosition := $
         define firstFat 1
         define firstDir (firstFat + (fatCount*fatSiz))
         define firstRec (firstDir + (maxEnt/(sectorSize/32)))
-        
+
         db media                                        ; media descriptor
         dw sectorSize                                   ; sector size
         db (sectorSize/32)-1, dirShift                  ; dirmsk
-        db sectorsPerCluster-1                          ; clusmsk 
-        db sectorsPerCluster                            ; clusshft (TODO: only correct for 1 and 2 sec/clus)         
+        db sectorsPerCluster-1                          ; clusmsk
+        db sectorsPerCluster                            ; clusshft (TODO: only correct for 1 and 2 sec/clus)
         dw firstFat
         db fatCount, maxEnt
         dw firstRec
@@ -110,20 +110,20 @@ currentFilePosition := $
 
 ; BANKSWITCHING macro
         macro BANKSWITCHING bankNumber
-        
+
         code ! $8000-(.end-.start)
-        
+
 .start:
 bankInit := $
         ld hl,nowindInit
         push hl
-        ld a,5                          ; bank 5 contains init routine  
-        jr switchBank        
+        ld a,5                          ; bank 5 contains init routine
+        jr switchBank
 
-copyFromBank := $ 
+copyFromBank := $
         ldir
         ret
-        
+
 callInBank := $
         push hl
         ld h,bankNumber                 ; store current bank
@@ -139,9 +139,9 @@ switchBank := $
 .jumpIX:
         jp (ix)
 .end:
-        endmacro                        
+        endmacro
 
-        
+
 ; MSXROMHEADER
         macro MSXROMHEADER
         db "AB"
@@ -152,10 +152,10 @@ switchBank := $
 ; INCLUDE_ROMDISK_360KB
 
         macro INCLUDE_ROMDISK_360KB dskimage
-        
+
 bankNumber := 8
 offset := 0
-       
+
 ; 22 banks with sector data
         repeat 22
         page bankNumber
@@ -165,8 +165,8 @@ offset := 0
         incbin dskimage, offset+512, 16384-512
         BANKSWITCHING bankNumber
 offset := offset + $4000
-bankNumber := bankNumber + 1        
-        endrepeat     
+bankNumber := bankNumber + 1
+        endrepeat
 
 ; 1 bank with remaining 8192 bytes
         page bankNumber
@@ -174,7 +174,7 @@ bankNumber := bankNumber + 1
         ds $4100 - $, $ff
         incbin dskimage, offset, 8192
         BANKSWITCHING bankNumber
-bankNumber := bankNumber + 1        
+bankNumber := bankNumber + 1
 
 ; 1 bank with sectors 00, 32, 64, ...
         page bankNumber
@@ -185,6 +185,6 @@ offset := 0
         incbin dskimage, offset, 512
 offset := offset + $4000
         endrepeat
-        BANKSWITCHING bankNumber        
+        BANKSWITCHING bankNumber
 
-        endmacro 
+        endmacro

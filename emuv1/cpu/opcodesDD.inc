@@ -38,13 +38,13 @@ case 0xE1: TS(14); REGIX = READMEM16(reg_sp); reg_sp +=2; break;    // pop ix
 case 0xE5: TS(15); reg_sp -= 2; WRITEMEM16(reg_sp, REGIX); break;   // push ix
 
 case 0xE3:      // ex (sp),ix
-        
+
         // TODO: test reg_wz!
         TS(23);
         reg_wz = READMEM16(reg_sp);
         WRITEMEM16(reg_sp, REGIX);
         REGIX = reg_wz;
-        break;  
+        break;
 
 
 // 8-bit arithmetic group
@@ -69,7 +69,7 @@ case 0x35: TS(23); reg1 = IXPD; reg2 = READMEM(reg1); DEC((--reg2)&255); WRITEME
         reg1 = REGIX + r; \
         reg_f = (reg_f & (SFLAG|ZFLAG|PFLAG)) | (reg1>>16) | \
                 ((reg1>>8)&(YFLAG|XFLAG)) | (((reg1^REGIX^r)>>8)&HFLAG); \
-        REGIX = reg1 & 0xFFFF; 
+        REGIX = reg1 & 0xFFFF;
 
 case 0x09: TS(15); ADDIX(reg_bc); break;        // add ix,bc
 case 0x19: TS(15); ADDIX(reg_de); break;        // add ix,de
@@ -79,9 +79,9 @@ case 0x39: TS(15); ADDIX(reg_sp); break;        // add ix,sp
 case 0x23: TS(10); ++REGIX &= 0xFFFF; break;    // inc ix
 case 0x2B: TS(10); --REGIX &= 0xFFFF; break;    // dec ix
 
-case 0xE9:                                      // jp (ix) 
+case 0xE9:                                      // jp (ix)
     TS(8);
-    reg_pc = REGIX; 
+    reg_pc = REGIX;
 #ifdef STACKTRACK_ON
     if (Debug::Instance()->STACK_TRACING)
     {
@@ -142,7 +142,7 @@ case 0xA5: TS(8); reg2 = REGIXL; AND(reg2); break;          // and ixl
 case 0xAC: TS(8); reg2 = REGIXH; XOR(reg2); break;          // xor ixh
 case 0xAD: TS(8); reg2 = REGIXL; XOR(reg2); break;          // xor ixl
 case 0xB4: TS(8); reg2 = REGIXH; OR(reg2); break;           // or ixh
-case 0xB5: TS(8); reg2 = REGIXL; OR(reg2); break;           // or ixl  
+case 0xB5: TS(8); reg2 = REGIXL; OR(reg2); break;           // or ixl
 case 0xBC: TS(8); reg2 = REGIXH; CP(reg2); break;           // cp ixh
 case 0xBD: TS(8); reg2 = REGIXL; CP(reg2); break;           // cp ixl
 
@@ -160,14 +160,14 @@ default:
     // Indien de DD xx niet gevonden is, moet de instructie zonder DD worden uitgevoerd
     // (in tegenstelling wat er bij de ED groep gebeurt dus!)
     // TODO: oplossing hiervoor bedenken.
-    
+
     //tijdelijk, want zexall maakt gebruik van DD instructies die geen HL in zich hebben:
     reg_pc--;
-    
+
     //DBERR("laatste opcode: DD %02X\n", opcode);
     //assert(false);
     break;
-    
+
 #undef IXPD
 #undef REGIXH
 #undef REGIXL

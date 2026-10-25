@@ -7,17 +7,17 @@ PTW_SIZE		equ	20	; size of Wave playtable line
 WAVCHNS			equ	24
 WAVESEG			equ	0FB1Fh	; Mapper segement for the replayer is stored at this address.
 
-													
+
 			STRUCT	WAVE_DRV_JUMP,04000h
 LoadSong		BLOCK	3
 ; Load mwm file
 ; Input DE = Pointer to file name
-;        A = bank number  			
+;        A = bank number
 ; Output A = Error code
 
 LoadWaveKit		BLOCK	3
 ; Load mwk file
-; Input DE = Pointer to file name  			
+; Input DE = Pointer to file name
 ; Output A = Error code
 
 Play			BLOCK	3
@@ -42,14 +42,14 @@ FreeSongSegments	BLOCK	3
 ;
 
 GetInfo			BLOCK	3
-; 
+;
 
 SetSongAddress		BLOCK	3
-; 
+;
 
 GetDriverVersion	BLOCK	3
 
-; File function. Overwrite these the use external file loading 
+; File function. Overwrite these the use external file loading
 FileOpen		BLOCK	3
 
 FileRead		BLOCK	3
@@ -70,24 +70,24 @@ status			WORD		; status bytes (0 = off)
 stepBuffer		BLOCK	25	; decrunched step, played next int
 loadBuffer		BLOCK	3
 playInt			BLOCK	3
-			ENDS	
-			
-			
+			ENDS
+
+
 			STRUCT	SMART_TABLE
 lastNote		BYTE  		;    - last note played
 freqRegister		BYTE		;    - frequency register
 pitchBend		BYTE		;    - pitch bending on/off
 pitchBendSpeed		WORD		;    - pitch bend speed
-detuneValue		BYTE		;    - detune value    
-toneNrNextInt		WORD		;    - tone nr for next interrupt 
+detuneValue		BYTE		;    - detune value
+toneNrNextInt		WORD		;    - tone nr for next interrupt
 freqNextInt		WORD		;    - freq for next interrupt
-currentPatch		BYTE		;    - current patch	
+currentPatch		BYTE		;    - current patch
 currentStereoSet	BYTE		;    - current stereo setting
 pseudoReverb		BYTE		;    - pseodo reverb
-ptrHeaderBytes		WORD		;    - Pointer to header bytes 
+ptrHeaderBytes		WORD		;    - Pointer to header bytes
 volume			BYTE		;    - Volume
-ptrFreqTable		WORD		;    - Pointer to used freq table 
-currentPitchFreq	WORD		;    - Current pitch freq.   
-			ENDS			
-		
+ptrFreqTable		WORD		;    - Pointer to used freq table
+currentPitchFreq	WORD		;    - Current pitch freq.
+			ENDS
+
 			endif

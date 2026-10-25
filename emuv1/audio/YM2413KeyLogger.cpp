@@ -62,15 +62,15 @@ YM2413::~YM2413()
             songSize = 1;
         }
 
-        string filename = "output.mbm"; 
+        string filename = "output.mbm";
         mbmStream = new fstream(filename.c_str(),ios::binary | ios::out);
         if (mbmStream->fail()) {
             DBERR("failed to open MBM log file...\n");
         }
-    
+
         mbmHeaderStruct mbmHeader;
         memset(&mbmHeader,0x00,sizeof(mbmHeaderStruct));
-    
+
         mbmHeader.length = songSize-1;
         mbmHeader.id = 0x00;
 
@@ -87,15 +87,15 @@ YM2413::~YM2413()
         }
 
         mbmHeader.startInstrumentsMsxAudio[0] = 1;
-    
+
         mbmHeader.channelChipSettings[0] = 1;       // msx-music ?
         mbmHeader.startTempo = 5;  // 3=20 ?
 
         sprintf(mbmHeader.trackName,"Captured by NOWIND msx-music logger     ");
         sprintf(mbmHeader.sampleKitName,"NONE    ");
-    
+
         mbmHeader.loopPosition = 1;
-    
+
         mbmStream->write((char *)&mbmHeader,sizeof(mbmHeaderStruct));
 
         unsigned char fullLineEnd = 0xF9;
@@ -104,24 +104,24 @@ YM2413::~YM2413()
         unsigned char emptyPos = 0xFF;
         unsigned char pos = 1;
 //      unsigned char tempo = 1;
-    
+
         unsigned int baseTempo = 20;
 
-        // amount of vdp-ints pause after a note in this tempo 
-        unsigned int baseInts = 25-baseTempo;   
+        // amount of vdp-ints pause after a note in this tempo
+        unsigned int baseInts = 25-baseTempo;
 
         for (int j=0;j<songSize;j++) {
             mbmStream->write((char *)&pos,1);
             pos++;
         }
-        
+
         unsigned char pos1 = 0x81;
         unsigned char pos2 = 1;
         for (int j=0;j<songSize;j++) {
             mbmStream->write((char *)&pos1,1);
             mbmStream->write((char *)&pos2,1);
         }
-    
+
         for (char* line : noteLines) {
             mbmStream->write((char *)line,6);           // detect 6 or 9 channels
             mbmStream->write((char *)&fullLineEnd,1);
@@ -145,7 +145,7 @@ YM2413::~YM2413()
 
         pos = 0;
         mbmStream->write((char *)&pos,1);
-        
+
         mbmStream->close();
 */
     // destructor

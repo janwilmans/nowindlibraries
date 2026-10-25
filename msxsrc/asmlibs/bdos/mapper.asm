@@ -1,4 +1,4 @@
-mapper		MAPPER		; Outside the module. There is only one instance needed of this 
+mapper		MAPPER		; Outside the module. There is only one instance needed of this
 
 
 		MODULE Mapper
@@ -18,5 +18,5 @@ Init:
 		LD	BC,16*3 ; size of jump table
 		LDIR
 		RET
-		
+
 		ENDMODULE

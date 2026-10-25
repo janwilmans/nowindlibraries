@@ -182,7 +182,7 @@ void BlockRead::blockReadContinue()
         DBERR("blockReadContinue, do more!\n");
         if (transferingToPage01) {
             DBERR("transferingToPage01 = TRUE!\n");
-        } 
+        }
         else {
             DBERR("transferingToPage01 = FALSE!\n");
         }

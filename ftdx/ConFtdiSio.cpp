@@ -1,10 +1,10 @@
 /**
  * @file ConFtdiSio.cpp
  *
- * @brief Linux kernel specific FTDI communication 
+ * @brief Linux kernel specific FTDI communication
  * @author Jan Wilmans <jw@dds.nl>  Copyright (C) 2009 Nowind
  *
- * this code contains linux specific code, but could very user friendly 
+ * this code contains linux specific code, but could very user friendly
  * because the usb serial I/O (FTDISIO) driver is available in lot of distributions by default.
  *
  */

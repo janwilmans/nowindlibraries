@@ -18,13 +18,13 @@ RAMHEADERS	equ	1	; don't change ROM headers
 		OUTPUT  "WAVER800.DRV"
 		else
 		OUTPUT  "WAVEZ80x.DRV"
-		endif 
-	
-		
+		endif
+
+
 		include	"..\bdos\bdos.inc"
 		include "..\opl4\opl4.inc"
 		include "mbmacros.asm"
-		include "wavedriver.inc"		
+		include "wavedriver.inc"
 ;---------------------------------------------------------------------------
 ; TSR Part
 ;---------------------------------------------------------------------------
@@ -78,7 +78,7 @@ mbload:
 	call	select_mwm_banks
 	call	FileOpen	; open song file
 	RET	NZ
-	
+
 	call	curbank_FE
 	push	af
 
@@ -216,7 +216,7 @@ ramtosram:
 	ld	c,WVIO + 1
 .l:
 	otir		; unsigned
-	dec	d	
+	dec	d
 	jp	nz,.l
 	pop	bc
 	pop	de
@@ -277,7 +277,7 @@ check_pats:
 	ld	b,l
 	ex	de,hl
 	xor	a
-check_patslp:	
+check_patslp:
 	cp	(hl)
 	jr	nc,check_pats2
 	ld	a,(hl)
@@ -449,7 +449,7 @@ load_mwktones:
 	ld	(ix + 2),20h	; sample start at 200300h
 	ld	hl,tones_data
 	ld	b,64
-load_mwktonesl:	
+load_mwktonesl:
 	push	bc
 	push	hl
 	bit	0,(hl)
@@ -554,31 +554,31 @@ start_music:
 		ld	a,(play_busy)
 		or	a
 		ret	nz	; already playing?
-	
+
 		ld	a,b
 		ld	hl,banks
 		add_hl_a
 		ld	a,(hl)
 		or	a
 		ret	z	; Bank empty
-	
+
 		di
 		ld	a,b
-	
+
 		call	select_mwm_banks
-	
+
 		ld	hl,0
 		ld	(status),hl
 		ld	(status+1),hl	; clear status bytes
-	
+
 		ld	a,0ffh
 		ld	(play_busy),a	; set busy playing
-	
+
 		ld	a,15
 		ld	(play_step),a
 		ld	a,255
 		ld	(play_pos),a	; set position and step
-	
+
 		call	curbank_FE
 		push	af
 		ld	a,(songdata_bank1)
@@ -589,7 +589,7 @@ start_music:
 		LD	DE,xls_tabel
 		LD	BC,18
 		LDIR
-	
+
 		ld	hl,(songdata_adres)
 		ld	de,xleng
 		ld	bc,220
@@ -604,7 +604,7 @@ start_music:
 		ld	(pat_address),hl
 		pop	af
 		call	selbank_FE
-	
+
 		call	init_opl4	; initialise OPL4
 		call	init_voices	; set start voices
 		ld	a,(xtempo)
@@ -622,7 +622,7 @@ start_music:
 
 
 start_mus_cnt:
-		di	        
+		di
 		ld	a,2
 		out	(0c4h),a
 		ld	a,(xhzequal)
@@ -713,7 +713,7 @@ halt_music
 	ld	a,(play_busy)	; already stopped?
 	or	a
 	ret	z
-	
+
 	ld	a,4
 	out	(0c4h),a
 	opl4_wait	; wait if Turbo-R
@@ -723,12 +723,12 @@ halt_music
 	xor	a
 	out	(0c5h),a	; Stop timers
 	ld	(play_busy),a
-	
+
 ;	ld	hl,old_int	; restore old interrupt hook
 ;	ld	de,0fd9ah
 ;	ld	bc,5
 ;	ldir
-	
+
 	ld	b,WAVCHNS	; # wave channels
 	ld	iy,play_table_wav
 	ld	de,PTW_SIZE
@@ -883,7 +883,7 @@ play_int_end:
 	out	(099h),a
 	ENDIF
 	ret
-/*	
+/*
 old_int:	; Old int from hook 0FD9Ah
 	ret
 	ret
@@ -1191,7 +1191,7 @@ calc_own:
   	add 	hl,hl ; *10
 	add 	hl,hl ; *20
 	add 	a,l   ; *25
-	ld 	l,a   
+	ld 	l,a
 	jr 	nc,.nocarry
 	inc	h
 .nocarry:
@@ -1263,7 +1263,7 @@ calc_own3:
 ;--- WAVE Event routines ---
 ;---------------------------
 
-play_wtones:	
+play_wtones:
 	ld	hl,step_buffer	; songdata address
 	ld	b,WAVCHNS	; # channels
 	ld	iy,play_table_wav
@@ -1357,7 +1357,7 @@ play_wonevtlp:
 	ld	a,(hl)
 	cp	0ffh
 	jr	z,play_wonevtlp3
-		
+
 	add	a,b
 	opl4_wait	; wait if Turbo-R
 	out	(WVIO),a
@@ -1377,7 +1377,7 @@ play_wvwait2:
 	in	a,(FMIO)	        ; wait till Wave Load ready
 	bit	1,a
 	jr	nz,play_wvwait2
-	
+
 play_wonevtlp3:
 
 	ld	a,050h	; set volume back to normal
@@ -1497,7 +1497,7 @@ play_wlnk:
 		sub	a,202
 		add	a,(iy + 0)
 		ld	(iy + 0),a
-	
+
 		bit	0,(iy + 6)
 		jr	z,play_wlnk2
 		bit	7,(iy + 7)
@@ -1515,12 +1515,12 @@ play_wlnk2:
 		ld	l,(iy + 16)
 		ld	h,(iy + 17)
 		add_hl_a	; ptr to freq
-	
+
 		ld	e,(hl)
 		inc	hl
 		ld	d,(hl)
 		ex	de,hl	; HL = freq
-	
+
 		add	hl,hl
 		ld	a,h
 		add	a,c
@@ -1534,10 +1534,10 @@ play_wlnk_7:
 play_wlnk_6:
 		add	hl,de	; detune...
 		add	hl,de
-	
+
 		ld	(iy + 18),l	; freq fine
 		ld	(iy + 19),h
-	
+
 		pop	bc
 		ld	a,20h - 1
 		add	a,b
@@ -1546,7 +1546,7 @@ play_wlnk_6:
 		or	(iy + 6)
 		opl4_wait	; wait if Turbo-R
 		out	(WVIO+1),a	; freq + tone
-	
+
 		ld	a,38h - 1
 		add	a,b
 		opl4_wait	; wait if Turbo-R
@@ -1603,7 +1603,7 @@ play_wchgpit:
 		add	a,a
 		add	a,a
 		ld	(iy + SMART_TABLE.pitchBendSpeed),a	; Set pitch bend speed
-		rlca			 
+		rlca
 		jr	c,play_wchgpit2
 		ld	(iy + SMART_TABLE.pitchBendSpeed+1),0
 		ret
@@ -1627,7 +1627,7 @@ play_wchgmod:
 
 ;--- Set detune ---
 
-play_wchgdet:	
+play_wchgdet:
 		sub	a,234
 		add	a,a
 		add	a,a		; * 4
@@ -1652,7 +1652,7 @@ play_chgdmp:
 ;--- Pseudo reverb on ---
 
 play_chgpsr:
-		set	3,(iy+SMART_TABLE.pseudoReverb) 
+		set	3,(iy+SMART_TABLE.pseudoReverb)
 		ret
 
 ;--- Pseudo reverb off ---
@@ -1672,7 +1672,7 @@ play_chglfo:
 	in	a,(WVIO+1)
 	xor	a,100000b
 	opl4_7mhz	; wait if 7Mhz
-	opl4_wait	; wait if Turbo-R                
+	opl4_wait	; wait if Turbo-R
 	out	(WVIO+1),a
 	ret
 
@@ -1685,7 +1685,7 @@ play_chgxls:
 	add_hl_a
 
 	ld	a,068h - 1
-	add	a,b	; calc. register        
+	add	a,b	; calc. register
 	ld	d,a	; Save calculation for later
 	out	(WVIO),a
 	opl4_7mhz	; wait if 7Mhz
@@ -1721,7 +1721,7 @@ play_chgxls:
 	res	5,a
 	out	(WVIO+1),a
 	ret
-	
+
 xls_tabel:
 	db	49,0
 	db	50,0
@@ -1895,7 +1895,7 @@ play_pitch_wd5:
 	exx
 	jp	(hl)
 
-	
+
 ;---- modulation ----
 
 play_mod_wdo:
@@ -1946,7 +1946,7 @@ play_fadelp:
 	add	a,8	; -4, but bit 0 is not for volume
 	jr	nc,play_fade2
 	ld	a,255
-play_fade2:	
+play_fade2:
 	ld	(iy + 15),a
 	ld	a,050h - 1
 	add	a,b
@@ -2463,8 +2463,7 @@ change_address:
 driver_info
 	ld	a,'1'
 	ld	de,'1'*256 + '5'
-	ret		
-		
+	ret
+
 einde:
 
-	

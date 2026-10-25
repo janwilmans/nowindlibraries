@@ -3,18 +3,18 @@
 ; CONST??? (used by MSXDOS.SYS???)
         ds $4034 - $, $c9
         jp assert
-        
+
 ; CONIN
         ds $4078 - $, $c9
         jp assert
-        
+
 ; CONOUT
         ds $408f - $, $c9
         jp assert
 
 ; BDOS $0c (get version number)
         ds $41ef - $, $c9
-bdosFunction_0ch:        
+bdosFunction_0ch:
         jp assert
 
 ; BDOS $13 (delete)
@@ -22,7 +22,7 @@ bdosFunction_0ch:
 bdosFunction_13h:
         jp assert
 
-; BDOS $17 (rename)  
+; BDOS $17 (rename)
         ds $4392 - $, $c9
 bdosFunction_17h:
         jp assert
@@ -36,7 +36,7 @@ bdosFunction_0fh:
         ds $456f - $, $c9
 bdosFunction_10h:
         jp assert
-          
+
 ; BDOS $16 (create)
         ds $461d - $, $c9
 bdosFunction_16h:
@@ -46,47 +46,47 @@ bdosFunction_16h:
         ds $46ba - $, $c9
 bdosFunction_2fh:
         jp assert
-        
+
 ; BDOS $30 (write sector)
         ds $4720 - $, $c9
-bdosFunction_30h:        
+bdosFunction_30h:
         jp assert
-        
+
 ; BDOS $14 (sequential read)
         ds $4775 - $, $c9
-bdosFunction_14h:        
+bdosFunction_14h:
         jp assert
-        
+
 ; BDOS $15 (sequential write)
         ds $477d - $, $c9
-bdosFunction_15h:        
+bdosFunction_15h:
         jp assert
-        
+
 ; BDOS $21 (random read)
         ds $4788 - $, $c9
 bdosFunction_21h:
         jp assert
-        
+
 ; BDOS $22 (random write)
         ds $4793 - $, $c9
 bdosFunction_22h:
         jp assert
-        
+
 ; BDOS $27 (random block read)
         ds $47b2 - $, $c9
-bdosFunction_27h:        
+bdosFunction_27h:
         jp assert
-        
+
 ; BDOS $26 (random block write)
         ds $47be - $, $c9
 bdosFunction_26h:
         jp assert
-        
+
 ; BDOS $28 (random write with zero fill)
         ds $47d1 - $, $c9
 bdosFunction_28h:
         jp assert
-        
+
 
 ; free space of 2021 bytes!
 
@@ -95,32 +95,32 @@ bdosFunction_28h:
         ds $4fb8 - $, $c9
 bdosFunction_11h:
         jp assert
-                
+
 ; BDOS $12 (find next)
         ds $5006 - $, $c9
 bdosFunction_12h:
         jp assert
-        
+
 ; BDOS $23 (get file size)
         ds $501e - $, $c9
 bdosFunction_23h:
         jp assert
-        
+
 ; BDOS $18 (get login vector)
         ds $504e - $, $c9
 bdosFunction_18h:
         jp assert
-        
+
 ; BDOS $1a (set disk transfer address)
         ds $5058 - $, $c9
 bdosFunction_1ah:
         jp assert
-        
+
 ; BDOS $1b (get allocation information)
         ds $505d - $, $c9
 bdosFunction_1bh:
         jp assert
-        
+
 ; BDOS $0d (disk reset)
         ds $509f - $, $c9
 bdosFunction_0dh:
@@ -129,31 +129,31 @@ bdosFunction_0dh:
 ; flush buffers (used by MSXDOS.SYS)
         ds $50a9 - $, $c9
         jp assert
-              
+
 ; BDOS $19 (get current drive)
         ds $50c4 - $, $c9
 bdosFunction_19h:
         jp assert
-        
+
 ; BDOS $24 (set random record)
         ds $50c8 - $, $c9
 bdosFunction_24h:
         jp assert
-        
+
 ; BDOS $0e (select disk)
         ds $50d5 - $, $c9
 bdosFunction_0eh:
         jp assert
-        
+
 ; BDOS $0a (buffered line input)
         ds $50e0 - $, $c9
 bdosFunction_0ah:
         jp assert
-        
+
 ; print newline (used in MSXDOS.SYS???)
         ds $5183 - $, $c9
         jp assert
-        
+
 
 ; free space of 471 bytes!
 
@@ -161,22 +161,22 @@ bdosFunction_0ah:
 ; print abort string (using in MSXDOS.SYS???)
         ds $535d - $, $c9
         jp assert
-        
+
 ; BDOS $02 (console output)
         ds $53a7 - $, $c9
 bdosFunction_02h:
         jp assert
-        
+
 ; BDOS $0b (console status)
         ds $543c - $, $c9
 bdosFunction_0bh:
         jp assert
-        
+
 ; BDOS $01 (console input)
         ds $5445 - $, $c9
 bdosFunction_01h:
         jp assert
-        
+
 ; BDOS $08 (console input without echo)
         ds $544e - $, $c9
 bdosFunction_08h:
@@ -232,7 +232,7 @@ bdosFunction_2dh:
 bdosFunction_2eh:
         jp assert
 
-; these routines can be place in unused areas 
+; these routines can be place in unused areas
 
 bdosFunction_1ch:
 bdosFunction_1dh:
@@ -247,7 +247,7 @@ bdosFunction_29h:
 
 bdosFunction_00h:
         jp assert
-        
+
 bdosFunction_09h:
         jp assert       ; (jumps to $f1c9, change in bdosfunctionTable)
 

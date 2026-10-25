@@ -1,15 +1,15 @@
 ; openDiskrom.asm
-DRVTBL          equ $fb21 
+DRVTBL          equ $fb21
 GETWRK          equ assert
 
         output "openDiskrom.rom"
 
         defpage 0, $4000, $4000
         defpage 1..31, $4000, $4000
-       
+
         define DEBUG
         include "../labels.asm"
-                
+
         page 0
 
         db "AB"                         ; rom header
@@ -36,7 +36,7 @@ GETWRK          equ assert
         ret
 
         include "bdos.asm"
-        
+
         include "../common.asm"
         include "../slotRoutines.asm"
         include "../flashWriter.asm"
@@ -52,14 +52,14 @@ init:   DEBUGMESSAGE "init"
         jp nz,noDiskromInit
         ; initialiseer EXTBIO (check HOKVLD eerst)
         ; 16k RAM?
-        
+
         DEBUGMESSAGE "shift?"
         ld a,6
         call SNSMAT
         di
         rrca
         jr nc,shiftPressed
-        
+
         DEBUGMESSAGE "neeeeh"
 
         ; reserveer F380+MYSIZE-F1C9 (start of diskvariables)
@@ -67,37 +67,37 @@ init:   DEBUGMESSAGE "init"
         ; AUTLIN(2) = 0 (grootste gevonden sector is 0)
         ; clear DRVINF(8) (4x aantal drives + slotcode)
         call GETSLT
-        
+
         ; clear DRVTBL(12) (slotcode + ISR)
-        
-        
+
+
         ; init hooks (F24F-F2B7) met $C9
         ; init F365 (in a,($a8), ret)
-        
+
         ld a,6                          ; store status CTRL-key
         call SNSMAT
         di
         and $02
         ld (LASTDRV),a
-        
+
         ld a,7                          ; beep
         rst $18
-               
+
         call GETSLT                     ; continue initialise after MSX-BASIC is initialised
         ld hl,H.RUNC
         ld de,basicInterceptor
-        call installHook     
-        
+        call installHook
+
         ; skip next part
-        
+
         ret
-        
-noDiskromInit:        
+
+noDiskromInit:
         ; zoek lege entry in DRVTBL
-        
-        
-        
-        
+
+
+
+
         call DRIVES
         ld a,h
         ld (DRVTBL),a
@@ -118,8 +118,8 @@ noDiskromInit:
         ;       alle vier bezet, No enough memory (di, halt)
 
 
-        
-        
+
+
         ; - tel reg_l bij al gevonden drives op en check of het niet meer dan 8 is
         ;       is het aantal meer dan 8 sla dan zoveel mogelijk op (dus 8 minua aantal al geinstallerde drives)
         ;       sla aantal drives van dit diskrom op in DRVTBL
@@ -128,29 +128,29 @@ noDiskromInit:
         ;       alloceer ruimte voor DPB(s) en init deze
 
         call INIENV
-                
+
         ld hl,DEVICE
         inc (hl)
         ret
-                
+
 basicInterceptor:
         DEBUGMESSAGE "H.RUNC"
-        
+
         ld hl,H.RUNC
         ld b,5
 .loop:  ld (hl),$c9
         inc hl
         djnz .loop
-        
+
         ; TODO: do more init!
-        ret        
-        
+        ret
+
 shiftPressed:
         ld a,7
         rst $18
 abortDiskInit:
         ld a,255
-        ld (DEVICE),a        
+        ld (DEVICE),a
         ret
 
 installHook:
@@ -162,33 +162,33 @@ installHook:
         inc hl
         ld (hl),d
         ret
-        
+
 printText:
         ;skip text, no printing routine implemented yet
         ex (sp),hl
         xor a
         ld c,255
-        cpir 
+        cpir
         ex (sp),hl
         ret
 
 ROMDISK_DSKIO:
 ROMDISK_DSKCHG:
- 
-assert: 
+
+assert:
         pop ix
         dec ix
         dec ix
         dec ix                          ; IX address from where call was made
-        DEBUGDUMPREGISTERS              
-        db $ed,$0a                      ; nowind assertion 
- 
+        DEBUGDUMPREGISTERS
+        db $ed,$0a                      ; nowind assertion
+
         ds $8000-$-1,0xff               ; fill with 0xff until 0x8000
         ret
-        
+
 ; add rom headers in banks 1..31
         repeat 31
-       
+
         page 1..31
         db "AB"                         ; rom header
         dw .init                        ; init
@@ -198,7 +198,7 @@ assert:
         ds 6,0                          ; reserved
 
         ds $4000 - 16 - 9, 255
-           
+
 .init:  ld hl,init
         push hl
         xor a
@@ -208,8 +208,8 @@ assert:
         endrepeat
 
 ; diskvariabelen: F1C9 t/m F37F
-;       - 23 hooks $F24F-$F2B7 
-;        
+;       - 23 hooks $F24F-$F2B7
+;
 ; Wat doet een DOS1 rom
 ; rom init:
 ; - call INIHRD
@@ -218,7 +218,7 @@ assert:
 ;       bit 7 is 1 -> quit
 ;       0 doe initialisatie zelf
 ;       niet 0, ander diskrom heeft init al gedaan, dus alleen drives installeren (*)
-; 
+;
 ; disk init:
 ; - installeer EXTBIO routine (check eerst HOKVLD, bit 0)
 ; - meer dan 16k aanwezig? (BOTTOM)
@@ -261,7 +261,7 @@ assert:
 ; - CALL INIENV
 ; - increment DEVICE (number of diskrominterfaces)
 ; - ret
- 
+
 ; Andere roms krijgen nu de kans, en pas als H.RUNC wordt aangeroepen gaat we hier verder:
 ; clear H.RUNC (met 5x $c9)
 ; check of DEVICE == 0 door een andere diskrom (zo ja, ret)
@@ -270,7 +270,7 @@ assert:
 ; F348 (EXBRSA?) diskrom slotid
 ; init diskrom variable (F1C9-F237) source $7397 tot aan begin driver
 ;       - BDOS09, XFER, warm boot, start handle in DOS mem, validate FCB
-;       - een jump, devicenames, fake directory?, aantal dagen per maand 
+;       - een jump, devicenames, fake directory?, aantal dagen per maand
 ; copy BIOS $34-$37 naar F30F
 ; iets datum
 ; iets met databuffer F241, F246
@@ -293,7 +293,7 @@ assert:
 ; zoek voor BASIC TEXT extentions????
 ; laad bootsector
 ; start boot code met carry flag reset
-; 
+;
 
 
 

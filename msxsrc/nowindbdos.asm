@@ -23,23 +23,23 @@ BDOS_ABSOLUTESECTORWRITE        equ $30
 
 
 ; patching the BDOS hook ($f37d) or its jumptable will not work as some routines are called directly internally by the BDOS itself.
-; For example, H.BINL (load binary) assumes these routines are at fixed places in the diskrom. Also some programs may assume the 
+; For example, H.BINL (load binary) assumes these routines are at fixed places in the diskrom. Also some programs may assume the
 ; addresses are fixed and call them directly.
-        
-        PATCH $5d20, nowindBDOS              ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW (for logging only)     
 
-currentFilePosition2 := $        
+        PATCH $5d20, nowindBDOS              ; overwrite the standard BDOS hook "DW $56D3" with BDOSNW (for logging only)
+
+currentFilePosition2 := $
 
         ;code ! $408F
         ;jp bdosInternalOutputToScreen    ; internal bdos subroutine that calls the CHPUT BIOS call
-        
+
         ;code ! $40AB                    ; MSX BIOS call logging for call made by BDOS
         ;jp bdosInternalCallBios
-        
+
 ;        code ! $5445
 ;        jp bdosConsoleInput             ; 0x01, CPM MSX1
 
-;         code ! $53a7                   
+;         code ! $53a7
 ;         ld a,c                          ; needed because C_OUT is called internally
 ;C_OUT:   jp bdosConsoleOutput            ; 0x02, CPM MSX1, no need to patch this, because it uses 'bdosInternalOutputToScreen' which is already patched
 
@@ -86,7 +86,7 @@ currentFilePosition2 := $
 
         code ! $4fb8
         jp bdosFindFirst                ; 0x11, CPM MSX1
-        
+
         code ! $5006
         jp bdosFindNext                 ; 0x12, CPM MSX1
 
@@ -95,13 +95,13 @@ currentFilePosition2 := $
 
         code ! $4775
         jp bdosSequentialRead           ; 0x14, CPM MSX1
-        
+
         code ! $477d
         jp bdosSequentialWrite          ; 0x15, CPM MSX1
-        
+
         code ! $461d
         jp bdosCreateFile               ; 0x16, CPM MSX1
-        
+
         code ! $4392
         jp bdosRenameFile               ; 0x17, CPM MSX1
 
@@ -128,7 +128,7 @@ currentFilePosition2 := $
 
         code ! $50c8
         jp bdosSetRandomRecord          ; 0x24, CPM MSX1
-        
+
         code ! $47be
         jp bdosRandomBlockWrite         ; 0x26, MSX1
 
@@ -140,7 +140,7 @@ currentFilePosition2 := $
         jp bdosRandomBlockWriteZeroFill ; 0x28, CPM MSX1
 
 ;        code ! $553c
-;        jp bdosGetDate                  ; 0x2a, MSX1   ; todo: implement, on msx1 the date is stored in RAM? 
+;        jp bdosGetDate                  ; 0x2a, MSX1   ; todo: implement, on msx1 the date is stored in RAM?
 ; Leest de datum en zet deze in de Z80-registers. A : dag van de week, D : dag, E : maand, HL: jaar
 
 ;        code ! $5552
@@ -207,20 +207,20 @@ bdosConsoleOutput:
         push bc
         push de
         push hl
-        DEBUGMESSAGE "Console output"    
+        DEBUGMESSAGE "Console output"
 
         pop hl
         pop de
         pop bc
         pop af
-        
+
         call $F2AF  ; code from the original bdosConsoleOutput that was overwritten by the bdos patch
         jp $53AB
 
 bdosOpenFile:
         DEBUGMESSAGE "bdosOpenFile"
         ld a,1                          ; since bdosOpenFile is a CP/M compatible BDOS call, we must set this.
-        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
+        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.
 
         push de
         call sendRegisters
@@ -231,17 +231,17 @@ bdosOpenFile:
         ex de,hl                        ; send FCB to host
         ld bc,37
         ldir
-        
+
         call blockRead
         jr c,.error			; connection lost
         cp 128
         jr z,.error
-        
+
         ld a,0
         ;DEBUGMESSAGE "bdosOpen ok"
         jp restorePage0
-        
-.error:        
+
+.error:
 		ld a,255
 		DEBUGMESSAGE "bdosOpen error"
         jp restorePage0
@@ -252,14 +252,14 @@ bdosOpenFile:
 ;        ld a,255                        ; return 'file not found'
 ;.exit:
 ;        ; TODO: update FCB?
-;        call restorePage0        
+;        call restorePage0
 ;        ret
-       
+
 bdosCloseFile:
         DEBUGMESSAGE "bdosCloseFile"
         ld a,1                          ; since bdosCloseFile is a CP/M compatible BDOS call, we must set this.
-        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
-        
+        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.
+
         call sendRegisters
         ld (hl),BDOS_CLOSEFILE
 
@@ -270,14 +270,14 @@ bdosCloseFile:
 bdosFindFirst:
         DEBUGMESSAGE "bdosFindFirst"
         ld a,1                          ; since bdosFindFirst is a CP/M compatible BDOS call, we must set this.
-        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
-        
+        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.
+
         push de
         ld hl,(BDOS_DTA)
         call sendRegisters
         ld (hl),BDOS_FINDFIRST
         pop de
-        
+
         push hl
         ex de,hl                        ; send FCB to host
         ld bc,37
@@ -296,15 +296,15 @@ bdosFindFirst:
         xor a
         ret z                   ; file was found! (drive number and filename copied to DTA)
 
-.error: 
+.error:
         ld a,$ff
         ret
 
 bdosFindNext:
-        //DEBUGMESSAGE "bdosFindNext"       
+        //DEBUGMESSAGE "bdosFindNext"
         ld a,1                          ; since bdosFindNext is a CP/M compatible BDOS call, we must set this.
-        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
-               
+        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.
+
         ld hl,(BDOS_DTA)
         call sendRegisters
         ld (hl),BDOS_FINDNEXT
@@ -313,24 +313,24 @@ bdosFindNext:
 bdosDeleteFile:
         DEBUGMESSAGE "bdosDeleteFile"
         ld a,1                          ; since bdosDeleteFile is a CP/M compatible BDOS call, we must set this.
-        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
-        
+        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.
+
         call sendRegisters
         ld (hl),BDOS_DELETEFILE
         ld a,255        ; delete unsuccessful
         ret
 
-; function: BDOS 0x16 (_FMAKE), CREATE FILE [FCB] 
+; function: BDOS 0x16 (_FMAKE), CREATE FILE [FCB]
 ; in: de = pointer to unopened FCB
 ;
-; out: a = 0xff if error 
+; out: a = 0xff if error
 ;      a = 0 if successful
-        
+
 bdosCreateFile:
         DEBUGMESSAGE "bdosCreateFile"
         ;ld a,1                          ; since bdosCreateFile is a CP/M compatible BDOS call, we must set this.
-        ;ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
-        
+        ;ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.
+
         ;push de
         ;ld hl,(BDOS_DTA)
         ;call sendRegisters
@@ -340,31 +340,31 @@ bdosCreateFile:
         ;ex de,hl                        ; send FCB to host
         ;ld bc,37
         ;ldir
-        
+
         ;ld a,(BDOS_DTA + 1)
         ;call blockRead
         ;jr c,.error
-        
-        ;call receiveRegisters           ; get bdosCreateFile results   
+
+        ;call receiveRegisters           ; get bdosCreateFile results
         ;jr c,.error
-        
+
         ;DEBUGMESSAGE "receiveRegisters done!"
-        
-.error:        
+
+.error:
         ld a,255        ; create unsuccessful
         ret
 
-; function: BDOS 0x17 (_FREN), RENAME FILE [FCB] 
+; function: BDOS 0x17 (_FREN), RENAME FILE [FCB]
 ; in: de = pointer to unopened FCB
 ;
-; out: a = 0xff if error 
+; out: a = 0xff if error
 ;      a = 0 if successful
 
 bdosRenameFile:
         DEBUGMESSAGE "bdosRenameFile"
         ld a,1                          ; since bdosRenameFile is a CP/M compatible BDOS call, we must set this.
-        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
-        
+        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.
+
         call sendRegisters
         ld (hl),BDOS_RENAMEFILE
         ld a,255        ; rename unsuccessful
@@ -374,29 +374,29 @@ bdosRenameFile:
 ; in: de = pointer to opened FCB
 ;     hl = number of records to write
 ;
-; out: a = 0xff if error 
+; out: a = 0xff if error
 ;      a = 0 if successful
 
-bdosRandomBlockWrite:     
+bdosRandomBlockWrite:
         DEBUGMESSAGE "bdosRandomBlockWrite"
         call sendRegisters
         ld (hl),BDOS_RANDOMBLOCKWRITE
-        ld a,255        ; write unsuccesful        
+        ld a,255        ; write unsuccesful
         ret
-        
-; function: BDOS 0x27, Random Block Read 
+
+; function: BDOS 0x27, Random Block Read
 ; in: de = pointer to opened FCB
 ;     hl = number of records to read
 ;
 ; out: a = 0xff if error (usually caused by end-of-file)
 ;      a = 0 if successful
 ;     hl = number of records actually read
-        
+
 bdosRandomBlockRead:
         DEBUGMESSAGE "bdosRandomBlockRead"
 
         xor a                           ; since bdosRandomBlockRead is not a CP/M compatible BDOS call, we must set this to zero.
-        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
+        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.
 
         push de
         ld bc,(BDOS_DTA)                ; send DTA in bc
@@ -411,23 +411,23 @@ bdosRandomBlockRead:
         ld a,(BDOS_DTA + 1)
         call blockRead
         jr c,.error
-        
+
         DEBUGMESSAGE "data blockRead done!"
-        
+
         ; todo: receive updated FCB here with second blockread
-        
-        call receiveRegisters       ; get bdosRandomBlockRead results   
+
+        call receiveRegisters       ; get bdosRandomBlockRead results
         jr c,.error
-        
+
         DEBUGMESSAGE "receiveRegisters done!"
 
         ; A = 1 if an error occured (mostly EOF), otherwise A = 0
         ; HL = records received
         ; DE and IX = address of open FCB
-                    
+
         ; do FCB update, hl must be added to the random record field [FCB+0x21] [FCB+0x22] [FCB+0x23]
         ; see: http://msxsyssrc.cvs.sourceforge.net/viewvc/msxsyssrc/disk100upd/disk.mac?revision=1.1&view=markup line: 1875
-        
+
         push hl
         push de
         ld e, (ix+$21)
@@ -436,7 +436,7 @@ bdosRandomBlockRead:
 
         ld (ix+$21), l
         ld (ix+$22), h
-        ld (ix+$23), 0        
+        ld (ix+$23), 0
         pop de
         pop hl
 
@@ -444,8 +444,8 @@ bdosRandomBlockRead:
         DEBUGDUMPREGISTERS
         ;DEBUGMESSAGE "CMD_INSTR_ON"
         ret
-        
-.error: 
+
+.error:
         DEBUGMESSAGE "BDOS 0x27 error"
         ld hl,0
         ld a,1
@@ -456,37 +456,37 @@ bdosRandomBlockRead:
 ;
 ; out: a = 0xff if error (usually caused by end-of-file)
 ;      a = 0 if successful
-        
+
 bdosSequentialRead:
         DEBUGMESSAGE "bdosSequentialRead"
 
-        push de                         ; read just 1 record of 128 bytes        
+        push de                         ; read just 1 record of 128 bytes
         pop ix
         ld (ix+$0e), 128
-        ld (ix+$0f), 0  
-        ld hl,1  
-        
+        ld (ix+$0f), 0
+        ld hl,1
+
         call bdosRandomBlockRead        ; resets $F306
-        
+
         ld a,1                          ; since bdosSequentialRead is a CP/M compatible BDOS call, we must set this.
-        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
-        ret        
+        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.
+        ret
 
 bdosAbsoluteSectorRead:
         DEBUGMESSAGE "bdosAbsoluteSectorRead"
         xor a                           ; since bdosAbsoluteSectorRead is not a CP/M compatible BDOS call, we must set this to zero.
-        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
-        
+        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.
+
         call sendRegisters
         ld (hl),BDOS_ABSOLUTESECTORREAD
         ld a,2  ; not ready (TODO: check!)
         ret
-        
+
 bdosAbsoluteSectorWrite:
         DEBUGMESSAGE "bdosAbsoluteSectorWrite"
         xor a                           ; since bdosAbsoluteSectorWrite is not a CP/M compatible BDOS call, we must set this to zero.
-        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.   
-        
+        ld ($F306),a                    ; for CP/M ld l,a and ld h,b is done after return of the BDOS function.
+
         ld a,2  ; not ready (TODO: check!)
         ret
 
@@ -517,9 +517,9 @@ bdosRandomBlockWriteZeroFill:
     ;db 0,0,0,0,0,0,0,0
     ;db 0,0,0,0,0,0,0,0
     ;db 0,0,0,0,0,0,0,0
-    ;db 0,0,0,0,0,0,0,0    
+    ;db 0,0,0,0,0,0,0,0
     ;        ds 128
-        
+
 ; http://www.konamiman.com/msx/msx-e.html#msx2th
 ; http://www.angelfire.com/art2/unicorndreams/msx/RR-BASIC.html
 ; http://msxsyssrc.cvs.sourceforge.net/msxsyssrc/diskdrvs/

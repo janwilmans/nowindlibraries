@@ -9,7 +9,7 @@
 #include "msxtypes.h"
 
 /*!
- * This class handles the different Media that can be inserted, like Disks and Roms 
+ * This class handles the different Media that can be inserted, like Disks and Roms
  */
 class Media {
 private:

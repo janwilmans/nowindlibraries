@@ -1,16 +1,16 @@
 FDD_IMAGE     EQU 0
-HDD_IMAGE     EQU 1 
-  
+HDD_IMAGE     EQU 1
+
               ; Nowind Image Changer, inspired by Marcel Delorme
               OUTPUT "nic.com"
               include "..\asmlibs\bdos\bdos.inc"
               include "..\asmlibs\bios\bios.inc"
-                
+
               ORG   COM_START_ADDR
-Main:             
+Main:
               LD    DE,START_TEXT
               CALL  String.PrintAsciiz
-              
+
               ;LD   D,"N"
               ;LD   E,0       ; method: get nowind interface slot
               ;XOR  A         ; find first nowind interface
@@ -26,35 +26,35 @@ Main:
               ;XOR  A         ; number of interface to activate
               ;CALL EXTBIO
 
-              
+
               LD  A,(CMD_LENGTH)
               OR  A,A
               JP  Z,PrintHelp
-              
-              LD  B,A 
+
+              LD  B,A
               LD  HL,CMD_LINE
-.scanLine             
+.scanLine
               LD  A,(HL)
               CP  A,' '
-              JP  Z,.next 
+              JP  Z,.next
               CP  A,'/'
-              JP  Z,HandleOption                  
+              JP  Z,HandleOption
               ; Handle characters as file name
               LD  (FILE_NAME_PTR),HL
               LD  B,1 ; End search
-.next             
+.next
               INC HL
-              DJNZ .scanLine  
-              
+              DJNZ .scanLine
+
               LD  HL,(FILE_NAME_PTR)
               LD  A,L
               OR  A,H
               RET Z ; No file name specified
-              
+
               ; LD  D,H
               ; LD  E,L
               ; CALL  String.PrintAsciiz
-              CALL SetImage           
+              CALL SetImage
 Exit:
               RET
 
@@ -74,7 +74,7 @@ HandleOption:
                 JP    Z,HddImage
                 CP    A,"L"
                 JP    Z,ListImages
-                                
+
                 LD    DE,INVALID_OPTION
                 CALL  String.PrintAsciiz
                 LD    B,1 ; Make sure program exits
@@ -84,43 +84,43 @@ HddImage:
                 LD  A,HDD_IMAGE
                 LD  (IMAGE_TYPE),A
                 JP  Main.next
-              
-              
-ListImages: 
-                JP  Main.next                           
+
+
+ListImages:
+                JP  Main.next
 
 SetImage:
-            
-                ; Save current slot         
+
+                ; Save current slot
                 LD    A,(SLOT_ID_RAM_1)
-                LD    (CUR_SLOT_PAG1),A 
-                
-                ; Select slot for NOWIND USB 
-              
+                LD    (CUR_SLOT_PAG1),A
+
+                ; Select slot for NOWIND USB
+
                 XOR  A					; find the first nowind interface, and reset carry flag
                 LD   DE,$4E00 			; D= 'N' E= function 0
                 CALL  EXTBIO			; Nowind-EXTBIO call returns nowind slotcode in A
                 jr    nc,not_found
-                
+
                 LD    H,0x40
                 CALL  ENASLT
-      
+
                 LD    A,(IMAGE_TYPE)
                 CALL  sendRegisters
-                LD    (HL),$91                  ; C_CHANGEIMAGE 
+                LD    (HL),$91                  ; C_CHANGEIMAGE
                 LD    HL,(FILE_NAME_PTR)
                  ; TODO: add length check to prevent sending bull
-.loop:        
+.loop:
                 LD    A,(HL)
                 INC   HL
                 LD    (0x04000),A
                 OR    A,A
                 JP    NZ,.loop
-                
+
                 ; Restore slot
                 LD    A,(CUR_SLOT_PAG1)
-                LD    H,0x40                    
-                CALL  ENASLT  
+                LD    H,0x40
+                CALL  ENASLT
                 RET
 not_found:
 				LD	DE,NFOUND_TEXT
@@ -144,26 +144,26 @@ sendRegisters:
                 ld (hl),d                       ; register a
                 ret
 
-                
+
 CUR_SLOT_PAG1:  DB  0
 
-              
+
 FILE_NAME_PTR:  DW  0
 IMAGE_TYPE:     DB  FDD_IMAGE
 
 START_TEXT:     DB "NOWIND Image Changer - NOWIND (c) 2009",CR,LF,0
 NFOUND_TEXT:    DB "No Nowind Interface found!",CR,LF,0
 HELP_TEXT:      DB CR,LF
-                DB "NIC {OPTIONS} PATH\\FILENAME",CR,LF  
+                DB "NIC {OPTIONS} PATH\\FILENAME",CR,LF
                 DB " Options",CR,LF
                 DB " /H - Image is a HDD Image",CR,LF
                 DB " /L - List Images",CR,LF
-                DB 0    
-                  
+                DB 0
+
 INVALID_OPTION: DB " *** Invalid option!!!",CR,LF,0
 FILE_NAME       DS 64,0
-                
-    
+
+
    include "..\asmlibs\string\string.asm"
 
-    
+

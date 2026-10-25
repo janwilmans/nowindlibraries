@@ -387,7 +387,7 @@ void hostImage(string sImageName)
          * to prevent loss of data, this is a requirement of our
          * hardware design.
          *
-         * When it's receive buffer is empty, a read from the 
+         * When it's receive buffer is empty, a read from the
          * msx is done and during that read data becomes available
          * the byte is "read" from the receivebuffer, but the msx
          * has already sampled the data-bus; so the byte is lost.

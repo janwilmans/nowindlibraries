@@ -10,29 +10,29 @@ using namespace std;
 
 /* Switched I/O ports
 
-According to the MSX2 Hardware Specification, ports #40-#4F are forming the so-called 
-'switched I/O ports'. With these the limitation of a maximum number of 256 I/O ports 
-can be overcome, although it does require a little additional logic on the hardware's 
+According to the MSX2 Hardware Specification, ports #40-#4F are forming the so-called
+'switched I/O ports'. With these the limitation of a maximum number of 256 I/O ports
+can be overcome, although it does require a little additional logic on the hardware's
 behalf. The port numbers #41-#4F are the actual switched ports, and the device 'connected'
-(e.g. listening to) to those ports is determined by the device ID written to port #40. 
-This device ID can be a number from 1-254, and when port #40 is read it returns the 
+(e.g. listening to) to those ports is determined by the device ID written to port #40.
+This device ID can be a number from 1-254, and when port #40 is read it returns the
 complement of the current device ID.
 
 Port range  Description
 #40     Device ID register
 #41-#4F     Switched I/O ports
 
-ID numbers between 1 and 127 are manufacturer ID numbers, and ID numbers 128 to 254 
-are device ID's. As a basic rule, those devices which are designed specifically for 
-one machine should contain the manufacturer's company ID, while periperhal devices 
-which can be used on all MSX computers should have a device ID number. Also, the Z80 
-actually has a 16-bit I/O addressing space so it is recommended to access in 16-bit 
-by decoding the upper 8 bits for those ID's which might be expanded in the future 
-(although I have personally only seen this done in the ADVRAM hardware). Especially 
-for devices which are connected with their make ID it can be expected that they 
+ID numbers between 1 and 127 are manufacturer ID numbers, and ID numbers 128 to 254
+are device ID's. As a basic rule, those devices which are designed specifically for
+one machine should contain the manufacturer's company ID, while periperhal devices
+which can be used on all MSX computers should have a device ID number. Also, the Z80
+actually has a 16-bit I/O addressing space so it is recommended to access in 16-bit
+by decoding the upper 8 bits for those ID's which might be expanded in the future
+(although I have personally only seen this done in the ADVRAM hardware). Especially
+for devices which are connected with their make ID it can be expected that they
 might eventually need more addressing space, and with this it will be future-proofed.
 List of BIOS extension device ID's:
-    
+
 1   ASCII/Microsoft
 2   Canon
 3   Casio

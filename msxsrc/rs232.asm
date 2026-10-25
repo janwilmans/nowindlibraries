@@ -13,14 +13,14 @@ MEXBIH  equ $fb07
 
 rs232Init:
         DEBUGMESSAGE "devInit"
-        ; EXTBIO already initialized by diskrom (so no need to check) 
-        
+        ; EXTBIO already initialized by diskrom (so no need to check)
+
         ld de,$0801
         xor a
         call EXTBIO
         ld hl,DEVNUM
         ld (hl),a
-        
+
         ld de,$0001
         xor a
         call EXTBIO
@@ -30,7 +30,7 @@ rs232Init:
         rlca
         or (hl)
         ld (hl),a
-        
+
         di
         ld de,MEXBIH            ; save EXTBIO
         ld hl,EXTBIO
@@ -63,17 +63,17 @@ copyToEXTBIO:
         pop iy
         pop ix
         pop de
-        ret        
-.end        
-        
+        ret
+.end
+
 extendedBios:
         DEBUGMESSAGE "ExtBio"
         push af
         call .determineDevice
         pop af
         jp MEXBIH
-        
-.determineDevice:        
+
+.determineDevice:
         ei
         ld a,d
         or a
@@ -88,8 +88,8 @@ extendedBios:
         jr z,buildSlotAddrTable
         dec a
         ret nz                  ; unknown function
-        
-        pop af                  ; return number of channels      
+
+        pop af                  ; return number of channels
         pop af
         inc a                   ; add 1 channel
         push af
@@ -114,28 +114,28 @@ broadcast:
         dec a
         ret nz
 
-enableInterrupt:        
+enableInterrupt:
         DEBUGMESSAGE "ei"
         ret
-        
+
 buildNameTable:
         DEBUGMESSAGE "buildNameTable"
-        ld a,8                  
+        ld a,8
         call buildTable
         xor a
         jp buildTable
-        
+
 addTrapEntries:
         DEBUGMESSAGE "trap"
         ; TODO same as 'return number of channels'
-        pop af                  ; return number of channels      
+        pop af                  ; return number of channels
         pop af
         inc a                   ; add 1 entry
         push af
         inc sp
         inc sp
         ret
-        
+
 disableInterrupt:
         DEBUGMESSAGE "di"
         ret
@@ -147,10 +147,10 @@ systemExclusive:
         ret nz
         call slotAddrAndJumpTable
         xor a                   ; maker ID (ASCII)
-        call buildTable     
+        call buildTable
         xor a                   ; reserved
         jp buildTable
-        
+
 slotAddrAndJumpTable:
         push bc
         push hl
@@ -174,8 +174,8 @@ buildTable:
         pop de ; nodig?
         pop bc
         pop af ; nodig?
-        ret        
-        
+        ret
+
 jumpTable:
         db DVINFB
         db 0,0                  ; version, reserved
@@ -194,7 +194,7 @@ jumpTable:
         ds 3,$c9                ; SETCHN
         ds 3,$c9                ; reserved
         ds 3,$c9                ; reserved
- 
+
 RS232_INIT
 RS232_OPEN
 RS232_STAT

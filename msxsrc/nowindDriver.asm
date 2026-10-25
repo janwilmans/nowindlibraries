@@ -1,7 +1,7 @@
 ; TODO: holding 'INS' should disable the interface completely (this is also what Sunrise IDE interface does)
 ; this is used to boot not using nowind, without having to remove the cartridge. (also usefull if flashing fails?)
 ;
-; holding 'TAB' should prevent boot from nowind, even if a disk is present. This is usefull for copying disks when 
+; holding 'TAB' should prevent boot from nowind, even if a disk is present. This is usefull for copying disks when
 ; the 'source' is nowind, and the disk normally boots from sector (so cannot be stopped).
 
 MYSIZE          equ 8                   ; size of work area (not used, some programs write here to stop drives spinning)
@@ -33,13 +33,13 @@ DRIVES:
         push bc
         push de
         ld a,(DEVICE)
-        
+
         push hl
         call sendRegisters
         ld (hl),C_DRIVES
         ld hl,drivesCommand
         call executeCommandNowindInPage0
-        
+
         pop hl
         ld l,1                          ; install one drive when not connected to host
         jr c,.error
@@ -64,7 +64,7 @@ INIENV:
 ; Interrupt handler can be installed here and
 ; work area can be initialized when it was requested
         DEBUGMESSAGE "INIENV"
-      
+
         call installExtendedBios        ; TODO: move to init.asm (als set HKLVLK self)
 
         call sendRegisters
@@ -95,7 +95,7 @@ inienvCommand:
 ;      c = media descriptor
 ;     de = logical sector number
 ;     hl = transfer address
-;     
+;
 ; out: f = carry set when not successful
 ;      a = 0, write protected
 ;      a = 2, not ready
@@ -126,14 +126,14 @@ DSKIO:
         ret c
         xor a
         ret
-        
+
 ; function: DSKCHG ($4013), check whether the disk has been changed
 ;
 ; in:  a = drive number (0=A:, etc.)
 ;      b = 0
 ;      c = media descriptor (previous)
 ;     hl = base address of DPB
-;     
+;
 ; out: a = error code, like DSKIO
 ;      b = -1, disk changed (DPB is updated)
 ;      b = 0, unknown (DPB is updated)
@@ -141,7 +141,7 @@ DSKIO:
 ;      f = carry set when not succesful
 ;
 ; changed: c, de, hl, ix
-        
+
 DSKCHG:
 
         ;DEBUGMESSAGE "DSKCHG"
@@ -152,7 +152,7 @@ DSKCHG:
         pop af
 
         ;USB_DBMSG "DSKCHG"
-        
+
         push af
         push hl
         call sendRegisters
@@ -168,21 +168,21 @@ DSKCHG:
         ret z                           ; not changed
 
         if MSXDOSVER == 1
-        
+
         ld a,d                          ; update dpb in MSXDOS1 (TODO: other diskrom can still be master and DOS1 !!!!)
         ld b,c
         call GETDPB
         ld a,10
         ret c
-        
+
         endif
-        
+
         ld b,255
         ret
 
 dskchgCommand:
         call getHeaderInPage0
-        ret c                
+        ret c
         ld c,(hl)
         ret
 
@@ -192,7 +192,7 @@ dskchgCommand:
 ;      b = media descriptor (first byte of FAT)
 ;      c = previous media descriptor (does not seem to be used in other drivers)
 ;     hl = base address of DPB
-;     
+;
 ; out: DPB for specified drive in [HL+1]..[HL+18]
 ;
 ; unchanged: iy
@@ -201,7 +201,7 @@ GETDPB:
         ;DEBUGMESSAGE "GETDPB"
         ex de,hl
         inc de
-        ld h,a                          ; store drive number 
+        ld h,a                          ; store drive number
         ld a,b
         cp $f0
         jr z,.makeDPB
@@ -214,7 +214,7 @@ GETDPB:
         rlca
         rlca
         add a,c
-        
+
         ld c,a                          ; update DPB
         ld b,0
         ld hl,supportedMedia
@@ -225,7 +225,7 @@ GETDPB:
 
 .makeDPB:
         ;DEBUGMESSAGE ".makeDPB"
-        ld a,($f313)                    ; don't support mediadescriptor F0 under MSXDOS1       
+        ld a,($f313)                    ; don't support mediadescriptor F0 under MSXDOS1
         cp 1                            ; large clustersize causes much memory to be allocated (causing crash)
         ret c
 
@@ -271,7 +271,7 @@ CHOICE:
 ;      d = drive number (0=A:)
 ;     hl = begin address of work area
 ;     bc = length of work area
-; out: f = carry set when not succesful 
+; out: f = carry set when not succesful
 ;      a = error code, if not succesful
 ;      a = 0, write protected
 ;      a = 2, not ready
@@ -287,7 +287,7 @@ DSKFMT:
         ld a,16                         ; other error
         scf
         ret
-        
+
 ; function: OEMSTA, ?
 ;
 ; in:  ?

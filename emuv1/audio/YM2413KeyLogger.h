@@ -15,8 +15,8 @@
 
 #define FMPAC_SOUND_OFF
 
-/*! 
- * The YM2413 class emulates the MSX-MUSIC, currently it only logs the music that 
+/*!
+ * The YM2413 class emulates the MSX-MUSIC, currently it only logs the music that
  * should have been played
  */
 class YM2413 {

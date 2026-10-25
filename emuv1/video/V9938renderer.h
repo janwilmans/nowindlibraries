@@ -57,7 +57,7 @@ const unsigned int RGBspritesGraphic7[16] = {
 class V9938;
 
 /*!
- * The V9938renderer class contains the V9938 screen mode methods 
+ * The V9938renderer class contains the V9938 screen mode methods
  */
 class V9938renderer {
 private:

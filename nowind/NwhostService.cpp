@@ -1,7 +1,7 @@
 /**
  * @file NwhostService.cpp
  *
- * @brief Contains methods to service a nowind interface 
+ * @brief Contains methods to service a nowind interface
  * @author Jan Wilmans <jw@dds.nl>  Copyright (C) 2009 Nowind
  *
  */

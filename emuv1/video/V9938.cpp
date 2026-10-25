@@ -165,16 +165,16 @@ nw_byte V9938::readStatusRegister()
     case 2: {
         value = statusReg[2] | 0x0c;
         value &= 0x9F; // reset HR and VR
-        /* Despite of its name, the Vertical Retrace Flag is set for the entire time while 
-           lower and upper screen borders are drawn and during actual vertical retrace. 
-           The Horizontal Retrace Flag becomes set at the end of each scanline - including 
+        /* Despite of its name, the Vertical Retrace Flag is set for the entire time while
+           lower and upper screen borders are drawn and during actual vertical retrace.
+           The Horizontal Retrace Flag becomes set at the end of each scanline - including
            hidden/dummy scanlines during vertical retrace.
         */
 
         // HR (bit 5)
         unsigned int positionInCurrentLine = (emuTime - frameStartTime) % SCANLINETIME;
         if (positionInCurrentLine >= horizontalDisplayTime) value |= 0x20;
-        /*        
+        /*
         if ((positionInCurrentLine > 190) || (positionInCurrentLine < 20)) {
            value |= 0x20;
         }
@@ -611,7 +611,7 @@ void V9938::calculateVDPtiming()
 }
 
 /*! \brief processes the normal VDP interrupt if it is enabled generates a Z80 interrupt
- *  
+ *
  *  VDPreg[1] bit 5 is "1" if the normal interrupt is enabled
  */
 void V9938::renderScreen(emuTimeType screenTime)
@@ -628,14 +628,14 @@ void V9938::renderScreen(emuTimeType screenTime)
         (*renderer.*dumpScreen)(nextDisplayChunk, chunksToDump);
     }
     nextDisplayChunk = 0;
-    /*  
+    /*
     SE_line[SE_counter + 1] = screenHeight;
     for (unsigned int i=0;i<SE_counter+1;i++) {
         if (SE_resolution256[i]) {
             gui->simple2x(SE_line[i + 1] - SE_line[i], SE_hAdjust[i]);
         } else {
             gui->simple512(SE_line[i + 1] - SE_line[i], SE_hAdjust[i]);
-        }    
+        }
     }
 */
     if (SE_resolution256[SE_counter])

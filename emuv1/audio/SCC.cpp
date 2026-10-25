@@ -130,14 +130,14 @@ void SCC::write(nw_word address, nw_byte value)
         channelEnable = value;
         // ZOU DIT IN WERKELIJKHEID GEBEUREN???
         // nu roteren de channels overigens gewoon door, ook als ze uitstaan.
-        // Het heeft nu dus geen zin om de pointers op 0 te zetten. (wel als er 
+        // Het heeft nu dus geen zin om de pointers op 0 te zetten. (wel als er
         // tijdens het afspelen eerst gecheck wordt of een channel aanstaat)
         // hoe is dit in werkelijkheid?
         if (diff & 0x01) wavePointer[0] = 0;
         if (diff & 0x02) wavePointer[1] = 0;
         if (diff & 0x04) wavePointer[2] = 0;
         if (diff & 0x08) wavePointer[3] = 0;
-        if (diff & 0x10) wavePointer[4] = 0;        
+        if (diff & 0x10) wavePointer[4] = 0;
         break;
 */
     default:

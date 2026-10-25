@@ -12,30 +12,30 @@ ROMDISK_DSKIO:
         pop af
         ld a,0
         ret c                           ; write protected
-        
+
         ld ix,copyFromBank
         ex de,hl
 .loop:  push bc
-        push hl        
-        
+        push hl
+
         bit 7,d
         jr nz,.directCopy
         ld a,d
-        cp $3e        
+        cp $3e
         jr c,.directCopy
 
         call .findSector
         push de
-        ld de,($f34d)        
+        ld de,($f34d)
         call callInBank
         pop de
         ld bc,512
         ld hl,($f34d)
         call XFER
-        jr .nextSector           
-              
-.directCopy:                
-        call .findSector  
+        jr .nextSector
+
+.directCopy:
+        call .findSector
         call callInBank
 .nextSector:
         pop hl
@@ -44,7 +44,7 @@ ROMDISK_DSKIO:
         djnz .loop
         ret
 
-.findSector:        
+.findSector:
         ld a,l                          ; determine bank
         and %11100000
         or h
@@ -72,7 +72,7 @@ ROMDISK_DSKIO:
         ld a,c
         ld bc,512
         ret
-                                         
+
 ROMDISK_DSKCHG:
         DEBUGMESSAGE "ROM_DSKCHG"
         pop af
@@ -82,7 +82,7 @@ ROMDISK_DSKCHG:
 
 ROMDISK_GETDPB:
         ; not implemented (standard mediadescriptor as used)
-        
+
 ROMDISK_DSKFMT:
         ; not implemented (no disk can be formatted)
-        
+

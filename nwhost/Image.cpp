@@ -272,10 +272,10 @@ const nw_byte* Image::GetNewPartitionTable()
 /* Hardddisk image, first 512 bytes contains partition table:
  * we use an modified FAT16 partition table: http://en.wikipedia.org/wiki/Master_boot_record
  *
- * 000: EB FE 90 nn nn nn nn nn nn nn 20 
+ * 000: EB FE 90 nn nn nn nn nn nn nn 20
  *  |
  * code area
- *  | 
+ *  |
  * 1BE: 4x16 bytes (Table of primary partitions, Four 16-byte entries, IBM Partition Table scheme)
  *
  *
@@ -292,7 +292,7 @@ const nw_byte* Image::GetNewPartitionTable()
  *     0x01 = read-only (bit 1)
  *     0x02 = disabled (bit 2)
  *     otherwise = invalid
- * 
+ *
  * 08: LBA (logical block address) of first sector in the partition (4 bytes)
  * 0C: amount of sectors in partition (4 bytes)
  */
