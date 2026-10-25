@@ -9,8 +9,14 @@ if(WIN32)
   set_target_properties(ftdi PROPERTIES IMPORTED_LOCATION ${FTDI_LIB} INTERFACE_COMPILE_DEFINITIONS FTD2XX_STATIC)
 else()
   # cached, nwhostapp installs it
-  find_library(FTDI_LIB NAMES ftdi1 REQUIRED)
-  find_path(FTDI_INCLUDE_DIR NAMES ftdi.h PATH_SUFFIXES libftdi1 REQUIRED)
+  find_library(FTDI_LIB NAMES ftdi1)
+  find_path(FTDI_INCLUDE_DIR NAMES ftdi.h PATH_SUFFIXES libftdi1)
+  if(NOT FTDI_LIB OR NOT FTDI_INCLUDE_DIR)
+    message(FATAL_ERROR "libftdi1 (the library and its headers) not found; to install it:\n"
+                        "     Debian/Ubuntu: sudo apt install libftdi1-dev\n"
+                        "     Fedora:        sudo dnf install libftdi-devel\n"
+                        "     macOS:         brew install libftdi")
+  endif()
   set_target_properties(ftdi PROPERTIES IMPORTED_LOCATION ${FTDI_LIB} INTERFACE_INCLUDE_DIRECTORIES ${FTDI_INCLUDE_DIR})
   # the linux kernel (ftdi_sio) and libftdi backends are not available on Windows
   target_sources(ftdx PRIVATE ConFtdiSio.cpp ConLibFtdi.cpp)

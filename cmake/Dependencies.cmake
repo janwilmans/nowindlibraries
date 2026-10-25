@@ -154,6 +154,22 @@ if(NOT TARGET GTest::gtest_main)
   find_package(GTest)
 endif()
 
+# how to install what is missing (Windows has the copy in thirdparty/windows-x64)
+if(NOT WIN32)
+  if(NOT TARGET SDL::SDL OR NOT TARGET SDL::ttf)
+    message(STATUS "SDL 1.2 and/or SDL_ttf 2.0 not found, emuv1 and its tests are not built; to install them:\n"
+                   "     Debian/Ubuntu: sudo apt install libsdl1.2-dev libsdl-ttf2.0-dev\n"
+                   "     Fedora:        sudo dnf install SDL-devel SDL_ttf-devel")
+  endif()
+  if(NOT TARGET GTest::gtest_main)
+    message(STATUS "googletest not found, the tests are not built; to install it:\n"
+                   "     Debian/Ubuntu: sudo apt install libgtest-dev\n"
+                   "     Fedora:        sudo dnf install gtest-devel\n"
+                   "     macOS:         brew install googletest\n"
+                   "   or configure with -DNOWIND_FETCH_DEPENDENCIES=ON to download it")
+  endif()
+endif()
+
 # copies the third-party DLLs next to a program (before googletest lists its tests by running it)
 function(nowind_copy_runtime_dlls target)
   if(NOWIND_RUNTIME_DLLS)

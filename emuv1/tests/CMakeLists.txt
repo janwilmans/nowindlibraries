@@ -1,6 +1,6 @@
 # the unit tests use googletest (cmake/Dependencies.cmake), they are skipped without it
 if(NOT TARGET GTest::gtest_main)
-  message(STATUS "emuv1: googletest not found, the emuv1 unit tests will not be built")
+  # cmake/Dependencies.cmake says how to install it
   return()
 endif()
 

@@ -1,7 +1,7 @@
 # emuv1 is the SDL 1.2 based MSX emulator with an emulated nowind interface, it needs SDL 1.2 and SDL_ttf 2.0
 # (cmake/Dependencies.cmake: downloaded on Windows, the installed packages elsewhere)
 if(NOT TARGET SDL::SDL OR NOT TARGET SDL::ttf)
-  message(STATUS "emuv1: SDL 1.2 and/or SDL_ttf not found, emuv1 will not be built")
+  # cmake/Dependencies.cmake says how to install it
   return()
 endif()
 
