@@ -36,7 +36,6 @@ private:
 
     unsigned int lastTime;
     unsigned int volumeDeler;
-    std::fstream* rawout;
 
     // DC filter
     float lastFilterIn;
@@ -74,8 +73,6 @@ public:
 
     AudioDevice* devices[20];
     unsigned int deviceCount;
-
-    void writeWav(FILE* fptr, char* samples, long nsamples, int nfreq);
 
     void volume(unsigned int);
     void AudioInterrupt(emuTimeType scheduledTime);

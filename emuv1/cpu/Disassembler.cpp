@@ -14,21 +14,13 @@ Disassembler::Disassembler()
 {
     DBERR("Disassembler constructor...\n");
 
-    // constructor
-    string filename("disassembler.html");
-
-    logfile = new ofstream(filename.c_str(), ios::trunc);
-    if (logfile->fail())
-    {
-        DBERR("Error opening file %s\n", filename.c_str());
-    }
-    (*logfile) << "<html><body><basefont color=\"black\" face=\"courier\" size=\"4\">" << endl;
+    logfile = nullptr; // created when something is disassembled, see log()
 
     startByProgramCounter = false;
     startByEmuTime = false;
     lineNumber = 0;
 
-    filename = "MSXBIOS.MLL";
+    string filename = "MSXBIOS.MLL";
     fstream* fs = new fstream(filename.c_str(), ios::in | ios::binary);
     string str_addr = "";
     string symbol_name = "";
@@ -62,6 +54,22 @@ Disassembler* Disassembler::Instance()
 
     static Disassembler deInstantie;
     return &deInstantie;
+}
+
+// the disassembly log, created on first use, so emuv1 only writes it when something is disassembled
+ofstream& Disassembler::log()
+{
+    if (!logfile)
+    {
+        string filename("disassembler.html");
+        logfile = new ofstream(filename.c_str(), ios::trunc);
+        if (logfile->fail())
+        {
+            DBERR("Error opening file %s\n", filename.c_str());
+        }
+        (*logfile) << "<html><body><basefont color=\"black\" face=\"courier\" size=\"4\">" << endl;
+    }
+    return *logfile;
 }
 
 Disassembler::~Disassembler()
@@ -256,74 +264,74 @@ void Disassembler::triggerDisassembler()
 
             char str[255];
             sprintf(str, "%05i:<br> ", int(lineNumber));
-            (*logfile) << string(str) << endl;
+            log() << string(str) << endl;
 
             sprintf(str, "<b>%04X: ", reg_pc);
-            (*logfile) << string(str) << string(disAsm(reg_pc, previewWord1, previewWord2));
+            log() << string(str) << string(disAsm(reg_pc, previewWord1, previewWord2));
 
             sprintf(str, " [%02X] [%02X] [%02X] [%02X]", previewWord1 & 255, previewWord1 >> 8, previewWord2 & 255, previewWord2 >> 8);
 
             string opcodes(str);
             int size = getSize() * 5;
-            (*logfile) << opcodes.substr(0, size) << endl;
+            log() << opcodes.substr(0, size) << endl;
 
-            (*logfile) << "</b><br>" << endl;
-            (*logfile) << "SP:";
+            log() << "</b><br>" << endl;
+            log() << "SP:";
             logRegisterColored(reg_sp, z80->reg_sp);
-            (*logfile) << " AF:";
+            log() << " AF:";
             logRegisterColored(register_af, (z80->reg_a << 8) | z80->reg_f);
-            (*logfile) << " BC:";
+            log() << " BC:";
             logRegisterColored(register_bc, (z80->reg_b << 8) | z80->reg_c);
-            (*logfile) << " DE:";
+            log() << " DE:";
             logRegisterColored(register_de, z80->reg_de);
-            (*logfile) << " HL:";
+            log() << " HL:";
             logRegisterColored(register_hl, z80->reg_hl);
-            (*logfile) << " IX:";
+            log() << " IX:";
             logRegisterColored(register_ix, z80->reg_ix);
-            (*logfile) << " IY:";
+            log() << " IY:";
             logRegisterColored(register_iy, z80->reg_iy);
-            (*logfile) << " F:";
+            log() << " F:";
 
             if (z80->reg_f & SFLAG)
-                (*logfile) << ("s");
+                log() << ("s");
             else
-                (*logfile) << (".");
+                log() << (".");
             if (z80->reg_f & ZFLAG)
-                (*logfile) << ("z");
+                log() << ("z");
             else
-                (*logfile) << (".");
+                log() << (".");
             if (z80->reg_f & 0x20)
-                (*logfile) << ("1");
+                log() << ("1");
             else
-                (*logfile) << ("0");
+                log() << ("0");
             if (z80->reg_f & HFLAG)
-                (*logfile) << ("h");
+                log() << ("h");
             else
-                (*logfile) << (".");
+                log() << (".");
             if (z80->reg_f & 0x08)
-                (*logfile) << ("1");
+                log() << ("1");
             else
-                (*logfile) << ("0");
+                log() << ("0");
             if (z80->reg_f & PFLAG)
-                (*logfile) << ("p");
+                log() << ("p");
             else
-                (*logfile) << (".");
+                log() << (".");
             if (z80->reg_f & NFLAG)
-                (*logfile) << ("n");
+                log() << ("n");
             else
-                (*logfile) << (".");
+                log() << (".");
             if (z80->reg_f & CFLAG)
-                (*logfile) << ("c");
+                log() << ("c");
             else
-                (*logfile) << (".");
-            (*logfile) << "(" << dec << (z80->emuTime - lastEmuTime) << ")";
-            (*logfile) << "<br>" << endl;
-            (*logfile) << "<br>" << endl;
+                log() << (".");
+            log() << "(" << dec << (z80->emuTime - lastEmuTime) << ")";
+            log() << "<br>" << endl;
+            log() << "<br>" << endl;
         }
         else
         {
             disassembling = false;
-            (*logfile) << "</body></html>" << endl;
+            log() << "</body></html>" << endl;
         }
     }
 }
@@ -342,20 +350,20 @@ void Disassembler::logRegisterColored(nw_word firstReg, nw_word secordReg)
 
     if ((firstReg >> 8) == (secordReg >> 8))
     {
-        (*logfile) << string(byte1);
+        log() << string(byte1);
     }
     else
     {
-        (*logfile) << "<font color='red'>" << string(byte1) << "</font>";
+        log() << "<font color='red'>" << string(byte1) << "</font>";
     }
 
     if ((firstReg & 255) == (secordReg & 255))
     {
-        (*logfile) << string(byte2);
+        log() << string(byte2);
     }
     else
     {
-        (*logfile) << "<font color='red'>" << string(byte2) << "</font>";
+        log() << "<font color='red'>" << string(byte2) << "</font>";
     }
 }
 

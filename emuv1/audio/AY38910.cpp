@@ -43,15 +43,11 @@ AY38910::AY38910()
     bufferOffsetCopy = 0;
     bufferLevel = 1; // het eerste buffer is leeg geinitializeerd
 
-    csvFile = new fstream("audio.csv", ios::out);
-
     DBERR("AY38910 constructor...finished\n");
 }
 
 AY38910::~AY38910()
 {
-    csvFile->close();
-    delete csvFile;
     // destructor
     DBERR("AY38910 destroyed.\n");
 }

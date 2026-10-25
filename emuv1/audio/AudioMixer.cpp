@@ -109,14 +109,6 @@ L = 1024 / 82200 = 0,0125 seconds (100th of a second delay)
 
     lastFilterIn = 0;
     lastFilterOut = 0;
-
-    string filename = "rawaudio.out";
-    string fullpath = Debug::Instance()->getPath() + filename;
-    rawout = new fstream(fullpath.c_str(), ios::out | ios::binary | ios::trunc);
-    if (rawout->fail())
-    {
-        DBERR("Could not open raw audio output file: %s\n", filename.c_str());
-    }
 }
 
 void AudioMixer::determineAudioFormat(Uint16 format)
@@ -294,111 +286,6 @@ AudioMixer::~AudioMixer()
     {
         delete[] buffers[i];
     }
-
-    unsigned int fileSize = rawout->tellp(); // current write-pointer
-    rawout->close();
-    delete rawout;
-
-    string filename = "rawaudio.out";
-    string fullpath = Debug::Instance()->getPath() + filename;
-    rawout = new fstream(fullpath.c_str(), ios::in | ios::binary);
-    if (rawout->fail())
-    {
-        DBERR("Could not open raw audio input file for conversion: %s\n", filename.c_str());
-    }
-
-    if (fileSize > 0)
-    {
-        char* samples = new char[fileSize];
-        rawout->read(samples, fileSize);
-        rawout->close();
-
-        filename = "rawaudio.wav";
-        fullpath = Debug::Instance()->getPath() + filename;
-
-        FILE* aFile = fopen(fullpath.c_str(), "wb");
-        writeWav(aFile, samples, fileSize, 44100);
-        fclose(aFile);
-        delete[] samples;
-    }
-
-    delete rawout;
     // destructor
     DBERR("AudioMixer destroyed.\n");
-}
-
-
-/*
-   Write an WAVE sound file
-   Only do one channel, only support 16 bit.
-   Supports any (reasonable) sample frequency
-   Little/big endian independent!
-*/
-void AudioMixer::writeWav(FILE* fptr, char* samples, long nsamples, int nfreq)
-{
-    int i;
-    unsigned long totalsize, bytespersec;
-    nsamples = nsamples / 2; //bytesPerSample;
-
-    /* Write the form chunk */
-    fprintf(fptr, "RIFF");
-    totalsize = 2 * nsamples + 36;         //bytesPerSample * nsamples + 36;
-    fputc((totalsize & 0x000000ff), fptr); /* File size */
-    fputc((totalsize & 0x0000ff00) >> 8, fptr);
-    fputc((totalsize & 0x00ff0000) >> 16, fptr);
-    fputc((totalsize & 0xff000000) >> 24, fptr);
-    fprintf(fptr, "WAVE");
-    fprintf(fptr, "fmt "); /* fmt_ chunk */
-    fputc(16, fptr);       /* Chunk size */
-    fputc(0, fptr);
-    fputc(0, fptr);
-    fputc(0, fptr);
-    fputc(1, fptr); /* Format tag - uncompressed */
-    fputc(0, fptr);
-    fputc(1, fptr); /* Channels */
-    fputc(0, fptr);
-    fputc((nfreq & 0x000000ff), fptr); /* Sample frequency (Hz) */
-    fputc((nfreq & 0x0000ff00) >> 8, fptr);
-    fputc((nfreq & 0x00ff0000) >> 16, fptr);
-    fputc((nfreq & 0xff000000) >> 24, fptr);
-    bytespersec = 2 * nfreq;                 //bytesPerSample * nfreq;
-    fputc((bytespersec & 0x000000ff), fptr); /* Average bytes per second */
-    fputc((bytespersec & 0x0000ff00) >> 8, fptr);
-    fputc((bytespersec & 0x00ff0000) >> 16, fptr);
-    fputc((bytespersec & 0xff000000) >> 24, fptr);
-    fputc(2, fptr); /* Block alignment */
-    fputc(0, fptr);
-    //fputc(bytesPerSample*8,fptr);                /* Bits per sample */
-    fputc(2 * 8, fptr); /* Bits per sample */
-    fputc(0, fptr);
-    fprintf(fptr, "data");
-    //totalsize = bytesPerSample * nsamples;
-    totalsize = 2 * nsamples;
-    fputc((totalsize & 0x000000ff), fptr); /* Data size */
-    fputc((totalsize & 0x0000ff00) >> 8, fptr);
-    fputc((totalsize & 0x00ff0000) >> 16, fptr);
-    fputc((totalsize & 0xff000000) >> 24, fptr);
-
-    //if (bytesPerSample == 2) {
-    if (2 == 2)
-    {
-        unsigned int j = 0;
-        /* Write the data */
-        for (i = 0; i < nsamples; i++)
-        {
-            Uint8 byte1 = samples[j++];
-            Uint8 byte2 = samples[j++];
-            fputc((byte1 & 0x00ff), fptr);
-            fputc((byte2 & 0x00ff), fptr);
-        }
-    }
-    else
-    {
-        /* Write the data */
-        for (i = 0; i < nsamples; i++)
-        {
-            Uint8 byte1 = samples[i];
-            fputc((byte1 & 0x00ff), fptr);
-        }
-    }
 }

@@ -314,19 +314,6 @@ void Emulator::reset()
     vdp->reset(); // zet de lastNormalInterruptTime op emuTime
 }
 
-ofstream ofs("timereport.txt");
-
-void reportCyclesInit()
-{
-}
-
-void reportCycles(emuTimeType emuTime, unsigned long long msRunning)
-{
-    static int point = 0;
-    ofs << emuTime << ";" << msRunning << "\n";
-    point++;
-}
-
 void Emulator::start()
 {
     DBERR("entering main loop\n");
@@ -473,7 +460,6 @@ void Emulator::speedCheck()
 #ifndef ZEXALL_ON
     int slicesReleased = 0;
     msTimeType passedTime = OUR_SDL_GetTicks();
-    reportCycles(cpu->emuTime, passedTime); // log time+emutime for analysis
 
     /*
     Comparisons against emuTimeType are always done using a subtraction and conversion to int (signed type)
@@ -516,7 +502,6 @@ void Emulator::speedCheck()
         slicesReleased++;
     }
     //  if (slicesReleased > 0) DBERR("[%u]", slicesReleased);
-    reportCycles(cpu->emuTime, passedTime);
 #endif
 }
 

@@ -48,7 +48,6 @@ class AY38910 : public AudioDevice {
     static const nw_byte USE_ENVELOPE = 16;
 
 private:
-    std::fstream* csvFile;
 
     AY38910();
     nw_byte reg[16];

@@ -155,8 +155,10 @@ private:
 
     std::map<nw_word, std::string> symbolnames;
 
-public:
     std::ofstream* logfile;
+    std::ofstream& log();
+
+public:
     bool disassembling;
 
     ~Disassembler();
