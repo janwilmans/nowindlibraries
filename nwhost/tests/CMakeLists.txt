@@ -16,6 +16,6 @@ target_include_directories(nwhosttestsupport INTERFACE ${CMAKE_CURRENT_SOURCE_DI
                                                        ${CMAKE_CURRENT_SOURCE_DIR}/../../general)
 target_link_libraries(nwhosttestsupport INTERFACE nwhost nwgeneral GTest::gtest)
 
-ADD_EXECUTABLE(nwhosttests SupportTest.cpp)
+ADD_EXECUTABLE(nwhosttests SupportTest.cpp ResponseTest.cpp DataBlockTest.cpp BlockReadTest.cpp BlockWriteTest.cpp)
 target_link_libraries(nwhosttests nwhosttestsupport GTest::gtest_main)
 gtest_discover_tests(nwhosttests PROPERTIES LABELS unit)
