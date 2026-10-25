@@ -91,6 +91,16 @@ NWTEST_SHOW_SCREEN=1 prints the MSX screen at the end of each of them.
 Tests named DISABLED_ document a known mismatch or bug, see the comment above
 each; run them with --gtest_also_run_disabled_tests.
 
+With AddressSanitizer and UndefinedBehaviorSanitizer (leaks, buffer
+overruns, use after free, undefined behaviour; MSVC: AddressSanitizer only),
+in a build tree of its own:
+  cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DNOWIND_SANITIZE=ON -Bbuild/asan
+  cmake --build build/asan
+  cd build/asan && ctest --output-on-failure
+Undefined behaviour stops the program, so the test fails. The leaks that are
+known and not fixed yet are listed in cmake/lsan-suppressions.txt (ctest
+passes the file to the tests); remove an entry when its leak is fixed.
+
 
 Problems
 --------
