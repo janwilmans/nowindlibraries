@@ -1,4 +1,5 @@
-# bulk reformat with clang-format, ignore in git blame:
+# bulk reformats (clang-format, trailing whitespace), ignore in git blame:
 #   git config blame.ignoreRevsFile .git-blame-ignore-revs
 a982e78ef619ee3f890646af317b8307d2d80594
 bda4b5a54ef634999c7bff42de4b9c539c1a1926
+dadedda0536afb5470d3a64ade8b51c3a2d53338
