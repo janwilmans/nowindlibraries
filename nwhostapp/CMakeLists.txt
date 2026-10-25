@@ -8,7 +8,7 @@ target_compile_options(getopt PRIVATE $<IF:$<C_COMPILER_ID:MSVC>,/w,-w>)
 
 # the MACOSX_BUNDLE supports the make install feature, it is ignored on other platforms
 add_executable(nwhostapp MACOSX_BUNDLE mainUsbHost.cpp HostApp.cpp)
-target_link_libraries(nwhostapp PRIVATE nowind nwgeneral getopt project::warnings_options)
+target_link_libraries(nwhostapp PRIVATE nowind nwgeneral getopt project::warnings_options project::warning_suppressions)
 
 #--------------------------------------------------------------------------------
 # Now the installation stuff below

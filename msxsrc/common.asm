@@ -575,7 +575,7 @@ blockWrite01:
         ld d,(hl)
         ld c,(hl)                       ; number of bytes
         ld b,(hl)
-        ld a,(hl)                       ; block sequence number
+        ld b,(hl)                       ; block sequence number
 
         ex de,hl
         ld de,usbWritePage2

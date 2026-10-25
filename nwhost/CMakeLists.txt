@@ -6,6 +6,6 @@ add_library(nwhost STATIC
 target_include_directories(nwhost PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(nwhost PUBLIC NOWIND_STATIC_LIBS)
 # public: the headers include general's (PrintfFormat.h)
-target_link_libraries(nwhost PUBLIC nwgeneral PRIVATE project::warnings_options)
+target_link_libraries(nwhost PUBLIC nwgeneral PRIVATE project::warnings_options project::warning_suppressions)
 
 add_subdirectory(tests)

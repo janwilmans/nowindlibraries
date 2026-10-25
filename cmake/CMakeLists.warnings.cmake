@@ -48,9 +48,10 @@ if (MSVC)
 # "CMAKE_SHARED_LINKER_FLAGS": "/machine:x64 /guard:cf"
 
 
-  #  target_compile_options(define_project_warning_suppressions INTERFACE
-  #   /wd4244
-  #  )
+  target_compile_options(define_project_warning_suppressions INTERFACE
+    /wd4242
+    /wd4244
+   )
 else()
   # Linux, Windows (MinGW), macOS
   if(NOT APPLE)
