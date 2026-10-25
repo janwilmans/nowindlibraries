@@ -13,7 +13,7 @@ if (MSVC)
   string (REGEX REPLACE "/W3" "" CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}")
   string (REGEX REPLACE "/W3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
   string (REGEX REPLACE "/INCREMENTAL[:NO]*" "/INCREMENTAL:NO" CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}")
- 
+
   set(PROJECT_WARNING_DEFAULTS
     /W4            # Baseline reasonable warnings
     /w14242        # 'identifier': conversion from 'type1' to 'type2', possible loss of data
@@ -41,8 +41,8 @@ if (MSVC)
    target_compile_options(define_project_warning_options INTERFACE "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_WARNING_DEFAULTS}>")
 
 # investigate these flags:
-# "CMAKE_CXX_FLAGS": "/sdl /guard:cf /utf-8 /diagnostics:caret /w14165 /w44242 /w44254 /w44263 /w34265 /w34287 /w44296 /w44365 /w44388 /w44464 
-#   /w14545 /w14546 /w14547 /w14549 /w14555 /w34619 /w34640 /w24826 /w14905 /w14906 /w14928 /w45038 /W4 /permissive- /volatile:iso /Zc:inline /Zc:preprocessor 
+# "CMAKE_CXX_FLAGS": "/sdl /guard:cf /utf-8 /diagnostics:caret /w14165 /w44242 /w44254 /w44263 /w34265 /w34287 /w44296 /w44365 /w44388 /w44464
+#   /w14545 /w14546 /w14547 /w14549 /w14555 /w34619 /w34640 /w24826 /w14905 /w14906 /w14928 /w45038 /W4 /permissive- /volatile:iso /Zc:inline /Zc:preprocessor
 #   /Zc:enumTypes /Zc:lambda /Zc:__cplusplus /Zc:externConstexpr /Zc:throwingNew /EHsc",
 # "CMAKE_EXE_LINKER_FLAGS": "/machine:x64 /guard:cf",
 # "CMAKE_SHARED_LINKER_FLAGS": "/machine:x64 /guard:cf"
@@ -77,7 +77,10 @@ else()
     -Wmisleading-indentation
     -Wmissing-include-dirs
     -Wnull-dereference
-    -Wswitch-enum
+    # -Wswitch-enum is off: it wants a case for every enumerator even when there is a default, emuv1's key handling
+    # switches over SDLKey (hundreds of keys) gave about 1300 warnings; -Wswitch (in -Wall) still reports a missing
+    # case in a switch without a default
+    # -Wswitch-enum
     -Wunused
     -Wunused-variable
     -Wunused-parameter
