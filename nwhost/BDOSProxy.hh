@@ -58,7 +58,7 @@ private:
     long findFirstHandle;
     void getVectorFromFileName(std::vector<byte>& buffer, std::string filename);
     std::vector<std::fstream*> bdosFiles;
-    std::fstream* bdosfile;
+    std::fstream* bdosfile = nullptr;
 
     bool FindFileResponse(const Command& command, Response& response, size_t bufferSize);
     std::filesystem::directory_iterator findFirstIterator;

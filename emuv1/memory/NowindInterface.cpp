@@ -38,7 +38,7 @@ NowindInterface::NowindInterface(string filename)
 NowindInterface::~NowindInterface()
 {
     DBERR("NowindInterface (LIBNOWIND) destruction...\n");
-    //     nowindusb_cleanup();
+    nowindusb_cleanup();
 }
 
 void NowindInterface::insertDisk(int driveNr, string filename)

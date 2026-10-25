@@ -39,6 +39,8 @@ public:
     };
 
 private:
+    void deleteDataBlocks();
+
     word startAddress;
     word processedData;
     word transferSize;

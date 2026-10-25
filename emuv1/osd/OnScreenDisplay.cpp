@@ -90,7 +90,9 @@ void OnScreenDisplay::initializeFont()
     DBERR("fontHeight: %i\n", fontHeight);
     SDL_Color black = {0, 0, 0, 0};
     fontHeight = TTF_FontAscent(font);
-    for (int i = 0; i < 128; i++)
+    // NUL is never drawn; SDL_ttf has no surface for it and leaks a buffer when asked to render it
+    glyph[0] = glyphStructure{nullptr, 0, 0};
+    for (int i = 1; i < 128; i++)
     {
         glyph[i].surface = TTF_RenderGlyph_Blended(font, i, black);
         int fontMaxY;
@@ -100,6 +102,7 @@ void OnScreenDisplay::initializeFont()
         glyph[i].maxY = fontMaxY;
     }
     TTF_CloseFont(font);
+    TTF_Quit(); // the glyphs are SDL surfaces now, SDL_ttf is no longer needed
 }
 
 void OnScreenDisplay::toggleOSD(bool enable)

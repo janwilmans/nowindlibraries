@@ -35,6 +35,7 @@ public:
     };
 
 private:
+    void deleteDataBlocks();
     word getBytesLeft() { return mTransferSize - mRequestedData; }
 
     unsigned int mBeginTime; // used for calculating speeds (information only)

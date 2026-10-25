@@ -97,9 +97,7 @@ in a build tree of its own:
   cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DNOWIND_SANITIZE=ON -Bbuild/asan
   cmake --build build/asan
   cd build/asan && ctest --output-on-failure
-Undefined behaviour stops the program, so the test fails. The leaks that are
-known and not fixed yet are listed in cmake/lsan-suppressions.txt (ctest
-passes the file to the tests); remove an entry when its leak is fixed.
+A leak, a memory error or undefined behaviour makes the test fail.
 
 
 Problems

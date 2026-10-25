@@ -35,6 +35,16 @@ void BlockWrite::initialize(NowindHostSupport* aSupport)
 
 BlockWrite::~BlockWrite()
 {
+    deleteDataBlocks();
+}
+
+void BlockWrite::deleteDataBlocks()
+{
+    for (DataBlockWrite* dataBlock : mDataBlockQueue)
+    {
+        delete dataBlock;
+    }
+    mDataBlockQueue.clear();
 }
 
 bool BlockWrite::isDone() const
@@ -51,7 +61,7 @@ void BlockWrite::init(unsigned int mMsTime, word aStartAddress, word aSize, std:
     mReceivedData = 0;
     mRequestedData = 0;
     mDone = false;
-    mDataBlockQueue.clear();
+    deleteDataBlocks(); // the requests of a previous transfer that did not finish
 
     mBeginTime = mMsTime;
     mStartAddress = aStartAddress;

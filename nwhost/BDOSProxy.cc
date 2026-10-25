@@ -32,6 +32,7 @@ void BDOSProxy::initialize(NowindHostSupport* aSupport)
 
 BDOSProxy::~BDOSProxy()
 {
+    delete bdosfile;
 }
 
 void BDOSProxy::DiskReset(const Command& command, Response& response)
@@ -131,6 +132,7 @@ bool BDOSProxy::OpenFile(const Command& command, Response& response)
     // TODO: maybe handle DOS device names (e.g. con, lpt, aux)
     DBERR("BDOSProxy::OpenFile FCB for: %s\n", filename.c_str());
     //bdosFiles.push_back( new fstream(imageName.c_str(), ios::binary | ios::in);
+    delete bdosfile; // the file opened before
     bdosfile = new fstream(filename.c_str(), ios::binary | ios::in);
     bdosfile->seekg(0, ios::end);
     size_t filesize = bdosfile->tellg();

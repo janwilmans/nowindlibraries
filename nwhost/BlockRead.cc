@@ -21,6 +21,16 @@ void BlockRead::initialize(NowindHostSupport* aSupport)
 
 BlockRead::~BlockRead()
 {
+    deleteDataBlocks();
+}
+
+void BlockRead::deleteDataBlocks()
+{
+    for (DataBlock* dataBlock : dataBlockQueue)
+    {
+        delete dataBlock;
+    }
+    dataBlockQueue.clear();
 }
 
 bool BlockRead::isDone() const
@@ -69,11 +79,7 @@ void BlockRead::blockReadHelper(word startAddress, word size)
     //DBERR("BlockRead::blockReadHelper, size: 0x%02x, processedData: 0x%02x\n", size, processedData);
 
     // delete any blocks still in the dataBlockQueue (unacknowleged by msx, could be caused by timeout or disconnect)
-    for (unsigned int i = 0; i < dataBlockQueue.size(); i++)
-    {
-        delete dataBlockQueue[i];
-    }
-    dataBlockQueue.clear();
+    deleteDataBlocks();
 
     word address = startAddress;
     unsigned int offset = processedData; // an offset within 'const vector <byte >& data'
