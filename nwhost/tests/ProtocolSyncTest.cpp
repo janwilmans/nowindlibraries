@@ -52,7 +52,7 @@ std::string routine(const std::string& source, const std::string& label)
     std::regex nextLabel("\n[A-Za-z_][A-Za-z0-9_]*:");
     std::smatch match;
     std::string rest = source.substr(begin + 1 + label.size() + 1);
-    if (std::regex_search(rest, match, nextLabel)) rest = rest.substr(0, match.position());
+    if (std::regex_search(rest, match, nextLabel)) rest = rest.substr(0, static_cast<std::string::size_type>(match.position()));
     return rest;
 }
 
@@ -178,7 +178,10 @@ TEST(ProtocolSync, CommandCodesAreTheSameInRomAndHost)
     }
     for (const auto& [name, value] : rom)
     {
-        if (name.rfind("C_", 0) == 0) EXPECT_TRUE(hostCommands().count(name)) << name << " is not known by the host";
+        if (name.rfind("C_", 0) == 0)
+        {
+            EXPECT_TRUE(hostCommands().count(name)) << name << " is not known by the host";
+        }
     }
     EXPECT_EQ(rom.at("API_NOWMAP"), nwhost::NowindHost::API_NOWMAP);
 }
@@ -296,12 +299,12 @@ TEST(ProtocolSync, BlockReadCodesMatchBlockRead01And23)
     std::vector<std::string> expected01 = {"call getHeaderInPage2", "ret c", "cp 1", "jr z,.fastTransfer", "and a",
                                            "ret z", "cp 2", "ret nz"};
     ASSERT_GE(code01.size(), expected01.size());
-    EXPECT_EQ(std::vector<std::string>(code01.begin(), code01.begin() + expected01.size()), expected01);
+    EXPECT_EQ(std::vector<std::string>(code01.begin(), code01.begin() + std::ptrdiff_t(expected01.size())), expected01);
     std::vector<std::string> code23 = instructions(routine(readText(MSXSRC + "common.asm"), "blockRead23"));
     std::vector<std::string> expected23 = {"call getHeaderInPage0", "ret c", "cp 1", "jr z,.fastTransfer", "cp 2",
                                            "ret nz"};
     ASSERT_GE(code23.size(), expected23.size());
-    EXPECT_EQ(std::vector<std::string>(code23.begin(), code23.begin() + expected23.size()), expected23);
+    EXPECT_EQ(std::vector<std::string>(code23.begin(), code23.begin() + std::ptrdiff_t(expected23.size())), expected23);
 
     EXPECT_EQ(nwhost::BlockRead::BLOCKREAD_EXIT_MORE_DATE_AHEAD, 0);
     EXPECT_EQ(nwhost::BlockRead::BLOCKREAD_FASTTRANSFER, 1);
@@ -362,7 +365,8 @@ TEST(ProtocolSync, TheHostDpbMatchesTheRomsSupportedMedia)
         for (std::size_t i = 0; i < msxFloppyFormats().size(); ++i)
         {
             const FloppyFormat& format = msxFloppyFormats()[i];
-            std::vector<byte> romDpb(rom.begin() + offset + i * 18, rom.begin() + offset + (i + 1) * 18);
+            auto romDpbBegin = rom.begin() + std::ptrdiff_t(offset + i * 18);
+            std::vector<byte> romDpb(romDpbBegin, romDpbBegin + 18);
 
             MemoryDisk disk;
             Fat12Image::writeBootSector(disk.sector(0), format);

@@ -39,13 +39,13 @@ protected:
     // DSKIO read (nowindDriver.asm: sendRegisters, ld (hl),C_DSKIO, jp nc,blockRead)
     RomResult dskioRead(RomModel& model, byte drive, byte sectors, word sector, word address, byte media = 0xf9)
     {
-        msx->sendCommand(Regs().setA(drive).setBC(sectors * 256 + media).setDE(sector).setHL(address), nwhost::C_DSKIO);
+        msx->sendCommand(Regs().setA(drive).setBC(word(sectors * 256 + media)).setDE(sector).setHL(address), nwhost::C_DSKIO);
         return model.blockRead(address);
     }
 
     RomResult dskioWrite(RomModel& model, byte drive, byte sectors, word sector, word address, byte media = 0xf9)
     {
-        msx->sendCommand(Regs().setA(drive).setF(CARRY).setBC(sectors * 256 + media).setDE(sector).setHL(address),
+        msx->sendCommand(Regs().setA(drive).setF(CARRY).setBC(word(sectors * 256 + media)).setDE(sector).setHL(address),
                          nwhost::C_DSKIO);
         return model.blockWrite(address);
     }

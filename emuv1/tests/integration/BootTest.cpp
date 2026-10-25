@@ -150,7 +150,7 @@ protected:
     {
         if (std::getenv("NWTEST_SHOW_SCREEN") && V9938::Instance())
         {
-            std::cout << "after " << Z80::Instance()->emuTime / double(Z80::Instance()->cpuFrequency)
+            std::cout << "after " << static_cast<double>(Z80::Instance()->emuTime) / static_cast<double>(Z80::Instance()->cpuFrequency)
                       << " s emulated:\n" << screen() << std::endl;
         }
     }

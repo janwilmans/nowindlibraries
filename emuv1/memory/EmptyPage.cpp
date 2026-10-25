@@ -22,7 +22,7 @@ EmptyPage::EmptyPage()
     // store a pointer to this object in a static variable (in MemoryDevice)
     emptyPage = this;
 
-    DBERR("--emptyPage: %p\n", emptyPage);
+    DBERR("--emptyPage: %p\n", static_cast<void*>(emptyPage));
 }
 
 nw_byte EmptyPage::read(nw_word address)

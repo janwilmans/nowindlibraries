@@ -40,11 +40,9 @@ if(NOWIND_SANITIZE)
   endif()
 endif()
 
-# check the arguments of the printf-style logging functions (NW_PRINTF_FORMAT in general/PrintfFormat.h), the only
-# place left where 32-bit assumptions (pointers or sizes printed as unsigned int) would go unnoticed
-if(NOT MSVC)
-  add_compile_options(-Wformat)
-endif()
+# project::warnings_options, linked by this project's own targets; it includes -Wformat=2, which checks the
+# arguments of the printf-style logging functions (NW_PRINTF_FORMAT in general/PrintfFormat.h)
+include(cmake/CMakeLists.warnings.cmake)
 
 add_subdirectory(general)
 add_subdirectory(nwhost)

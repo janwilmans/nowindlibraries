@@ -1,10 +1,12 @@
+# the warnings for this project's own code: link project::warnings_options to a target to turn them on
+# (third-party code, such as sjasm and the glibc getopt copy in nwhostapp, stays without them)
 add_library(define_project_warning_options INTERFACE)
 add_library(project::warnings_options ALIAS define_project_warning_options)
 add_library(define_project_warning_suppressions INTERFACE)
 add_library(project::warning_suppressions ALIAS define_project_warning_suppressions)
 
 if (MSVC)
-  # replace /Zx with /Z7 for tooling compatibility (Incredibuild and stashed.io)
+  # replace /Zi and /ZI with /Z7 for tooling compatibility (Incredibuild and stashed.io)
   string(REGEX REPLACE "/Z[iI7]" "/Z7" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
   string(REGEX REPLACE "/Z[iI7]" "/Z7" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
 
@@ -14,7 +16,7 @@ if (MSVC)
  
   set(PROJECT_WARNING_DEFAULTS
     /W4            # Baseline reasonable warnings
-    /w14242        # 'identifier': conversion from 'type1' to 'type1', possible loss of data
+    /w14242        # 'identifier': conversion from 'type1' to 'type2', possible loss of data
     /w14254        # 'operator': conversion from 'type1:field_bits' to 'type2:field_bits', possible loss of data
     /w14263        # 'function': member function does not override any base class virtual member function
     /w14265        # 'classname': class has virtual functions, but destructor is not virtual instances of this class may not
@@ -50,10 +52,14 @@ if (MSVC)
   #   /wd4244
   #  )
 else()
-  # Linux, Windows (MinGW)
-  set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}    -Wl,--no-undefined")
-  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
-  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-undefined")
+  # Linux, Windows (MinGW), macOS
+  if(NOT APPLE)
+    # report unresolved symbols when linking a shared library too (the macOS linker has no --no-undefined, it
+    # already does this by default)
+    set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}    -Wl,--no-undefined")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-undefined")
+  endif()
 
   target_compile_options(define_project_warning_options INTERFACE
     -Wall

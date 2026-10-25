@@ -152,7 +152,7 @@ private:
     void fastTransfer(RomResult& result)
     {
         nwhost::word sp = in();
-        sp |= in() << 8;
+        sp |= nwhost::word(in()) << 8;
         nwhost::byte blocks = in();
         do
         {
@@ -183,9 +183,9 @@ private:
     void slowTransfer(RomResult& result)
     {
         nwhost::word address = in();
-        address |= in() << 8;
+        address |= nwhost::word(in()) << 8;
         unsigned length = in();
-        length |= in() << 8;
+        length |= unsigned(in()) << 8;
         in(); // header
         if (length == 0) length = 0x10000; // ldir with bc = 0
         for (unsigned i = 0; i < length; ++i) memory.bytes[(address + i) & 0xffff] = in();
@@ -213,9 +213,9 @@ private:
                 return;
             }
             nwhost::word address = in();
-            address |= in() << 8;
+            address |= nwhost::word(in()) << 8;
             unsigned length = in();
-            length |= in() << 8;
+            length |= unsigned(in()) << 8;
             nwhost::byte sequence = in();
             port.write(sequence);
             for (unsigned i = 0; i < length; ++i) port.write(memory.bytes[(address + i) & 0xffff]);

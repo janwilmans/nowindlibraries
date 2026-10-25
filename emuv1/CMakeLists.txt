@@ -32,15 +32,17 @@ target_include_directories(emuv1lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ../genera
 if(WIN32)
   target_compile_definitions(emuv1lib PUBLIC _CRT_SECURE_NO_DEPRECATE)
 endif()
-target_link_libraries(emuv1lib PUBLIC nwhost nwgeneral ${SDL_LIBRARIES} ${SDL_TTF_LIBRARIES})
+target_link_libraries(emuv1lib PUBLIC nwhost nwgeneral ${SDL_LIBRARIES} ${SDL_TTF_LIBRARIES} PRIVATE project::warnings_options)
 
 ADD_EXECUTABLE(emuv1 maincons.cpp)
 if(WIN32)
   # msvcrt has no getopt, use the copy bundled with nwhostapp
   target_sources(emuv1 PRIVATE ../nwhostapp/getopt.c ../nwhostapp/getopt1.c)
   target_include_directories(emuv1 PRIVATE ../nwhostapp)
+  # a copy from glibc (third-party), without the project warnings
+  set_source_files_properties(../nwhostapp/getopt.c ../nwhostapp/getopt1.c PROPERTIES COMPILE_OPTIONS /w)
 endif()
-target_link_libraries(emuv1 emuv1lib)
+target_link_libraries(emuv1 emuv1lib project::warnings_options)
 
 INSTALL(TARGETS emuv1 RUNTIME DESTINATION bin COMPONENT Runtime)
 

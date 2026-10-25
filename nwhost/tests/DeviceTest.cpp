@@ -26,7 +26,7 @@ protected:
     // open (device.asm): D = device code, E = file mode, HL = FCB, then the 11 byte FILNAM ("NAME    EXT")
     void open(const std::string& name, byte mode, byte device = 0x24)
     {
-        msx->sendCommand(Regs().setDE(device * 256 + mode).setHL(FCB), nwhost::C_DEVICEOPEN);
+        msx->sendCommand(Regs().setDE(word(device * 256 + mode)).setHL(FCB), nwhost::C_DEVICEOPEN);
         std::string filnam = name;
         filnam.resize(11, ' ');
         msx->send(std::vector<byte>(filnam.begin(), filnam.end()));

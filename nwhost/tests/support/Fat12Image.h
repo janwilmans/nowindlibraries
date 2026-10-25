@@ -98,7 +98,7 @@ public:
     }
 
     unsigned firstFatSector() const { return 1; }
-    unsigned firstDirSector() const { return 1 + format.fats * format.sectorsPerFat; }
+    unsigned firstDirSector() const { return 1u + unsigned(format.fats) * format.sectorsPerFat; }
     unsigned dirSectors() const { return (format.rootEntries * 32 + SECTOR_SIZE - 1) / SECTOR_SIZE; }
     unsigned firstDataSector() const { return firstDirSector() + dirSectors(); }
     unsigned clusterCount() const { return (format.totalSectors - firstDataSector()) / format.sectorsPerCluster; }
@@ -122,7 +122,7 @@ public:
             previous = cluster;
             std::size_t offset = std::size_t(i) * clusterSize();
             std::size_t size = std::min<std::size_t>(clusterSize(), content.size() - offset);
-            std::copy_n(content.begin() + offset, size, &data[clusterSector(cluster) * SECTOR_SIZE]);
+            std::copy_n(content.begin() + std::ptrdiff_t(offset), size, &data[clusterSector(cluster) * SECTOR_SIZE]);
         }
         std::fill(entry, entry + 32, 0);
         std::string dirName = toDirName(name);

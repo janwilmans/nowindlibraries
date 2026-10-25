@@ -20,4 +20,4 @@ endif()
 
 MESSAGE ("find_library FTDI: ${FTDI_LIB}")
 
-target_link_libraries(ftdx PUBLIC ${FTDI_LIB})
+target_link_libraries(ftdx PUBLIC ${FTDI_LIB} PRIVATE project::warnings_options)

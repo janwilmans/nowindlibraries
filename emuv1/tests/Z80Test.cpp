@@ -101,8 +101,8 @@ INSTANTIATE_TEST_SUITE_P(Z80, Z80AluTest,
                                            AluCase{"cp equal", 0xfe, 0x10, 0, 0x10, 0x10, Z | N},
                                            AluCase{"cp xy from operand", 0xfe, 0x28, 0, 0x28, 0x28, Z | Y | X | N},
                                            AluCase{"cp less", 0xfe, 0x01, 0, 0x02, 0x01, S | H | N | C}),
-                         [](const ::testing::TestParamInfo<AluCase>& info) {
-                             std::string name = info.param.name;
+                         [](const ::testing::TestParamInfo<AluCase>& paramInfo) {
+                             std::string name = paramInfo.param.name;
                              for (char& c : name)
                                  if (c == ' ') c = '_';
                              return name;
@@ -176,13 +176,13 @@ TEST_F(Z80Test, CbBitSetResAndShift)
 
 TEST_F(Z80Test, LdirCopiesAndClearsBc)
 {
-    for (int i = 0; i < 5; ++i) z80.ram[0xd000 + i] = nw_byte('a' + i);
+    for (unsigned i = 0; i < 5; ++i) z80.ram[0xd000 + i] = nw_byte('a' + i);
     z80.hl() = 0xd000;
     z80.de() = 0xe000;
     z80.setBC(5);
     z80.load({0xed, 0xb0, 0x00}); // ldir / nop
     ASSERT_TRUE(z80.runUntil(0xc002));
-    for (int i = 0; i < 5; ++i) EXPECT_EQ(z80.ram[0xe000 + i], 'a' + i);
+    for (unsigned i = 0; i < 5; ++i) EXPECT_EQ(z80.ram[0xe000 + i], nw_byte('a' + i));
     EXPECT_EQ(z80.bc(), 0u);
     EXPECT_EQ(z80.hl(), 0xd005u);
     EXPECT_EQ(z80.de(), 0xe005u);
@@ -191,7 +191,7 @@ TEST_F(Z80Test, LdirCopiesAndClearsBc)
 
 TEST_F(Z80Test, CpirStopsAtTheByte)
 {
-    for (int i = 0; i < 5; ++i) z80.ram[0xd000 + i] = nw_byte('A' + i);
+    for (unsigned i = 0; i < 5; ++i) z80.ram[0xd000 + i] = nw_byte('A' + i);
     z80.hl() = 0xd000;
     z80.setBC(5);
     z80.a() = 'C';

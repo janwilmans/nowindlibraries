@@ -67,6 +67,8 @@ protected:
 };
 
 const nw_byte SLOT2 = 0xaa; // slot 2 in all pages
+// AF 05, the registers (c b e d l h f a = 1: MSX2), C_GETDOSVERSION
+const nw_byte GETDOSVERSION_FRAME[] = {0xaf, 0x05, 0, 0, 0, 0, 0, 0, 0, 1, 0x92};
 const nw_byte SLOT3 = 0xff;
 
 } // namespace
@@ -160,18 +162,18 @@ TEST_F(MachineTest, WritesTo4000ReachTheHostAndRepliesAreReadAt2000And8000)
     // or at 0x8000 (nowind in page 2)
     selectSlots(SLOT2, 0x00);
     while (read(0x2000) != 0xff || read(0x2000) != 0xff) {} // drain anything left
-    for (nw_byte value : {0xaf, 0x05, 0, 0, 0, 0, 0, 0, 0, 1, 0x92}) write(0x4000, value); // GETDOSVERSION, MSX2
+    for (nw_byte value : GETDOSVERSION_FRAME) write(0x4000, value);
     EXPECT_EQ(read(0x2000, 4), (std::vector<nw_byte>{0xff, 0xaf, 0x05, 1})) << "DOS1, DOS2 is off in this machine";
     EXPECT_EQ(read(0x2000), 0xff) << "empty";
 
-    for (nw_byte value : {0xaf, 0x05, 0, 0, 0, 0, 0, 0, 0, 1, 0x92}) write(0x8000, value);
+    for (nw_byte value : GETDOSVERSION_FRAME) write(0x8000, value);
     EXPECT_EQ(read(0x8000, 4), (std::vector<nw_byte>{0xff, 0xaf, 0x05, 1}));
 }
 
 TEST_F(MachineTest, TheUsbWindowIsOnlyThereWhenNowindIsSelected)
 {
     selectSlots(SLOT2, 0x00);
-    for (nw_byte value : {0xaf, 0x05, 0, 0, 0, 0, 0, 0, 0, 1, 0x92}) write(0x4000, value);
+    for (nw_byte value : GETDOSVERSION_FRAME) write(0x4000, value);
     selectSlots(nw_byte(0xaa & ~0x03), 0x00); // the main ROM in page 0
     EXPECT_EQ(read(0x2000), mainRom[0x2000]);
     selectSlots(SLOT2, 0x01); // nowind's slot in page 0, but another sub slot

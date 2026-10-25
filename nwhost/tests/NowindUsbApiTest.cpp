@@ -131,7 +131,7 @@ TEST_F(NowindUsbApiTest, HarddiskAutodetectInsertsTheBootablePartitionFirst)
 {
     // partition number 0xFF: all partitions, the bootable one in the first drive
     std::vector<std::uint8_t> image(64 * 512);
-    auto entry = [&](int p, std::uint8_t flags, std::uint8_t start) {
+    auto entry = [&](std::size_t p, std::uint8_t flags, std::uint8_t start) {
         image[0x1ee - p * 16] = flags;
         image[0x1ee - p * 16 + 8] = start;
         image[0x1ee - p * 16 + 12] = 10;

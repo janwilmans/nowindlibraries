@@ -15,7 +15,9 @@ if(WIN32)
   target_include_directories(nwhostapp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
-target_link_libraries(nwhostapp nowind nwhost ftdx nwgeneral)
+target_link_libraries(nwhostapp nowind nwhost ftdx nwgeneral project::warnings_options)
+# getopt*.c are a copy from glibc (third-party), without the project warnings
+set_source_files_properties(getopt.c getopt1.c PROPERTIES COMPILE_OPTIONS $<IF:$<C_COMPILER_ID:MSVC>,/w,-w>)
 
 #--------------------------------------------------------------------------------
 # Now the installation stuff below
