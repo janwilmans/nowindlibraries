@@ -32,6 +32,10 @@ public:
         cpu->emuTime = 0;
     }
 
+    // for tests on the configured machine (SlotSelector::configure): the CPU reads and writes through the slots
+    static void useSlotSelector() { Z80::Instance()->slotSelector = SlotSelector::Instance(); }
+    static Mapper* mapper() { return Z80::Instance()->mapper; }
+
     // puts code at the program counter
     void load(std::initializer_list<nw_byte> code, nw_word address = 0xc000)
     {
