@@ -25,6 +25,7 @@ add_subdirectory(nwhost)
 add_subdirectory(ftdx)
 add_subdirectory(nowind)
 add_subdirectory(nwhostapp)
+add_subdirectory(emuv1)
 
 if(${CMAKE_SIZEOF_VOID_P} EQUAL 4)
    set(TARGETBITS 32)
