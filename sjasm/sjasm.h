@@ -61,6 +61,7 @@
 #endif
 
 #include <time.h>
+#include <cstring>
 #include <list>
 #include <stack>
 #include <vector>

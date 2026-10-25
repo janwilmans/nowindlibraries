@@ -121,7 +121,7 @@ StringList RawSource::ReadUntil(StringList lnest, StringList lend, string unex) 
 
 string RawSource::_KillComments() {
   char ochar=listopt._char;
-  unsigned pos,af=0;
+  size_t pos,af=0;
   string res="";
   istring p,op;
 
@@ -229,7 +229,7 @@ void RawSource::_Group2(string &line) {
 
 void RawSource::_CutLines(string &line) {
   string res="";
-  unsigned pos;
+  size_t pos;
   while ('o') {
     pos=(int)line.find_first_of("\\\"'");
     if (pos) res+=line.substr(0,pos);

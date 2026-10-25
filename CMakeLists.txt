@@ -23,6 +23,8 @@ set(CMAKE_INSTALL_RPATH "\$ORIGIN")
 # lets ctest in the build directory find the unit tests
 enable_testing()
 
+add_subdirectory(sjasm)
+add_subdirectory(msxsrc)
 add_subdirectory(general)
 add_subdirectory(nwhost)
 add_subdirectory(ftdx)
