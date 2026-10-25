@@ -102,6 +102,10 @@ private:
     void calculateNextLineInterrupt();
 
 public:
+    // for the tests: read-only access to the video memory and the registers
+    const nw_byte* getVideoRam() const { return videoRam; }
+    nw_byte getRegister(unsigned int reg) const { return vdpReg[reg]; }
+
     void scheduleNextVDPInterrupt();
     unsigned int MSXscreen[544 * 214];
 

@@ -358,67 +358,7 @@ void Emulator::start()
         {
             scheduleNextInterrupt();
             cpu->executeInstructions();
-            /* Interrupt reached, find out which one */
-
-            /* neem de VALUE waarin het type interrupt staat */
-            switch (interruptType)
-            {
-            case INT_VDP:
-
-                switch (clipboardTimer)
-                {
-                case 0: {
-                    int i = clipboardStream.length();
-                    if (i > 0)
-                    {
-                        clipboardKey = clipboardStream[0];
-                        clipboardStream = clipboardStream.substr(1, i - 1);
-                        Keyboard::Instance()->modifyMatrixAscii(clipboardKey, true);
-                        clipboardTimer = 1;
-                    }
-                    break;
-                }
-                case 1:
-                    Keyboard::Instance()->modifyMatrixAscii(clipboardKey, false);
-                    clipboardTimer--;
-                    break;
-                default:
-                    clipboardTimer--;
-                }
-
-
-                // DBERR("execute INT_VDP\n");
-                cpu->intCPU(0xff);
-
-                // TODO: misschien ergens anders neerzetten, voor fmpac logging
-                // YM2413::Instance()->dumpChannelsBeat();
-                break;
-
-            case INT_RENDERSCREEN: {
-#ifndef CONSOLE_DEBUGGING_ON
-                /* handle key/sdl events */
-                handle_key_and_sdl_events();
-
-                //DBERR("execute INT_RENDERSCREEN\n");
-                vdp->renderScreen(cpu->nextInterrupt);
-#endif
-                /* check if we're not going to fast */
-                speedCheck();
-
-                if (autoPause) notPaused = false;
-                break;
-            }
-            case INT_SCREENCHANGE:
-                //DBERR("execute INT_SCREENCHANGE\n");
-                vdp->doScreenChange(cpu->nextInterrupt);
-                break;
-            case INT_AUDIO:
-                AudioMixer::Instance()->AudioInterrupt(cpu->nextInterrupt);
-                break;
-
-            default:
-                assert(false);
-            }
+            handleInterrupt(true);
         } // end of while(notPaused)
 
         DBERR("pause pressed!\n");
@@ -435,6 +375,94 @@ void Emulator::start()
 
     /* classes Z80, VDP, AY38910 etc... will die on their own, they're singletons ;) */
     SDL_Quit();
+}
+
+/* handles the interrupt that ended cpu->executeInstructions(); realTime: process SDL events and slow down to the
+ * real speed of an MSX (false for the tests, see runFor) */
+void Emulator::handleInterrupt(bool realTime)
+{
+    /* Interrupt reached, find out which one */
+
+    /* neem de VALUE waarin het type interrupt staat */
+    switch (interruptType)
+    {
+    case INT_VDP:
+
+        switch (clipboardTimer)
+        {
+        case 0: {
+            int i = clipboardStream.length();
+            if (i > 0)
+            {
+                clipboardKey = clipboardStream[0];
+                clipboardStream = clipboardStream.substr(1, i - 1);
+                Keyboard::Instance()->modifyMatrixAscii(clipboardKey, true);
+                clipboardTimer = 1;
+            }
+            break;
+        }
+        case 1:
+            Keyboard::Instance()->modifyMatrixAscii(clipboardKey, false);
+            clipboardTimer--;
+            break;
+        default:
+            clipboardTimer--;
+        }
+
+
+        // DBERR("execute INT_VDP\n");
+        cpu->intCPU(0xff);
+
+        // TODO: misschien ergens anders neerzetten, voor fmpac logging
+        // YM2413::Instance()->dumpChannelsBeat();
+        break;
+
+    case INT_RENDERSCREEN: {
+#ifndef CONSOLE_DEBUGGING_ON
+        /* handle key/sdl events */
+        if (realTime) handle_key_and_sdl_events();
+
+        //DBERR("execute INT_RENDERSCREEN\n");
+        vdp->renderScreen(cpu->nextInterrupt);
+#endif
+        if (realTime)
+        {
+            /* check if we're not going to fast */
+            speedCheck();
+
+            if (autoPause) notPaused = false;
+        }
+        break;
+    }
+    case INT_SCREENCHANGE:
+        //DBERR("execute INT_SCREENCHANGE\n");
+        vdp->doScreenChange(cpu->nextInterrupt);
+        break;
+    case INT_AUDIO:
+        AudioMixer::Instance()->AudioInterrupt(cpu->nextInterrupt);
+        break;
+
+    default:
+        assert(false);
+    }
+}
+
+// runs the emulation for an amount of emulated time, without the SDL event loop and as fast as possible (the tests)
+void Emulator::runFor(unsigned int milliseconds)
+{
+    emuTimeType end = cpu->emuTime + emuTimeType(milliseconds) * (cpu->cpuFrequency / 1000);
+    while ((long long)(end - cpu->emuTime) > 0)
+    {
+        scheduleNextInterrupt();
+        cpu->executeInstructions();
+        handleInterrupt(false);
+    }
+}
+
+// types the text on the MSX keyboard, one key per VDP interrupt (like pasting from the clipboard)
+void Emulator::typeText(const std::string& text)
+{
+    clipboardStream += text;
 }
 
 /* release time-slices until the average is back in range 

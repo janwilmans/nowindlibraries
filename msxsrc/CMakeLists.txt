@@ -23,6 +23,30 @@ add_custom_command(
     VERBATIM)
 add_custom_target(nowindrom ALL DEPENDS ${NOWIND_ROM})
 
+# NOWMAP.COM, the MSX-DOS tool that uses the ROM's EXTBIO API (built like make.bat does, from this directory)
+set(NOWMAP_COM ${STAGE}/msxsrc/msxdostools/nowmap.com)
+# the repository has asmlibs/String, nowmap.asm includes asmlibs/string (the staged copy is lower case)
+set(NOWMAP_INPUTS msxdostools/nowmap.asm asmlibs/macros.inc asmlibs/bdos/bdos.inc asmlibs/String/string.asm)
+list(TRANSFORM NOWMAP_INPUTS PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/ OUTPUT_VARIABLE NOWMAP_SOURCES)
+# sjasm finds the includes relative to the source file only with the native separator in its name (\ on windows)
+file(TO_NATIVE_PATH msxdostools/nowmap.asm NOWMAP_ASM)
+add_custom_command(
+    OUTPUT ${NOWMAP_COM}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE}/msxsrc/msxdostools ${STAGE}/msxsrc/asmlibs/bdos
+            ${STAGE}/msxsrc/asmlibs/string
+    COMMAND ${CMAKE_COMMAND} -E copy ${ASM_SOURCES} ${STAGE}/msxsrc
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/msxdostools/nowmap.asm ${STAGE}/msxsrc/msxdostools
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/asmlibs/macros.inc ${STAGE}/msxsrc/asmlibs
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/asmlibs/bdos/bdos.inc ${STAGE}/msxsrc/asmlibs/bdos
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/asmlibs/String/string.asm ${STAGE}/msxsrc/asmlibs/string
+    COMMAND $<TARGET_FILE:sjasm> ${NOWMAP_ASM}
+    WORKING_DIRECTORY ${STAGE}/msxsrc
+    DEPENDS sjasm ${ASM_SOURCES} ${NOWMAP_SOURCES}
+    COMMENT "Assembling NOWMAP.COM from msxsrc/msxdostools"
+    VERBATIM)
+add_custom_target(nowmapcom ALL DEPENDS ${NOWMAP_COM})
+set(NOWMAP_COM ${NOWMAP_COM} PARENT_SCOPE)
+
 # for the tests
 set(NOWIND_ROM ${NOWIND_ROM} PARENT_SCOPE)
 set(NOWIND_ROM_SYMBOLS ${NOWIND_ROM_SYMBOLS} PARENT_SCOPE)

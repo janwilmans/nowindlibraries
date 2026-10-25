@@ -33,6 +33,7 @@ private:
     Emulator();
     static void handle_key_and_sdl_events();
     void scheduleNextInterrupt();
+    void handleInterrupt(bool realTime);
     void speedCheck();
 
     emuTimeType newVDPInterruptTime;
@@ -80,6 +81,8 @@ public:
     static Emulator* Instance();
     void initialize();
     void start();
+    void runFor(unsigned int milliseconds);
+    void typeText(const std::string& text);
     void reset();
     static void quit();
     ~Emulator();
