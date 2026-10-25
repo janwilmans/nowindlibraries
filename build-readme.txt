@@ -1,5 +1,5 @@
-Building the nowind libraries, nwhostapp and emuv1
-=================================================
+Building the nowind libraries, nwhostapp, emuv1 and the tests
+============================================================
 
 The build uses CMake (3.23 or newer) and needs a C++23 compiler.
 Two build trees are created, build/debug and build/release (RelWithDebInfo);
@@ -46,11 +46,8 @@ build.
 Optional, for emuv1 (the SDL based MSX emulator, it is skipped when SDL 1.2
 or SDL_ttf is not found):
   sudo apt install libsdl1.2-dev libsdl-ttf2.0-dev
-and for the emuv1 unit tests (emuv1/tests, skipped when googletest is not
-found):
+and for the tests (skipped when googletest is not found, see Tests below):
   sudo apt install libgtest-dev
-run them with ctest from a build tree:
-  cd build/debug && ctest --output-on-failure
 
 Build:
   ./build.sh
@@ -74,6 +71,25 @@ Prerequisites:
 
 Build:
   ./build.sh
+
+
+Tests
+-----
+The build also assembles the nowind ROM and NOWMAP.COM from msxsrc, with the
+Sjasm 0.42c in sjasm/, the tests use those. With googletest installed (and SDL
+for the emuv1 tests) ctest runs them from a build tree:
+  cd build/debug && ctest --output-on-failure
+or one group, by label:
+  ctest -L unit          nwhost and emuv1 unit tests
+  ctest -L sync          the host (nwhost) against the ROM sources (msxsrc)
+  ctest -L integration   boots the emulated MSX2 with the nowind ROM against
+                         nwhost (MSX-DOS 1 and 2, DIR, COPY, the romdisk)
+The integration tests need a process each (the emulator is made of
+singletons), ctest does that; to run one by hand:
+  build/debug/emuv1/tests/emuv1integrationtests --gtest_filter=BootTest.DirListsTheDisk
+NWTEST_SHOW_SCREEN=1 prints the MSX screen at the end of each of them.
+Tests named DISABLED_ document a known mismatch or bug, see the comment above
+each; run them with --gtest_also_run_disabled_tests.
 
 
 Problems
