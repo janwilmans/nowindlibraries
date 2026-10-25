@@ -16,7 +16,9 @@ public:
 
 TEST(RamBlock, StartsZeroed)
 {
+    layoutType layout;
     TestableRamBlock ram(0x4000);
+    ram.install(layout, 0, 0, 0x0000); // sets the offset that at() subtracts
     EXPECT_EQ(ram.getIdString(), "RamBlock");
     for (nw_word address = 0; address < 0x4000; ++address)
     {

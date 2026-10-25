@@ -25,6 +25,23 @@ enable_testing()
 
 add_subdirectory(sjasm)
 add_subdirectory(msxsrc)
+
+# finds leaks, buffer overruns, use after free and undefined behaviour at run time, also in the tests; after sjasm
+# (third-party, a short-lived build tool with harmless leaks) and msxsrc, so they are built without it
+option(NOWIND_SANITIZE "Build with AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
+if(NOWIND_SANITIZE)
+  if(MSVC)
+    # MSVC has no UndefinedBehaviorSanitizer
+    add_compile_options(/fsanitize=address)
+  else()
+    # undefined behaviour stops the program, so a test with undefined behaviour fails
+    add_compile_options(-fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address,undefined)
+    # the leaks that are known and not fixed yet
+    set(NOWIND_TEST_ENVIRONMENT "LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/cmake/lsan-suppressions.txt")
+  endif()
+endif()
+
 add_subdirectory(general)
 add_subdirectory(nwhost)
 add_subdirectory(ftdx)

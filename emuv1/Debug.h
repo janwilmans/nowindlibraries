@@ -8,7 +8,6 @@
 #include <fstream>
 #include <string>
 
-#include "TraceAllocInclude.h"
 
 /* when ON enables writing of debugging info to stdout/stderr 
 (or stdout.txt and stderr.txt) */

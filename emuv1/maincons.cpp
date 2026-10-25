@@ -62,7 +62,6 @@ using namespace std;
 
 */
 
-void exitRoutine();
 
 class TestA {
     int a;
@@ -315,25 +314,7 @@ int main(int argc, char* argv[])
 #endif
 
 
-    /* install an exit handler */
-    atexit(exitRoutine); //(&Emulator::quit);
-
     DBERR("Nowind v1.0\n");
-
-    /*
-    // CheckSanity();
-    TestA * t = new TestA();
-    unsigned int * bvp = (unsigned int *) t;
-    bvp--;
-    unsigned int bv = *bvp;
-
-    unsigned char * evp = (unsigned char *) t;
-    evp =  evp + sizeof(t);
-    unsigned int * evp2 = (unsigned int *) evp;
-    unsigned int ev = *evp2;
-    // *bvp = 1;
-    // CheckSanity();
-    */
 
     DBERR("Emulator initializing...\n");
     Emulator::Instance()->initialize(); // this constructs EVERYTHING
@@ -365,11 +346,4 @@ int main(int argc, char* argv[])
 
     /* exit program */
     return 0;
-}
-
-void exitRoutine()
-{
-#ifndef NO_TRACEALLOCATOR
-    DumpReport();
-#endif
 }

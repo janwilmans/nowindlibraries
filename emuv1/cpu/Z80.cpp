@@ -83,7 +83,6 @@ void Z80::initialize()
     slotSelector = SlotSelector::Instance();
     slotSelector->configure(Config::Instance()->msxVersion);
 
-    //CheckSanity();
     DBERR("Cpu initialized...\n");
 }
 
@@ -281,7 +280,6 @@ void Z80::abortEmulator()
 // put the localemutime back into global emutime at exit of executeInstructions()
 void Z80::executeInstructions()
 {
-    //CheckSanity();
     // TODO: 1 instruction is always executed before the next interrupt occurs,
     // this is sometimes usefull, but not accurate.. why did we do that ?
     // see also Emulator::setCPUInterrupt

@@ -12,7 +12,7 @@ ADD_EXECUTABLE(emuv1tests RamBlockTest.cpp Z80Test.cpp DisassemblerTest.cpp)
 target_link_libraries(emuv1tests emuv1lib GTest::gtest_main)
 
 include(GoogleTest)
-gtest_discover_tests(emuv1tests PROPERTIES LABELS unit)
+gtest_discover_tests(emuv1tests PROPERTIES LABELS unit ENVIRONMENT "${NOWIND_TEST_ENVIRONMENT}")
 
 # a directory laid out like the repository, for the machine and the integration tests: emuv1 loads ../roms/*.ROM,
 # ../msxsrc/nowind.rom (here the ROM assembled from msxsrc) and ../disks/dos2.dsk relative to its directory (emu/),
@@ -38,7 +38,7 @@ ADD_EXECUTABLE(emuv1machinetests MachineTest.cpp)
 target_link_libraries(emuv1machinetests emuv1lib GTest::gtest_main)
 target_compile_definitions(emuv1machinetests PRIVATE EMUV1_STAGE="${EMUV1_STAGE}")
 add_dependencies(emuv1machinetests emuv1stage)
-gtest_discover_tests(emuv1machinetests PROPERTIES LABELS unit)
+gtest_discover_tests(emuv1machinetests PROPERTIES LABELS unit ENVIRONMENT "${NOWIND_TEST_ENVIRONMENT}")
 
 # boots the emulated MSX2 with the nowind ROM against nwhost; each test needs a process of its own (ctest does that)
 ADD_EXECUTABLE(emuv1integrationtests integration/BootTest.cpp)
@@ -46,4 +46,4 @@ target_link_libraries(emuv1integrationtests emuv1lib nwhosttestsupport GTest::gt
 target_compile_definitions(emuv1integrationtests PRIVATE EMUV1_STAGE="${EMUV1_STAGE}" NOWIND_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
                                                          NOWMAP_COM="${NOWMAP_COM}")
 add_dependencies(emuv1integrationtests emuv1stage nowmapcom)
-gtest_discover_tests(emuv1integrationtests PROPERTIES LABELS integration TIMEOUT 600)
+gtest_discover_tests(emuv1integrationtests PROPERTIES LABELS integration TIMEOUT 600 ENVIRONMENT "${NOWIND_TEST_ENVIRONMENT}")

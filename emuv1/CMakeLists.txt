@@ -13,7 +13,7 @@ endif()
 # everything but main() goes in a library, so the unit tests can link the emulator too
 ADD_LIBRARY(emuv1lib STATIC
     Config.cpp Debug.cpp DiskDrive.cpp DiskInterface.cpp Emulator.cpp EmulatorTester.cpp GUI.cpp
-    Media.cpp TraceAllocations.cpp TraceItem.cpp VirtualDrive.cpp
+    Media.cpp VirtualDrive.cpp
     audio/AY38910.cpp audio/AudioDevice.cpp audio/AudioDummy.cpp audio/AudioMixer.cpp audio/MSXAudio.cpp
     audio/PPISound.cpp audio/SCC.cpp audio/YM2413.cpp
     controls/Joystick.cpp controls/Keyboard.cpp controls/Mouse.cpp
@@ -29,7 +29,6 @@ ADD_LIBRARY(emuv1lib STATIC
 # sources include headers relative to this directory (cpu/Z80.h) and the nwhost headers as ../nwhost/libnwhost.h
 target_include_directories(emuv1lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ../general ${SDL_INCLUDE_DIR}
                                            ${SDL_TTF_INCLUDE_DIRS})
-target_compile_definitions(emuv1lib PUBLIC NO_TRACEALLOCATOR)
 if(WIN32)
   target_compile_definitions(emuv1lib PUBLIC _CRT_SECURE_NO_DEPRECATE)
 endif()

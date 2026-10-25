@@ -1,12 +1,5 @@
 //! Debug.cpp
 
-// no trace allocator for debug-messages (would create a mess in the logs)
-#ifdef NO_TRACEALLOCATOR
-//undefine it first, if it was defined to prevent re-definition
-#undef NO_TRACEALLOCATOR
-#endif
-#define NO_TRACEALLOCATOR
-
 #include "Debug.h"
 #include <stdio.h>
 #include <stdarg.h>

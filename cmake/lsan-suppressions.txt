@@ -1,0 +1,20 @@
+# LeakSanitizer suppressions for the leaks that are known and not fixed yet (NOWIND_SANITIZE builds, see
+# release-notes.txt, Known issues). Remove an entry when its leak is fixed, so the sanitizer guards the fix.
+
+# emuv1 never calls nowindusb_cleanup() (it is commented out in NowindInterface::~NowindInterface), so the host,
+# its drives and their image streams stay allocated until the program exits
+leak:nowindusb_startup
+leak:nowindusb_add_drive
+leak:Image::reOpenDiskImage
+
+# BlockWrite::init() clears the outstanding DataBlockWrite requests (mDataBlockQueue) without deleting them
+leak:nwhost::BlockWrite::requestBlock
+
+# ~BlockRead does not delete the DataBlocks of a transfer that did not finish (dataBlockQueue)
+leak:nwhost::BlockRead::blockReadHelper
+
+# BDOSProxy::OpenFile never deletes the fstream it creates (the experimental BDOS_NOWIND proxy)
+leak:nwhost::BDOSProxy::OpenFile
+
+# inside SDL_ttf (third-party)
+leak:libSDL_ttf
