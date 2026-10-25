@@ -48,6 +48,9 @@ endif()
 # arguments of the printf-style logging functions (NW_PRINTF_FORMAT in general/PrintfFormat.h)
 include(cmake/CMakeLists.warnings.cmake)
 
+# SDL 1.2, SDL_ttf and googletest: downloaded on Windows, the installed packages elsewhere (NOWIND_FETCH_DEPENDENCIES)
+include(cmake/Dependencies.cmake)
+
 add_subdirectory(general)
 add_subdirectory(nwhost)
 add_subdirectory(ftdx)

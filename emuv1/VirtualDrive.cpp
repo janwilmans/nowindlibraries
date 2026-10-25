@@ -435,7 +435,7 @@ void VirtualDrive::writeLE(unsigned char* buffer, unsigned len, unsigned long aV
     }
 }
 
-void VirtualDrive::writeStr(unsigned char** pBuffer, char* str)
+void VirtualDrive::writeStr(unsigned char** pBuffer, const char* str)
 {
     DBERR("VirtualDrive::writeStr\n");
 

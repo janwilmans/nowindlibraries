@@ -325,7 +325,7 @@ void Debug::debug_wrap_sprintf(const char* cFormat, ...)
 #endif
 }
 
-void Debug::memFileDump(const nw_byte* mem[8], char* file)
+void Debug::memFileDump(const nw_byte* mem[8], const char* file)
 {
     string filename(file);
 

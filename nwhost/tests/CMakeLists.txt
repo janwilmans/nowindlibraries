@@ -1,7 +1,5 @@
-# the unit tests use googletest, they are skipped when it is not installed
-find_package(GTest)
-
-if(NOT GTest_FOUND)
+# the unit tests use googletest (cmake/Dependencies.cmake), they are skipped without it
+if(NOT TARGET GTest::gtest_main)
   message(STATUS "nwhost: googletest not found, the nwhost unit tests will not be built")
   return()
 endif()

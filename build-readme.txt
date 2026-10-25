@@ -6,11 +6,20 @@ Two build trees are created, build/debug and build/release (RelWithDebInfo);
 each is installed into its own install/ subdirectory, nwhostapp ends up in
 build/<debug|release>/install/bin (on macOS: build/<debug|release>/install/nwhostapp.app).
 
-The only external dependency is the FTDI USB library:
-- Windows: FTDI's FTD2XX driver library, a static x64 copy is included in
-  ftdx/FTD2XX-msc, nothing to install.
-- Linux and macOS: libftdi1 (the open source libusb based library),
-  including its headers.
+The external dependencies:
+- the FTDI USB library
+  - Windows: FTDI's FTD2XX driver library, a static x64 copy is included in
+    ftdx/FTD2XX-msc, nothing to install.
+  - Linux and macOS: libftdi1 (the open source libusb based library),
+    including its headers.
+- optional, for emuv1 and the tests: SDL 1.2, SDL_ttf 2.0 and googletest
+  - Windows: downloaded by CMake during the configure step (FetchContent,
+    the official SDL 1.2.15 / SDL_ttf 2.0.11 Visual C++ packages and
+    googletest 1.15.2), nothing to install; needs an internet connection the
+    first time.
+  - Linux and macOS: the installed packages (see below), without them emuv1
+    and/or the tests are skipped. -DNOWIND_FETCH_DEPENDENCIES=ON downloads
+    googletest there too (SDL is only downloaded for Windows).
 
 
 Windows
@@ -76,8 +85,8 @@ Build:
 Tests
 -----
 The build also assembles the nowind ROM and NOWMAP.COM from msxsrc, with the
-Sjasm 0.42c in sjasm/, the tests use those. With googletest installed (and SDL
-for the emuv1 tests) ctest runs them from a build tree:
+Sjasm 0.42c in sjasm/, the tests use those. With googletest (and SDL for the
+emuv1 tests; both downloaded on Windows) ctest runs them from a build tree:
   cd build/debug && ctest --output-on-failure
 or one group, by label:
   ctest -L unit          nwhost and emuv1 unit tests

@@ -91,7 +91,7 @@ public:
 
     void memDump(nw_byte* cpuPageRead[4], nw_word);
     void memDump(nw_byte* cpuPageRead[4], nw_word, nw_word);
-    void memFileDump(const nw_byte* mem[8], char*);
+    void memFileDump(const nw_byte* mem[8], const char*);
     void fill(unsigned int);
     bool fillInit;
     unsigned int fillCount;

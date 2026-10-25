@@ -1,9 +1,6 @@
-# emuv1 is the SDL 1.2 based MSX emulator with an emulated nowind interface, it needs SDL 1.2 and SDL_ttf 2.0;
-# CMake's FindSDL honours the SDLDIR and SDLTTFDIR environment variables to point at a local copy
-find_package(SDL)
-find_package(SDL_ttf)
-
-if(NOT SDL_FOUND OR NOT SDL_TTF_FOUND)
+# emuv1 is the SDL 1.2 based MSX emulator with an emulated nowind interface, it needs SDL 1.2 and SDL_ttf 2.0
+# (cmake/Dependencies.cmake: downloaded on Windows, the installed packages elsewhere)
+if(NOT TARGET SDL::SDL OR NOT TARGET SDL::ttf)
   message(STATUS "emuv1: SDL 1.2 and/or SDL_ttf not found, emuv1 will not be built")
   return()
 endif()
@@ -25,19 +22,25 @@ add_library(emuv1lib STATIC
     video/V9938.cpp video/V9938commands.cpp video/V9938renderer.cpp video/V9938sprites.cpp)
 
 # the sources include headers relative to this directory (cpu/Z80.h)
-target_include_directories(emuv1lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${SDL_INCLUDE_DIR} ${SDL_TTF_INCLUDE_DIRS})
+target_include_directories(emuv1lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 if(WIN32)
   target_compile_definitions(emuv1lib PUBLIC _CRT_SECURE_NO_DEPRECATE)
 endif()
-target_link_libraries(emuv1lib PUBLIC nwhost ${SDL_LIBRARIES} ${SDL_TTF_LIBRARIES} PRIVATE project::warnings_options)
+target_link_libraries(emuv1lib PUBLIC nwhost SDL::SDL SDL::ttf PRIVATE project::warnings_options)
 
 add_executable(emuv1 maincons.cpp)
 target_link_libraries(emuv1 PRIVATE emuv1lib project::warnings_options)
+nowind_copy_runtime_dlls(emuv1)
 if(WIN32)
+  # the real main(), instead of SDL's SDLmain.lib (see the file)
+  target_sources(emuv1 PRIVATE SdlMainWindows.cpp)
   # msvcrt has no getopt, use the copy bundled with nwhostapp
   target_link_libraries(emuv1 PRIVATE getopt)
 endif()
 
 install(TARGETS emuv1 RUNTIME DESTINATION bin COMPONENT Runtime)
+if(NOWIND_RUNTIME_DLLS)
+  install(FILES ${NOWIND_RUNTIME_DLLS} DESTINATION bin COMPONENT Runtime)
+endif()
 
 add_subdirectory(tests)

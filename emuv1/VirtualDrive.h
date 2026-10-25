@@ -39,7 +39,7 @@ private:
 
     void writeLEinc(unsigned char** buffer, unsigned len, unsigned long value);
     void writeLE(unsigned char* buffer, unsigned len, unsigned long value);
-    void writeStr(unsigned char** buffer, char* str);
+    void writeStr(unsigned char** buffer, const char* str);
 
 public:
     VirtualDrive();

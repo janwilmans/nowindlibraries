@@ -1,13 +1,12 @@
-# the unit tests use googletest, they are skipped when it is not installed
-find_package(GTest)
-
-if(NOT GTest_FOUND)
+# the unit tests use googletest (cmake/Dependencies.cmake), they are skipped without it
+if(NOT TARGET GTest::gtest_main)
   message(STATUS "emuv1: googletest not found, the emuv1 unit tests will not be built")
   return()
 endif()
 
 add_executable(emuv1tests RamBlockTest.cpp Z80Test.cpp DisassemblerTest.cpp)
 target_link_libraries(emuv1tests PRIVATE emuv1lib GTest::gtest_main project::warnings_options)
+nowind_copy_runtime_dlls(emuv1tests)
 
 include(GoogleTest)
 gtest_discover_tests(emuv1tests PROPERTIES LABELS unit)
@@ -34,6 +33,7 @@ add_custom_target(emuv1stage DEPENDS ${EMUV1_STAGE}/msxsrc/nowind.rom)
 # the configured MSX2 (singletons), in a process of its own
 add_executable(emuv1machinetests MachineTest.cpp)
 target_link_libraries(emuv1machinetests PRIVATE emuv1lib GTest::gtest_main project::warnings_options)
+nowind_copy_runtime_dlls(emuv1machinetests)
 target_compile_definitions(emuv1machinetests PRIVATE EMUV1_STAGE="${EMUV1_STAGE}")
 add_dependencies(emuv1machinetests emuv1stage)
 gtest_discover_tests(emuv1machinetests PROPERTIES LABELS unit)
@@ -41,6 +41,7 @@ gtest_discover_tests(emuv1machinetests PROPERTIES LABELS unit)
 # boots the emulated MSX2 with the nowind ROM against nwhost; each test needs a process of its own (ctest does that)
 add_executable(emuv1integrationtests integration/BootTest.cpp)
 target_link_libraries(emuv1integrationtests PRIVATE emuv1lib nwhosttestsupport GTest::gtest_main project::warnings_options)
+nowind_copy_runtime_dlls(emuv1integrationtests)
 target_compile_definitions(emuv1integrationtests PRIVATE EMUV1_STAGE="${EMUV1_STAGE}" NOWIND_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
                                                          NOWMAP_COM="${NOWMAP_COM}")
 add_dependencies(emuv1integrationtests emuv1stage nowmapcom)
