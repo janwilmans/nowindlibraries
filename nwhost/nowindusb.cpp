@@ -91,9 +91,9 @@ void nowindusb_cleanup(void)
     nowindusb_debug("nowindusb_cleanup\n");
     delete nowindHost;
     nowindHost = nullptr;
-    for (Drives::iterator it = drives.begin(); it != drives.end(); ++it)
+    for (DiskHandler* drive : drives)
     {
-        delete *it;
+        delete drive;
     }
     drives.clear(); // a next nowindusb_startup() must not use the deleted drives
 }
@@ -134,12 +134,12 @@ unsigned int NowindHost_InsertHarddiskPartitions(unsigned int driveNr, std::stri
         DBERR("Partition: %u, bootable: %u, disabled: %u, readonly: %u\n", i, p.bootable, p.disabled, p.readonly);
     }
 
-    for (std::list<PartitionInfo>::iterator p = partitionList.begin(); p != partitionList.end(); p++)
+    for (PartitionInfo& p : partitionList)
     {
-        if (p->bootable)
+        if (p.bootable)
         {
-            p->inserted = true;
-            unsigned int result = NowindHost_InsertPartition(driveNr, p->index, aHarddiskimage);
+            p.inserted = true;
+            unsigned int result = NowindHost_InsertPartition(driveNr, p.index, aHarddiskimage);
             if (result > 0)
             {
                 driveNr++;
@@ -149,10 +149,10 @@ unsigned int NowindHost_InsertHarddiskPartitions(unsigned int driveNr, std::stri
         }
     }
 
-    for (std::list<PartitionInfo>::iterator p = partitionList.begin(); p != partitionList.end(); p++)
+    for (const PartitionInfo& p : partitionList)
     {
-        if (p->inserted) continue;
-        unsigned int result = NowindHost_InsertPartition(driveNr, p->index, aHarddiskimage);
+        if (p.inserted) continue;
+        unsigned int result = NowindHost_InsertPartition(driveNr, p.index, aHarddiskimage);
         if (result > 0)
         {
             driveNr++;

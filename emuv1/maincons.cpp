@@ -344,15 +344,15 @@ int main(int argc, char* argv[])
         Media::Instance()->insertMedia(Debug::Instance()->getPath() + "../disks/dos1.dsk", 0);
     }
     else
-        for (list<string>::iterator i = media.begin(); i != media.end(); i++)
+        for (const string& medium : media)
         {
             //todo: fix this media priority crap :(
             // (any third or above image or disk will just overidde the second)
             // even worse: -i some.rom -i foo.dsk will insert the disk in de second drive!
             // just because some other media came before it on the cmdline
             static int firstMedia = 0; // static, so initialized just once.
-            DBERR("media: %s, insert with priority: %u\n", (*i).c_str(), firstMedia);
-            Media::Instance()->insertMedia((*i).c_str(), firstMedia);
+            DBERR("media: %s, insert with priority: %u\n", medium.c_str(), firstMedia);
+            Media::Instance()->insertMedia(medium.c_str(), firstMedia);
             firstMedia = 1;
         }
 

@@ -223,9 +223,9 @@ void CheckSanity()
     //DBERR("CheckSanity()\n");
     try
     {
-        for (traceMapType::iterator iter = traceMap.begin(); iter != traceMap.end(); iter++)
+        for (const auto& trace : traceMap)
         {
-            void* ptr = (void*)iter->first;
+            void* ptr = (void*)trace.first;
             TraceCheck(ptr);
         }
     }
@@ -245,10 +245,10 @@ void DumpReport()
 
     char pcFilename[260];
     Uint32 totalSize = 0;
-    for (traceMapType::iterator iter = traceMap.begin(); iter != traceMap.end(); iter++)
+    for (const auto& trace : traceMap)
     {
-        unsigned int address = (unsigned int)iter->first;
-        TraceItem* i = iter->second;
+        unsigned int address = (unsigned int)trace.first;
+        TraceItem* i = trace.second;
         sprintf(pcFilename, "%s:%u", i->file.c_str(), i->line);
         DBERR("%-35s at 0x%08X: %s of %d bytes unfreed\n", pcFilename, address, i->type.c_str(), i->size);
         totalSize += i->size;
@@ -258,9 +258,8 @@ void DumpReport()
 
     DBERR("\nInformation about memory usage:\n");
 
-    for (traceListType::iterator iter = unusedList.begin(); iter != unusedList.end(); iter++)
+    for (TraceItem* i : unusedList)
     {
-        TraceItem* i = *iter;
         sprintf(pcFilename, "%s:%u", i->file.c_str(), i->line);
         DBERR("%-35s: %s of %d bytes unused\n", pcFilename, i->type.c_str(), i->size);
     }

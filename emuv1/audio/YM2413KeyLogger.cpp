@@ -122,8 +122,7 @@ YM2413::~YM2413()
             mbmStream->write((char *)&pos2,1);
         }
     
-        for (list<char *>::iterator i = noteLines.begin(); i != noteLines.end(); i++) {
-            char* line = *i;
+        for (char* line : noteLines) {
             mbmStream->write((char *)line,6);           // detect 6 or 9 channels
             mbmStream->write((char *)&fullLineEnd,1);
 
