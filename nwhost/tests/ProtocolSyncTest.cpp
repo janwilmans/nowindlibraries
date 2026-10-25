@@ -379,9 +379,9 @@ TEST(ProtocolSync, TheHostDpbMatchesTheRomsSupportedMedia)
     }
 }
 
-// DISABLED: msxsrc/nowind.rom (committed 2013) is not what msxsrc assembles to today (the asm was changed in
-// 2024); about 1200 bytes differ, starting in bank 5 (init.asm). Which one is flashed on real interfaces?
-TEST(ProtocolSync, DISABLED_TheCommittedRomIsTheAssembledSource)
+// msxsrc/nowind.rom must be what msxsrc assembles to: after changing the asm, copy the ROM the build assembled
+// (build/<tree>/msxsrc/stage/msxsrc/nowind.rom) over it. The 2013 release ROM is kept as msxsrc/nowind4.3.rom.
+TEST(ProtocolSync, TheCommittedRomIsTheAssembledSource)
 {
     std::vector<byte> assembled = readBinary(NOWIND_ROM);
     std::vector<byte> committed = readBinary(MSXSRC + "nowind.rom");
