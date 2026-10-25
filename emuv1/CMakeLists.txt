@@ -42,5 +42,14 @@ install(TARGETS emuv1 RUNTIME DESTINATION bin COMPONENT Runtime)
 if(NOWIND_RUNTIME_DLLS)
   install(FILES ${NOWIND_RUNTIME_DLLS} DESTINATION bin COMPONENT Runtime)
 endif()
+# what emuv1 loads relative to its own directory (bin/): the on-screen display font from freetype/, the MSX ROMs
+# from ../roms, the nowind ROM (assembled from msxsrc) from ../msxsrc and the disk images from ../disks
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/copy_to_release/freetype/VeraMono.ttf DESTINATION bin/freetype
+        COMPONENT Runtime)
+file(GLOB EMUV1_ROMS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/roms/*.ROM)
+install(FILES ${EMUV1_ROMS} DESTINATION roms COMPONENT Runtime)
+install(FILES ${NOWIND_ROM} DESTINATION msxsrc COMPONENT Runtime)
+install(FILES ${CMAKE_SOURCE_DIR}/disks/DOS2.dsk DESTINATION disks RENAME dos2.dsk COMPONENT Runtime)
+install(FILES ${CMAKE_SOURCE_DIR}/disks/DOS1.dsk DESTINATION disks RENAME dos1.dsk COMPONENT Runtime)
 
 add_subdirectory(tests)
