@@ -30,6 +30,7 @@ public:
     int readSectors(nw_byte* buffer, unsigned int startSector, unsigned int sectorCount) override
     {
         ++readCount;
+        lastReadSector = startSector;
         if (failReads || !inRange(startSector, sectorCount)) return -1;
         std::copy_n(&data[startSector * SECTOR_SIZE], sectorCount * SECTOR_SIZE, buffer);
         return 0;
@@ -38,6 +39,7 @@ public:
     int writeSectors(nw_byte* buffer, unsigned int startSector, unsigned int sectorCount) override
     {
         ++writeCount;
+        lastWriteSector = startSector;
         if (failWrites || !inRange(startSector, sectorCount)) return -1;
         std::copy_n(buffer, sectorCount * SECTOR_SIZE, &data[startSector * SECTOR_SIZE]);
         return 0;
@@ -71,6 +73,8 @@ public:
     bool failWrites = false;
     unsigned readCount = 0;
     unsigned writeCount = 0;
+    unsigned lastReadSector = 0;
+    unsigned lastWriteSector = 0;
     std::vector<std::string> insertedFilenames;
 
 private:
