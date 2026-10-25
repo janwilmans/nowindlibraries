@@ -791,25 +791,33 @@ void GUI::scale2xSaI(unsigned int* MSXscreen)
                     {
                         int r = 0;
                         if (colorE == colorG)
+                        {
                             if (colorA == colorE)
                                 r--;
                             else if (colorB == colorE)
                                 r++;
+                        }
                         if (colorF == colorK)
+                        {
                             if (colorA == colorF)
                                 r--;
                             else if (colorB == colorF)
                                 r++;
+                        }
                         if (colorH == colorN)
+                        {
                             if (colorA == colorH)
                                 r--;
                             else if (colorB == colorH)
                                 r++;
+                        }
                         if (colorL == colorO)
+                        {
                             if (colorA == colorL)
                                 r--;
                             else if (colorB == colorL)
                                 r++;
+                        }
                         product = product1 = INTERPOLATE(colorA, colorB);
                         product2 = r > 0 ? colorA : (r < 0 ? colorB : product);
                     }

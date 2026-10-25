@@ -96,14 +96,14 @@ void Media::insertNowindImage(string filename, Uint32 size)
     string extention = filename.substr(filename.size() - 3);
     ToUpper(extention);
 
-    char buf[512];
+    nw_byte buf[512]; // boot sector and FAT bytes, 0xEB etc. do not fit a (signed) char
     for (Uint32 i = 0; i < 512; i++) buf[i] = 0;
 
     fstream* fs = new fstream(filename.c_str(), ios::out | ios::binary); //ios::trunc
     if (!fs->fail())
     {
         fs->seekp(size - 512, ios::beg);
-        fs->write(buf, 512);
+        fs->write(reinterpret_cast<const char*>(buf), 512);
 
         /* boot sector */
         fs->seekp(0, ios::beg);
@@ -113,7 +113,7 @@ void Media::insertNowindImage(string filename, Uint32 size)
         buf[2] = 0x90;
         buf[0x15] = 0xF9;
         buf[0x1E] = 0xC9;
-        fs->write(buf, 512);
+        fs->write(reinterpret_cast<const char*>(buf), 512);
 
         /* fat directory */
         fs->seekp(0x200, ios::beg);
@@ -121,7 +121,7 @@ void Media::insertNowindImage(string filename, Uint32 size)
         buf[0] = 0xF9;
         buf[1] = 0xFF;
         buf[2] = 0xFF;
-        fs->write(buf, 512);
+        fs->write(reinterpret_cast<const char*>(buf), 512);
 
         fs->close();
     }
