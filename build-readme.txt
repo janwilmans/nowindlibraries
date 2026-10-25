@@ -46,6 +46,11 @@ build.
 Optional, for emuv1 (the SDL based MSX emulator, it is skipped when SDL 1.2
 or SDL_ttf is not found):
   sudo apt install libsdl1.2-dev libsdl-ttf2.0-dev
+and for the emuv1 unit tests (emuv1/tests, skipped when googletest is not
+found):
+  sudo apt install libgtest-dev
+run them with ctest from a build tree:
+  cd build/debug && ctest --output-on-failure
 
 Build:
   ./build.sh

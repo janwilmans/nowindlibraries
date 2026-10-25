@@ -10,8 +10,9 @@ if(NOT SDL_FOUND OR NOT SDL_TTF_FOUND)
   return()
 endif()
 
-ADD_EXECUTABLE(emuv1
-    maincons.cpp Config.cpp Debug.cpp DiskDrive.cpp DiskInterface.cpp Emulator.cpp EmulatorTester.cpp GUI.cpp
+# everything but main() goes in a library, so the unit tests can link the emulator too
+ADD_LIBRARY(emuv1lib STATIC
+    Config.cpp Debug.cpp DiskDrive.cpp DiskInterface.cpp Emulator.cpp EmulatorTester.cpp GUI.cpp
     Media.cpp TraceAllocations.cpp TraceItem.cpp VirtualDrive.cpp
     audio/AY38910.cpp audio/AudioDevice.cpp audio/AudioDummy.cpp audio/AudioMixer.cpp audio/MSXAudio.cpp
     audio/PPISound.cpp audio/SCC.cpp audio/YM2413.cpp
@@ -26,17 +27,22 @@ ADD_EXECUTABLE(emuv1
     video/V9938.cpp video/V9938commands.cpp video/V9938renderer.cpp video/V9938sprites.cpp)
 
 # sources include headers relative to this directory (cpu/Z80.h) and the nwhost headers as ../nwhost/libnwhost.h
-target_include_directories(emuv1 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ../general ${SDL_INCLUDE_DIR}
-                                         ${SDL_TTF_INCLUDE_DIRS})
-target_compile_definitions(emuv1 PRIVATE NO_TRACEALLOCATOR)
-
+target_include_directories(emuv1lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ../general ${SDL_INCLUDE_DIR}
+                                           ${SDL_TTF_INCLUDE_DIRS})
+target_compile_definitions(emuv1lib PUBLIC NO_TRACEALLOCATOR)
 if(WIN32)
-  target_compile_definitions(emuv1 PRIVATE _CRT_SECURE_NO_DEPRECATE)
+  target_compile_definitions(emuv1lib PUBLIC _CRT_SECURE_NO_DEPRECATE)
+endif()
+target_link_libraries(emuv1lib PUBLIC nwhost nwgeneral ${SDL_LIBRARIES} ${SDL_TTF_LIBRARIES})
+
+ADD_EXECUTABLE(emuv1 maincons.cpp)
+if(WIN32)
   # msvcrt has no getopt, use the copy bundled with nwhostapp
   target_sources(emuv1 PRIVATE ../nwhostapp/getopt.c ../nwhostapp/getopt1.c)
   target_include_directories(emuv1 PRIVATE ../nwhostapp)
 endif()
-
-target_link_libraries(emuv1 nwhost nwgeneral ${SDL_LIBRARIES} ${SDL_TTF_LIBRARIES})
+target_link_libraries(emuv1 emuv1lib)
 
 INSTALL(TARGETS emuv1 RUNTIME DESTINATION bin COMPONENT Runtime)
+
+add_subdirectory(tests)

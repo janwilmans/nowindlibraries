@@ -20,6 +20,9 @@ endif()
 # libraries in its own directory first.
 set(CMAKE_INSTALL_RPATH "\$ORIGIN")
 
+# lets ctest in the build directory find the unit tests
+enable_testing()
+
 add_subdirectory(general)
 add_subdirectory(nwhost)
 add_subdirectory(ftdx)
