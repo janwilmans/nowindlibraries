@@ -80,5 +80,5 @@ void AudioDummy::createOneBuffer()
         value = buf[i] & 0xff;
         audioBuffer[audioBufferIndex++] = value;
     }
-    delete buf;
+    delete[] buf;
 }

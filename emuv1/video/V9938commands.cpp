@@ -306,7 +306,8 @@ void V9938commands::commandSearch()
     {
     case GRAPHICMODE4:
         cl &= 0x0F;
-        for (i = sx; (i >= 0) && (i < 256); i += step)
+        // unsigned: stepping below 0 wraps above the end, so the end check stops the loop (there is no '>= 0' check)
+        for (i = sx; i < 256; i += step)
         {
             if ((eq && (cl != pointG4(i, sy))) || (!eq && (cl == pointG4(i, sy))))
             {
@@ -318,7 +319,7 @@ void V9938commands::commandSearch()
         break;
     case GRAPHICMODE5:
         cl &= 0x03;
-        for (i = sx; (i >= 0) && (i < 512); i += step)
+        for (i = sx; i < 512; i += step)
         {
             if ((eq && (cl != pointG5(i, sy))) || (!eq && (cl == pointG5(i, sy))))
             {
@@ -330,7 +331,7 @@ void V9938commands::commandSearch()
         break;
     case GRAPHICMODE6:
         cl &= 0x0F;
-        for (i = sx; (i >= 0) && (i < 512); i += step)
+        for (i = sx; i < 512; i += step)
         {
             if ((eq && (cl != pointG6(i, sy))) || (!eq && (cl == pointG6(i, sy))))
             {
@@ -341,7 +342,7 @@ void V9938commands::commandSearch()
         }
         break;
     case GRAPHICMODE7:
-        for (i = sx; (i >= 0) && (i < 256); i += step)
+        for (i = sx; i < 256; i += step)
         {
             if ((eq && (cl != pointG7(i, sy))) || (!eq && (cl == pointG7(i, sy))))
             {
@@ -779,7 +780,8 @@ void V9938commands::commandYmmm()
         if (nx == 0) nx = 256;
         for (unsigned int y = 0; y < ny; y++)
         {
-            for (unsigned int x = dxl >> 1; (x >= 0) && (x < 128); x += dix)
+            // unsigned: stepping below 0 wraps above the end, so the end check stops the loop (there is no '>= 0' check)
+            for (unsigned int x = dxl >> 1; x < 128; x += dix)
             {
                 vram[((dy + y * diy) << 7) + x] = vram[((sy + y * diy) << 7) + x];
             }
@@ -790,7 +792,7 @@ void V9938commands::commandYmmm()
         if (nx == 0) nx = 512;
         for (unsigned int y = 0; y < ny; y++)
         {
-            for (unsigned int x = dx >> 1; (x >= 0) && (x < 256); x += dix)
+            for (unsigned int x = dx >> 1; x < 256; x += dix)
             {
                 srcAddr = ((sy + y * diy) << 8) + x;
                 dstAddr = ((dy + y * diy) << 8) + x;
@@ -803,7 +805,7 @@ void V9938commands::commandYmmm()
         if (nx == 0) nx = 256;
         for (unsigned int y = 0; y < ny; y++)
         {
-            for (unsigned int x = dxl; (x >= 0) && (x < 256); x += dix)
+            for (unsigned int x = dxl; x < 256; x += dix)
             {
                 srcAddr = ((sy + y * diy) << 8) + x;
                 dstAddr = ((dy + y * diy) << 8) + x;

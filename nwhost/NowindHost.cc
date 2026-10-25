@@ -86,12 +86,12 @@ NowindHost::NowindHost(const vector<DiskHandler*>& drives_)
     , lastTime(0)
     , state(STATE_SYNC1)
     , romdisk(255)
+    , driveOffset(0)
     , allowOtherDiskroms(false)
     , enablePhantomDrives(false)
     , enableMSXDOS2(false)
-    , nwhSupport(0)
-    , driveOffset(0)
     , activeCommand(0)
+    , nwhSupport(0)
 {
     // test for requestWait
     vector<byte> requestWait;

@@ -789,7 +789,7 @@ void GUI::scale2xSaI(unsigned int* MSXscreen)
                         product = product1 = product2 = colorA;
                     else
                     {
-                        unsigned int r = 0;
+                        int r = 0;
                         if (colorE == colorG)
                             if (colorA == colorE)
                                 r--;
@@ -951,7 +951,7 @@ void GUI::scaleSuper2xSaI(unsigned int* MSXscreen)
                 {
                     if (color5 == color3)
                     {
-                        unsigned int r = 0;
+                        int r = 0;
                         r += GetResult(color6, color5, color1, colorA1);
                         r += GetResult(color6, color5, color4, colorB1);
                         r += GetResult(color6, color5, colorA2, colorS1);
@@ -1255,7 +1255,7 @@ void GUI::scaleSuper3xSaI(unsigned int* MSXscreen)
                 {
                     if (color5 == color3)
                     {
-                        unsigned int r = 0;
+                        int r = 0;
                         r += GetResult(color6, color5, color1, colorA1);
                         r += GetResult(color6, color5, color4, colorB1);
                         r += GetResult(color6, color5, colorA2, colorS1);

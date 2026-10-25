@@ -13,7 +13,7 @@ AudioDevice::AudioDevice()
 
 void AudioDevice::initialize()
 {
-    DBERR(deviceName.c_str());
+    DBERR("%s", deviceName.c_str());
     DBERR(" initializing...\n");
 
     audioBufferSize = AudioMixer::Instance()->getBufferSize();

@@ -949,7 +949,7 @@ void Z80::setupBdosEnv(const char* filename)
         nw_byte value = temp[i] & 0xff; // todo: find out why this fails without the & 0xff!!
         WRITEMEM(0x100 + i, value);
     }
-    delete temp;
+    delete[] temp;
 
     // patch bdos call 0x0005
     WRITEMEM(0x0005, 0xED);

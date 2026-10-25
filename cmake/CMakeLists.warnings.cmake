@@ -67,8 +67,10 @@ else()
     -Wpedantic
     -Wcast-align
     -Wshadow
-    -Wsign-conversion 
-    -Wconversion
+    # -Wsign-conversion and -Wconversion are off: the legacy code (emuv1 from 2004, nwhost from 2009) mixes int,
+    # unsigned, byte and word everywhere, which gives about a thousand warnings that hide the useful ones
+    # -Wsign-conversion
+    # -Wconversion
     -Wdouble-promotion
     -Wold-style-cast
     -Wformat=2

@@ -184,7 +184,7 @@ void NowindInterface::activate(unsigned int theBlock)
 
 void NowindInterface::debugout(const char* msg)
 {
-    DBERR(msg);
+    DBERR("%s", msg); // the messages of nwhost can contain '%'
 }
 
 void NowindInterface::setAttribute(int attr, bool value)

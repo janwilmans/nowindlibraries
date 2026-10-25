@@ -79,7 +79,7 @@ void Debug::fill(unsigned int amount)
     DBERR(".");
     char level[250];
     sprintf(level, "%5i %X ", diff, amount);
-    DBERR(level);
+    DBERR("%s", level);
     DBERR("..");
 
     diff = diff & 63;
@@ -182,7 +182,7 @@ void Debug::memDump(nw_byte* mem[4], nw_word address, nw_word marker)
     for (int i = 0; i < 18; i++)
     {
         sprintf(temp, "%04x: ", realAddress);
-        DBERR(temp);
+        DBERR("%s", temp);
 
         DBERR("page: %u   ", page);
 
@@ -197,7 +197,7 @@ void Debug::memDump(nw_byte* mem[4], nw_word address, nw_word marker)
             {
                 sprintf(temp, " %02x ", j);
             }
-            DBERR(temp);
+            DBERR("%s", temp);
             pageOffset++;
             realAddress++;
             page = realAddress >> 14;
@@ -214,7 +214,7 @@ void Debug::memDump(nw_byte* mem[4], nw_word address, nw_word marker)
             {
                 sprintf(temp, " %02x ", j);
             }
-            DBERR(temp);
+            DBERR("%s", temp);
             pageOffset++;
             realAddress++;
             page = realAddress >> 14;

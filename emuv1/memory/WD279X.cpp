@@ -120,14 +120,14 @@ void WD279X::write(nw_word address, nw_byte value)
             statusCommandTypeI();
             break;
 
-        case 0x50: trackRegister = (++trackRegister) & 0xff; // step-in
+        case 0x50: trackRegister = (trackRegister + 1) & 0xff; // step-in
         case 0x40:
             currentTrack++;
             seekDirection = 1;
             statusCommandTypeI();
             break;
 
-        case 0x70: trackRegister = (--trackRegister) & 0xff; // step-out
+        case 0x70: trackRegister = (trackRegister - 1) & 0xff; // step-out
         case 0x60:
             currentTrack--;
             seekDirection = -1;
