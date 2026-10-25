@@ -534,13 +534,14 @@ TEST_F(NowMapTest, WrongArgumentsAreReported)
     EXPECT_EQ(nowmap("0 1").substr(0, 25), "error: drive is not a hdd");
 }
 
-// DISABLED: NOWMAP.COM (msxdostools/nowmap.asm) sends the MSX-DOS command line from CMD_LINE as it is, and that
-// starts with a space (" 0 1"); NowindHost::nowMap splits on ' ' keeping empty parts, so it sees 3 arguments and
-// replies 'no 2 arguments found'. Host: nwhost/NowindHost.cc nowMap() (split(arguments, " ")).
-TEST_F(NowMapTest, DISABLED_TheCommandLineFromNowmapComStartsWithASpace)
+TEST_F(NowMapTest, TheByteAfterTheArgumentsFromNowmapComIsIgnored)
 {
+    // nowmap.asm sends B = CMD_LENGTH bytes from CMD_LINE (0x82, after the leading space), so one byte past the
+    // arguments: the end of the MSX-DOS command line
     createHost(1);
-    EXPECT_EQ(nowmap(" 0 1").substr(0, 25), "error: drive is not a hdd");
+    EXPECT_EQ(nowmap(std::string("0 1\0", 4)).substr(0, 25), "error: drive is not a hdd");
+    EXPECT_EQ(nowmap("0 1\r").substr(0, 25), "error: drive is not a hdd");
+    EXPECT_EQ(nowmap(std::string("/l\0", 3)).substr(0, 15), "Nowind Map v1.2");
 }
 
 TEST_F(NowMapTest, MoreThan240BytesIsRejected)
