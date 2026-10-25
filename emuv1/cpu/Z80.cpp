@@ -43,9 +43,9 @@ Z80::Z80()
     cpuFrequency = 3579545;
 
     /* initialize flag tables
-         * instructions use these so the flags do not have to be calculated 
-         * the undocumented (we call them: X and Y) flags are calculated here too.
-         */
+     * instructions use these so the flags do not have to be calculated
+     * the undocumented (we call them: X and Y) flags are calculated here too.
+     */
     for (int i = 0; i < 256; ++i)
     {
         flagSZ[i] = (i & (SFLAG | XFLAG | YFLAG)) | ((i == 0) ? ZFLAG : 0);
@@ -298,7 +298,7 @@ void Z80::executeInstructions()
     {
         Debug::Instance()->STACK_TRACING = true;
     }
-   
+
     if (Z80::Instance()->emuTime >= 0x014b0dcd)
     {
         Debug::Instance()->INSTRUCTION_TRACING = true;
@@ -409,9 +409,9 @@ void Z80::executeInstructions()
  *  \address 16-bit addres to read from
  *  \return the value read
  *
- *  with readMem(nw_word) it's possible to read the 
+ *  with readMem(nw_word) it's possible to read the
  *  current sub-slot selection from address 0xffff
- * 
+ *
  *  this method can be inlined for speed
  */
 inline nw_byte Z80::readMem(nw_word address)
@@ -424,7 +424,7 @@ inline nw_byte Z80::readMem(nw_word address)
     /*
 
     if ((slotSelector->isIllegalAddress(address)) && (address!=0xffff)) {
-        DBERR("WARNING: reading empty page (addr: 0x%04x)!\n", address); 
+        DBERR("WARNING: reading empty page (addr: 0x%04x)!\n", address);
     }
 TODO: voor alle pages, en geen foutmelding geven wanneer het slot niet expanded is
     if (address == 0xfcc5) {
@@ -476,14 +476,14 @@ TODO: voor alle pages, en geen foutmelding geven wanneer het slot niet expanded 
 }
 
 
-/*! \brief writes a 16 bit value to memory 
+/*! \brief writes a 16 bit value to memory
  *
  *  \address 16-bit address to write to
  *  \value 16-bit value that should be written
  *
- *  This method may at some time in future also include a check for writing to address 0xFFFF 
+ *  This method may at some time in future also include a check for writing to address 0xFFFF
  *  that is used for selecting the sub-slot
- * 
+ *
  * this method can be inlined for speed
  */
 inline nw_word Z80::readMem16(nw_word address)
@@ -518,7 +518,7 @@ inline nw_word Z80::readMem16(nw_word address)
  *  \address 16-bit addres to write to
  *  \value 8-bit value that should be written
  *
- *  This method also includes a check for writing to address 0xFFFF 
+ *  This method also includes a check for writing to address 0xFFFF
  *  that is used for selecting the sub-slot
  */
 inline void Z80::writeMem(nw_word address, nw_byte value)
@@ -568,9 +568,9 @@ inline void Z80::writeMem(nw_word address, nw_byte value)
  *  \address 16-bit addres to write to
  *  \value 16-bit value that should be written
  *
- * cpu space refers to the fact the this routine does not write to memory 
+ * cpu space refers to the fact the this routine does not write to memory
  * directly but as a real z80 would, namely accessing 64 KB at one time
- * through 4 pages of 16kb 
+ * through 4 pages of 16kb
  *
  */
 inline void Z80::writeMem16(nw_word address, nw_word value)
