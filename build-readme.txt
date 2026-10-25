@@ -100,6 +100,16 @@ in a build tree of its own:
 A leak, a memory error or undefined behaviour makes the test fail.
 
 
+Source sanitation
+-----------------
+script/ holds scripts that check and clean up the sources (Python 3):
+  python script/whitespace.py           lists files with trailing whitespace or a
+                                        C/C++ file without a final newline
+                                        (exit code 1 when there are any)
+  python script/whitespace.py --apply   fixes them
+Third-party code (.clang-format-ignore) is left as it was imported.
+
+
 Problems
 --------
 - "Could not find FTDI_LIB using the following names: ftdi1" or a missing
