@@ -5,6 +5,7 @@
 #include "msxtypes.h"
 #include "SDL_events.h"
 #include <list>
+#include <string>
 
 /*!
  * The Debugger class 

@@ -269,7 +269,9 @@ int main(int argc, char* argv[])
 #endif // _MSC_VER
 
     //    putenv("SDL_AUDIODRIVER=disk");
-    _putenv("SDL_VIDEO_CENTERED=center");
+    // putenv keeps a pointer to the string, so it must outlive the call
+    static char videoCentered[] = "SDL_VIDEO_CENTERED=center";
+    SDL_putenv(videoCentered);
 
 #ifndef CONSOLE_DEBUGGING_ON
     if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0)

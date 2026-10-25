@@ -5,6 +5,7 @@
 #include "msxtypes.h"
 #include "SDL.h"
 #include <list>
+#include <string>
 
 /*!
  * The LogWatcher class 
