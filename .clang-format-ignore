@@ -7,3 +7,4 @@ ftdx/other/*
 nwhostapp/getopt*
 emuv1/FastDelegate.h
 emuv1/osd/SDL_ttf.h
+thirdparty/*
