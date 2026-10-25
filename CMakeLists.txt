@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23 FATAL_ERROR)
 
-PROJECT(nowindlibraries)
+project(nowindlibraries LANGUAGES C CXX)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "installation path" FORCE)
@@ -8,13 +8,6 @@ endif()
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# all libraries are built as static libraries, so no dllimport/dllexport decoration
-add_compile_definitions(NOWIND_STATIC_LIBS)
-if(WIN32)
-  # link the FTD2XX library statically
-  add_compile_definitions(FTD2XX_STATIC)
-endif()
 
 # Setting the rpath to '$ORIGIN' ensures our application looks for
 # libraries in its own directory first.

@@ -1,5 +1,3 @@
-PROJECT(nowindrom)
-
 # assemble the nowind ROM from these sources, the tests use it to check the host against the ROM.
 # nowind.asm includes ..\roms\*.ROM and ..\disks\dos2.dsk, so the sources are staged next to copies of those files
 # (sjasm turns the backslashes into slashes, the disk image is DOS2.dsk in the repo, which matters on linux)

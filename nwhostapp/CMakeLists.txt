@@ -1,41 +1,32 @@
-cmake_minimum_required(VERSION 3.23 FATAL_ERROR)
+# nwhostapp: the command line host application
 
-PROJECT(nwhostapp)
-
-INCLUDE_DIRECTORIES(../general)
-INCLUDE_DIRECTORIES(../nwhost)
-INCLUDE_DIRECTORIES(../ftdx)
-INCLUDE_DIRECTORIES(../nowind)
+# getopt, a copy from glibc (third-party, without the project warnings); msvcrt has none, so on Windows its getopt.h
+# is used too, elsewhere the system's (emuv1 links it on Windows)
+add_library(getopt STATIC getopt.c getopt1.c)
+target_include_directories(getopt INTERFACE $<$<PLATFORM_ID:Windows>:${CMAKE_CURRENT_SOURCE_DIR}>)
+target_compile_options(getopt PRIVATE $<IF:$<C_COMPILER_ID:MSVC>,/w,-w>)
 
 # the MACOSX_BUNDLE supports the make install feature, it is ignored on other platforms
-ADD_EXECUTABLE(nwhostapp MACOSX_BUNDLE mainUsbHost.cpp HostApp.cpp getopt.c getopt1.c)
-
-if(WIN32)
-  # msvcrt has no getopt, use the bundled glibc copy
-  target_include_directories(nwhostapp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-endif()
-
-target_link_libraries(nwhostapp nowind nwhost ftdx nwgeneral project::warnings_options)
-# getopt*.c are a copy from glibc (third-party), without the project warnings
-set_source_files_properties(getopt.c getopt1.c PROPERTIES COMPILE_OPTIONS $<IF:$<C_COMPILER_ID:MSVC>,/w,-w>)
+add_executable(nwhostapp MACOSX_BUNDLE mainUsbHost.cpp HostApp.cpp)
+target_link_libraries(nwhostapp PRIVATE nowind nwgeneral getopt project::warnings_options)
 
 #--------------------------------------------------------------------------------
 # Now the installation stuff below
 #--------------------------------------------------------------------------------
-SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/nwhostapp")
-SET(library_dest_dir distr)
-IF(APPLE)
-  SET(library_dest_dir nwhostapp.app/Contents/MacOS)
-  SET(APPS "\${CMAKE_INSTALL_PREFIX}/nwhostapp.app")
-ENDIF(APPLE)
-IF(WIN32)
-  SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/nwhostapp.exe")
-ENDIF(WIN32)
+set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/nwhostapp")
+set(library_dest_dir distr)
+if(APPLE)
+  set(library_dest_dir nwhostapp.app/Contents/MacOS)
+  set(APPS "\${CMAKE_INSTALL_PREFIX}/nwhostapp.app")
+endif()
+if(WIN32)
+  set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/nwhostapp.exe")
+endif()
 
 #--------------------------------------------------------------------------------
 # Install the application, on Apple, the bundle is at the root of the
 # install tree, and on other platforms it'll go into the bin directory.
-INSTALL(TARGETS nwhostapp
+install(TARGETS nwhostapp
     BUNDLE DESTINATION . COMPONENT Runtime
     RUNTIME DESTINATION bin COMPONENT Runtime
     )
@@ -43,14 +34,14 @@ INSTALL(TARGETS nwhostapp
 #--------------------------------------------------------------------------------
 # Install needed libraries by copying from library installation directories
 if(NOT WIN32)
-  INSTALL(FILES ${FTDI_LIB} DESTINATION ${library_dest_dir} COMPONENT Runtime)
+  install(FILES ${FTDI_LIB} DESTINATION ${library_dest_dir} COMPONENT Runtime)
 endif()
 
 # this was suppose to copy the real files too, not just the symlinks, but it doesnt work,
 # just copy them manually once
-if (0)
+if(0)
 
-INSTALL(CODE "
+install(CODE "
         file(GLOB_RECURSE LIBS
         \"${CMAKE_INSTALL_PREFIX}/\${library_dest_dir}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
 
@@ -64,7 +55,7 @@ INSTALL(CODE "
         endif()
         endforeach()
 ")
-ENDIF()
+endif()
 
 # # Now the work of copying dependencies into the bundle/package
 # # The quotes are escaped and variables to use at install time have their $ escaped
@@ -80,4 +71,3 @@ ENDIF()
 # # And then there's ways to customize this as well
 # set(CPACK_BINARY_DRAGNDROP ON)
 # include(CPack)
-

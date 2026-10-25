@@ -6,7 +6,7 @@
 #include "Debug.h"
 #include "cpu/Z80.h"
 #include "memory/EmptyPage.h"
-#include "../nwhost/libnwhost.h"
+#include "libnwhost.h"
 
 #ifdef WIN32
 #include <windows.h>

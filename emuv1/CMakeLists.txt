@@ -1,5 +1,3 @@
-PROJECT(emuv1)
-
 # emuv1 is the SDL 1.2 based MSX emulator with an emulated nowind interface, it needs SDL 1.2 and SDL_ttf 2.0;
 # CMake's FindSDL honours the SDLDIR and SDLTTFDIR environment variables to point at a local copy
 find_package(SDL)
@@ -11,7 +9,7 @@ if(NOT SDL_FOUND OR NOT SDL_TTF_FOUND)
 endif()
 
 # everything but main() goes in a library, so the unit tests can link the emulator too
-ADD_LIBRARY(emuv1lib STATIC
+add_library(emuv1lib STATIC
     Config.cpp Debug.cpp DiskDrive.cpp DiskInterface.cpp Emulator.cpp EmulatorTester.cpp GUI.cpp
     Media.cpp VirtualDrive.cpp
     audio/AY38910.cpp audio/AudioDevice.cpp audio/AudioDummy.cpp audio/AudioMixer.cpp audio/MSXAudio.cpp
@@ -26,24 +24,20 @@ ADD_LIBRARY(emuv1lib STATIC
     osd/Command.cpp osd/Debugger.cpp osd/LogWatcher.cpp osd/MemoryMonitor.cpp osd/OnScreenDisplay.cpp
     video/V9938.cpp video/V9938commands.cpp video/V9938renderer.cpp video/V9938sprites.cpp)
 
-# sources include headers relative to this directory (cpu/Z80.h) and the nwhost headers as ../nwhost/libnwhost.h
-target_include_directories(emuv1lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ../general ${SDL_INCLUDE_DIR}
-                                           ${SDL_TTF_INCLUDE_DIRS})
+# the sources include headers relative to this directory (cpu/Z80.h)
+target_include_directories(emuv1lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${SDL_INCLUDE_DIR} ${SDL_TTF_INCLUDE_DIRS})
 if(WIN32)
   target_compile_definitions(emuv1lib PUBLIC _CRT_SECURE_NO_DEPRECATE)
 endif()
-target_link_libraries(emuv1lib PUBLIC nwhost nwgeneral ${SDL_LIBRARIES} ${SDL_TTF_LIBRARIES} PRIVATE project::warnings_options)
+target_link_libraries(emuv1lib PUBLIC nwhost ${SDL_LIBRARIES} ${SDL_TTF_LIBRARIES} PRIVATE project::warnings_options)
 
-ADD_EXECUTABLE(emuv1 maincons.cpp)
+add_executable(emuv1 maincons.cpp)
+target_link_libraries(emuv1 PRIVATE emuv1lib project::warnings_options)
 if(WIN32)
   # msvcrt has no getopt, use the copy bundled with nwhostapp
-  target_sources(emuv1 PRIVATE ../nwhostapp/getopt.c ../nwhostapp/getopt1.c)
-  target_include_directories(emuv1 PRIVATE ../nwhostapp)
-  # a copy from glibc (third-party), without the project warnings
-  set_source_files_properties(../nwhostapp/getopt.c ../nwhostapp/getopt1.c PROPERTIES COMPILE_OPTIONS /w)
+  target_link_libraries(emuv1 PRIVATE getopt)
 endif()
-target_link_libraries(emuv1 emuv1lib project::warnings_options)
 
-INSTALL(TARGETS emuv1 RUNTIME DESTINATION bin COMPONENT Runtime)
+install(TARGETS emuv1 RUNTIME DESTINATION bin COMPONENT Runtime)
 
 add_subdirectory(tests)
