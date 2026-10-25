@@ -102,7 +102,9 @@ A leak, a memory error or undefined behaviour makes the test fail.
 
 Source sanitation
 -----------------
-script/ holds scripts that check and clean up the sources (Python 3):
+script/ holds scripts that check and clean up the sources (Python 3). The
+build runs the whitespace check (target whitespacecheck) and fails when it
+finds something; without Python 3 the check is skipped.
   python script/whitespace.py           lists files with trailing whitespace or a
                                         C/C++ file without a final newline
                                         (exit code 1 when there are any)

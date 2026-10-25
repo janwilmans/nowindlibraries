@@ -20,6 +20,17 @@ endif()
 # libraries in its own directory first.
 set(CMAKE_INSTALL_RPATH "\$ORIGIN")
 
+# fails the build when a source file has trailing whitespace or a C/C++ file does not end with a newline
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_FOUND)
+  add_custom_target(whitespacecheck ALL
+      COMMAND Python3::Interpreter ${CMAKE_SOURCE_DIR}/script/whitespace.py ${CMAKE_SOURCE_DIR}
+      COMMENT "Checking the sources for trailing whitespace (fix: python script/whitespace.py --apply)"
+      VERBATIM)
+else()
+  message(STATUS "Python 3 not found, the sources are not checked for trailing whitespace")
+endif()
+
 # lets ctest in the build directory find the unit tests
 enable_testing()
 

@@ -6,7 +6,8 @@ usage: script/whitespace.py [--apply] [repository]
   --apply:         fixes them (line endings, CRLF or LF, are kept)
   repository:      defaults to the repository this script is in
 
-Covers the files git knows: C/C++, assembly, Python, CMake and shell/batch scripts. The third-party paths listed in
+Covers the files git knows (without git: all files except build trees): C/C++, assembly, Python, CMake and shell/batch
+scripts. The build runs it (the whitespacecheck target in CMakeLists.txt). The third-party paths listed in
 .clang-format-ignore are left as they were imported; Markdown is skipped (two trailing spaces are a line break).
 """
 import fnmatch
@@ -30,10 +31,24 @@ def third_party_patterns(repository):
     return patterns
 
 
+def all_files(repository):
+    # the files git knows; a copy without .git (a source archive): all files, except build trees
+    try:
+        listing = subprocess.run(["git", "-C", str(repository), "ls-files"], capture_output=True, text=True,
+                                 check=True)
+        return listing.stdout.splitlines()
+    except (OSError, subprocess.CalledProcessError):
+        files = []
+        for file in repository.rglob("*"):
+            relative = file.relative_to(repository)
+            if file.is_file() and not any(part.startswith(("build", ".")) for part in relative.parts[:-1]):
+                files.append(relative.as_posix())
+        return files
+
+
 def source_files(repository):
-    listing = subprocess.run(["git", "-C", str(repository), "ls-files"], capture_output=True, text=True, check=True)
     ignore = third_party_patterns(repository)
-    for path in listing.stdout.splitlines():
+    for path in all_files(repository):
         lower = path.lower()
         if not (lower.endswith(CPP) or lower.endswith(OTHER_SOURCE) or path.rsplit("/", 1)[-1] in NAMES):
             continue
