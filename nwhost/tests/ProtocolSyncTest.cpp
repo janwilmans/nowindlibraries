@@ -379,8 +379,9 @@ TEST(ProtocolSync, TheHostDpbMatchesTheRomsSupportedMedia)
     }
 }
 
-// msxsrc/nowind.rom must be what msxsrc assembles to: after changing the asm, copy the ROM the build assembled
-// (build/<tree>/msxsrc/stage/msxsrc/nowind.rom) over it. The 2013 release ROM is kept as msxsrc/nowind4.3.rom.
+// msxsrc/nowind.rom must be what msxsrc assembles to; the build copies the assembled ROM over it (nowindromupdate in
+// msxsrc/CMakeLists.txt), so this fails when that step is skipped or broken. The 2013 release ROM is
+// msxsrc/nowind4.3.rom.
 TEST(ProtocolSync, TheCommittedRomIsTheAssembledSource)
 {
     std::vector<byte> assembled = readBinary(NOWIND_ROM);

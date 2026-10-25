@@ -23,6 +23,14 @@ add_custom_command(
     VERBATIM)
 add_custom_target(nowindrom ALL DEPENDS ${NOWIND_ROM})
 
+# keep the committed msxsrc/nowind.rom equal to what the sources assemble to; runs every build, but only writes the
+# file when it differs, so git shows it as modified exactly when the asm changed the ROM
+add_custom_target(nowindromupdate ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${NOWIND_ROM} ${CMAKE_CURRENT_SOURCE_DIR}/nowind.rom
+    DEPENDS ${NOWIND_ROM}
+    COMMENT "Updating msxsrc/nowind.rom"
+    VERBATIM)
+
 # NOWMAP.COM, the MSX-DOS tool that uses the ROM's EXTBIO API (built like make.bat does, from this directory)
 set(NOWMAP_COM ${STAGE}/msxsrc/msxdostools/nowmap.com)
 # the repository has asmlibs/String, nowmap.asm includes asmlibs/string (the staged copy is lower case)
@@ -34,14 +42,15 @@ add_custom_command(
     OUTPUT ${NOWMAP_COM}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE}/msxsrc/msxdostools ${STAGE}/msxsrc/asmlibs/bdos
             ${STAGE}/msxsrc/asmlibs/string
-    COMMAND ${CMAKE_COMMAND} -E copy ${ASM_SOURCES} ${STAGE}/msxsrc
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/msxdostools/nowmap.asm ${STAGE}/msxsrc/msxdostools
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/asmlibs/macros.inc ${STAGE}/msxsrc/asmlibs
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/asmlibs/bdos/bdos.inc ${STAGE}/msxsrc/asmlibs/bdos
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/asmlibs/String/string.asm ${STAGE}/msxsrc/asmlibs/string
     COMMAND $<TARGET_FILE:sjasm> ${NOWMAP_ASM}
     WORKING_DIRECTORY ${STAGE}/msxsrc
-    DEPENDS sjasm ${ASM_SOURCES} ${NOWMAP_SOURCES}
+    # after the ROM: that step stages the *.asm files (debug.asm, labels.asm) this includes; copying them here too
+    # raced with it in parallel builds
+    DEPENDS sjasm ${NOWIND_ROM} ${NOWMAP_SOURCES}
     COMMENT "Assembling NOWMAP.COM from msxsrc/msxdostools"
     VERBATIM)
 add_custom_target(nowmapcom ALL DEPENDS ${NOWMAP_COM})
