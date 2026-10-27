@@ -8,6 +8,7 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
+#include <atomic>
 #include <string>
 #include <fstream>
 
@@ -34,7 +35,14 @@ public:
     void openBlocking();
     static void initialize();
 
+    // readBlocking() returns 0 once *keepRunning is false, so another thread can stop a host that waits for the MSX;
+    // the flag must outlive this stream
+    void setKeepRunningFlag(const std::atomic<bool>* keepRunning);
+
 protected:
+    [[nodiscard]] bool stopRequested() const;
+
+    const std::atomic<bool>* mKeepRunning = nullptr;
     unsigned int mRxTimeout;
     unsigned int mTxTimeout;
     bool mTimeoutSet;

@@ -7,6 +7,7 @@
  */
 
 #include <fstream>
+#include <stdexcept>
 #include <assert.h>
 #include <string.h>
 #ifdef WIN32
@@ -103,7 +104,7 @@ void NwhostService::waitForAck()
         if (lBytesReceived != 1)
         {
             Util::debug("Communication failed!\n");
-            exit(1);
+            throw std::runtime_error("Communication failed!");
         }
         if (firstByte)
         {
@@ -140,8 +141,9 @@ void NwhostService::startDriver()
     if (mUsbStream == 0)
     {
         Util::debug("No driver available?\n");
-        exit(0);
+        throw std::runtime_error("No driver available");
     }
+    mUsbStream->setKeepRunningFlag(&mRunning);
 }
 
 void NwhostService::startDriver(FtdiDriverType aDriverType)
@@ -152,8 +154,9 @@ void NwhostService::startDriver(FtdiDriverType aDriverType)
     if (mUsbStream == 0)
     {
         Util::debug("No ftdi driver available?\n");
-        exit(0);
+        throw std::runtime_error("No ftdi driver available");
     }
+    mUsbStream->setKeepRunningFlag(&mRunning);
 }
 
 // the update firmware used hardcoded commands
@@ -195,7 +198,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
     if (fs->fail())
     {
         Util::debug("%s not found!\n", sImageName.c_str());
-        exit(1);
+        throw std::runtime_error(sImageName + " not found");
     }
     // check for rom headers in all banks
     for (int i = 0; i < 32; i++)
@@ -208,7 +211,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
             if (i == 0)
             {
                 Util::debug("Error: No rom header found! (did you specify the wrong file?)\n");
-                exit(1);
+                throw std::runtime_error("No rom header found (wrong file?)");
             }
             Util::debug("warning: No rom header found in bank %u!\n", i);
         }
@@ -370,7 +373,7 @@ void NwhostService::updateFirmware(string sImageName, int iMethodVersion, bool b
                     if (uiErrors > 25)
                     {
                         Util::debug("Found more than 25 errors, exiting...!\n");
-                        exit(1);
+                        throw std::runtime_error("Verify failed: more than 25 errors");
                     }
                     Util::debug(cString);
                 }
@@ -411,12 +414,14 @@ void NwhostService::hostImage()
 
     mUsbStream->setTimeouts(1000, 10000);
     bool lConnected = false;
-    mRunning = true;
     while (mRunning)
     {
         if (!lConnected)
         {
-            mUsbStream->openBlocking();
+            if (!openUnlessStopped())
+            {
+                break;
+            }
             purge_buffers();
             lConnected = true;
         }
@@ -427,6 +432,7 @@ void NwhostService::hostImage()
             // connection problem
             mUsbStream->close();
             lConnected = false;
+            if (mConnectionCallback) mConnectionCallback(ConnectionState::WaitingForInterface);
             continue;
         }
 
@@ -457,7 +463,45 @@ void NwhostService::hostImage()
             Util::debug("Error: lBytesWritten (%u) != buffer.size (%u)!\n", lBytesWritten, buffer.size());
         }
         statStopMeasument(lBytesWritten);
+        mTotalBytesTransferred += static_cast<unsigned long long>(lBytesReceived) + lBytesWritten;
     }
+    if (lConnected)
+    {
+        mUsbStream->close();
+    }
+}
+
+void NwhostService::setConnectionCallback(std::function<void(ConnectionState)> callback)
+{
+    mConnectionCallback = std::move(callback);
+}
+
+unsigned long long NwhostService::totalBytesTransferred() const
+{
+    return mTotalBytesTransferred.load();
+}
+
+bool NwhostService::openUnlessStopped()
+{
+    static constexpr unsigned int retryDelayMilliseconds = 250;
+    bool announced = false;
+    while (mRunning)
+    {
+        if (mUsbStream->open())
+        {
+            Util::debug("Found Nowind Interface using %s!\n", mUsbStream->getIdString());
+            if (mConnectionCallback) mConnectionCallback(ConnectionState::Connected);
+            return true;
+        }
+        if (!announced)
+        {
+            Util::debug("Using driver %s, please connect nowind interface...\n", mUsbStream->getIdString());
+            if (mConnectionCallback) mConnectionCallback(ConnectionState::WaitingForInterface);
+            announced = true;
+        }
+        Util::sleep(retryDelayMilliseconds);
+    }
+    return false;
 }
 
 void NwhostService::setRunningFalse()
@@ -494,16 +538,16 @@ void NwhostService::diskToRom(string imageName)
     if (fsDisk->fail())
     {
         Util::debug("File %s not found!\n", imageName.c_str());
-        exit(1);
+        throw std::runtime_error(imageName + " not found");
     }
 
     // TODO: check 360 kB
 
     fstream* fsOut = new fstream("romdisk.bin", ios::binary | ios::out);
-    if (fsDisk->fail())
+    if (fsOut->fail())
     {
         Util::debug("Unable to create romdisk.bin!\n");
-        exit(1);
+        throw std::runtime_error("Unable to create romdisk.bin");
     }
     char* buffer = new char[0x4000];
     char* bank31 = new char[0x4000];

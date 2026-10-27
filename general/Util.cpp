@@ -8,6 +8,7 @@
 
 #define GEN_API_EXPORT
 #include "Util.h"
+#include <atomic>
 #include <stdio.h>
 
 using namespace general;
@@ -66,6 +67,8 @@ int Util::snprintf(char* str, size_t size, const char* format, ...)
 
 #define MAXMSG 2000
 
+static std::atomic<Util::DebugSink> debugSink{nullptr};
+
 void Util::debug(const char* cFormat, ...)
 {
     va_list arg_list;
@@ -78,6 +81,15 @@ void Util::debug(const char* cFormat, ...)
 #ifdef WIN32
     OutputDebugStringA(scratch);
 #endif
+    if (Util::DebugSink sink = debugSink.load())
+    {
+        sink(scratch);
+    }
+}
+
+void Util::setDebugSink(DebugSink sink)
+{
+    debugSink.store(sink);
 }
 
 #ifdef WIN32

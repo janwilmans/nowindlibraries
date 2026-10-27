@@ -169,6 +169,7 @@ int ConFTD2XX::readBlocking(unsigned char* aBuffer, unsigned long aMaxBytesToRea
     DWORD lRxBytes = 0;
     for (;;)
     {
+        if (stopRequested()) return 0;
         waitForData();
         // waitForData result doesn't matter, whether a timeout occurred or there really
         // is data, we need to check if the device is still present and also how much data we have.

@@ -1,5 +1,7 @@
 #include "HostApp.h"
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 
 int main(int argc, char* argv[])
 {
@@ -8,7 +10,18 @@ int main(int argc, char* argv[])
     HostApp app;
     app.setParameters(argc, argv);
     atexit(&HostApp::processExit);
-    int exitcode = app.execute();
+
+    int exitcode = 0;
+    try
+    {
+        exitcode = app.execute();
+    }
+    catch (const std::exception& exception)
+    {
+        // NwhostService throws where it used to call exit(1)
+        std::fprintf(stderr, "Error: %s\n", exception.what());
+        exitcode = 1;
+    }
 
     HostApp::processNormalExit();
 

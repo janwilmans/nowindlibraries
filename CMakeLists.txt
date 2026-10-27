@@ -58,6 +58,12 @@ add_subdirectory(nowind)
 add_subdirectory(nwhostapp)
 add_subdirectory(emuv1)
 
+# the graphical host downloads SDL2 and Dear ImGui at configure time, so it is opt-in
+option(NOWIND_BUILD_GUI "Build nowindgui, the graphical host (downloads SDL2 and Dear ImGui)" OFF)
+if(NOWIND_BUILD_GUI)
+  add_subdirectory(nowindgui)
+endif()
+
 if(${CMAKE_SIZEOF_VOID_P} EQUAL 4)
    set(TARGETBITS 32)
 else()

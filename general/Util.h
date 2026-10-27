@@ -20,6 +20,10 @@ public:
     static int vsnprintf(char* str, size_t size, const char* format, va_list ap) NW_PRINTF_FORMAT(3, 0);
     static int snprintf(char* str, size_t size, const char* format, ...) NW_PRINTF_FORMAT(3, 4);
 
+    // receives every debug message in addition to stderr, called on the thread that logs
+    using DebugSink = void (*)(const char* message);
+    static void setDebugSink(DebugSink sink);
+
     static void initialize();
     static void debug(const char* cFormat, ...);
     static unsigned long getTicks(void);

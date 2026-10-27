@@ -38,6 +38,16 @@ UsbStream::~UsbStream()
 {
 }
 
+void UsbStream::setKeepRunningFlag(const std::atomic<bool>* keepRunning)
+{
+    mKeepRunning = keepRunning;
+}
+
+bool UsbStream::stopRequested() const
+{
+    return mKeepRunning != nullptr && !mKeepRunning->load();
+}
+
 void UsbStream::setTimeouts(unsigned int aRxTimeout, unsigned int aTxTimeout)
 {
     mRxTimeout = aRxTimeout;

@@ -6,6 +6,8 @@
 //# pragma warning( disable: 4251 )
 #endif
 
+#include <atomic>
+#include <functional>
 #include <string>
 #include <vector>
 using namespace std;
@@ -18,6 +20,11 @@ using namespace std;
 
 namespace nowind {
 
+enum class ConnectionState {
+    WaitingForInterface, // no interface found (yet), hostImage() keeps trying
+    Connected
+};
+
 class NOWIND_API NwhostService {
 public:
     NwhostService();
@@ -26,12 +33,22 @@ public:
     int execute();
 
     static void initialize();
+    // The functions below throw std::runtime_error when execution cannot continue (previously exit()), so a GUI can
+    // report the error; the command line host catches it at the top level.
     void startDriver();
     void startDriver(ftdx::FtdiDriverType aDriverType);
     void waitForAck();
     void updateFirmware(std::string sImageName, int iMethodVersion, bool bVerify);
     void hostImage();
+
+    // Thread-safe; may be called before hostImage() starts, in which case hostImage() returns immediately.
     void setRunningFalse();
+
+    // Called on the thread running hostImage(); set it before hostImage() starts.
+    void setConnectionCallback(std::function<void(ConnectionState)> callback);
+
+    // Bytes received from and sent to the MSX since this service was created; thread-safe.
+    [[nodiscard]] unsigned long long totalBytesTransferred() const;
     void testMode(string);
     void testModeDev();
     void diskToRom(string imageName);
@@ -55,8 +72,11 @@ public:
 
 
 private:
-    int argc;
-    char** argv;
+    // returns false if a stop was requested before the interface was connected
+    bool openUnlessStopped();
+
+    int argc = 0;
+    char** argv = nullptr;
     static ftdx::UsbStream* mUsbStream;
 
     // statistics
@@ -64,7 +84,9 @@ private:
     static unsigned long mTotalTime;
     static unsigned long mTransferredBytes;
     static bool mDebug;
-    bool mRunning;
+    std::atomic<bool> mRunning{true}; // "not stopped", so a stop requested before hostImage() is not lost
+    std::atomic<unsigned long long> mTotalBytesTransferred{0};
+    std::function<void(ConnectionState)> mConnectionCallback;
 };
 
 } // namespace nowind

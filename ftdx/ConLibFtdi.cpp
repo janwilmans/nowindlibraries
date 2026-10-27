@@ -125,6 +125,8 @@ int ConLibFtdi::readBlocking(unsigned char* aBuffer, unsigned long aMaxBytesToRe
     int result = 0;
     for (;;)
     {
+        if (stopRequested()) return 0;
+
         // result:
         // <0: error or timeout
         //  0: no data available, method blocks, but can still return zero if the usb device does not
