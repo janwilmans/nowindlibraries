@@ -1,4 +1,4 @@
-# builds and tests nwhostapp on Apple Silicon (without SDL, so emuv1 is skipped, see build-readme.txt)
+# builds and tests nwhostapp and builds nowindgui on Apple Silicon (without SDL, so emuv1 is skipped, see build-readme.txt)
 name: macos
 
 on:
@@ -14,7 +14,7 @@ jobs:
       - name: Install dependencies
         run: brew install ninja libftdi googletest
       - name: Configure
-        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -Bbuild/release
+        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DNOWIND_BUILD_GUI=ON -Bbuild/release
       - name: Build
         run: cmake --build build/release --target install
       - name: Test
@@ -27,8 +27,14 @@ jobs:
           grep -q "Usage: nwhostapp" help.txt
       # zipped, so the bundle structure and the executable permission survive
       - name: Package
-        run: ditto -c -k --keepParent build/release/install/nwhostapp.app nwhostapp-macos-arm64.zip
+        run: |
+          ditto -c -k --keepParent build/release/install/nwhostapp.app nwhostapp-macos-arm64.zip
+          ditto -c -k --keepParent build/release/install/nowindgui.app nowindgui-macos-arm64.zip
       - uses: actions/upload-artifact@v4
         with:
           name: nwhostapp-macos-arm64
           path: nwhostapp-macos-arm64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nowindgui-macos-arm64
+          path: nowindgui-macos-arm64.zip

@@ -1,4 +1,4 @@
-# builds and tests everything, including emuv1 and nwhostapp, on Windows and Linux (see build-readme.txt)
+# builds and tests everything, including emuv1, nwhostapp and nowindgui, on Windows and Linux (see build-readme.txt)
 name: build
 
 on:
@@ -16,14 +16,17 @@ jobs:
         with:
           arch: x64
       - name: Configure
-        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -Bbuild/release
+        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DNOWIND_BUILD_GUI=ON -Bbuild/release
       - name: Build
         run: cmake --build build/release --target install
       - name: Test
         run: ctest --test-dir build/release --output-on-failure
-      - name: Check emuv1 and nwhostapp are installed
+      - name: Check emuv1, nwhostapp and nowindgui are installed
         shell: bash
-        run: test -f build/release/install/bin/emuv1.exe && test -f build/release/install/bin/nwhostapp.exe
+        run: |
+          test -f build/release/install/bin/emuv1.exe
+          test -f build/release/install/bin/nwhostapp.exe
+          test -f build/release/install/bin/nowindgui.exe
       - uses: actions/upload-artifact@v4
         with:
           name: nowind-windows-x64
@@ -37,15 +40,20 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ninja-build g++-14 libftdi1-dev libsdl1.2-dev libsdl-ttf2.0-dev libgtest-dev
+          # nowindgui builds SDL2 from source, without these headers it has no X11 / Wayland video driver
+          sudo apt-get install -y libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxfixes-dev libxss-dev libwayland-dev libxkbcommon-dev libegl-dev
       - name: Configure
-        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=gcc-14 -DCMAKE_CXX_COMPILER=g++-14 -Bbuild/release
+        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DNOWIND_BUILD_GUI=ON -DCMAKE_C_COMPILER=gcc-14 -DCMAKE_CXX_COMPILER=g++-14 -Bbuild/release
       - name: Build
         run: cmake --build build/release --target install
       - name: Test
         run: ctest --test-dir build/release --output-on-failure
       # emuv1 is skipped silently when SDL is not found, so make that fail here
-      - name: Check emuv1 and nwhostapp are installed
-        run: test -f build/release/install/bin/emuv1 && test -f build/release/install/bin/nwhostapp
+      - name: Check emuv1, nwhostapp and nowindgui are installed
+        run: |
+          test -f build/release/install/bin/emuv1
+          test -f build/release/install/bin/nwhostapp
+          test -f build/release/install/bin/nowindgui
       - uses: actions/upload-artifact@v4
         with:
           name: nowind-linux-x64
