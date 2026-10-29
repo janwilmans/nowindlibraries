@@ -1,0 +1,52 @@
+# builds and tests everything, including emuv1 and nwhostapp, on Windows and Linux (see build-readme.txt)
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      # the x64 compiler environment, configure-x64-ninja-vs2022-runtime.bat expects Visual Studio on D:
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Configure
+        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -Bbuild/release
+      - name: Build
+        run: cmake --build build/release --target install
+      - name: Test
+        run: ctest --test-dir build/release --output-on-failure
+      - name: Check emuv1 and nwhostapp are installed
+        shell: bash
+        run: test -f build/release/install/bin/emuv1.exe && test -f build/release/install/bin/nwhostapp.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nowind-windows-x64
+          path: build/release/install
+
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build g++-14 libftdi1-dev libsdl1.2-dev libsdl-ttf2.0-dev libgtest-dev
+      - name: Configure
+        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=gcc-14 -DCMAKE_CXX_COMPILER=g++-14 -Bbuild/release
+      - name: Build
+        run: cmake --build build/release --target install
+      - name: Test
+        run: ctest --test-dir build/release --output-on-failure
+      # emuv1 is skipped silently when SDL is not found, so make that fail here
+      - name: Check emuv1 and nwhostapp are installed
+        run: test -f build/release/install/bin/emuv1 && test -f build/release/install/bin/nwhostapp
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nowind-linux-x64
+          path: build/release/install
